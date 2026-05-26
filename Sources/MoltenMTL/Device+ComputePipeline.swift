@@ -1,21 +1,12 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - Pipeline creation error
 
-/// Error thrown by the `makeComputePipelineState` overloads.
 public struct MTLComputePipelineError: Error {
     public let message: String
 }
 
 public extension MTLDevice {
 
-    // MARK: Simple overload — matches Metal's API exactly
-
-    /// Creates a compute pipeline state using SPIR-V reflection to discover
-    /// the descriptor layout automatically.
-    ///
-    /// This overload mirrors the real `MTLDevice.makeComputePipelineSt    /// signature. The library must have been created via `makeLibrary(url:)` so that
-    /// SPIR-V bytes are available for reflection.
     func makeComputePipelineState(function: MTLFunction) throws -> MTLComputePipelineState {
         guard let vkDev     = device,
               let shaderMod = function.library.shaderModule else {
@@ -30,13 +21,7 @@ public extension MTLDevice {
                                         storageBufferCount: storageBufferCount)
     }
 
-    // MARK: Descriptor overload — explicit binding counts, zero reflection overhead
-
-    /// Creates a compute pipeline state from a fully-configured descriptor.
-    ///
-    /// Builds the `VkDescriptorSetLayout` directly from the counts on the descriptor —
-    /// no SPIR-V reflection is performed. You must keep the counts in sync with your
-    /// GLSL `layout(binding=N)` declarations.
+    // Counts must be kept in sync with GLSL `layout(binding=N)` declarations.
     func makeComputePipelineState(descriptor: MTLComputePipelineDescriptor) throws -> MTLComputePipelineState {
         guard let function = descriptor.computeFunction else {
             throw MTLComputePipelineError(message: "MTLComputePipelineDescriptor.computeFunction is nil")
@@ -65,15 +50,13 @@ public extension MTLDevice {
     }
 }
 
-// MARK: - Private helpers
-
-/// Reflects SPIR-V bytecode to produce the binding array and storage-buffer count.
+/// Reflects SPIR-V bytecode to build the binding array.
 private func reflectBindings(
     function: MTLFunction
 ) throws -> (bindings: [VkDescriptorSetLayoutBinding], storageBufferCount: Int) {
     guard let spirvData = function.library.spirvData else {
         throw MTLComputePipelineError(message:
-            "No SPIR-V data available for reflection — use makeComputePipelineState(descriptor:) instead")
+            "No SPIR-V data available for reflection â€” use makeComputePipelineState(descriptor:) instead")
     }
 
     var rawBindings = [SPIRVBinding](repeating: SPIRVBinding(), count: 64)
@@ -123,7 +106,7 @@ private func buildComputePipeline(
     storageBufferCount: Int
 ) throws -> MTLComputePipelineState {
 
-    // ── 1. Descriptor set layout ───────────────────────────────────────────
+    // Descriptor set layout
     var descriptorSetLayout: VkDescriptorSetLayout?
     var mutableBindings = bindings
     mutableBindings.withUnsafeMutableBufferPointer { ptr in
@@ -139,7 +122,7 @@ private func buildComputePipeline(
         throw MTLComputePipelineError(message: "Failed to create compute pipeline state")
     }
 
-    // ── 2. Pipeline layout ─────────────────────────────────────────────────
+    // Pipeline layout
     var pipelineLayout: VkPipelineLayout?
     var dsl = descriptorSetLayout
     withUnsafePointer(to: &dsl) { dslPtr in
@@ -156,7 +139,7 @@ private func buildComputePipeline(
         throw MTLComputePipelineError(message: "Failed to create compute pipeline state")
     }
 
-    // ── 3. Compute pipeline ────────────────────────────────────────────────
+    // Compute pipeline
     var pipeline: VkPipeline?
     functionName.withCString { namePtr in
         var stageCI = VkPipelineShaderStageCreateInfo()
@@ -187,7 +170,6 @@ private func buildComputePipeline(
                                    vkDevice:            device)
     }
 
-/// Builds a flat `[VkDescriptorSetLayoutBinding]` from three pre-sorted slot arrays.
 private func makeLayoutBindings(storageBufferSlots: [UInt32],
                                 asSlots:            [UInt32],
                                 imageSlots:         [UInt32]) -> [VkDescriptorSetLayoutBinding] {

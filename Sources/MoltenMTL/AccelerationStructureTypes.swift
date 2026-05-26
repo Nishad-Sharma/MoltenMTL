@@ -1,8 +1,5 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - MTLPackedFloat3
-
-/// Mirrors MTLPackedFloat3 — three tightly packed floats with no padding.
 public struct MTLPackedFloat3 {
     public var x: Float
     public var y: Float
@@ -15,20 +12,12 @@ public struct MTLPackedFloat3 {
     public init() { x = 0; y = 0; z = 0 }
 }
 
-/// Mirrors MTLPackedFloat3Make.
 public func MTLPackedFloat3Make(_ x: Float, _ y: Float, _ z: Float) -> MTLPackedFloat3 {
     MTLPackedFloat3(x, y, z)
 }
 
-// MARK: - MTLPackedFloat4x3
-
-/// Mirrors MTLPackedFloat4x3 — four columns of MTLPackedFloat3 (column-major 3×4 matrix).
-///
-/// Used to represent TLAS instance transforms. The four columns correspond to:
-///   - `columns.0` = x-axis direction
-///   - `columns.1` = y-axis direction
-///   - `columns.2` = z-axis direction
-///   - `columns.3` = translation
+/// Column-major 3×4 matrix for TLAS instance transforms.
+/// Columns: 0 = x-axis, 1 = y-axis, 2 = z-axis, 3 = translation.
 public struct MTLPackedFloat4x3 {
     public var columns: (MTLPackedFloat3, MTLPackedFloat3, MTLPackedFloat3, MTLPackedFloat3)
 
@@ -43,10 +32,7 @@ public struct MTLPackedFloat4x3 {
     }
 }
 
-// MARK: - MTLAccelerationStructureInstanceOptions
-
-/// Mirrors MTLAccelerationStructureInstanceOptions.
-/// Raw values match the corresponding VkGeometryInstanceFlagBitsKHR values.
+/// Raw values match `VkGeometryInstanceFlagBitsKHR`.
 public struct MTLAccelerationStructureInstanceOptions: OptionSet, Sendable {
     public let rawValue: UInt32
     public init(rawValue: UInt32) { self.rawValue = rawValue }
@@ -59,9 +45,7 @@ public struct MTLAccelerationStructureInstanceOptions: OptionSet, Sendable {
     public static let nonOpaque          = MTLAccelerationStructureInstanceOptions(rawValue: 0x8)
 }
 
-// MARK: - MTLAccelerationStructureInstanceDescriptor
-
-/// Mirrors MTLAccelerationStructureInstanceDescriptor — one entry in a TLAS instance buffer.
+/// One entry in a TLAS instance buffer.
 public struct MTLAccelerationStructureInstanceDescriptor {
     /// Index into `MTLInstanceAccelerationStructureDescriptor.instancedAccelerationStructures`.
     public var accelerationStructureIndex:      UInt32 = 0
@@ -74,9 +58,7 @@ public struct MTLAccelerationStructureInstanceDescriptor {
     public init() {}
 }
 
-// MARK: - MTLIndexType
-
-/// Mirrors MTLIndexType — index buffer element size.
+/// Index buffer element size.
 public enum MTLIndexType {
     case uint16
     case uint32
@@ -89,17 +71,12 @@ public enum MTLIndexType {
     }
 }
 
-// MARK: - MTLAttributeFormat
-
 /// Vertex attribute format for acceleration structure geometry.
 public enum MTLAttributeFormat {
     /// Three packed 32-bit floats. Maps to VK_FORMAT_R32G32B32_SFLOAT.
     case float3
 }
 
-// MARK: - MTLAccelerationStructureSizes
-
-/// Mirrors MTLAccelerationStructureSizes — buffer sizes required to build an AS.
 public struct MTLAccelerationStructureSizes {
     /// Byte size needed for the acceleration structure itself.
     public var accelerationStructureSize: Int = 0
@@ -109,15 +86,9 @@ public struct MTLAccelerationStructureSizes {
     public var refitScratchBufferSize: Int    = 0
 }
 
-// MARK: - MTLAccelerationStructureDescriptor (protocol)
-
-/// Conformance marker — passed to `device.accelerationStructureSizes(descriptor:)`.
 public protocol MTLAccelerationStructureDescriptor: AnyObject {}
 
-// MARK: - MTLAccelerationStructureTriangleGeometryDescriptor
-
-/// Mirrors MTLAccelerationStructureTriangleGeometryDescriptor — triangle geometry for a BLAS.
-/// NOTE: Difference in API, Vulkan requires vertexCount explicitly, MTL infers it.
+/// NOTE: Unlike Metal, `vertexCount` must be set explicitly - Vulkan does not infer it.
 public final class MTLAccelerationStructureTriangleGeometryDescriptor {
     public var vertexBuffer:       MTLBuffer?          = nil
     public var vertexBufferOffset: Int                 = 0
@@ -134,23 +105,19 @@ public final class MTLAccelerationStructureTriangleGeometryDescriptor {
     public init() {}
 }
 
-// MARK: - MTLPrimitiveAccelerationStructureDescriptor
-
-/// Mirrors MTLPrimitiveAccelerationStructureDescriptor — describes a BLAS build.
+/// Describes a BLAS build.
 public final class MTLPrimitiveAccelerationStructureDescriptor: MTLAccelerationStructureDescriptor {
     public var geometryDescriptors: [MTLAccelerationStructureTriangleGeometryDescriptor] = []
     public init() {}
 }
 
-// MARK: - MTLInstanceAccelerationStructureDescriptor
-
-/// Mirrors MTLInstanceAccelerationStructureDescriptor — describes a TLAS build.
+/// Describes a TLAS build.
 public final class MTLInstanceAccelerationStructureDescriptor: MTLAccelerationStructureDescriptor {
     /// Host-visible buffer containing `MTLAccelerationStructureInstanceDescriptor` entries.
     /// Must be `.shared` storage mode so the encoder can read and convert the instances.
     public var instanceDescriptorBuffer:        MTLBuffer?                 = nil
     public var instanceCount:                   Int                        = 0
-    /// BLAS array — indexed by `MTLAccelerationStructureInstanceDescriptor.accelerationStructureIndex`.
+    /// BLAS array - indexed by `MTLAccelerationStructureInstanceDescriptor.accelerationStructureIndex`.
     public var instancedAccelerationStructures: [MTLAccelerationStructure] = []
 
     public init() {}

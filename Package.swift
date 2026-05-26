@@ -2,7 +2,9 @@
 import PackageDescription
 import Foundation
 
-let vulkanSDK = ProcessInfo.processInfo.environment["VULKAN_INSTALL"] ?? ""
+let vulkanSDK = ProcessInfo.processInfo.environment["VULKAN_INSTALL"]
+    ?? ProcessInfo.processInfo.environment["VULKAN_SDK"]
+    ?? ""
 
 let package = Package(
     name: "MoltenMTL",

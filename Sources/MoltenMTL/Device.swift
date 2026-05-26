@@ -1,6 +1,4 @@
-import CVulkan
-
-// MARK: - VkResult check
+﻿import CVulkan
 
 @discardableResult
 private func vkCheck(_ result: VkResult, _ label: String) -> Bool {
@@ -11,13 +9,10 @@ private func vkCheck(_ result: VkResult, _ label: String) -> Bool {
     return true
 }
 
-// MARK: - Device
-
-/// Mirrors MTLDevice — owns the Vulkan instance, physical device, and logical device.
-/// Create via `Device.createSystemDefaultDevice()`.
+/// Wraps the Vulkan instance, physical device, and logical device.
+/// Create via `MTLCreateSystemDefaultDevice()`.
 public final class MTLDevice {
 
-    // MARK: Public handles
     fileprivate nonisolated(unsafe) static var shared: MTLDevice?
 
     public fileprivate(set) var instance:           VkInstance?
@@ -26,8 +21,6 @@ public final class MTLDevice {
     public fileprivate(set) var queue:              VkQueue?
     public fileprivate(set) var allocator:          VmaAllocator?
     public fileprivate(set) var computeQueueFamily: UInt32 = .max 
-
-    // MARK: Init / deinit
 
     init() {}
 
@@ -39,18 +32,8 @@ public final class MTLDevice {
     }
 }
 
-// MARK: - createSystemDefaultDevice
-
-/// Mirrors `MTLCreateSystemDefaultDevice()`.
-///
-/// Selects the first available Vulkan-capable GPU and creates:
-///   - a `VkInstance` (with Khronos validation layer)
-///   - a `VkPhysicalDevice` (first enumerated GPU)
-///   - a `VkDevice` with ray-tracing extensions enabled
-///     (VK_KHR_deferred_host_operations, VK_KHR_acceleration_structure,
-///      VK_KHR_ray_query) and the matching feature structs in the pNext chain
-///   - a compute `VkQueue`
-///
+/// Selects the first available Vulkan-capable GPU and initialises a device with
+/// ray-tracing extensions (deferred host ops, acceleration structure, ray query).
 /// Returns `nil` if any step fails.
 public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     if let sharedDevice = MTLDevice.shared {
@@ -59,10 +42,10 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
 
     let dev = MTLDevice()
 
-    // ── Disable overlay layers that mis-use the swapchain API ─────────────
+    // Disable overlay layers that mis-use the swapchain API
     CVKS_disableOverlayLayers()
 
-    // ── Instance ───────────────────────────────────────────────────────────
+    // Instance
     var appInfo = VkApplicationInfo()
     appInfo.sType      = VK_STRUCTURE_TYPE_APPLICATION_INFO
     appInfo.apiVersion = SWIFT_VK_API_VERSION_1_4
@@ -72,7 +55,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
 
     validationLayer.withCString { layerCStr in
         let layers: [UnsafePointer<CChar>?] = [layerCStr]
-        // Instance extensions: surface support required for SDL3 windowing.
+        // Surface extensions required for SDL3 windowing.
         var instanceExts: [UnsafePointer<CChar>?] = [
             SWIFT_EXT_KHR_SURFACE,
             SWIFT_EXT_WIN32_SURFACE
@@ -95,7 +78,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     }
     guard vkCheck(instanceResult, "vkCreateInstance") else { return nil }
 
-    // ── Physical device ────────────────────────────────────────────────────
+    // Physical device
     var devCount: UInt32 = 0
     vkEnumeratePhysicalDevices(dev.instance, &devCount, nil)
     guard devCount > 0 else {
@@ -106,7 +89,6 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     vkEnumeratePhysicalDevices(dev.instance, &devCount, &physDevs)
     dev.physicalDevice = physDevs[0]
 
-    // Print the GPU name — deviceName is a fixed C char array, convert via bytes.
     var devProps = VkPhysicalDeviceProperties()
     vkGetPhysicalDeviceProperties(dev.physicalDevice, &devProps)
     let gpuName = withUnsafeBytes(of: devProps.deviceName) { bytes in
@@ -114,7 +96,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     }
     print("[VulkanSwift] GPU: \(gpuName)")
 
-    // ── Compute queue family ───────────────────────────────────────────────
+    // Compute queue family
     var qfCount: UInt32 = 0
     vkGetPhysicalDeviceQueueFamilyProperties(dev.physicalDevice, &qfCount, nil)
     var qfProps = [VkQueueFamilyProperties](
@@ -142,20 +124,13 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
         return nil
     }
 
-    // ── Logical device + RT feature chain ─────────────────────────────────
-    //
-    // pNext chain (innermost → outermost):
-    //   VkPhysicalDeviceBufferDeviceAddressFeatures
-    //     ← VkPhysicalDeviceAccelerationStructureFeaturesKHR
-    //         ← VkPhysicalDeviceRayQueryFeaturesKHR
-    //               ← VkDeviceCreateInfo.pNext
-    //
+    // Logical device + RT feature chain
     // Each struct must stay alive until vkCreateDevice returns, so we use
     // withUnsafeMutablePointer nesting to pin their addresses on the stack.
 
     var bdaFeatures = VkPhysicalDeviceBufferDeviceAddressFeatures()
     bdaFeatures.sType               = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES
-    bdaFeatures.bufferDeviceAddress = 1 // VK_TRUE (VkBool32 = UInt32)
+    bdaFeatures.bufferDeviceAddress = 1
 
     var deviceResult: VkResult = VK_SUCCESS
 
@@ -163,13 +138,13 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
         var asFeatures = VkPhysicalDeviceAccelerationStructureFeaturesKHR()
         asFeatures.sType                 = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR
         asFeatures.pNext                 = UnsafeMutableRawPointer(bdaPtr)
-        asFeatures.accelerationStructure = 1 // VK_TRUE
+        asFeatures.accelerationStructure = 1
 
         withUnsafeMutablePointer(to: &asFeatures) { asPtr in
             var rqFeatures = VkPhysicalDeviceRayQueryFeaturesKHR()
             rqFeatures.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR
             rqFeatures.pNext    = UnsafeMutableRawPointer(asPtr)
-            rqFeatures.rayQuery = 1 // VK_TRUE
+            rqFeatures.rayQuery = 1
 
             withUnsafeMutablePointer(to: &rqFeatures) { rqPtr in
                 var prio: Float = 1.0
@@ -181,13 +156,11 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                     queueCI.pQueuePriorities = prioPtr
 
                     withUnsafePointer(to: queueCI) { queueCIPtr in
-                        // Extension names — SWIFT_EXT_* are const char* constants
-                        // defined in CVulkan.h, so Swift sees them as UnsafePointer<CChar>?.
                         var exts: [UnsafePointer<CChar>?] = [
                             SWIFT_EXT_DEFERRED_HOST_OPS,
                             SWIFT_EXT_ACCEL_STRUCTURE,
                             SWIFT_EXT_RAY_QUERY,
-                            SWIFT_EXT_KHR_SWAPCHAIN    // VK_KHR_swapchain
+                            SWIFT_EXT_KHR_SWAPCHAIN
                         ]
                         let devExtCount = UInt32(exts.count)
                         exts.withUnsafeMutableBufferPointer { extsBuf in
@@ -209,12 +182,11 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
 
     guard vkCheck(deviceResult, "vkCreateDevice") else { return nil }
 
-    // Load extension function pointers.
-    CVKAS_init(dev.device)   // ray-tracing extensions
+    CVKAS_init(dev.device)
 
     vkGetDeviceQueue(dev.device, dev.computeQueueFamily, 0, &dev.queue)
 
-    // ── VMA allocator ──────────────────────────────────────────────────────
+    // VMA allocator
     let allocResult = CVMA_createAllocator(dev.instance, dev.physicalDevice,
                                             dev.device, SWIFT_VK_API_VERSION_1_4,
                                             &dev.allocator)

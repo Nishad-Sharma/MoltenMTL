@@ -1,54 +1,26 @@
-/// Mirrors CAMetalLayer — the Vulkan-backed renderable surface.
-///
-/// Owns the `VkSwapchainKHR` and its sync primitives.
-/// The `VkSurfaceKHR` is **not** owned here — the caller creates it
-/// (via `SDL_Vulkan_CreateSurface`) and destroys it (via `vkDestroySurfaceKHR`),
-/// the same way engine2 doesn't destroy the window from inside the renderer.
-///
-/// Usage:
-/// ```swift
-/// let layer = CAMetalLayer(device: device, surface: surface, width: W, height: H)!
-/// // each frame:
-/// let drawable = layer.nextDrawable()!
-/// blit.copyBuffer(stagingBuf, toImage: drawable.texture, width: W, height: H)
-/// cmdBuf.present(drawable)
-/// cmdBuf.commit()
-/// cmdBuf.waitUntilCompleted()
-/// ```
-
+﻿/// The Vulkan-backed renderable surface. Owns the `VkSwapchainKHR` and its sync primitives.
+/// The `VkSurfaceKHR` is **not** owned here - the caller creates and destroys it.
 import CVulkan
 
 public final class CAMetalLayer {
 
-    // MARK: - Public
-
-    /// The `MTLDevice` this layer was created with.
     public var device: MTLDevice
-    /// `true` when the swapchain format is BGRA — caller must swap R/B in the staging buffer.
+    /// `true` when the swapchain format is BGRA - caller must swap R/B in the staging buffer.
     public let isBGRA: Bool
-
-    // MARK: - Private
 
     private let vkDev: VkDevice
     private let swapchain: VkSwapchainKHR
     private let images: [VkImage]
-    /// Signalled by `vkAcquireNextImageKHR`; waited by the submit.
-    /// One semaphore is fine — it is consumed by submit before the next acquire.
+    /// Signalled by `vkAcquireNextImageKHR`; consumed by the submit before the next acquire.
     private let imageSem: VkSemaphore
-    /// One per swapchain image — prevents reuse while a previous frame's
+    /// One per swapchain image - prevents reuse while a previous frame's
     /// presentation engine is still holding the semaphore for that image index.
     private let renderSems: [VkSemaphore]
     public private(set) var drawableSize: (width: Int, height: Int)
 
     public var pixelFormat: MTLPixelFormat = .rgba8Unorm
     
-
-    // MARK: - Init
-
-    /// - Parameters:
-    ///   - device:  MTLDevice providing `device`, `physicalDevice`, `computeQueueFamily`
-    ///   - surface: An already-created `VkSurfaceKHR` (e.g. from `SDL_Vulkan_CreateSurface`).
-    ///              **Not** owned by this object.
+    ///   - surface: An already-created `VkSurfaceKHR`. **Not** owned by this object.
     ///   - width / height: Desired swapchain image extent.
     public init?(device: MTLDevice, surface: VkSurfaceKHR, width: Int, height: Int) {
         self.device  = device
@@ -57,19 +29,16 @@ public final class CAMetalLayer {
             let physDev = device.physicalDevice
         else { return nil }
 
-        // ── 0. Verify presentation support for the chosen queue family ────────
         var presentSupported: UInt32 = 0
         vkGetPhysicalDeviceSurfaceSupportKHR(physDev, device.computeQueueFamily,
                                               surface, &presentSupported)
         if presentSupported == 0 {
-            print("[CAMetalLayer] queue family \(device.computeQueueFamily) does not support presentation — swapchain will likely fail")
+            print("[CAMetalLayer] queue family \(device.computeQueueFamily) does not support presentation â€” swapchain will likely fail")
         }
 
-        // ── 1. Surface capabilities ───────────────────────────────────────────
         var caps = VkSurfaceCapabilitiesKHR()
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physDev, surface, &caps)
 
-        // ── 2. Surface format — prefer RGBA, fall back to BGRA ────────────────
         var fmtCount: UInt32 = 0
         vkGetPhysicalDeviceSurfaceFormatsKHR(physDev, surface, &fmtCount, nil)
         var surfFmts = [VkSurfaceFormatKHR](repeating: VkSurfaceFormatKHR(), count: Int(fmtCount))
@@ -81,7 +50,6 @@ public final class CAMetalLayer {
             ?? surfFmts[0]
         self.isBGRA = chosen.format == VK_FORMAT_B8G8R8A8_UNORM
 
-        // ── 3. Swapchain extent ───────────────────────────────────────────────
         let scW = caps.currentExtent.width != 0xFFFF_FFFF ? caps.currentExtent.width : UInt32(width)
         let scH =
             caps.currentExtent.height != 0xFFFF_FFFF ? caps.currentExtent.height : UInt32(height)
@@ -91,7 +59,6 @@ public final class CAMetalLayer {
             return caps.maxImageCount > 0 ? min(n, caps.maxImageCount) : n
         }()
 
-        // ── 4. Create swapchain ───────────────────────────────────────────────
         var qfIdx = device.computeQueueFamily
         var sc: VkSwapchainKHR? = nil
         withUnsafePointer(to: &qfIdx) { qfPtr in
@@ -123,18 +90,15 @@ public final class CAMetalLayer {
             return nil
         }
 
-        // ── 5. Enumerate swapchain images ─────────────────────────────────────
         var count: UInt32 = 0
         vkGetSwapchainImagesKHR(dev, swapchain, &count, nil)
         var raw = [VkImage?](repeating: nil, count: Int(count))
         vkGetSwapchainImagesKHR(dev, swapchain, &count, &raw)
         let images = raw.compactMap { $0 }
 
-        // ── 6. Semaphores ─────────────────────────────────────────────────────
         var semCI = VkSemaphoreCreateInfo()
         semCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
 
-        // One acquire semaphore (consumed by submit before the next acquire).
         var imgSem: VkSemaphore? = nil
         vkCreateSemaphore(dev, &semCI, nil, &imgSem)
         guard let imageSem = imgSem else {
@@ -143,7 +107,7 @@ public final class CAMetalLayer {
             return nil
         }
 
-        // One render-done semaphore per image — each image cycles independently
+        // One render-done semaphore per image - each image cycles independently
         // through the presentation engine, so they must not share a semaphore.
         var renderSems: [VkSemaphore] = []
         for _ in 0..<count {
@@ -159,7 +123,7 @@ public final class CAMetalLayer {
             renderSems.append(sem)
         }
 
-        print("[CAMetalLayer] \(count) images, \(isBGRA ? "BGRA" : "RGBA"), \(scW)×\(scH)")
+        print("[CAMetalLayer] \(count) images, \(isBGRA ? "BGRA" : "RGBA"), \(scW)Ã—\(scH)")
 
         self.vkDev = dev
         self.swapchain = swapchain
@@ -168,9 +132,6 @@ public final class CAMetalLayer {
         self.renderSems = renderSems
     }
 
-    // MARK: - nextDrawable
-
-    /// Mirrors `CAMetalLayer.nextDrawable()`.
     /// Acquires the next available swapchain image and returns a `CAMetalDrawable`.
     public func nextDrawable() -> CAMetalDrawable? {
         var idx: UInt32 = 0
@@ -192,15 +153,10 @@ public final class CAMetalLayer {
             swapchainHandle:         swapchain)
     }
 
-    // MARK: - deinit
-
     deinit {
-        // Wait for all GPU + presentation work to drain before releasing anything.
         vkDeviceWaitIdle(vkDev)
-        // Destroy the swapchain first — this severs the presentation engine's
-        // connection to all swapchain images and forces completion of any pending
-        // present operations, guaranteeing the engine has released its semaphore
-        // waits before we destroy the semaphore objects themselves.
+        // Destroy the swapchain before its semaphores - this forces the presentation
+        // engine to complete any pending presents and release semaphore waits first.
         vkDestroySwapchainKHR(vkDev, swapchain, nil)
         renderSems.forEach { vkDestroySemaphore(vkDev, $0, nil) }
         vkDestroySemaphore(vkDev, imageSem, nil)

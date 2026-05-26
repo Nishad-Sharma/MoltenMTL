@@ -1,6 +1,6 @@
-import CVulkan
+﻿import CVulkan
 
-/// Mirrors MTLAccelerationStructure — an opaque GPU acceleration structure.
+/// An opaque GPU acceleration structure.
 /// Create via `device.makeAccelerationStructure(size:)`.
 public final class MTLAccelerationStructure {
 
@@ -10,7 +10,7 @@ public final class MTLAccelerationStructure {
     let buffer:     VkBuffer?
     let allocation: VmaAllocation?
 
-    /// GPU device address — used when referencing this BLAS from a TLAS instance buffer.
+    /// GPU device address - used when referencing this BLAS from a TLAS instance buffer.
     let deviceAddress: VkDeviceAddress
 
     /// Strong reference keeps the Device (and its allocator) alive.

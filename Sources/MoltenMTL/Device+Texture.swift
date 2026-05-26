@@ -1,22 +1,12 @@
-import CVulkan
+﻿import CVulkan
 
 public extension MTLDevice {
 
-    // MARK: - makeTexture
-
-    /// Mirrors `MTLDevice.makeTexture(descriptor:)`.
-    ///
-    /// Creates a GPU-only 2-D texture (VMA-managed, optimal tiling) together
-    /// with a `VkImageView` spanning all mip levels.
-    ///
-    /// - Returns: A `Texture` ready for data upload via
-    ///   `replace(region:mipmapLevel:withBytes:bytesPerRow:)`, or `nil` if
-    ///   any Vulkan call fails.
+    /// Creates a GPU-only 2-D texture (VMA-managed, optimal tiling) with a `VkImageView` spanning all mip levels.
     func makeTexture(descriptor: MTLTextureDescriptor) -> MTLTexture? {
         guard let vmaAlloc = allocator,
               let vkDev    = device else { return nil }
 
-        // ── VkImage via VMA ────────────────────────────────────────────────────
         var img:   VkImage?
         var alloc: VmaAllocation?
 
@@ -32,7 +22,6 @@ public extension MTLDevice {
             return nil
         }
 
-        // ── VkImageView ────────────────────────────────────────────────────────
         var viewCI = VkImageViewCreateInfo()
         viewCI.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO
         viewCI.image                           = img
@@ -51,7 +40,6 @@ public extension MTLDevice {
         var view: VkImageView?
         guard vkCreateImageView(vkDev, &viewCI, nil, &view) == VK_SUCCESS else {
             print("[VulkanSwift] vkCreateImageView failed")
-            // Clean up the image before returning nil.
             if let a = allocator, let i = img, let al = alloc {
                 CVMA_destroyImage(a, i, al)
             }

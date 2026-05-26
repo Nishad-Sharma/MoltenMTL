@@ -1,28 +1,18 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - CommandQueue
 
-/// Mirrors MTLCommandQueue.
-/// Create via `device.makeCommandQueue()` — never instantiate directly.
+/// Create via `device.makeCommandQueue()` - never instantiate directly.
 public final class MTLCommandQueue {
 
-    // MARK: Internal Vulkan handles
 
-    /// The VkQueue used for submission — borrowed from Device, not owned.
+    /// Borrowed from `MTLDevice` - not owned by this queue.
     let queue: VkQueue?
-
-    /// Pool from which command buffers are allocated.
     let commandPool: VkCommandPool?
-
-    /// Raw logical device handle — used by CommandBuffer for Vulkan calls.
     let vkDevice: VkDevice?
 
-    /// Strong reference to the parent Device.
-    /// Ensures `vkDestroyDevice` is not called while the pool is still alive.
-    /// Internal so CommandBuffer can pass it to encoders that need Device access.
+    /// Internal so encoders can access the device through the queue.
     let device: MTLDevice
 
-    // MARK: Init / deinit
 
     init(queue: VkQueue?, commandPool: VkCommandPool?, vkDevice: VkDevice?, device: MTLDevice) {
         self.queue       = queue
@@ -38,16 +28,11 @@ public final class MTLCommandQueue {
         }
     }
 
-    // MARK: - makeCommandBuffer
-
-    /// Mirrors `MTLCommandQueue.makeCommandBuffer()`.
-    ///
-    /// Allocates a primary `VkCommandBuffer` from the pool and immediately
-    /// begins recording (ONE_TIME_SUBMIT semantics — same as a fresh MTLCommandBuffer).
+    /// Allocates a primary `VkCommandBuffer` and immediately begins recording (ONE_TIME_SUBMIT).
     public func makeCommandBuffer() -> MTLCommandBuffer? {
         guard let dev = vkDevice, let pool = commandPool else { return nil }
 
-        // ── Allocate ───────────────────────────────────────────────────────────
+        // Allocate
         var allocInfo = VkCommandBufferAllocateInfo()
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO
         allocInfo.commandPool        = pool
@@ -61,7 +46,7 @@ public final class MTLCommandQueue {
             return nil
         }
 
-        // ── Begin recording ────────────────────────────────────────────────────
+        // Begin recording
         var beginInfo = VkCommandBufferBeginInfo()
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
         beginInfo.flags = UInt32(bitPattern: VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT.rawValue)

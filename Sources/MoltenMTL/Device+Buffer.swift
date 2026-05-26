@@ -1,29 +1,20 @@
-import CVulkan
+﻿import CVulkan
 
 public extension MTLDevice {
 
-    // MARK: - makeBuffer
-
-    /// Mirrors `MTLDevice.makeBuffer(length:options:)`.
-    ///
-    /// Allocates a `VkBuffer` backed by VMA-managed `VkDeviceMemory`.
-    /// - `.shared`  → `VMA_MEMORY_USAGE_AUTO` + persistent map + prefer ReBAR/HOST_VISIBLE.
-    /// - `.private` → `VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE`, GPU-only, `contents()` returns `nil`.
+    /// Allocates a `VkBuffer`. `.shared` = persistently mapped; `.private` = GPU-only.
     func makeBuffer(length: Int, options: MTLStorageMode) -> MTLBuffer? {
         makeBuffer(length: length, options: options == .private ? .storageModePrivate : [])
     }
 
-    /// Primary API — mirrors `MTLDevice.makeBuffer(length:options:)`.
-    ///
-    /// Accepts `MTLResourceOptions` (an OptionSet), so all Metal array-literal call
-    /// sites compile unchanged: `device.makeBuffer(length: n, options: [.storageModeShared])`.
+    /// Accepts `MTLResourceOptions` so Metal array-literal call-sites compile unchanged.
     func makeBuffer(length: Int, options: MTLResourceOptions = []) -> MTLBuffer? {
         guard let vmaAlloc = allocator else {
             print("[VulkanSwift] makeBuffer: VMA allocator is nil")
             return nil
         }
 
-        // ── Usage flags ────────────────────────────────────────────────────────
+        // Usage flags
         // Always include SHADER_DEVICE_ADDRESS so buffers can be used in RT/BDA.
         let usage = UInt32(bitPattern: VK_BUFFER_USAGE_STORAGE_BUFFER_BIT.rawValue)
                   | UInt32(bitPattern: VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT.rawValue)
@@ -31,9 +22,7 @@ public extension MTLDevice {
                   | UInt32(bitPattern: VK_BUFFER_USAGE_TRANSFER_DST_BIT.rawValue)
                   | UInt32(bitPattern: VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR.rawValue)
 
-        // ── Call VMA wrapper ───────────────────────────────────────────────────
-        // storageMode 0 = shared (CPU+GPU, persistently mapped)
-        // storageMode 1 = private (GPU-only)
+        // storageMode 0 = shared (CPU+GPU, persistently mapped), 1 = private (GPU-only)
         var buf:    VkBuffer?
         var vmaBuf: VmaAllocation?
         var mapped: UnsafeMutableRawPointer?

@@ -1,47 +1,36 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - MTLHazardTrackingMode / MTLHeapType
-
-/// Mirrors MTLHazardTrackingMode.
-/// Metal uses this to opt out of automatic resource-barrier insertion.
-/// On Vulkan all barriers are always manual, so this is a no-op API-parity type.
+/// On Vulkan all barriers are always manual - this exists for API parity only.
 public enum MTLHazardTrackingMode {
-    case `default`  // Metal default: driver tracks hazards automatically
-    case tracked    // Explicit opt-in to hazard tracking (same as default on most drivers)
-    case untracked  // Caller is responsible for barriers — matches Vulkan's always-manual model
+    case `default`
+    case tracked
+    case untracked
 }
 
-/// Mirrors MTLHeapType.
-/// `.automatic` = driver places resources; `.placement` = caller specifies byte offsets.
-/// VMA handles placement automatically, so this is always a no-op.
+/// VMA handles placement automatically - this exists for API parity only.
 public enum MTLHeapType {
     case automatic
     case placement
 }
 
-// MARK: - HeapDescriptor
 
-/// Mirrors MTLHeapDescriptor — describes a heap before creation.
+/// Mirrors MTLHeapDescriptor - describes a heap before creation.
 /// Pass to `device.makeHeap(descriptor:)`.
 public final class MTLHeapDescriptor {
-    /// Total byte size of the heap's backing memory block.
     public var size: Int = 0
-    /// CPU/GPU access mode for resources sub-allocated from this heap.
     public var storageMode: MTLStorageMode = .private
-    /// Hazard tracking mode — no-op on Vulkan (barriers are always manual).
+    /// No-op on Vulkan - all barriers are manual.
     public var hazardTrackingMode: MTLHazardTrackingMode = .default
-    /// Heap placement type — no-op on Vulkan (VMA manages placement).
+    /// No-op on Vulkan - VMA manages placement.
     public var type: MTLHeapType = .automatic
 
     public init() {}
 }
 
-// MARK: - Heap
-
-/// Mirrors MTLHeap — a fixed-size pre-allocated block of GPU memory from which
+/// Mirrors MTLHeap - a fixed-size pre-allocated block of GPU memory from which
 /// buffers and textures can be sub-allocated without individual device round-trips.
 ///
-/// Create via `device.makeHeap(descriptor:)` — never instantiate directly.
+/// Create via `device.makeHeap(descriptor:)` - never instantiate directly.
 ///
 /// Backed by a single-block `VmaPool`. Sub-allocations from the heap use the
 /// same `CVMA_destroyBuffer` / `CVMA_destroyImage` paths as device-level
@@ -49,16 +38,11 @@ public final class MTLHeapDescriptor {
 /// heap itself is destroyed.
 public final class MTLHeap {
 
-    // MARK: Public Metal-mirrored API
 
-    /// Total byte size of the heap's backing memory block.
     public let size: Int
-
-    /// CPU/GPU access mode shared by all resources in this heap.
     public let storageMode: MTLStorageMode
 
     /// Bytes currently occupied by live sub-allocations.
-    /// Mirrors `MTLHeap.usedSize`.
     public var usedSize: Int {
         var used: VkDeviceSize = 0
         if let a = device.allocator, let p = pool {
@@ -68,22 +52,14 @@ public final class MTLHeap {
     }
 
     /// Approximate bytes still available for new sub-allocations.
-    /// Mirrors `MTLHeap.maxAvailableSize(alignment:)`.
-    /// The `alignment` parameter is accepted for API parity — VMA handles
-    /// alignment internally during sub-allocation.
+    /// The `alignment` parameter is accepted for API parity; VMA handles alignment internally.
     public func maxAvailableSize(alignment: Int = 0) -> Int {
         return max(0, size - usedSize)
     }
 
-    // MARK: Internal Vulkan handle
-
     let pool: VmaPool?
 
-    // MARK: Private
-
-    private let device: MTLDevice   // strong ref — keeps VMA allocator alive
-
-    // MARK: Init (internal)
+    private let device: MTLDevice   // strong ref â€” keeps VMA allocator alive
 
     init(pool: VmaPool?, size: Int, storageMode: MTLStorageMode, device: MTLDevice) {
         self.pool        = pool
@@ -91,8 +67,6 @@ public final class MTLHeap {
         self.storageMode = storageMode
         self.device      = device
     }
-
-    // MARK: Deinit
 
     deinit {
         // VMA requires all sub-allocations from the pool to be freed before this
@@ -103,16 +77,8 @@ public final class MTLHeap {
         }
     }
 
-    // MARK: - makeBuffer
-
-    /// Mirrors `MTLHeap.makeBuffer(length:options:)`.
-    ///
     /// Sub-allocates a `VkBuffer` from this heap's VMA pool.
     /// The returned buffer holds a strong reference to this heap.
-    ///
-    /// - Parameters:
-    ///   - length: Byte size of the buffer.
-    ///   - options: Storage mode override; defaults to the heap's own `storageMode`.
     public func makeBuffer(length: Int, options: MTLStorageMode? = nil) -> MTLBuffer? {
         guard let vmaAlloc = device.allocator, let p = pool else { return nil }
 
@@ -146,12 +112,8 @@ public final class MTLHeap {
                          heap:         self)
     }
 
-    // MARK: - makeTexture
-
-    /// Mirrors `MTLHeap.makeTexture(descriptor:)`.
-    ///
-    /// Sub-allocates a `VkImage` (and creates its `VkImageView`) from this
-    /// heap's VMA pool. The returned texture holds a strong reference to this heap.
+    /// Sub-allocates a `VkImage` from this heap's VMA pool.
+    /// The returned texture holds a strong reference to this heap.
     public func makeTexture(descriptor: MTLTextureDescriptor) -> MTLTexture? {
         guard let vmaAlloc = device.allocator,
               let vkDev    = device.device,

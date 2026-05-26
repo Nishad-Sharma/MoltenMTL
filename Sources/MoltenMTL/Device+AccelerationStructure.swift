@@ -1,15 +1,10 @@
-import CVulkan
+﻿import CVulkan
 
 public extension MTLDevice {
 
-    // MARK: - accelerationStructureSizes
-
-    /// Mirrors `MTLDevice.accelerationStructureSizes(descriptor:)`.
-    ///
-    /// Queries the sizes required to allocate the acceleration structure and its
-    /// scratch buffer.  Pass the returned `accelerationStructureSize` to
-    /// `makeAccelerationStructure(size:)` and allocate a `.private` buffer of
-    /// `buildScratchBufferSize` for the build.
+    /// Queries the buffer sizes needed to build the acceleration structure.
+    /// Pass `accelerationStructureSize` to `makeAccelerationStructure(size:)` and
+    /// allocate a `.private` buffer of `buildScratchBufferSize` for the build.
     func accelerationStructureSizes(descriptor: MTLAccelerationStructureDescriptor)
         -> MTLAccelerationStructureSizes
     {
@@ -23,17 +18,11 @@ public extension MTLDevice {
         return MTLAccelerationStructureSizes()
     }
 
-    // MARK: - makeAccelerationStructure
-
-    /// Mirrors `MTLDevice.makeAccelerationStructure(size:)`.
-    ///
-    /// Allocates a VMA-backed buffer of `size` bytes, creates a
-    /// `VkAccelerationStructureKHR` on top of it, and queries its device
-    /// address for later TLAS referencing.
+    /// Allocates a VMA-backed buffer, creates a `VkAccelerationStructureKHR`, and queries its device address.
     func makeAccelerationStructure(size: Int) -> MTLAccelerationStructure? {
         guard let vkDev = device, let vmaAlloc = allocator else { return nil }
 
-        // ── Allocate backing buffer ────────────────────────────────────────────
+        // Allocate backing buffer
         // Must have ACCELERATION_STRUCTURE_STORAGE_BIT + SHADER_DEVICE_ADDRESS_BIT.
         let usageFlags = UInt32(bitPattern:
             VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR.rawValue) |
@@ -53,7 +42,7 @@ public extension MTLDevice {
             return nil
         }
 
-        // ── Create VkAccelerationStructureKHR ─────────────────────────────────
+        //  Create VkAccelerationStructureKHR
         var createInfo = VkAccelerationStructureCreateInfoKHR()
         createInfo.sType  = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR
         createInfo.buffer = buf
@@ -70,7 +59,7 @@ public extension MTLDevice {
             return nil
         }
 
-        // ── Query device address ───────────────────────────────────────────────
+        // Query device address
         let deviceAddress = CVKAS_getAccelerationStructureDeviceAddress(vkDev, handle)
 
         return MTLAccelerationStructure(size:          size,
@@ -81,7 +70,6 @@ public extension MTLDevice {
                                      device:        self)
     }
 
-    // MARK: - Private helpers
 
     private func blasSizes(_ desc: MTLPrimitiveAccelerationStructureDescriptor,
                            vkDev: VkDevice) -> MTLAccelerationStructureSizes
@@ -89,7 +77,7 @@ public extension MTLDevice {
         let geoms = desc.geometryDescriptors
         guard !geoms.isEmpty else { return MTLAccelerationStructureSizes() }
 
-        // Build a geometry array (device addresses left zeroed — only structure
+        // Build a geometry array (device addresses left zeroed â€” only structure
         // matters for the size query).
         var vkGeoms = geoms.map { geom -> VkAccelerationStructureGeometryKHR in
             var triangles = VkAccelerationStructureGeometryTrianglesDataKHR()
@@ -122,7 +110,7 @@ public extension MTLDevice {
     {
         var instancesData = VkAccelerationStructureGeometryInstancesDataKHR()
         instancesData.sType            = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR
-        instancesData.arrayOfPointers  = 0 // VK_FALSE — flat array, not array of pointers
+        instancesData.arrayOfPointers  = 0 // VK_FALSE â€” flat array, not array of pointers
 
         var geomData = VkAccelerationStructureGeometryDataKHR()
         geomData.instances = instancesData
@@ -140,7 +128,6 @@ public extension MTLDevice {
                           maxPrimCounts: &maxPrimCount)
     }
 
-    /// Generic size query helper.
     private func querySizes(vkDev:         VkDevice,
                             type:          VkAccelerationStructureTypeKHR,
                             geometries:    inout [VkAccelerationStructureGeometryKHR],
@@ -175,7 +162,6 @@ public extension MTLDevice {
         return result
     }
 
-    /// Overload that accepts a single element via inout UInt32.
     private func querySizes(vkDev:         VkDevice,
                             type:          VkAccelerationStructureTypeKHR,
                             geometries:    inout [VkAccelerationStructureGeometryKHR],

@@ -1,6 +1,6 @@
-import CVulkan
+﻿import CVulkan
 
-/// Mirrors MTLAccelerationStructureCommandEncoder — records acceleration structure
+/// Records acceleration structure build commands.
 /// Create via `commandBuffer.makeAccelerationStructureCommandEncoder()`.
 public final class MTLAccelerationStructureCommandEncoder {
 
@@ -49,11 +49,8 @@ public final class MTLAccelerationStructureCommandEncoder {
         }
     }
 
-    // MARK: - endEncoding
-
-    /// Mirrors `MTLAccelerationStructureCommandEncoder.endEncoding()`.
-    public func endEncoding() {
-        // No Vulkan call needed — the encoder doesn't own a sub-command buffer.
+     public func endEncoding() {
+        // No Vulkan call needed - the encoder doesn't own a sub-command buffer.
         // Temporary Vulkan buffers (e.g. TLAS instance data) must remain valid
         // until GPU execution completes. Cleanup is handled by deinit, which runs
         // after buf.waitUntilCompleted() returns at the call site.
@@ -145,7 +142,7 @@ public final class MTLAccelerationStructureCommandEncoder {
         let stride = MemoryLayout<CVkInstanceData>.stride  // 64 bytes
         let instBufSize = VkDeviceSize(instanceCount * stride)
 
-        // ── Allocate host-visible buffer for Vulkan-format instance data ───────
+        // Allocate host-visible buffer for Vulkan-format instance data
         let instUsage = UInt32(bitPattern:
             VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR.rawValue) |
             UInt32(bitPattern: VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT.rawValue)
@@ -162,7 +159,7 @@ public final class MTLAccelerationStructureCommandEncoder {
             return
         }
 
-        // ── Convert MTLAccelerationStructureInstanceDescriptor → CVkInstanceData ──
+        // Convert MTLAccelerationStructureInstanceDescriptor to CVkInstanceData
         let srcInstances = srcPtr.bindMemory(
             to: MTLAccelerationStructureInstanceDescriptor.self, capacity: instanceCount)
         let dstInstances = instMapped.bindMemory(
@@ -172,28 +169,22 @@ public final class MTLAccelerationStructureCommandEncoder {
             let src = srcInstances[i]
             var dst = CVkInstanceData()
 
-            // Transform: Metal column-major (4 cols of float3) → Vulkan row-major (float[3][4])
+            // Transform: Metal column-major (4 cols of float3) to Vulkan row-major (float[3][4])
             // vk.matrix[row][col] = metal.columns[col][row]
             let (c0, c1, c2, c3) = src.transformationMatrix.columns
-            // Row 0 — x-components of each column
             dst.transform.0.0 = c0.x; dst.transform.0.1 = c1.x
             dst.transform.0.2 = c2.x; dst.transform.0.3 = c3.x
-            // Row 1 — y-components
             dst.transform.1.0 = c0.y; dst.transform.1.1 = c1.y
             dst.transform.1.2 = c2.y; dst.transform.1.3 = c3.y
-            // Row 2 — z-components
             dst.transform.2.0 = c0.z; dst.transform.2.1 = c1.z
             dst.transform.2.2 = c2.z; dst.transform.2.3 = c3.z
 
-            // Pack customIndex (bits 0..23) and mask (bits 24..31).
             dst.customIndexAndMask = (src.mask & 0xFF) << 24
 
-            // Pack SBT offset (bits 0..23) and geometry instance flags (bits 24..31).
             let flags = src.options.rawValue & 0xFF
             dst.sbtOffsetAndFlags = (flags << 24) |
                 (src.intersectionFunctionTableOffset & 0x00FFFFFF)
 
-            // Look up BLAS device address by index.
             let blasIdx = Int(src.accelerationStructureIndex)
             if blasIdx < descriptor.instancedAccelerationStructures.count {
                 dst.blasAddress = descriptor.instancedAccelerationStructures[blasIdx].deviceAddress
@@ -208,14 +199,14 @@ public final class MTLAccelerationStructureCommandEncoder {
         // Keep the instance buffer alive until endEncoding() / commit().
         temporaryBuffers.append((instBuf, instAlloc))
 
-        // ── Build the TLAS ─────────────────────────────────────────────────────
+        // Build the TLAS
         let instBufAddr = CVKAS_getBufferDeviceAddress(vkDev, instBuf)
 
         var instancesData = VkAccelerationStructureGeometryInstancesDataKHR()
         instancesData.sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR
         instancesData.arrayOfPointers = 0  // VK_FALSE — flat array
         instancesData.data.deviceAddress = instBufAddr
-
+    
         var geomData = VkAccelerationStructureGeometryDataKHR()
         geomData.instances = instancesData
 

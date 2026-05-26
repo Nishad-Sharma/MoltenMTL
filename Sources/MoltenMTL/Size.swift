@@ -1,9 +1,5 @@
-// MARK: - Size
-
-/// Mirrors MTLSize — thread counts for compute dispatch.
-///
-/// Used in `dispatchThreadgroups(_:threadsPerThreadgroup:)` to specify
-/// the number of threadgroups per grid and threads per threadgroup.
+﻿
+/// Thread counts for compute dispatch.
 public struct MTLSize {
     public var width:  Int
     public var height: Int

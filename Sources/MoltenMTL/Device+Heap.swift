@@ -1,8 +1,5 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - MTLSizeAndAlign
-
-/// Mirrors MTLSizeAndAlign — returned by `device.heapTextureSizeAndAlign(descriptor:)`.
 public struct MTLSizeAndAlign {
     public var size:  Int
     public var align: Int
@@ -10,18 +7,8 @@ public struct MTLSizeAndAlign {
 
 public extension MTLDevice {
 
-    // MARK: - heapTextureSizeAndAlign
-
-    /// Mirrors `MTLDevice.heapTextureSizeAndAlign(descriptor:)`.
-    ///
-    /// Returns the size and alignment that a texture matching `descriptor` would require
-    /// when sub-allocated from a heap. Used by `HeapTextureManager.ensureHeapSpace` to
-    /// verify that the heap has enough free space before attempting an allocation.
-    ///
-    /// Metal exposes this as a first-class device query. In Vulkan the only way to know
-    /// a texture's memory footprint is to create a real (but unbound) `VkImage`, call
-    /// `vkGetImageMemoryRequirements`, then destroy the image. This is a deliberate part
-    /// of Vulkan's explicit model: the driver's tiling decisions are visible to the app.
+    /// Vulkan requires creating a real (unbound) `VkImage` and calling `vkGetImageMemoryRequirements`
+    /// to determine this - the driver's tiling layout is not predictable ahead of time.
     func heapTextureSizeAndAlign(descriptor: MTLTextureDescriptor) -> MTLSizeAndAlign {
         guard let vkDev = device, let vmaAlloc = allocator else {
             return MTLSizeAndAlign(size: 0, align: 1)
@@ -47,8 +34,6 @@ public extension MTLDevice {
 
         var reqs = VkMemoryRequirements()
         vkGetImageMemoryRequirements(vkDev, image, &reqs)
-
-        // Free the temporary image and its VMA allocation.
         CVMA_destroyImage(vmaAlloc, image, allocation)
 
         return MTLSizeAndAlign(size: Int(reqs.size), align: Int(reqs.alignment))
@@ -57,14 +42,6 @@ public extension MTLDevice {
 
 public extension MTLDevice {
 
-    // MARK: - makeHeap
-
-    /// Mirrors `MTLDevice.makeHeap(descriptor:)`.
-    ///
-    /// Creates a VMA memory pool of the requested size and storage mode.
-    /// The pool is backed by a single pre-allocated `VkDeviceMemory` block so
-    /// subsequent `MTLHeap.makeBuffer` / `MTLHeap.makeTexture` calls sub-allocate
-    /// from it without additional driver round-trips.
     func makeHeap(descriptor: MTLHeapDescriptor) -> MTLHeap? {
         guard let vmaAlloc = allocator else {
             print("[VulkanSwift] makeHeap: VMA allocator is nil")

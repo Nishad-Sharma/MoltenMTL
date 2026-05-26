@@ -1,63 +1,30 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - ComputeCommandEncoder
-
-/// Mirrors MTLComputeCommandEncoder.
-///
 /// Records compute commands into the parent `CommandBuffer`.
 /// Create via `commandBuffer.makeComputeCommandEncoder()`.
-///
-/// Typical usage:
-/// ```swift
-/// let enc = cmdBuf.makeComputeCommandEncoder()
-/// enc.setComputePipelineState(pipeline)
-/// enc.setBuffer(myBuffer, offset: 0, index: 0)
-/// enc.setAccelerationStructure(tlas, index: 0)
-/// enc.dispatchThreadgroups(Size(width: 4), threadsPerThreadgroup: Size(width: 1))
-/// enc.endEncoding()
-/// ```
 public final class MTLComputeCommandEncoder {
 
-    // MARK: Public properties
-
-    /// Mirrors `MTLComputeCommandEncoder.label` — used by GPU debuggers.
+    /// Used by GPU debuggers.
     public var label: String?
-
-    // MARK: Private state
 
     private let commandBuffer: MTLCommandBuffer
     private var pipeline:      MTLComputePipelineState?
 
-    /// Buffers bound via setBuffer(_:offset:index:).  Key = Vulkan binding number.
     private var boundBuffers: [Int: (buffer: MTLBuffer, offset: Int)] = [:]
-
-    /// Acceleration structures bound via setAccelerationStructure(_:bufferIndex:).
-    /// Key = Vulkan binding number (pass the shader's binding slot directly, e.g. 10).
     private var boundAS: [Int: MTLAccelerationStructure] = [:]
-
-    /// Textures bound via setTexture(_:index:).
-    /// Key = Vulkan binding number (pass the shader's binding slot directly, e.g. 11, 12).
     private var boundTextureSets: [Int: [MTLTexture]] = [:]
 
     private var isEnded = false
-
-    // MARK: Init
 
     init(commandBuffer: MTLCommandBuffer) {
         self.commandBuffer = commandBuffer
     }
 
-    // MARK: - setComputePipelineState
-
-    /// Mirrors `MTLComputeCommandEncoder.setComputePipelineState(_:)`.
     public func setComputePipelineState(_ pipeline: MTLComputePipelineState) {
         self.pipeline = pipeline
     }
 
-    // MARK: - setBuffer
-
     /// Mirrors `MTLComputeCommandEncoder.setBuffer(_:offset:index:)`.
-    ///
     /// Binds `buffer` to the storage-buffer descriptor slot at `index`.
     public func setBuffer(_ buffer: MTLBuffer?, offset: Int = 0, index: Int) {
         if let buffer = buffer {
@@ -67,37 +34,22 @@ public final class MTLComputeCommandEncoder {
         }
     }
 
-    // MARK: - setTextures / setTexture
-
-    /// Binds an array of textures to a storage-image binding.
-    /// `index` is the Vulkan binding number declared in the shader (e.g. 11, 12).
+    /// Binds an array of textures to the storage-image slot at `index`.
     public func setTextures(_ textures: [MTLTexture], index: Int = 0) {
         boundTextureSets[index] = textures
     }
 
-    /// Mirrors `MTLComputeCommandEncoder.setTexture(_:index:)` — single-texture variant.
     public func setTexture(_ texture: MTLTexture, index: Int) {
         setTextures([texture], index: index)
     }
 
-    // MARK: - setAccelerationStructure
-
-    /// Mirrors `MTLComputeCommandEncoder.setAccelerationStructure(_:bufferIndex:)`.
-    ///
-    /// Binds `accelerationStructure` to the AS descriptor slot at `bufferIndex` (0-based).
-    /// `bufferIndex` is the Vulkan binding number declared in the shader (e.g. 10).
+    /// Binds `accelerationStructure` to the AS descriptor slot at `bufferIndex`.
     public func setAccelerationStructure(_ accelerationStructure: MTLAccelerationStructure,
                                          bufferIndex: Int) {
         boundAS[bufferIndex] = accelerationStructure
     }
 
-    // MARK: - setBytes
-
-    /// Mirrors `MTLComputeCommandEncoder.setBytes(_:length:index:)`.
-    ///
-    /// Copies `length` bytes from `bytes` into a small shared `MTLBuffer` and binds it
-    /// at `index`. This is a convenience for passing small per-dispatch constants without
-    /// requiring a pre-allocated buffer.
+    /// Convenience for small per-dispatch constants: copies bytes into a transient shared buffer and binds it.
     public func setBytes(_ bytes: UnsafeRawPointer, length: Int, index: Int) {
         guard let buf = commandBuffer.commandQueue.device
                 .makeBuffer(length: max(length, 4), options: .shared) else { return }
@@ -105,23 +57,12 @@ public final class MTLComputeCommandEncoder {
         setBuffer(buf, offset: 0, index: index)
     }
 
-    // MARK: - useResource / useHeap
-
-    /// Mirrors `MTLComputeCommandEncoder.useResource(_:usage:)`.
-    ///
-    /// On Vulkan, resource residency is managed automatically via descriptor writes —
-    /// this is a no-op provided for Metal API parity.
+    /// No-op - Vulkan manages resource residency via descriptor writes.
     public func useResource(_ resource: AnyObject, usage: MTLResourceUsage) { }
 
-    /// Mirrors `MTLComputeCommandEncoder.useHeap(_:)`.
-    ///
-    /// On Vulkan, heap residency is managed automatically — this is a no-op provided
-    /// for Metal API parity.
+    /// No-op - Vulkan manages heap residency automatically.
     public func useHeap(_ heap: MTLHeap) { }
 
-    // MARK: - dispatchThreadgroups
-
-    /// Mirrors `MTLComputeCommandEncoder.dispatchThreadgroups(_:threadsPerThreadgroup:)`.
     public func dispatchThreadgroups(_ threadgroupsPerGrid: MTLSize,
                                      threadsPerThreadgroup: MTLSize) {
         guard !isEnded else {
@@ -136,10 +77,10 @@ public final class MTLComputeCommandEncoder {
 
         let cmd = commandBuffer.handle
 
-        // ── Bind compute pipeline ──────────────────────────────────────────────
+        // Bind compute pipeline
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline)
 
-        // ── Descriptor set ─────────────────────────────────────────────────────
+        // Descriptor set
         let sortedBuffers     = boundBuffers.sorted      { $0.key < $1.key }
         let sortedAS          = boundAS.sorted           { $0.key < $1.key }
         let sortedTextureSets = boundTextureSets.sorted  { $0.key < $1.key }
@@ -147,7 +88,7 @@ public final class MTLComputeCommandEncoder {
         let needsDescriptors = !sortedBuffers.isEmpty || !sortedAS.isEmpty || !sortedTextureSets.isEmpty
         if needsDescriptors, let dsl = pso.descriptorSetLayout {
 
-            // ── Pool ──────────────────────────────────────────────────────────
+            // Pool
             var poolSizes: [VkDescriptorPoolSize] = []
             if !sortedBuffers.isEmpty, let pso = pipeline {
                 var ps = VkDescriptorPoolSize()
@@ -183,7 +124,7 @@ public final class MTLComputeCommandEncoder {
             }
             commandBuffer.ownedPools.append(pool)
 
-            // ── Allocate descriptor set ────────────────────────────────────────
+            // Allocate descriptor set
             var descriptorSet: VkDescriptorSet?
             var dslCopy: VkDescriptorSetLayout? = dsl
             withUnsafePointer(to: &dslCopy) { dslPtr in
@@ -198,7 +139,7 @@ public final class MTLComputeCommandEncoder {
                 print("[VulkanSwift] vkAllocateDescriptorSets failed"); return
             }
 
-            // ── Write buffer descriptors ───────────────────────────────────────
+            // Write buffer descriptors
             if !sortedBuffers.isEmpty {
                 var bufferInfos: [VkDescriptorBufferInfo] = sortedBuffers.map { _, binding in
                     var info = VkDescriptorBufferInfo()
@@ -226,7 +167,7 @@ public final class MTLComputeCommandEncoder {
                 }
             }
 
-            // ── Write acceleration structure descriptors ───────────────────────
+            // Write acceleration structure descriptors
             // Each AS write uses pNext → VkWriteDescriptorSetAccelerationStructureKHR.
             // Written one at a time to keep the pointer lifetimes trivial.
             for (bindingIndex, asStruct) in sortedAS {
@@ -249,7 +190,7 @@ public final class MTLComputeCommandEncoder {
                 }
             }
 
-            // ── Write storage-image descriptors ───────────────────────────────
+            // Write storage-image descriptors
             if !sortedTextureSets.isEmpty {
                 for (bindingIndex, textures) in sortedTextureSets {
 
@@ -278,7 +219,7 @@ public final class MTLComputeCommandEncoder {
                 }
             }
 
-            // ── Bind descriptor set ────────────────────────────────────────────
+            // Bind descriptor set
             var setToBind: VkDescriptorSet? = descSet
             withUnsafePointer(to: &setToBind) { setPtr in
                 vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE,
@@ -286,7 +227,7 @@ public final class MTLComputeCommandEncoder {
             }
         }
 
-        // ── Transition storage images to GENERAL (if not already there) ──────
+        // Transition storage images to GENERAL (if not already there)
         for (_, textures) in sortedTextureSets {
             for tex in textures {
                 guard let img = tex.image,
@@ -305,21 +246,17 @@ public final class MTLComputeCommandEncoder {
             }
         }
 
-        // ── Dispatch ───────────────────────────────────────────────────────────
+        // Dispatch
         vkCmdDispatch(cmd,
                       UInt32(threadgroupsPerGrid.width),
                       UInt32(threadgroupsPerGrid.height),
                       UInt32(threadgroupsPerGrid.depth))
     }
 
-    // MARK: - endEncoding
-
-    /// Mirrors `MTLComputeCommandEncoder.endEncoding()`.
     public func endEncoding() {
         isEnded = true
         // Transfer all bound resources to the command buffer so their Vulkan
-        // handles remain valid through vkEndCommandBuffer and GPU completion.
-        // Mirrors Metal's implicit resource retention during command encoding.
+        // handles remain valid through GPU completion.
         for (_, binding) in boundBuffers {
             commandBuffer.ownedBuffers.append(binding.buffer)
         }

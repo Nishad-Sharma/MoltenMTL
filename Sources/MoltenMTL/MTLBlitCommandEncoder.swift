@@ -1,10 +1,10 @@
-import CVulkan
+﻿import CVulkan
 
-/// Mirrors `MTLBlitCommandEncoder` — records image/buffer copy commands.
+/// Records image/buffer copy commands.
 /// Obtain via `commandBuffer.makeBlitCommandEncoder()`.
 public final class MTLBlitCommandEncoder {
 
-    /// Mirrors `MTLBlitCommandEncoder.label` — used by GPU debuggers.
+    /// Used by GPU debuggers.
     public var label: String?
 
     private let commandBuffer: MTLCommandBuffer
@@ -13,18 +13,9 @@ public final class MTLBlitCommandEncoder {
         self.commandBuffer = commandBuffer
     }
 
-    // MARK: - copyBuffer(_:toImage:width:height:)
 
-    /// Copy `src` (u8 RGBA/BGRA, tightly packed) into a swapchain image.
-    ///
-    /// Records the necessary image-layout transitions automatically:
-    ///   UNDEFINED → TRANSFER_DST_OPTIMAL → PRESENT_SRC_KHR
-    ///
-    /// - Parameters:
-    ///   - src:     A shared/staging `MTLBuffer` holding u8 pixel data.
-    ///   - toImage: The destination `MTLTexture` (typically `CAMetalDrawable.texture`).
-    ///   - width:   Image width in pixels.
-    ///   - height:  Image height in pixels.
+    /// Copies `src` (u8 RGBA/BGRA, tightly packed) into a swapchain image,
+    /// recording the necessary layout transitions automatically.
     public func copyBuffer(_ src: MTLBuffer,
                            toImage image: MTLTexture,
                            width: Int, height: Int) {
@@ -35,17 +26,9 @@ public final class MTLBlitCommandEncoder {
                                    UInt32(width), UInt32(height))
     }
 
-    // MARK: - copy(from:sourceSlice:sourceLevel:sourceOrigin:sourceSize:to:destinationSlice:destinationLevel:destinationOrigin:)
 
-    /// Mirrors `MTLBlitCommandEncoder.copy(from:sourceSlice:sourceLevel:sourceOrigin:sourceSize:to:destinationSlice:destinationLevel:destinationOrigin:)`.
-    ///
     /// Copies a region of `source` into `destination` using `vkCmdBlitImage`.
-    /// Performs the required layout transitions:
-    ///   - source:      current layout → `TRANSFER_SRC_OPTIMAL` → restored
-    ///   - destination: `UNDEFINED`    → `TRANSFER_DST_OPTIMAL` → `PRESENT_SRC_KHR`
-    ///
-    /// For destination textures that are not swapchain images (e.g. intermediate render
-    /// targets), the final layout used is `SHADER_READ_ONLY_OPTIMAL`.
+    /// Swapchain destinations end in `PRESENT_SRC_KHR`; others in `SHADER_READ_ONLY_OPTIMAL`.
     public func copy(from source: MTLTexture,
                      sourceSlice: Int,
                      sourceLevel: Int,
@@ -60,7 +43,7 @@ public final class MTLBlitCommandEncoder {
 
         let cmd = commandBuffer.handle
 
-        // ── Transition source → TRANSFER_SRC_OPTIMAL ──────────────────────────
+        // â”€â”€ Transition source â†’ TRANSFER_SRC_OPTIMAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // Assume source was last written by a compute shader (GENERAL or SHADER_READ_ONLY).
         let srcOldLayout: VkImageLayout = source.usage.contains(.shaderWrite)
             ? VK_IMAGE_LAYOUT_GENERAL
@@ -75,7 +58,7 @@ public final class MTLBlitCommandEncoder {
                      dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
                      aspectMask: source.pixelFormat.aspectMask)
 
-        // ── Transition destination → TRANSFER_DST_OPTIMAL ─────────────────────
+        // â”€â”€ Transition destination â†’ TRANSFER_DST_OPTIMAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         imageBarrier(cmd:       cmd,
                      image:     dstImage,
                      oldLayout: VK_IMAGE_LAYOUT_UNDEFINED,
@@ -86,7 +69,7 @@ public final class MTLBlitCommandEncoder {
                      dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
                      aspectMask: destination.pixelFormat.aspectMask)
 
-        // ── vkCmdBlitImage ─────────────────────────────────────────────────────
+        // â”€â”€ vkCmdBlitImage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var region = VkImageBlit()
         region.srcSubresource.aspectMask     = source.pixelFormat.aspectMask
         region.srcSubresource.mipLevel       = UInt32(sourceLevel)
@@ -118,7 +101,7 @@ public final class MTLBlitCommandEncoder {
                            VK_FILTER_LINEAR)
         }
 
-        // ── Restore source layout ──────────────────────────────────────────────
+        // â”€â”€ Restore source layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         imageBarrier(cmd:       cmd,
                      image:     srcImage,
                      oldLayout: VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -129,7 +112,7 @@ public final class MTLBlitCommandEncoder {
                      dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT.rawValue),
                      aspectMask: source.pixelFormat.aspectMask)
 
-        // ── Transition destination to its final layout ─────────────────────────
+        // â”€â”€ Transition destination to its final layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // Swapchain images go to PRESENT_SRC; all others to SHADER_READ_ONLY.
         let dstFinalLayout: VkImageLayout = destination.usage.contains(.renderTarget)
             ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
@@ -145,17 +128,9 @@ public final class MTLBlitCommandEncoder {
                      aspectMask: destination.pixelFormat.aspectMask)
     }
 
-    // MARK: - copy(from:MTLBuffer, ...)
 
-    /// Mirrors `MTLBlitCommandEncoder.copy(from:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:to:destinationSlice:destinationLevel:destinationOrigin:)`.
-    ///
-    /// Copies pixel data from a (shared/staging) `MTLBuffer` into a mip level of `texture`.
-    ///
-    /// Metal has no image-layout concept — textures are always accessible from any stage.
-    /// In Vulkan every image must be in the correct `VkImageLayout` before use, so this
-    /// method records two barriers around the copy:
-    ///   UNDEFINED → TRANSFER_DST_OPTIMAL  (allow the copy)
-    ///   TRANSFER_DST_OPTIMAL → SHADER_READ_ONLY_OPTIMAL  (make it shader-readable)
+    /// Copies pixel data from a staging `MTLBuffer` into a mip level of `texture`,
+    /// transitioning the image from `UNDEFINED` to `SHADER_READ_ONLY_OPTIMAL`.
     public func copy(from buffer: MTLBuffer,
                      sourceOffset: Int,
                      sourceBytesPerRow: Int,
@@ -209,32 +184,24 @@ public final class MTLBlitCommandEncoder {
                      aspectMask: texture.pixelFormat.aspectMask)
     }
 
-    // MARK: - copy(from:MTLTexture, sliceCount:levelCount:) — stub
 
-    /// Texture-to-texture copy used by the legacy `blitUpload` path.
-    /// Not called in the active `blitBufferToTexture` path; stub for compilation parity.
+    /// Stub â€” not used in the active blit path.
     public func copy(from source: MTLTexture,
                      sourceSlice: Int, sourceLevel: Int,
                      to destination: MTLTexture,
                      destinationSlice: Int, destinationLevel: Int,
                      sliceCount: Int, levelCount: Int) {
-        // TODO: implement full texture→texture copy if blitUpload path is ever needed
+        // TODO: implement full textureâ†’texture copy if blitUpload path is ever needed
     }
 
-    // MARK: - generateMipmaps — stub
 
-    /// Mirrors `MTLBlitCommandEncoder.generateMipmaps(for:)`.
-    ///
-    /// Metal issues one GPU command; the driver adds barriers between mip levels.
-    /// Vulkan requires N−1 `vkCmdBlitImage` calls plus an explicit barrier per level —
-    /// stubbed for now; textures will work without mipmaps.
+    /// Stub â€” textures work without mipmaps until this is implemented.
     public func generateMipmaps(for texture: MTLTexture) {
         // TODO: implement per-level vkCmdBlitImage loop with barriers
     }
 
-    // MARK: - endEncoding
 
     public func endEncoding() {
-        // Nothing to flush — commands are recorded directly into the command buffer.
+        // Nothing to flush â€” commands are recorded directly into the command buffer.
     }
 }

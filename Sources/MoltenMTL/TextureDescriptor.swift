@@ -1,26 +1,22 @@
-import CVulkan
+﻿import CVulkan
 
-// MARK: - PixelFormat
 
-/// Mirrors MTLPixelFormat — the format of texels stored in a texture.
 public enum MTLPixelFormat {
-    case rgba8Unorm       /// 4 bytes/pixel — 8-bit unsigned normalised, RGBA
-    case bgra8Unorm       /// 4 bytes/pixel — 8-bit unsigned normalised, BGRA (typical swapchain format)
-    case rgba8Unorm_srgb  /// 4 bytes/pixel — 8-bit sRGB, RGBA
-    case rgba16Float      /// 8 bytes/pixel — 16-bit float per channel
-    case rgba32Float      /// 16 bytes/pixel — 32-bit float per channel
-    case r8Unorm          /// 1 byte/pixel  — single 8-bit unsigned normalised channel
-    case r8Unorm_srgb     /// 1 byte/pixel  — single 8-bit sRGB channel
-    case rg8Unorm         /// 2 bytes/pixel — 8-bit unsigned normalised, RG
-    case r16Float         /// 2 bytes/pixel — single 16-bit float channel
-    case rg16Float        /// 4 bytes/pixel — 16-bit float, RG
-    case r32Float         /// 4 bytes/pixel — single 32-bit float channel
-    case rg32Float        /// 8 bytes/pixel — 32-bit float, RG
-    case depth32Float     /// 4 bytes/pixel — 32-bit float depth
+    case rgba8Unorm
+    case bgra8Unorm
+    case rgba8Unorm_srgb
+    case rgba16Float
+    case rgba32Float
+    case r8Unorm
+    case r8Unorm_srgb
+    case rg8Unorm
+    case r16Float
+    case rg16Float
+    case r32Float
+    case rg32Float
+    case depth32Float
 
-    // MARK: Internal Vulkan properties
 
-    /// Corresponding `VkFormat`.
     var vkFormat: VkFormat {
         switch self {
         case .rgba8Unorm:       return VK_FORMAT_R8G8B8A8_UNORM
@@ -39,7 +35,6 @@ public enum MTLPixelFormat {
         }
     }
 
-    /// Vulkan image aspect mask (colour vs. depth).
     var aspectMask: UInt32 {
         switch self {
         case .depth32Float:
@@ -49,9 +44,7 @@ public enum MTLPixelFormat {
         }
     }
 
-    // MARK: Public Metal-mirrored properties
 
-    /// Size of a single texel in bytes.
     public var bytesPerPixel: Int {
         switch self {
         case .rgba8Unorm:       return 4
@@ -71,9 +64,8 @@ public enum MTLPixelFormat {
     }
 }
 
-// MARK: - TextureUsage
 
-/// Mirrors MTLTextureUsage — how the texture will be accessed by the GPU.
+/// Describes how the texture will be accessed by the GPU.
 public struct MTLTextureUsage: OptionSet, Sendable {
     public let rawValue: UInt32
     public init(rawValue: UInt32) { self.rawValue = rawValue }
@@ -86,12 +78,8 @@ public struct MTLTextureUsage: OptionSet, Sendable {
     public static let renderTarget = MTLTextureUsage(rawValue: 1 << 2)
 }
 
-// MARK: - TextureDescriptor
 
-/// Mirrors MTLTextureDescriptor.
-///
-/// Describes the properties of a texture before creating it via
-/// `device.makeTexture(descriptor:)`.
+/// Describes the properties of a texture before creating it via `device.makeTexture(descriptor:)`.
 public final class MTLTextureDescriptor {
 
     public var pixelFormat:      MTLPixelFormat  = .rgba8Unorm
@@ -101,18 +89,14 @@ public final class MTLTextureDescriptor {
     public var usage:            MTLTextureUsage = .shaderRead
     /// Mirrors `MTLTextureDescriptor.storageMode`.
     /// Vulkan images always reside in device-local memory (optimal tiling), so this
-    /// property has no effect on the underlying allocation — it exists for API parity.
+    /// property has no effect on the underlying allocation â€” it exists for API parity.
     public var storageMode:      MTLStorageMode  = .private
 
     public init() {}
 
-    // MARK: - texture2DDescriptor
 
-    /// Mirrors `MTLTextureDescriptor.texture2DDescriptor(pixelFormat:width:height:mipmapped:)`.
-    ///
     /// Builds a descriptor for a 2-D texture.
-    /// When `mipmapped` is `true`, `mipmapLevelCount` is set to
-    /// `floor(log2(max(width, height))) + 1`.
+    /// When `mipmapped` is `true`, `mipmapLevelCount` is `floor(log2(max(width, height))) + 1`.
     public static func texture2DDescriptor(pixelFormat: MTLPixelFormat,
                                            width:       Int,
                                            height:      Int,
@@ -123,8 +107,7 @@ public final class MTLTextureDescriptor {
         d.height      = height
 
         if mipmapped {
-            // Compute floor(log2(max(w, h))) + 1 via bit-shifting — avoids
-            // importing Foundation just for log2().
+            // Avoids importing Foundation just for log2().
             var n      = max(width, height)
             var levels = 1
             while n > 1 { n >>= 1; levels += 1 }
@@ -134,16 +117,11 @@ public final class MTLTextureDescriptor {
         return d
     }
 
-    // MARK: Internal Vulkan usage flags
 
-    /// `VkImageUsageFlags` derived from the Metal `TextureUsage` and pixel format.
-    ///
-    /// Always includes `TRANSFER_SRC` and `TRANSFER_DST` so callers can
-    /// upload data via `replace(region:mipmapLevel:withBytes:bytesPerRow:)`.
+    /// Always includes `TRANSFER_SRC`/`TRANSFER_DST` so the staging-buffer upload path always works.
     var vkUsage: UInt32 {
         var flags: UInt32 = 0
 
-        // Transfer flags let the staging-buffer upload path always work.
         flags |= UInt32(bitPattern: VK_IMAGE_USAGE_TRANSFER_DST_BIT.rawValue)
         flags |= UInt32(bitPattern: VK_IMAGE_USAGE_TRANSFER_SRC_BIT.rawValue)
 

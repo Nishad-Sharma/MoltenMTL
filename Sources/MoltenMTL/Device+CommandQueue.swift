@@ -1,18 +1,10 @@
-import CVulkan
+﻿import CVulkan
 
 public extension MTLDevice {
 
-    // MARK: - makeCommandQueue
-
-    /// Mirrors `MTLDevice.makeCommandQueue()`.
-    ///
-    /// Creates a `VkCommandPool` tied to the compute queue family and returns
-    /// a `CommandQueue` that allocates command buffers from it.
     func makeCommandQueue() -> MTLCommandQueue? {
         guard let vkDev = device, let q = queue else { return nil }
 
-        // RESET_COMMAND_BUFFER_BIT lets individual command buffers be reset
-        // independently of one another (not strictly required here, but good practice).
         var poolCI = VkCommandPoolCreateInfo()
         poolCI.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO
         poolCI.queueFamilyIndex = computeQueueFamily

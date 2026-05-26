@@ -1,34 +1,24 @@
-import CVulkan
+﻿import CVulkan
 
-/// Mirrors CAMetalDrawable — one acquired swapchain image for a single frame.
-/// Obtain via `CAMetalLayer.nextDrawable()`.
-/// Pass to `MTLCommandBuffer.present(_:)` before calling `commit()`.
+/// Obtain via `CAMetalLayer.nextDrawable()`, then pass to `MTLCommandBuffer.present(_:)` before `commit()`.
 public final class CAMetalDrawable {
 
-    /// The swapchain image wrapped as an `MTLTexture`, mirroring Metal's `CAMetalDrawable.texture`.
-    /// Supports `.width`, `.height`, and can be used as a blit destination via
-    /// `MTLBlitCommandEncoder.copy(from:to:)` or `copyBuffer(_:toImage:width:height:)`.
-    ///
-    /// The underlying `VkImage` is owned by the swapchain — this texture does **not**
-    /// free it on deinit (allocation is nil).
+    /// The swapchain image as an `MTLTexture`.
+    /// The underlying `VkImage` is owned by the swapchain - this texture does **not** free it on deinit.
     public let texture: MTLTexture
 
-    /// `true` when the swapchain format is BGRA — caller must swap R/B in the staging buffer.
     public let isBGRA: Bool
 
     /// Index into the swapchain's image array.
     public let imageIndex: UInt32
 
-    /// Signalled by `vkAcquireNextImageKHR`; waited by the submit.
     let imageAvailableSemaphore: VkSemaphore
 
-    /// Signalled by the submit; waited by `vkQueuePresentKHR`.
     let renderFinishedSemaphore: VkSemaphore
 
-    /// Raw swapchain handle — used in `commit()` for `vkQueuePresentKHR`.
+    /// Raw swapchain handle - used in `commit()` for `vkQueuePresentKHR`.
     let swapchainHandle: VkSwapchainKHR
 
-    // todo: this shouldn't be public?
     public init(image: VkImage,
          isBGRA: Bool,
          imageIndex: UInt32,
@@ -38,9 +28,7 @@ public final class CAMetalDrawable {
          imageAvailableSemaphore: VkSemaphore,
          renderFinishedSemaphore: VkSemaphore,
          swapchainHandle: VkSwapchainKHR) {
-        // Wrap the swapchain VkImage as a lightweight MTLTexture.
-        // allocation: nil → deinit will NOT call CVMA_destroyImage (swapchain owns the image).
-        // imageView:  nil → no VkImageView to destroy.
+        // allocation/imageView nil - swapchain owns the image; deinit must not free it.
         self.texture = MTLTexture(
             image:            image,
             imageView:        nil,
