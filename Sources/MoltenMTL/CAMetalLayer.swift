@@ -20,9 +20,9 @@ public final class CAMetalLayer {
 
     public var pixelFormat: MTLPixelFormat = .rgba8Unorm
     
-    ///   - surface: An already-created `VkSurfaceKHR`. **Not** owned by this object.
+    ///   - surface: An already-created `VkSurfaceKHR` passed as `OpaquePointer`. **Not** owned by this object.
     ///   - width / height: Desired swapchain image extent.
-    public init?(device: MTLDevice, surface: VkSurfaceKHR, width: Int, height: Int) {
+    public init?(device: MTLDevice, surface: OpaquePointer, width: Int, height: Int) {
         self.device  = device
         drawableSize = (width: width, height: height)   // may be updated below from caps
         guard let dev = device.device,

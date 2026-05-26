@@ -15,20 +15,21 @@ public final class MTLDevice {
 
     fileprivate nonisolated(unsafe) static var shared: MTLDevice?
 
-    public fileprivate(set) var instance:           VkInstance?
-    public fileprivate(set) var physicalDevice:     VkPhysicalDevice?
-    public fileprivate(set) var device:             VkDevice?
-    public fileprivate(set) var queue:              VkQueue?
-    public fileprivate(set) var allocator:          VmaAllocator?
-    public fileprivate(set) var computeQueueFamily: UInt32 = .max 
+    fileprivate(set) var _instance:                 VkInstance?
+    public var instance: OpaquePointer?             { _instance }
+    fileprivate(set) var physicalDevice:             VkPhysicalDevice?
+    fileprivate(set) var device:                     VkDevice?
+    fileprivate(set) var queue:                      VkQueue?
+    fileprivate(set) var allocator:                  VmaAllocator?
+    public fileprivate(set) var computeQueueFamily:  UInt32 = .max
 
     init() {}
 
     deinit {
         // Destroy in reverse-creation order: allocator → device → instance
-        if let a = allocator { CVMA_destroyAllocator(a) }
-        if let d = device    { vkDestroyDevice(d, nil) }
-        if let i = instance  { vkDestroyInstance(i, nil) }
+        if let a = allocator  { CVMA_destroyAllocator(a) }
+        if let d = device     { vkDestroyDevice(d, nil) }
+        if let i = _instance  { vkDestroyInstance(i, nil) }
     }
 }
 
@@ -71,7 +72,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                     instanceCI.ppEnabledLayerNames      = layersBuf.baseAddress
                     instanceCI.enabledExtensionCount    = instanceExtCount
                     instanceCI.ppEnabledExtensionNames  = UnsafePointer(extsBuf.baseAddress)
-                    instanceResult = vkCreateInstance(&instanceCI, nil, &dev.instance)
+                    instanceResult = vkCreateInstance(&instanceCI, nil, &dev._instance)
                 }
             }
         }
@@ -80,13 +81,13 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
 
     // Physical device
     var devCount: UInt32 = 0
-    vkEnumeratePhysicalDevices(dev.instance, &devCount, nil)
+    vkEnumeratePhysicalDevices(dev._instance, &devCount, nil)
     guard devCount > 0 else {
         print("[VulkanSwift] No Vulkan-capable GPU found")
         return nil
     }
     var physDevs = [VkPhysicalDevice?](repeating: nil, count: Int(devCount))
-    vkEnumeratePhysicalDevices(dev.instance, &devCount, &physDevs)
+    vkEnumeratePhysicalDevices(dev._instance, &devCount, &physDevs)
     dev.physicalDevice = physDevs[0]
 
     var devProps = VkPhysicalDeviceProperties()
@@ -187,7 +188,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     vkGetDeviceQueue(dev.device, dev.computeQueueFamily, 0, &dev.queue)
 
     // VMA allocator
-    let allocResult = CVMA_createAllocator(dev.instance, dev.physicalDevice,
+    let allocResult = CVMA_createAllocator(dev._instance, dev.physicalDevice,
                                             dev.device, SWIFT_VK_API_VERSION_1_4,
                                             &dev.allocator)
     guard vkCheck(allocResult, "CVMA_createAllocator") else { return nil }

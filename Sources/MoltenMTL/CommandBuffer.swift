@@ -4,7 +4,7 @@ public final class MTLCommandBuffer {
 
     public var label: String?
 
-    public let handle: VkCommandBuffer
+    let handle: VkCommandBuffer
 
     /// Internal (not private) so encoders can access vkDevice/queue via the queue.
     let commandQueue: MTLCommandQueue

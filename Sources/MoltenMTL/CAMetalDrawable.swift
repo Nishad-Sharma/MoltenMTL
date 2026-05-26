@@ -19,7 +19,7 @@ public final class CAMetalDrawable {
     /// Raw swapchain handle - used in `commit()` for `vkQueuePresentKHR`.
     let swapchainHandle: VkSwapchainKHR
 
-    public init(image: VkImage,
+    init(image: VkImage,
          isBGRA: Bool,
          imageIndex: UInt32,
          width: Int,
