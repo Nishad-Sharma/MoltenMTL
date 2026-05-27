@@ -18,6 +18,7 @@ let package = Package(
         .target(
             name: "CVulkan",
             path: "Sources/CVulkan",
+            exclude: ["include/spirv_reflect.c"],
             publicHeadersPath: "include",
             cSettings: [
                 .define("NOMINMAX"),
