@@ -31,7 +31,7 @@ let package = Package(
                 .define("VMA_IMPLEMENTATION"),
                 .define("VMA_STATIC_VULKAN_FUNCTIONS",  to: "0"),
                 .define("VMA_DYNAMIC_VULKAN_FUNCTIONS", to: "1"),
-                .unsafeFlags(["-I\(vulkanSDK)/Include"]),
+                .unsafeFlags(["-Xcc", "-I\(vulkanSDK)/Include"])
             ],
             linkerSettings: [
                 .unsafeFlags(["-L\(vulkanSDK)/Lib"]),
