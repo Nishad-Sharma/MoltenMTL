@@ -22,16 +22,15 @@ let package = Package(
             cSettings: [
                 .define("NOMINMAX"),
                 .define("WIN32_LEAN_AND_MEAN"),
-                .unsafeFlags(["-I\(vulkanSDK)/Include"]),
-                .unsafeFlags(["-I\(vulkanSDK)/Source/SPIRV-Reflect"]),
+                .define("SPIRV_REFLECT_USE_SYSTEM_SPIRV_H"),
             ],
             cxxSettings: [
                 .define("NOMINMAX"),
                 .define("WIN32_LEAN_AND_MEAN"),
+                .define("SPIRV_REFLECT_USE_SYSTEM_SPIRV_H"),
                 .define("VMA_IMPLEMENTATION"),
                 .define("VMA_STATIC_VULKAN_FUNCTIONS",  to: "0"),
                 .define("VMA_DYNAMIC_VULKAN_FUNCTIONS", to: "1"),
-                .unsafeFlags(["-I\(vulkanSDK)/Include"]),
             ],
             linkerSettings: [
                 .unsafeFlags(["-L\(vulkanSDK)/Lib"]),
@@ -41,10 +40,7 @@ let package = Package(
         .target(
             name: "Metal",
             dependencies: ["CVulkan"],
-            path: "Sources/MoltenMTL",
-            swiftSettings: [
-                .unsafeFlags(["-Xcc", "-I\(vulkanSDK)/Include"])
-            ]
+            path: "Sources/MoltenMTL"
         ),
     ]
 )
