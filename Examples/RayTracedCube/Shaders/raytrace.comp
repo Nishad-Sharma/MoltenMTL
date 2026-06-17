@@ -1,0 +1,76 @@
+#version 460
+#extension GL_EXT_ray_query : require
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+// Explicit binding layout (storageBufferCount=1, accelerationStructureCount=1):
+//   binding 0 — pixel buffer  (IMAGE_SIZE * IMAGE_SIZE * 4 floats, RGBA row-major)
+//   binding 1 — TLAS
+layout(set = 0, binding = 0) buffer PixelBuffer { float pixels[]; };
+layout(set = 0, binding = 1) uniform accelerationStructureEXT tlas;
+
+const int   IMAGE_SIZE = 256;
+const float HALF_FOV   = 0.4142135;  // tan(22.5 degrees) — gives a 45 degree vertical FOV
+
+// Face index = primitiveIndex / 2.
+// Matches the index order in main.swift: 0=bottom 1=top 2=front 3=back 4=left 5=right
+vec3 faceColor(uint f) {
+    if (f == 0u) return vec3(1.0, 0.0, 1.0);  // magenta — bottom (-Y)
+    if (f == 1u) return vec3(0.0, 1.0, 0.0);  // green   — top    (+Y)
+    if (f == 2u) return vec3(1.0, 1.0, 0.0);  // yellow  — front  (-Z)
+    if (f == 3u) return vec3(0.0, 1.0, 1.0);  // cyan    — back   (+Z)
+    if (f == 4u) return vec3(0.0, 0.0, 1.0);  // blue    — left   (-X)
+    return                 vec3(1.0, 0.0, 0.0); // red   — right  (+X)
+}
+
+vec3 faceNormal(uint f) {
+    if (f == 0u) return vec3( 0.0, -1.0,  0.0);
+    if (f == 1u) return vec3( 0.0,  1.0,  0.0);
+    if (f == 2u) return vec3( 0.0,  0.0, -1.0);
+    if (f == 3u) return vec3( 0.0,  0.0,  1.0);
+    if (f == 4u) return vec3(-1.0,  0.0,  0.0);
+    return                vec3( 1.0,  0.0,  0.0);
+}
+
+void main() {
+    uvec2 id  = gl_GlobalInvocationID.xy;
+    uint  idx = (id.y * uint(IMAGE_SIZE) + id.x) * 4u;
+
+    // Perspective camera at (1.5, 1.2, 1.8) looking toward the origin.
+    vec3 eye     = vec3(1.5, 1.2, 1.8);
+    vec3 forward = normalize(-eye);
+    vec3 right   = normalize(cross(forward, vec3(0.0, 1.0, 0.0)));
+    vec3 up      = cross(right, forward);
+
+    // UV in [-1, 1]; flip V so +Y is up in the output image.
+    float u = (float(id.x) + 0.5) / float(IMAGE_SIZE) * 2.0 - 1.0;
+    float v = 1.0 - (float(id.y) + 0.5) / float(IMAGE_SIZE) * 2.0;
+    vec3  dir = normalize(forward + u * HALF_FOV * right + v * HALF_FOV * up);
+
+    rayQueryEXT rq;
+    rayQueryInitializeEXT(rq, tlas, gl_RayFlagsOpaqueEXT,
+                          0xFF,    // cull mask — test all instances
+                          eye, 0.001, dir, 100.0);
+    while (rayQueryProceedEXT(rq)) {}
+
+    vec3 color = vec3(0.0);  // black background for misses
+    if (rayQueryGetIntersectionTypeEXT(rq, true) !=
+            gl_RayQueryCommittedIntersectionNoneEXT) {
+
+        uint  prim    = uint(rayQueryGetIntersectionPrimitiveIndexEXT(rq, true));
+        uint  face    = prim / 2u;
+        vec3  normal  = faceNormal(face);
+
+        // Lambertian shading: directional light from above-right.
+        vec3  lightDir = normalize(vec3(1.0, 2.0, 1.0));
+        float lambert  = max(dot(normal, lightDir), 0.0);
+        float shade    = 0.15 + 0.85 * lambert;  // ambient + diffuse
+
+        color = faceColor(face) * shade;
+    }
+
+    pixels[idx]      = color.r;
+    pixels[idx + 1u] = color.g;
+    pixels[idx + 2u] = color.b;
+    pixels[idx + 3u] = 1.0;
+}
