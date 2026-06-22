@@ -1,11 +1,9 @@
 import Foundation
 import MoltenMTL
 
-let shaderURL = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent()
-    .deletingLastPathComponent()
-    .deletingLastPathComponent()
-    .appendingPathComponent("Shaders/add.spv")
+guard let shaderURL = Bundle.module.url(forResource: "add", withExtension: "spv") else {
+    fatalError("add.spv not found in bundle — the CompileShaders plugin did not run.")
+}
 
 guard let device = MTLCreateSystemDefaultDevice() else {
     fatalError("No Vulkan-capable GPU found")

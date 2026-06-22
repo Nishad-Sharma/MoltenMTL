@@ -24,8 +24,7 @@ Demonstrates: BLAS/TLAS acceleration structure builds, instance transforms, ray 
 From this directory:
 
 ```
-swift build
-.build\debug\RayTracedCube
+swift run
 ```
 
 Expected output:
@@ -40,10 +39,7 @@ Wrote <path>\output.ppm
 
 Open `output.ppm` with any image viewer (IrfanView, GIMP, or a VS Code PPM extension).
 
-## Recompile the shader (optional)
+## Editing the shader
 
-The pre-compiled `Shaders/raytrace.spv` is already checked in. If you modify `raytrace.comp`, recompile with:
-
-```
-%VULKAN_INSTALL%\Bin\glslc.exe --target-env=vulkan1.3 Shaders\raytrace.comp -o Shaders\raytrace.spv
-```
+Edit `Shaders/raytrace.comp` and re-run `swift run` — the build recompiles it to
+SPIR-V for you.

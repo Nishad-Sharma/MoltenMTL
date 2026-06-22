@@ -12,6 +12,7 @@ let package = Package(
     name: "MoltenMTL",
     products: [
         .library(name: "MoltenMTL", targets: ["MoltenMTL"]),
+        .plugin(name: "CompileShaders", targets: ["CompileShaders"]),
     ],
     targets: [
         .target(
@@ -55,6 +56,11 @@ let package = Package(
             swiftSettings: [
                 .unsafeFlags(["-Xcc", "-I\(vulkanSDK)/Include"])
             ]
+        ),
+        .plugin(
+            name: "CompileShaders",
+            capability: .buildTool(),
+            path: "Plugins/CompileShaders"
         ),
     ]
 )

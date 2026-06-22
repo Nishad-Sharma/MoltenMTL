@@ -1,11 +1,9 @@
 import Foundation
 import MoltenMTL
 
-let shaderURL = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent()   // Sources/RayTracedCube/
-    .deletingLastPathComponent()   // Sources/
-    .deletingLastPathComponent()   // RayTracedCube/ (example root)
-    .appendingPathComponent("Shaders/raytrace.spv")
+guard let shaderURL = Bundle.module.url(forResource: "raytrace", withExtension: "spv") else {
+    fatalError("raytrace.spv not found in bundle — the CompileShaders plugin did not run.")
+}
 
 guard let device = MTLCreateSystemDefaultDevice() else {
     fatalError("No Vulkan-capable GPU found")
@@ -117,11 +115,7 @@ print("TLAS built ✓")
 
 guard let library  = device.makeLibrary(path: shaderURL.path),
       let function = library.makeFunction(name: "main") else {
-    fatalError("""
-        Failed to load shader at \(shaderURL.path)
-        Compile it first:
-          glslc --target-env=vulkan1.3 Shaders/raytrace.comp -o Shaders/raytrace.spv
-        """)
+    fatalError("Failed to load shader at \(shaderURL.path)")
 }
 
 

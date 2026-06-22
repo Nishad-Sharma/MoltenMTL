@@ -19,8 +19,7 @@ Demonstrates: device creation, shader loading, compute pipeline, shared buffers,
 From this directory:
 
 ```
-swift build
-.build\debug\SimpleCompute
+swift run
 ```
 
 Expected output:
@@ -31,10 +30,7 @@ Input:  [1, 2, 3, 4, 5, 6, 7, 8]
 Output: [2, 4, 6, 8, 10, 12, 14, 16]
 ```
 
-## Recompile the shader (optional)
+## Editing the shader
 
-The pre-compiled `Shaders/add.spv` is already checked in. If you modify `add.comp`, recompile with:
-
-```
-%VULKAN_INSTALL%\Bin\glslc.exe Shaders\add.comp -o Shaders\add.spv
-```
+Edit `Shaders/add.comp` and re-run `swift run` — the build recompiles it to SPIR-V
+for you.

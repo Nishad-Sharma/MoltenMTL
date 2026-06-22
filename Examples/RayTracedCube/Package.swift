@@ -12,7 +12,10 @@ let package = Package(
             dependencies: [
                 .product(name: "MoltenMTL", package: "MoltenMTL"),
             ],
-            path: "Sources/RayTracedCube"
+            path: "Sources/RayTracedCube",
+            plugins: [
+                .plugin(name: "CompileShaders", package: "MoltenMTL"),
+            ]
         ),
     ]
 )
