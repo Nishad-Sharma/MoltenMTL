@@ -1,8 +1,18 @@
 # RayTracedCube
 
-Ray-traces a cube on the GPU and writes the result to `output.ppm` (256×256).
+Ray-traces a textured cube resting on a ground plane, lit by a point light, and writes
+the result to `output.ppm` (256×256).
 
-Demonstrates: BLAS/TLAS acceleration structure builds, instance transforms, ray queries from a compute shader, and pixel readback — the full ray-tracing path through MoltenMTL.
+Demonstrates: BLAS/TLAS acceleration structure builds, a multi-instance TLAS with
+per-object transforms and materials, ray queries from a compute shader, per-vertex
+attributes (UVs and normals) interpolated via ray-query barycentrics, a textured cube
+sampled from a storage image, point-light (Blinn-Phong) shading, and pixel readback —
+the full ray-tracing path through MoltenMTL.
+
+The scene — camera, light, geometry, and materials — is defined in
+[`Scene.swift`](Sources/RayTracedCube/Scene.swift), a render-agnostic description kept
+separate from the rendering code so the same scene can later be reused by a rasterized
+example for a side-by-side comparison.
 
 <p align="center">
   <img src="../../docs/raytraced-cube.png" alt="Ray-traced cube output" width="256">
