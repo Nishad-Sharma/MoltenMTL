@@ -21,6 +21,9 @@ public extension MTLDevice {
                   | UInt32(bitPattern: VK_BUFFER_USAGE_TRANSFER_SRC_BIT.rawValue)
                   | UInt32(bitPattern: VK_BUFFER_USAGE_TRANSFER_DST_BIT.rawValue)
                   | UInt32(bitPattern: VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR.rawValue)
+                  | UInt32(bitPattern: VK_BUFFER_USAGE_VERTEX_BUFFER_BIT.rawValue)
+                  | UInt32(bitPattern: VK_BUFFER_USAGE_INDEX_BUFFER_BIT.rawValue)
+                  | UInt32(bitPattern: VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT.rawValue)
 
         // storageMode 0 = shared (CPU+GPU, persistently mapped), 1 = private (GPU-only)
         var buf:    VkBuffer?

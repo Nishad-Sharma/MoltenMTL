@@ -28,6 +28,12 @@ public final class MTLCommandBuffer {
     /// Textures retained from the encoder until GPU completion.
     var ownedTextures: [MTLTexture] = []
 
+    /// Samplers retained from the encoder until GPU completion.
+    var ownedSamplers: [MTLSamplerState] = []
+
+    /// Render pipeline states retained from the encoder until GPU completion.
+    var ownedRenderPipelines: [MTLRenderPipelineState] = []
+
     /// Set by `present(_:)`. When non-nil, commit() submits with semaphores + presents.
     private var pendingDrawable: CAMetalDrawable?
 
@@ -116,6 +122,14 @@ public final class MTLCommandBuffer {
     /// Call `endEncoding()` on the encoder before creating another or calling `commit()`.
     public func makeComputeCommandEncoder() -> MTLComputeCommandEncoder? {
         MTLComputeCommandEncoder(commandBuffer: self)
+    }
+
+    /// Creates a render encoder for the given pass (dynamic rendering).
+    /// Call `endEncoding()` on the encoder before creating another or calling `commit()`.
+    public func makeRenderCommandEncoder(descriptor: MTLRenderPassDescriptor)
+        -> MTLRenderCommandEncoder?
+    {
+        MTLRenderCommandEncoder(commandBuffer: self, descriptor: descriptor)
     }
 
     /// Call `endEncoding()` before calling `commit()`.

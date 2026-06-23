@@ -50,8 +50,11 @@ let package = Package(
             name: "MoltenMTLTests",
             dependencies: ["MoltenMTL"],
             path: "Tests/MoltenMTLTests",
+            exclude: ["Shaders"],
             resources: [
                 .copy("Resources/double.spv"),
+                .copy("Resources/ui_quad.vert.spv"),
+                .copy("Resources/ui_quad.frag.spv"),
             ],
             swiftSettings: [
                 .unsafeFlags(["-Xcc", "-I\(vulkanSDK)/Include"])

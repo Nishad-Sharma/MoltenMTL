@@ -16,6 +16,7 @@ public enum MTLPixelFormat {
     case r32Float
     case rg32Float
     case depth32Float
+    case depth32Float_stencil8
 
     var vkFormat: VkFormat {
         switch self {
@@ -31,7 +32,8 @@ public enum MTLPixelFormat {
         case .rg16Float:        return VK_FORMAT_R16G16_SFLOAT
         case .r32Float:         return VK_FORMAT_R32_SFLOAT
         case .rg32Float:        return VK_FORMAT_R32G32_SFLOAT
-        case .depth32Float:     return VK_FORMAT_D32_SFLOAT
+        case .depth32Float:          return VK_FORMAT_D32_SFLOAT
+        case .depth32Float_stencil8: return VK_FORMAT_D32_SFLOAT_S8_UINT
         }
     }
 
@@ -39,8 +41,28 @@ public enum MTLPixelFormat {
         switch self {
         case .depth32Float:
             return UInt32(bitPattern: VK_IMAGE_ASPECT_DEPTH_BIT.rawValue)
+        case .depth32Float_stencil8:
+            return UInt32(bitPattern: (VK_IMAGE_ASPECT_DEPTH_BIT.rawValue
+                                     | VK_IMAGE_ASPECT_STENCIL_BIT.rawValue))
         default:
             return UInt32(bitPattern: VK_IMAGE_ASPECT_COLOR_BIT.rawValue)
+        }
+    }
+
+    /// True for any depth and/or stencil format — selects the depth/stencil
+    /// attachment usage, layout, and barrier stages instead of the colour ones.
+    var isDepthStencil: Bool {
+        switch self {
+        case .depth32Float, .depth32Float_stencil8: return true
+        default:                                    return false
+        }
+    }
+
+    /// True when the format carries a stencil aspect.
+    var hasStencil: Bool {
+        switch self {
+        case .depth32Float_stencil8: return true
+        default:                     return false
         }
     }
 
@@ -58,7 +80,8 @@ public enum MTLPixelFormat {
         case .rg16Float:        return 4
         case .r32Float:         return 4
         case .rg32Float:        return 8
-        case .depth32Float:     return 4
+        case .depth32Float:          return 4
+        case .depth32Float_stencil8: return 8
         }
     }
 }
@@ -126,7 +149,7 @@ public final class MTLTextureDescriptor {
             flags |= UInt32(bitPattern: VK_IMAGE_USAGE_STORAGE_BIT.rawValue)
         }
         if usage.contains(.renderTarget) {
-            if case .depth32Float = pixelFormat {
+            if pixelFormat.isDepthStencil {
                 flags |= UInt32(bitPattern: VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT.rawValue)
             } else {
                 flags |= UInt32(bitPattern: VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT.rawValue)

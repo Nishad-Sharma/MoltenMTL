@@ -21,6 +21,8 @@ public final class MTLBlitCommandEncoder {
         CVKS_cmdCopyBufferToImage(commandBuffer.handle,
                                    buf, vkImage,
                                    UInt32(width), UInt32(height))
+        // CVKS_cmdCopyBufferToImage records UNDEFINED → TRANSFER_DST → PRESENT_SRC.
+        image.currentLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
     }
 
     /// Copies a region of `source` into `destination` using `vkCmdBlitImage`.
@@ -39,11 +41,15 @@ public final class MTLBlitCommandEncoder {
 
         let cmd = commandBuffer.handle
 
-        // Transition source → TRANSFER_SRC_OPTIMAL
-        // Assume source was last written by a compute shader (GENERAL or SHADER_READ_ONLY).
-        let srcOldLayout: VkImageLayout = source.usage.contains(.shaderWrite)
-            ? VK_IMAGE_LAYOUT_GENERAL
-            : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        // Transition source → TRANSFER_SRC_OPTIMAL.
+        // Prefer the tracked layout; fall back to the usage-based guess (compute
+        // shaders leave storage images in GENERAL, sampled ones in SHADER_READ_ONLY)
+        // for textures whose layout was never tracked.
+        let srcOldLayout: VkImageLayout = source.currentLayout != VK_IMAGE_LAYOUT_UNDEFINED
+            ? source.currentLayout
+            : (source.usage.contains(.shaderWrite)
+                ? VK_IMAGE_LAYOUT_GENERAL
+                : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
         imageBarrier(cmd:       cmd,
                      image:     srcImage,
                      oldLayout: srcOldLayout,
@@ -122,6 +128,9 @@ public final class MTLBlitCommandEncoder {
                      srcStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
                      dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT.rawValue),
                      aspectMask: destination.pixelFormat.aspectMask)
+
+        source.currentLayout      = srcOldLayout
+        destination.currentLayout = dstFinalLayout
     }
 
     /// Copies pixel data from a staging `MTLBuffer` into a mip level of `texture`,
@@ -177,6 +186,73 @@ public final class MTLBlitCommandEncoder {
                      srcStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
                      dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT.rawValue),
                      aspectMask: texture.pixelFormat.aspectMask)
+
+        texture.currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    }
+
+    /// Copies a region of `texture` into `buffer` (e.g. for CPU readback of a
+    /// render target). The texture is returned to its prior layout afterwards.
+    public func copy(from texture: MTLTexture,
+                     sourceSlice: Int,
+                     sourceLevel: Int,
+                     sourceOrigin: MTLOrigin,
+                     sourceSize: MTLSize,
+                     to buffer: MTLBuffer,
+                     destinationOffset: Int,
+                     destinationBytesPerRow: Int,
+                     destinationBytesPerImage: Int) {
+        guard let img = texture.image, let buf = buffer.handle else { return }
+        let cmd = commandBuffer.handle
+
+        let priorLayout = texture.currentLayout
+        imageBarrier(cmd:       cmd,
+                     image:     img,
+                     oldLayout: priorLayout,
+                     newLayout: VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                     srcAccess: UInt32(bitPattern: VK_ACCESS_MEMORY_WRITE_BIT.rawValue),
+                     dstAccess: UInt32(bitPattern: VK_ACCESS_TRANSFER_READ_BIT.rawValue),
+                     srcStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_ALL_COMMANDS_BIT.rawValue),
+                     dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
+                     aspectMask: texture.pixelFormat.aspectMask)
+
+        var region = VkBufferImageCopy()
+        region.bufferOffset                    = VkDeviceSize(destinationOffset)
+        region.bufferRowLength                 = UInt32(destinationBytesPerRow / max(texture.pixelFormat.bytesPerPixel, 1))
+        region.bufferImageHeight               = 0
+        region.imageSubresource.aspectMask     = texture.pixelFormat.aspectMask
+        region.imageSubresource.mipLevel       = UInt32(sourceLevel)
+        region.imageSubresource.baseArrayLayer = UInt32(sourceSlice)
+        region.imageSubresource.layerCount     = 1
+        region.imageOffset.x                   = Int32(sourceOrigin.x)
+        region.imageOffset.y                   = Int32(sourceOrigin.y)
+        region.imageOffset.z                   = Int32(sourceOrigin.z)
+        region.imageExtent.width               = UInt32(sourceSize.width)
+        region.imageExtent.height              = UInt32(sourceSize.height)
+        region.imageExtent.depth               = UInt32(max(sourceSize.depth, 1))
+
+        withUnsafePointer(to: region) { regionPtr in
+            vkCmdCopyImageToBuffer(cmd, img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                   buf, 1, regionPtr)
+        }
+
+        // Restore the prior layout when there was one; a texture that was still
+        // UNDEFINED has no contents worth preserving and stays in TRANSFER_SRC.
+        if priorLayout != VK_IMAGE_LAYOUT_UNDEFINED {
+            imageBarrier(cmd:       cmd,
+                         image:     img,
+                         oldLayout: VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                         newLayout: priorLayout,
+                         srcAccess: UInt32(bitPattern: VK_ACCESS_TRANSFER_READ_BIT.rawValue),
+                         dstAccess: UInt32(bitPattern: VK_ACCESS_MEMORY_READ_BIT.rawValue),
+                         srcStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_TRANSFER_BIT.rawValue),
+                         dstStage:  UInt32(bitPattern: VK_PIPELINE_STAGE_ALL_COMMANDS_BIT.rawValue),
+                         aspectMask: texture.pixelFormat.aspectMask)
+        } else {
+            texture.currentLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+        }
+
+        commandBuffer.ownedTextures.append(texture)
+        commandBuffer.ownedBuffers.append(buffer)
     }
 
     /// - Note: **Not yet implemented.** This stub exists for API parity;

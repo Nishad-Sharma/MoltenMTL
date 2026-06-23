@@ -148,6 +148,13 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
             rqFeatures.rayQuery = 1
 
             withUnsafeMutablePointer(to: &rqFeatures) { rqPtr in
+              // Dynamic rendering (Vulkan 1.3 core) — required by the render-pipeline
+              // path, which uses vkCmdBeginRendering instead of VkRenderPass objects.
+              var drFeatures = VkPhysicalDeviceDynamicRenderingFeatures()
+              drFeatures.sType           = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES
+              drFeatures.pNext           = UnsafeMutableRawPointer(rqPtr)
+              drFeatures.dynamicRendering = 1
+              withUnsafeMutablePointer(to: &drFeatures) { drPtr in
                 var prio: Float = 1.0
                 withUnsafePointer(to: &prio) { prioPtr in
                     var queueCI = VkDeviceQueueCreateInfo()
@@ -167,7 +174,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                         exts.withUnsafeMutableBufferPointer { extsBuf in
                             var deviceCI = VkDeviceCreateInfo()
                             deviceCI.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO
-                            deviceCI.pNext                   = UnsafeRawPointer(rqPtr)
+                            deviceCI.pNext                   = UnsafeRawPointer(drPtr)
                             deviceCI.queueCreateInfoCount    = 1
                             deviceCI.pQueueCreateInfos       = queueCIPtr
                             deviceCI.enabledExtensionCount   = devExtCount
@@ -177,6 +184,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                         }
                     }
                 }
+              }
             }
         }
     }
