@@ -1,7 +1,7 @@
 #version 450
 // Fragment stage for RasterizedCube. Fragment-stage resources live in descriptor set 1.
 // Point-light Blinn-Phong — the same shading math as RayTracedCube's raytrace.comp — so
-// the two examples match. The brick texture is sampled with a real sampler (filtered),
+// the two examples match. The cube texture is sampled with a real sampler (filtered),
 // where the ray example used a nearest imageLoad.
 
 layout(set = 1, binding = 0) uniform sampler2D tex;

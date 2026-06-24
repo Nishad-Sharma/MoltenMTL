@@ -2,8 +2,8 @@
 
 Rasterizes a textured cube resting on a ground plane, lit by a point light, and writes
 the result to `output.ppm` (256×256). It renders the **same scene** as
-[RayTracedCube](../RayTracedCube) — same camera, light, geometry, materials, and brick
-texture — but through the raster pipeline instead of ray queries.
+[RayTracedCube](../RayTracedCube) — same camera, light, geometry, materials, and
+solid-colour texture — but through the raster pipeline instead of ray queries.
 
 Demonstrates: render pipeline + vertex descriptor, a vertex/fragment shader pair, a
 depth buffer, per-object draws with model/view/projection matrices, point-light

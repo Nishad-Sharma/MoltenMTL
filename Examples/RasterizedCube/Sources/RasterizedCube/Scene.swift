@@ -155,31 +155,18 @@ struct TextureData {
     var height: Int
     var pixels: [UInt8]   // width * height * 4 bytes
 
-    /// A flat brick-and-mortar texture in a running-bond layout, generated procedurally
-    /// so the example needs no asset files. Pure albedo (two solid colors, no gradient
-    /// or bevel) so the scene's point light alone provides all shading.
-    static func brick(size: Int = 128) -> TextureData {
-        let mortar = (0.82, 0.80, 0.76)   // light warm grey
-        let brick  = (0.62, 0.22, 0.16)   // brick red
-        let rowH   = max(4, size / 6)
-        let brickW = max(4, size / 3)
-        let m      = max(1, size / 24)    // mortar thickness
-
+    /// A plain single-colour texture, generated procedurally so the example needs no
+    /// asset files. Still a real sampled texture — every texel is `color`.
+    static func solid(_ color: Vec3, size: Int = 16) -> TextureData {
+        let r = UInt8(max(0, min(255, Int(color.x * 255))))
+        let g = UInt8(max(0, min(255, Int(color.y * 255))))
+        let b = UInt8(max(0, min(255, Int(color.z * 255))))
         var px = [UInt8](repeating: 0, count: size * size * 4)
-        for y in 0..<size {
-            for x in 0..<size {
-                let row = y / rowH
-                let off = (row % 2 == 0) ? 0 : brickW / 2   // running bond
-                let bx  = (x + off) % brickW
-                let by  = y % rowH
-                let c   = (bx < m || by < m) ? mortar : brick
-
-                let i = (y * size + x) * 4
-                px[i + 0] = UInt8(max(0, min(255, Int(c.0 * 255))))
-                px[i + 1] = UInt8(max(0, min(255, Int(c.1 * 255))))
-                px[i + 2] = UInt8(max(0, min(255, Int(c.2 * 255))))
-                px[i + 3] = 255
-            }
+        for i in 0..<(size * size) {
+            px[i * 4 + 0] = r
+            px[i * 4 + 1] = g
+            px[i * 4 + 2] = b
+            px[i * 4 + 3] = 255
         }
         return TextureData(width: size, height: size, pixels: px)
     }
@@ -316,12 +303,12 @@ extension Scene {
             ambient: 0.08)
 
         let materials: [Material] = [
-            .textured(),                                       // cube — brick texture
+            .textured(),                                       // cube — orange texture
             .solid(Vec3(0.58, 0.58, 0.60), shininess: 8, specStrength: 0.05),  // plane — neutral grey
         ]
 
         return Scene(camera: camera, light: light,
                      objects: [cube, plane], materials: materials,
-                     texture: .brick())
+                     texture: .solid(Vec3(1.0, 0.45, 0.15)))
     }
 }

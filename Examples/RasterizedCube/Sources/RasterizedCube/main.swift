@@ -80,15 +80,15 @@ let depthTexDesc = MTLTextureDescriptor.texture2DDescriptor(
 depthTexDesc.usage = .renderTarget
 let depthTexture = device.makeTexture(descriptor: depthTexDesc)!
 
-// MARK: - Brick texture + sampler (real filtered sampling, unlike the ray example)
+// MARK: - Cube texture + sampler (real filtered sampling, unlike the ray example)
 
 let texData = scene.texture
-let brickDesc = MTLTextureDescriptor.texture2DDescriptor(
+let texDesc = MTLTextureDescriptor.texture2DDescriptor(
     pixelFormat: .rgba8Unorm, width: texData.width, height: texData.height, mipmapped: false)
-brickDesc.usage = .shaderRead
-let brickTexture = device.makeTexture(descriptor: brickDesc)!
+texDesc.usage = .shaderRead
+let cubeTexture = device.makeTexture(descriptor: texDesc)!
 texData.pixels.withUnsafeBytes {
-    brickTexture.replace(
+    cubeTexture.replace(
         region: .make2D(width: texData.width, height: texData.height),
         mipmapLevel: 0, withBytes: $0.baseAddress!, bytesPerRow: texData.width * 4)
 }
@@ -144,7 +144,7 @@ let cb  = queue.makeCommandBuffer()!
 let enc = cb.makeRenderCommandEncoder(descriptor: pass)!
 enc.setRenderPipelineState(pipeline)
 enc.setDepthStencilState(depthState)
-enc.setFragmentTexture(brickTexture, index: 0)       // set 1, binding 0
+enc.setFragmentTexture(cubeTexture, index: 0)        // set 1, binding 0
 enc.setFragmentSamplerState(sampler, index: 0)
 
 for (i, obj) in scene.objects.enumerated() {
