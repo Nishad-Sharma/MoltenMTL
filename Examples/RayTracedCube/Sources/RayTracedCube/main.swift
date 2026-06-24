@@ -18,7 +18,7 @@ let queue = device.makeCommandQueue()!
 
 // MARK: - Bottom-level acceleration structures (one per object)
 
-@MainActor
+@MainActor //why
 func buildBLAS(_ mesh: Mesh) -> (blas: MTLAccelerationStructure, indexBuffer: MTLBuffer) {
     let vertexBuffer = device.makeBuffer(
         bytes: mesh.vertices,
