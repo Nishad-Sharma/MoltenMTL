@@ -5,12 +5,14 @@ let package = Package(
     name: "RasterizedCube",
     dependencies: [
         .package(path: "../.."),
+        .package(path: "../Shared"),
     ],
     targets: [
         .executableTarget(
             name: "RasterizedCube",
             dependencies: [
                 .product(name: "MoltenMTL", package: "MoltenMTL"),
+                .product(name: "ExampleSupport", package: "Shared"),
             ],
             path: "Sources/RasterizedCube",
             plugins: [

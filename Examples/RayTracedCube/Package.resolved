@@ -1,0 +1,15 @@
+{
+  "originHash" : "1b806739ca5de00e660ef9f402479b662ba140a8473064aa9f7fcbb1385541be",
+  "pins" : [
+    {
+      "identity" : "kvsimd.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/keyvariable/kvSIMD.swift.git",
+      "state" : {
+        "revision" : "d95f3590b28ffc35c51d570a521daea1ce74e490",
+        "version" : "1.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}

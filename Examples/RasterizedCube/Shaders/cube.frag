@@ -9,7 +9,7 @@ layout(set = 1, binding = 0) uniform sampler2D tex;
 // binding 1 ← setFragmentBytes(index: 1)
 layout(set = 1, binding = 1) uniform FragUniforms {
     vec4 albedo;             // base colour for solid materials
-    vec4 props;              // x = mode (0 solid, 1 textured), y = shininess, z = specStrength
+    vec4 props;              // x = textureIndex (-1 = solid, >=0 = textured), y = shininess, z = specStrength
     vec4 lightPosIntensity;  // xyz = light pos,   w = intensity
     vec4 lightColorAmbient;  // xyz = light color, w = ambient
     vec4 eye;                // xyz = camera eye
@@ -26,7 +26,7 @@ void main() {
     float shininess = u.props.y;
     float specStr   = u.props.z;
 
-    vec3 albedo = (mode > 0.5) ? texture(tex, fragUV).rgb : u.albedo.rgb;
+    vec3 albedo = (mode >= 0.0) ? texture(tex, fragUV).rgb : u.albedo.rgb;
 
     vec3  N = normalize(fragNormal);
     vec3  P = fragWorldPos;
