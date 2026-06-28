@@ -1,5 +1,4 @@
 import Foundation
-import simd
 import MoltenMTL
 
 // MARK: - Render-agnostic scene model
@@ -7,72 +6,6 @@ import MoltenMTL
 // Shared by both examples so they display the identical scene. Holds everything the
 // ray tracer and the rasterizer both need: the camera, point light, GPU mesh buffers,
 // instances, and textures.
-
-// MARK: - Matrices (column-major, dependency-free)
-
-/// Column-major 4×4 matrix mirroring a GLSL `mat4` (so it uploads directly into a
-/// uniform block). Right-handed view/projection with a 0…1 depth range (Vulkan/Metal).
-public struct float4x4 {
-    public var columns: (SIMD4<Float>, SIMD4<Float>, SIMD4<Float>, SIMD4<Float>)
-
-    public init(_ c0: SIMD4<Float>, _ c1: SIMD4<Float>, _ c2: SIMD4<Float>, _ c3: SIMD4<Float>) {
-        columns = (c0, c1, c2, c3)
-    }
-
-    /// Matrix · column-vector.
-    public static func * (m: float4x4, v: SIMD4<Float>) -> SIMD4<Float> {
-        m.columns.0 * v.x + m.columns.1 * v.y + m.columns.2 * v.z + m.columns.3 * v.w
-    }
-
-    /// Matrix · matrix (each result column = self · other's column).
-    public static func * (a: float4x4, b: float4x4) -> float4x4 {
-        float4x4(a * b.columns.0, a * b.columns.1, a * b.columns.2, a * b.columns.3)
-    }
-
-    /// Right-handed look-at; camera looks down −Z in view space.
-    public static func lookAt(eye: SIMD3<Float>, target: SIMD3<Float>, up: SIMD3<Float>) -> float4x4 {
-        let f = normalize(target - eye)
-        let s = normalize(cross(f, up))
-        let u = cross(s, f)
-        return float4x4(
-            SIMD4(s.x, u.x, -f.x, 0),
-            SIMD4(s.y, u.y, -f.y, 0),
-            SIMD4(s.z, u.z, -f.z, 0),
-            SIMD4(-dot(s, eye), -dot(u, eye), dot(f, eye), 1))
-    }
-
-    /// Right-handed perspective with depth in [0, 1] (+Y up in clip; the render encoder
-    /// records a negative-height viewport so this matches Metal's convention).
-    public static func perspective(fovYDegrees: Float, aspect: Float, near: Float, far: Float) -> float4x4 {
-        let f = 1 / tan(fovYDegrees * .pi / 180 * 0.5)
-        return float4x4(
-            SIMD4(f / aspect, 0, 0, 0),
-            SIMD4(0, f, 0, 0),
-            SIMD4(0, 0, far / (near - far), -1),
-            SIMD4(0, 0, (near * far) / (near - far), 0))
-    }
-}
-
-extension MTLPackedFloat4x3 {
-    /// Identity rotation/scale with a translation.
-    public static func translation(_ t: SIMD3<Float>) -> MTLPackedFloat4x3 {
-        MTLPackedFloat4x3(
-            MTLPackedFloat3(1, 0, 0),
-            MTLPackedFloat3(0, 1, 0),
-            MTLPackedFloat3(0, 0, 1),
-            MTLPackedFloat3(t.x, t.y, t.z))
-    }
-
-    /// As a column-major model matrix (the implicit 4th row is 0,0,0,1).
-    public var modelMatrix: float4x4 {
-        let c = columns
-        return float4x4(
-            SIMD4(c.0.x, c.0.y, c.0.z, 0),
-            SIMD4(c.1.x, c.1.y, c.1.z, 0),
-            SIMD4(c.2.x, c.2.y, c.2.z, 0),
-            SIMD4(c.3.x, c.3.y, c.3.z, 1))
-    }
-}
 
 /// A perspective camera. `viewMatrix` / `projectionMatrix` drive the raster pipeline;
 /// `eye`, `target`, `up`, `fovYDegrees`, `aspect` upload directly to the ray tracer.
@@ -109,33 +42,6 @@ public struct PointLight {
         self.color = color
         self.intensity = intensity
         self.ambient = ambient
-    }
-}
-
-/// CPU-side RGBA8 image, row-major and tightly packed. Uploaded to an `MTLTexture`.
-public struct TextureData {
-    public var width: Int
-    public var height: Int
-    public var pixels: [UInt8]   // width * height * 4 bytes
-
-    public init(width: Int, height: Int, pixels: [UInt8]) {
-        self.width = width; self.height = height; self.pixels = pixels
-    }
-
-    /// A plain single-colour texture, generated procedurally so the examples need no
-    /// asset files. Still a real sampled texture — every texel is `color`.
-    public static func solid(_ color: SIMD3<Float>, size: Int = 16) -> TextureData {
-        let r = UInt8(max(0, min(255, Int(color.x * 255))))
-        let g = UInt8(max(0, min(255, Int(color.y * 255))))
-        let b = UInt8(max(0, min(255, Int(color.z * 255))))
-        var px = [UInt8](repeating: 0, count: size * size * 4)
-        for i in 0..<(size * size) {
-            px[i * 4 + 0] = r
-            px[i * 4 + 1] = g
-            px[i * 4 + 2] = b
-            px[i * 4 + 3] = 255
-        }
-        return TextureData(width: size, height: size, pixels: px)
     }
 }
 
@@ -300,36 +206,3 @@ extension Scene {
     }
 }
 
-// MARK: - Shared GPU helpers
-
-/// Creates the default device + a command queue (traps with a clear message if there's
-/// no Vulkan-capable GPU).
-public func makeDeviceAndQueue() -> (MTLDevice, MTLCommandQueue) {
-    guard let device = MTLCreateSystemDefaultDevice() else {
-        fatalError("No Vulkan-capable GPU found")
-    }
-    return (device, device.makeCommandQueue()!)
-}
-
-/// Uploads RGBA8 pixel data into a 2-D texture. The ray tracer passes
-/// `[.shaderRead, .shaderWrite]` (storage image, read via `imageLoad`); the rasterizer
-/// passes `.shaderRead` (a sampled texture).
-public func uploadTexture(_ device: MTLDevice, _ data: TextureData, usage: MTLTextureUsage) -> MTLTexture {
-    let desc = MTLTextureDescriptor.texture2DDescriptor(
-        pixelFormat: .rgba8Unorm, width: data.width, height: data.height, mipmapped: false)
-    desc.usage = usage
-    let tex = device.makeTexture(descriptor: desc)!
-    data.pixels.withUnsafeBytes {
-        tex.replace(region: .make2D(width: data.width, height: data.height),
-                    mipmapLevel: 0, withBytes: $0.baseAddress!, bytesPerRow: data.width * 4)
-    }
-    return tex
-}
-
-/// Writes tightly-packed RGB bytes (`width * height * 3`) as a binary PPM (P6) file.
-public func writePPM(_ rgb: [UInt8], width: Int, height: Int, to url: URL) throws {
-    var ppm = Data()
-    ppm.append(contentsOf: "P6\n\(width) \(height)\n255\n".utf8)
-    ppm.append(contentsOf: rgb)
-    try ppm.write(to: url)
-}
