@@ -13,7 +13,7 @@ let (device, queue) = makeDeviceAndQueue()
 let scene = Scene.demo(device)      // shared scene (camera, light, mesh buffers)
 let imageSize = 256
 
-// MARK: - Pipeline + scene data
+// MARK: - Pipeline
 
 guard let library  = device.makeLibrary(path: shaderURL.path),
       let function = library.makeFunction(name: "main") else {
@@ -25,21 +25,58 @@ let pixelCount = imageSize * imageSize
 let ouputPixelBuffer = device.makeBuffer(length: pixelCount * 4 * MemoryLayout<Float>.stride, options: .storageModeShared)!
 let outputPixelPtr = ouputPixelBuffer.contents().bindMemory(to: Float.self, capacity: pixelCount * 4)
 
+// MARK: - Scene data buffers
+
 var camera = scene.camera
-// PointLight's layout matches the shader's Light block, so upload it directly.
-var light = scene.light
+var light  = scene.light
 
 let materials = scene.instances.map { $0.material }
-let materialBuffer = device.makeBuffer(bytes: materials, length: materials.count * MemoryLayout<Material>.stride, options: .storageModeShared)!
+let materialBuffer = device.makeBuffer(bytes: materials,
+                                       length: materials.count * MemoryLayout<Material>.stride,
+                                       options: .storageModeShared)!
 
-// The shader samples a single textured instance and fetches its per-vertex UVs/normals.
-// TODO: can only texture one mesh at the moment, need to add per-mesh texture support then we can change this
-let texturedInstance = scene.instances.first { $0.material.textureIndex >= 0 }!
-let texturedMesh = scene.meshBuffers[texturedInstance.meshIndex]
-let texture = uploadTexture(device, scene.textures[Int(texturedInstance.material.textureIndex)], usage: [.shaderRead, .shaderWrite])
+// Per-instance mesh index (shader needs to know which mesh each instance references).
+let instMeshIdxData = scene.instances.map { UInt32($0.meshIndex) }
+let instMeshIdxBuffer = device.makeBuffer(bytes: instMeshIdxData,
+                                          length: instMeshIdxData.count * MemoryLayout<UInt32>.stride,
+                                          options: .storageModeShared)!
 
-// MARK: - Acceleration structures (one BLAS + instance per mesh)
-// Build one bottom-level acceleration structure (BLAS) per mesh from its triangles.
+// Pack all meshes' vertex data into single flat buffers, tracking per-mesh ranges.
+struct MeshRange { var indexStart: UInt32; var vertexStart: UInt32 }
+var allIndices:  [UInt32]        = []
+var allUVs:      [SIMD2<Float>]  = []
+var allNormals:  [SIMD4<Float>]  = []
+var meshRanges:  [MeshRange]     = []
+for mesh in scene.meshBuffers {
+    meshRanges.append(MeshRange(indexStart:  UInt32(allIndices.count),
+                                vertexStart: UInt32(allUVs.count)))
+    let ip = mesh.indices.contents().bindMemory(to: UInt32.self,       capacity: mesh.indexCount)
+    allIndices.append(contentsOf: UnsafeBufferPointer(start: ip, count: mesh.indexCount))
+    let up = mesh.uvs.contents().bindMemory(to: SIMD2<Float>.self,     capacity: mesh.vertexCount)
+    allUVs.append(contentsOf: UnsafeBufferPointer(start: up, count: mesh.vertexCount))
+    let np = mesh.normals.contents().bindMemory(to: SIMD4<Float>.self,  capacity: mesh.vertexCount)
+    allNormals.append(contentsOf: UnsafeBufferPointer(start: np, count: mesh.vertexCount))
+}
+let rangesBuffer    = device.makeBuffer(bytes: meshRanges,
+                                        length: meshRanges.count * MemoryLayout<MeshRange>.stride,
+                                        options: .storageModeShared)!
+let allIndicesBuffer = device.makeBuffer(bytes: allIndices,
+                                         length: allIndices.count * MemoryLayout<UInt32>.stride,
+                                         options: .storageModeShared)!
+let allUVsBuffer    = device.makeBuffer(bytes: allUVs,
+                                        length: allUVs.count * MemoryLayout<SIMD2<Float>>.stride,
+                                        options: .storageModeShared)!
+let allNormalsBuffer = device.makeBuffer(bytes: allNormals,
+                                         length: allNormals.count * MemoryLayout<SIMD4<Float>>.stride,
+                                         options: .storageModeShared)!
+
+// Upload all scene textures; bind as an array at binding 10.
+let sceneTextures = scene.textures.map {
+    uploadTexture(device, $0, usage: [.shaderRead, .shaderWrite])
+}
+
+// MARK: - Acceleration structures (one BLAS per unique mesh)
+
 var blasList: [MTLAccelerationStructure] = []
 for mesh in scene.meshBuffers {
     let geom = MTLAccelerationStructureTriangleGeometryDescriptor()
@@ -66,8 +103,6 @@ for mesh in scene.meshBuffers {
 }
 print("BLAS built ✓")
 
-// Build the top-level acceleration structure (TLAS): one instance per BLAS, placed by
-// its mesh's transform.
 let instances = scene.instances.map { inst -> MTLAccelerationStructureInstanceDescriptor in
     var d = MTLAccelerationStructureInstanceDescriptor()
     d.accelerationStructureIndex = UInt32(inst.meshIndex)
@@ -104,19 +139,21 @@ print("TLAS built ✓")
 let cb  = queue.makeCommandBuffer()!
 let enc = cb.makeComputeCommandEncoder()!
 enc.setComputePipelineState(pso)
-enc.setBuffer(ouputPixelBuffer, offset: 0, index: 0)        // 0 — pixels
-enc.setAccelerationStructure(tlas, bufferIndex: 1)      // 1 — TLAS
-withUnsafeBytes(of: &camera) {                          // 2 — camera
+enc.setBuffer(ouputPixelBuffer, offset: 0, index: 0)          // 0 — pixels
+enc.setAccelerationStructure(tlas, bufferIndex: 1)             // 1 — TLAS
+withUnsafeBytes(of: &camera) {                                 // 2 — camera
     enc.setBytes($0.baseAddress!, length: $0.count, index: 2)
 }
-enc.setBuffer(materialBuffer, offset: 0, index: 3)      // 3 — per-instance materials
-enc.setTexture(texture, index: 4)                       // 4 — cube texture
-enc.setBuffer(texturedMesh.indices, offset: 0, index: 5)  // 5 — cube indices
-enc.setBuffer(texturedMesh.uvs, offset: 0, index: 6)      // 6 — cube UVs
-enc.setBuffer(texturedMesh.normals, offset: 0, index: 7)  // 7 — cube normals
-withUnsafeBytes(of: &light) {                           // 8 — point light
-    enc.setBytes($0.baseAddress!, length: $0.count, index: 8)
+withUnsafeBytes(of: &light) {                                  // 3 — light
+    enc.setBytes($0.baseAddress!, length: $0.count, index: 3)
 }
+enc.setBuffer(materialBuffer,     offset: 0, index: 4)         // 4 — materials
+enc.setBuffer(instMeshIdxBuffer,  offset: 0, index: 5)         // 5 — instance mesh indices
+enc.setBuffer(rangesBuffer,       offset: 0, index: 6)         // 6 — mesh ranges
+enc.setBuffer(allIndicesBuffer,   offset: 0, index: 7)         // 7 — all indices
+enc.setBuffer(allUVsBuffer,       offset: 0, index: 8)         // 8 — all UVs
+enc.setBuffer(allNormalsBuffer,   offset: 0, index: 9)         // 9 — all normals
+enc.setTextures(sceneTextures,    index: 10)                   // 10 — texture array
 enc.dispatchThreadgroups(MTLSize(width: 32, height: 32), threadsPerThreadgroup: MTLSize(width: 8, height: 8))
 enc.endEncoding()
 cb.commit()

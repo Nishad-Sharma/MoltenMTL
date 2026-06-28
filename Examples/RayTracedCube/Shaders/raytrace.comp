@@ -3,34 +3,33 @@
 
 layout(local_size_x = 8, local_size_y = 8) in;
 
-// Binding layout (reflected from SPIR-V):
-//   binding 0 — pixel buffer (IMAGE_SIZE * IMAGE_SIZE * 4 floats, RGBA row-major)
-//   binding 1 — TLAS
-//   binding 2 — camera (eye, target, up as vec4; fovYDegrees, aspect as float)
-//   binding 3 — per-instance materials (indexed by gl_InstanceID)
-//   binding 4 — cube texture (storage image; sampled with imageLoad, nearest)
-//   binding 5 — cube triangle indices (uint[])
-//   binding 6 — cube per-vertex UVs (vec2[])
-//   binding 7 — cube per-vertex normals (vec4[], xyz)
-//   binding 8 — point light (vec4 position, vec4 color, float intensity, float ambient)
+// Binding layout:
+//   0 — pixel buffer
+//   1 — TLAS
+//   2 — camera
+//   3 — light
+//   4 — per-instance materials
+//   5 — per-instance mesh indices
+//   6 — per-mesh vertex ranges (indexStart, vertexStart)
+//   7 — all mesh indices packed
+//   8 — all mesh UVs packed
+//   9 — all mesh normals packed
+//  10 — texture array (storage images, nearest via imageLoad)
+
 layout(set = 0, binding = 0) buffer PixelBuffer { float pixels[]; };
 layout(set = 0, binding = 1) uniform accelerationStructureEXT tlas;
-layout(set = 0, binding = 4, rgba8) uniform readonly image2D cubeTex;
-layout(set = 0, binding = 5) readonly buffer CubeIndices { uint cubeIndices[]; };
-layout(set = 0, binding = 6) readonly buffer CubeUVs     { vec2 cubeUVs[]; };
-layout(set = 0, binding = 7) readonly buffer CubeNormals { vec4 cubeNormals[]; };
 
 layout(set = 0, binding = 2) readonly buffer Camera {
     vec4  eye;          // xyz used, w ignored — matches Swift SIMD3<Float> (16B)
-    vec4  target;       // xyz used, w ignored
-    vec4  up;           // xyz used, w ignored
+    vec4  target;
+    vec4  up;
     float fovYDegrees;
     float aspect;
 } cam;
 
-layout(set = 0, binding = 8) readonly buffer Light {
+layout(set = 0, binding = 3) readonly buffer Light {
     vec4  position;    // xyz used, w ignored — matches Swift SIMD3<Float> (16B)
-    vec4  color;       // xyz used, w ignored
+    vec4  color;
     float intensity;
     float ambient;
 } light;
@@ -42,10 +41,21 @@ struct Material {
     float specStrength;
     // 4B implicit padding (struct stride = 32B under std430)
 };
-layout(set = 0, binding = 3) readonly buffer Materials { Material materials[]; };
+layout(set = 0, binding = 4) readonly buffer Materials { Material materials[]; };
+
+layout(set = 0, binding = 5) readonly buffer InstMeshIdx { uint instMeshIdx[]; };
+
+struct MeshRange { uint indexStart; uint vertexStart; };
+layout(set = 0, binding = 6) readonly buffer MeshRanges { MeshRange meshRanges[]; };
+
+layout(set = 0, binding = 7) readonly buffer AllIndices { uint allIndices[]; };
+layout(set = 0, binding = 8) readonly buffer AllUVs     { vec2 allUVs[]; };
+layout(set = 0, binding = 9) readonly buffer AllNormals { vec4 allNormals[]; };
+
+const int MAX_TEXTURES = 8;
+layout(set = 0, binding = 10, rgba8) uniform readonly image2D textures[MAX_TEXTURES];
 
 const int IMAGE_SIZE = 256;
-
 
 void main() {
     uvec2 id  = gl_GlobalInvocationID.xy;
@@ -65,8 +75,7 @@ void main() {
 
     rayQueryEXT rq;
     rayQueryInitializeEXT(rq, tlas, gl_RayFlagsOpaqueEXT,
-                          0xFF,    // cull mask — test all instances
-                          eye, 0.001, dir, 100.0);
+                          0xFF, eye, 0.001, dir, 100.0);
     while (rayQueryProceedEXT(rq)) {}
 
     vec3 color = vec3(0.0);  // black background for misses
@@ -78,35 +87,37 @@ void main() {
         vec3  P      = eye + t * dir;
         uint  prim   = uint(rayQueryGetIntersectionPrimitiveIndexEXT(rq, true));
 
-        Material m         = materials[instId];
-        float    shininess = m.shininess;
-        float    specStr   = m.specStrength;
+        Material m = materials[instId];
 
-        // The textured mesh carries per-vertex attributes — interpolate its normal (and
-        // UV for the texture) across the hit triangle via barycentrics. Untextured meshes
-        // (the ground plane) are flat quads shaded with a constant +Y normal.
-        vec3 N;
+        // Look up this instance's mesh and its vertex data range.
+        uint      mesh = instMeshIdx[instId];
+        MeshRange r    = meshRanges[mesh];
+
+        uint  i0 = allIndices[r.indexStart + prim * 3u + 0u];
+        uint  i1 = allIndices[r.indexStart + prim * 3u + 1u];
+        uint  i2 = allIndices[r.indexStart + prim * 3u + 2u];
+        vec2  b  = rayQueryGetIntersectionBarycentricsEXT(rq, true);
+        float w0 = 1.0 - b.x - b.y;
+
+        // Always interpolate the normal from per-vertex data.
+        vec3 N = normalize(
+            w0 * allNormals[r.vertexStart + i0].xyz +
+            b.x * allNormals[r.vertexStart + i1].xyz +
+            b.y * allNormals[r.vertexStart + i2].xyz);
+
         vec3 albedo;
         if (m.textureIndex >= 0) {
-            uint  i0 = cubeIndices[prim * 3u + 0u];
-            uint  i1 = cubeIndices[prim * 3u + 1u];
-            uint  i2 = cubeIndices[prim * 3u + 2u];
-            vec2  b  = rayQueryGetIntersectionBarycentricsEXT(rq, true);  // weights for v1, v2
-            float w0 = 1.0 - b.x - b.y;
-
-            N = normalize(w0 * cubeNormals[i0].xyz + b.x * cubeNormals[i1].xyz + b.y * cubeNormals[i2].xyz);
-
-            // Textured: read the texture (nearest — MoltenMTL has no samplers yet).
-            vec2  uv = w0 * cubeUVs[i0] + b.x * cubeUVs[i1] + b.y * cubeUVs[i2];
-            ivec2 ts = imageSize(cubeTex);
+            vec2  uv = w0 * allUVs[r.vertexStart + i0]
+                     + b.x * allUVs[r.vertexStart + i1]
+                     + b.y * allUVs[r.vertexStart + i2];
+            ivec2 ts = imageSize(textures[m.textureIndex]);
             ivec2 tx = clamp(ivec2(uv * vec2(ts)), ivec2(0), ts - 1);
-            albedo = imageLoad(cubeTex, tx).rgb;
+            albedo = imageLoad(textures[m.textureIndex], tx).rgb;
         } else {
-            N = vec3(0.0, 1.0, 0.0);
             albedo = m.diffuseColor.xyz;
         }
 
-        // Point-light shading (Blinn-Phong). Same math a fragment shader would use.
+        // Point-light shading (Blinn-Phong).
         vec3  lightPos   = light.position.xyz;
         float intensity  = light.intensity;
         vec3  lightColor = light.color.xyz;
@@ -120,7 +131,7 @@ void main() {
 
         float atten = intensity / dist2;
         float diff  = max(dot(N, L), 0.0);
-        float spec  = (diff > 0.0) ? pow(max(dot(N, H), 0.0), shininess) * specStr : 0.0;
+        float spec  = (diff > 0.0) ? pow(max(dot(N, H), 0.0), m.shininess) * m.specStrength : 0.0;
 
         color = albedo * ambient
               + (albedo * diff + vec3(spec)) * atten * lightColor;

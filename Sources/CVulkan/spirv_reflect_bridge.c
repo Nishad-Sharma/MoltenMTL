@@ -38,6 +38,7 @@ int spv_get_descriptor_bindings(const void*   spirvData,
         outBindings[written].binding        = bindings[i]->binding;
         outBindings[written].set            = bindings[i]->set;
         outBindings[written].descriptorType = (uint32_t)bindings[i]->descriptor_type;
+        outBindings[written].count          = bindings[i]->count;
         written++;
     }
 

@@ -13,6 +13,7 @@ typedef struct {
     uint32_t binding;
     uint32_t set;
     uint32_t descriptorType;  // one of the SPV_BRIDGE_DESCRIPTOR_TYPE_* values
+    uint32_t count;           // array size; 1 for non-arrays
 } SPIRVBinding;
 
 // Reflects all descriptor bindings from SPIR-V bytecode.

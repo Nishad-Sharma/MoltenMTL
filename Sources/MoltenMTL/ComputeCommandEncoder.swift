@@ -88,16 +88,37 @@ public final class MTLComputeCommandEncoder {
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline)
 
         // Descriptor set
-        let sortedBuffers     = boundBuffers.sorted      { $0.key < $1.key }
-        let sortedAS          = boundAccelerationStructures.sorted           { $0.key < $1.key }
-        let sortedTextureSets = boundTextureSets.sorted  { $0.key < $1.key }
+        let sortedBuffers = boundBuffers.sorted              { $0.key < $1.key }
+        let sortedAS      = boundAccelerationStructures.sorted { $0.key < $1.key }
 
-        let needsDescriptors = !sortedBuffers.isEmpty || !sortedAS.isEmpty || !sortedTextureSets.isEmpty
+        // Build effective texture sets: pad each declared image binding to its layout count
+        // with a 1×1 dummy texture so all declared descriptor slots are written.
+        var effectiveTextureSets: [(key: Int, value: [MTLTexture])] = []
+        if !pso.imageBindingCounts.isEmpty {
+            let mtlDevice = commandBuffer.commandQueue.device
+            let dummyDesc = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: .rgba8Unorm, width: 1, height: 1, mipmapped: false)
+            dummyDesc.usage = [.shaderRead, .shaderWrite]
+            if let dummy = mtlDevice.makeTexture(descriptor: dummyDesc) {
+                dummy.replace(region: .make2D(width: 1, height: 1), mipmapLevel: 0,
+                              withBytes: [UInt8](repeating: 255, count: 4), bytesPerRow: 4)
+                commandBuffer.ownedTextures.append(dummy)
+                for (slot, count) in pso.imageBindingCounts.sorted(by: { $0.key < $1.key }) {
+                    let bound = boundTextureSets[slot] ?? []
+                    let padded = bound + Array(repeating: dummy, count: max(0, count - bound.count))
+                    effectiveTextureSets.append((key: slot, value: padded))
+                }
+            }
+        } else {
+            effectiveTextureSets = boundTextureSets.sorted { $0.key < $1.key }
+        }
+
+        let needsDescriptors = !sortedBuffers.isEmpty || !sortedAS.isEmpty || !effectiveTextureSets.isEmpty
         if needsDescriptors, let dsl = pso.descriptorSetLayout {
 
             // Pool
             var poolSizes: [VkDescriptorPoolSize] = []
-            if !sortedBuffers.isEmpty, let pso = pipeline {
+            if !sortedBuffers.isEmpty {
                 var ps = VkDescriptorPoolSize()
                 ps.type            = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
                 // Pool must cover all declared layout slots, not just bound ones.
@@ -110,10 +131,11 @@ public final class MTLComputeCommandEncoder {
                 ps.descriptorCount = UInt32(sortedAS.count)
                 poolSizes.append(ps)
             }
-            if !sortedTextureSets.isEmpty {
+            if !effectiveTextureSets.isEmpty {
                 var ps = VkDescriptorPoolSize()
                 ps.type            = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
-                ps.descriptorCount = UInt32(sortedTextureSets.map { $0.value.count }.reduce(0, +))
+                // Use declared counts (from layout), not bound count, to size correctly.
+                ps.descriptorCount = UInt32(effectiveTextureSets.map { $0.value.count }.reduce(0, +))
                 poolSizes.append(ps)
             }
 
@@ -197,14 +219,13 @@ public final class MTLComputeCommandEncoder {
                 }
             }
 
-            // Write storage-image descriptors
-            if !sortedTextureSets.isEmpty {
-                for (bindingIndex, textures) in sortedTextureSets {
-
+            // Write storage-image descriptors (effectiveTextureSets is already padded to declared count)
+            if !effectiveTextureSets.isEmpty {
+                for (bindingIndex, textures) in effectiveTextureSets {
                     var imageInfos: [VkDescriptorImageInfo] = textures.compactMap { tex in
                         guard let view = tex.imageView else { return nil }
                         var info = VkDescriptorImageInfo()
-                        info.sampler     = nil   // storage images don't use samplers
+                        info.sampler     = nil
                         info.imageView   = view
                         info.imageLayout = VK_IMAGE_LAYOUT_GENERAL
                         return info
@@ -235,7 +256,7 @@ public final class MTLComputeCommandEncoder {
         }
 
         // Transition storage images to GENERAL (if not already there)
-        for (_, textures) in sortedTextureSets {
+        for (_, textures) in effectiveTextureSets {
             for tex in textures {
                 guard let img = tex.image,
                       tex.currentLayout != VK_IMAGE_LAYOUT_GENERAL else { continue }

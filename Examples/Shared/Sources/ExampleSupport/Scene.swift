@@ -148,8 +148,10 @@ public struct Material {
     public var specStrength: Float
 
     public init(diffuseColor: SIMD3<Float>, textureIndex: Int32, shininess: Float, specStrength: Float) {
-        self.diffuseColor = diffuseColor; self.textureIndex = textureIndex
-        self.shininess = shininess; self.specStrength = specStrength
+        self.diffuseColor = diffuseColor
+        self.textureIndex = textureIndex
+        self.shininess = shininess
+        self.specStrength = specStrength
     }
 
     public static func solid(_ color: SIMD3<Float>, shininess: Float = 32, specStrength: Float = 0.4) -> Material {

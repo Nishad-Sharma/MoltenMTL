@@ -45,7 +45,7 @@ public extension MTLDevice {
 
         let bufSlots = (0..<numBuf).map { UInt32($0) }
         let asSlots  = (numBuf..<numBuf + numAS).map { UInt32($0) }
-        let imgSlots = (numBuf + numAS..<numBuf + numAS + numImg).map { UInt32($0) }
+        let imgSlots = (numBuf + numAS..<numBuf + numAS + numImg).map { (slot: UInt32($0), count: UInt32(1)) }
 
         let bindings = makeLayoutBindings(storageBufferSlots: bufSlots,
                                           asSlots:            asSlots,
@@ -80,7 +80,7 @@ private func reflectBindings(
 
     var storageBufferBindings: [UInt32] = []
     var asBindings:            [UInt32] = []
-    var imageBindings:         [UInt32] = []
+    var imageBindings:         [(slot: UInt32, count: UInt32)] = []
 
     for i in 0..<Int(bindingCount) {
         let b = rawBindings[i]
@@ -90,14 +90,14 @@ private func reflectBindings(
         case UInt32(SPV_BRIDGE_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR):
             asBindings.append(b.binding)
         case UInt32(SPV_BRIDGE_DESCRIPTOR_TYPE_STORAGE_IMAGE):
-            imageBindings.append(b.binding)
+            imageBindings.append((slot: b.binding, count: b.count))
         default:
             break
         }
     }
     storageBufferBindings.sort()
     asBindings.sort()
-    imageBindings.sort()
+    imageBindings.sort { $0.slot < $1.slot }
 
     let bindings = makeLayoutBindings(storageBufferSlots: storageBufferBindings,
                                       asSlots:            asBindings,
@@ -113,6 +113,12 @@ private func buildComputePipeline(
     bindings:           [VkDescriptorSetLayoutBinding],
     storageBufferCount: Int
 ) throws -> MTLComputePipelineState {
+
+    // Collect per-binding image descriptor counts for pool sizing and array padding.
+    let imageBindingCounts: [Int: Int] = Dictionary(
+        uniqueKeysWithValues: bindings
+            .filter { $0.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE }
+            .map    { (Int($0.binding), Int($0.descriptorCount)) })
 
     // Descriptor set layout
     var descriptorSetLayout: VkDescriptorSetLayout?
@@ -175,22 +181,24 @@ private func buildComputePipeline(
                                    pipelineLayout:      pipelineLayout,
                                    descriptorSetLayout: descriptorSetLayout,
                                    storageBufferCount:  storageBufferCount,
+                                   imageBindingCounts:  imageBindingCounts,
                                    vkDevice:            device)
     }
 
 private func makeLayoutBindings(storageBufferSlots: [UInt32],
                                 asSlots:            [UInt32],
-                                imageSlots:         [UInt32]) -> [VkDescriptorSetLayoutBinding] {
+                                imageSlots:         [(slot: UInt32, count: UInt32)]
+) -> [VkDescriptorSetLayoutBinding] {
     let stageFlags = UInt32(bitPattern: VK_SHADER_STAGE_COMPUTE_BIT.rawValue)
 
-    func binding(_ slot: UInt32, _ type: VkDescriptorType) -> VkDescriptorSetLayoutBinding {
+    func binding(_ slot: UInt32, _ type: VkDescriptorType, count: UInt32 = 1) -> VkDescriptorSetLayoutBinding {
         var b = VkDescriptorSetLayoutBinding()
         b.binding = slot; b.descriptorType = type
-        b.descriptorCount = 1; b.stageFlags = stageFlags
+        b.descriptorCount = count; b.stageFlags = stageFlags
         return b
     }
 
     return storageBufferSlots.map { binding($0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) }
          + asSlots.map          { binding($0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR) }
-         + imageSlots.map       { binding($0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE) }
+         + imageSlots.map       { binding($0.slot, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, count: $0.count) }
 }
