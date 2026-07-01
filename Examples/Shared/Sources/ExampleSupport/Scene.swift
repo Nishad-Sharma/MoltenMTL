@@ -83,12 +83,16 @@ public struct MeshBuffers {
 
 /// A placed, shaded occurrence of a mesh in the scene.
 public struct Instance {
+    public var modelMatrix: float4x4        // precomputed from transform; vertex shader reads this at offset 0
     public var meshIndex: Int
     public var transform: MTLPackedFloat4x3
     public var material: Material
 
     public init(meshIndex: Int, transform: MTLPackedFloat4x3, material: Material) {
-        self.meshIndex = meshIndex; self.transform = transform; self.material = material
+        self.modelMatrix = transform.modelMatrix
+        self.meshIndex   = meshIndex
+        self.transform   = transform
+        self.material    = material
     }
 }
 

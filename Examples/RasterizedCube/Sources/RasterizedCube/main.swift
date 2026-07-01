@@ -2,33 +2,6 @@ import Foundation
 import MoltenMTL
 import ExampleSupport
 
-// MARK: - GPU layouts (raster-specific: MVP + per-mesh material/light)
-
-struct VertexUniforms {
-    var viewProj: float4x4
-    var model: float4x4
-}
-struct FragUniforms {
-    var diffuseColor: SIMD4<Float>
-    var props: SIMD4<Float>             // x = useTexture (0/1), y = shininess, z = specStrength
-    var lightPosIntensity: SIMD4<Float>
-    var lightColorAmbient: SIMD4<Float>
-    var eye: SIMD4<Float>
-}
-
-/// The vertex descriptor for the render pipeline. Must match `MeshBuffers`'s buffer layout:
-/// position (buffer 0), normal (buffer 1), uv (buffer 2).
-func makeMeshVertexDescriptor() -> MTLVertexDescriptor {
-    let vd = MTLVertexDescriptor()
-    vd.attributes[0].format = .float3; vd.attributes[0].bufferIndex = 0   // position
-    vd.attributes[1].format = .float3; vd.attributes[1].bufferIndex = 1   // normal
-    vd.attributes[2].format = .float2; vd.attributes[2].bufferIndex = 2   // uv
-    vd.layouts[0].stride = MemoryLayout<MTLPackedFloat3>.stride  // 12
-    vd.layouts[1].stride = MemoryLayout<SIMD4<Float>>.stride     // 16 (normals stored as vec4)
-    vd.layouts[2].stride = MemoryLayout<SIMD2<Float>>.stride     // 8
-    return vd
-}
-
 // MARK: - Setup
 
 // cube.vert/cube.frag are compiled to SPIR-V by the CompileShaders build plugin and
@@ -53,7 +26,14 @@ guard let vertLib = device.makeLibrary(path: vertURL.path),
 let pipeDesc = MTLRenderPipelineDescriptor()
 pipeDesc.vertexFunction   = vertFn
 pipeDesc.fragmentFunction = fragFn
-pipeDesc.vertexDescriptor = makeMeshVertexDescriptor()   // matches MeshBuffers's buffer layout
+let vertexDesc = MTLVertexDescriptor()
+vertexDesc.attributes[0].format = .float3; vertexDesc.attributes[0].bufferIndex = 0   // position
+vertexDesc.attributes[1].format = .float3; vertexDesc.attributes[1].bufferIndex = 1   // normal
+vertexDesc.attributes[2].format = .float2; vertexDesc.attributes[2].bufferIndex = 2   // uv
+vertexDesc.layouts[0].stride = MemoryLayout<MTLPackedFloat3>.stride            // 12
+vertexDesc.layouts[1].stride = MemoryLayout<SIMD4<Float>>.stride              // 16 (normals stored as vec4)
+vertexDesc.layouts[2].stride = MemoryLayout<SIMD2<Float>>.stride              // 8
+pipeDesc.vertexDescriptor = vertexDesc
 pipeDesc.colorAttachments[0].pixelFormat = .rgba8Unorm
 pipeDesc.depthAttachmentPixelFormat      = .depth32Float
 let pipeline = try device.makeRenderPipelineState(descriptor: pipeDesc)
@@ -90,38 +70,28 @@ let sampler = device.makeSamplerState(descriptor: samplerDesc)!
 
 // MARK: - Draw
 
-let viewProj = scene.camera.viewProjectionMatrix
-let light = scene.light
-
-let pass = MTLRenderPassDescriptor()
-pass.colorAttachments[0].texture     = colorTexture
-pass.colorAttachments[0].loadAction  = .clear
-pass.colorAttachments[0].storeAction = .store
-pass.colorAttachments[0].clearColor  = MTLClearColorMake(0, 0, 0, 1)   // black, matching RayTracedCube
-pass.depthAttachment.texture     = depthTexture
-pass.depthAttachment.loadAction  = .clear
-pass.depthAttachment.storeAction = .dontCare
-pass.depthAttachment.clearDepth  = 1.0
+let renderPassDesc = MTLRenderPassDescriptor()
+renderPassDesc.colorAttachments[0].texture     = colorTexture
+renderPassDesc.colorAttachments[0].loadAction  = .clear
+renderPassDesc.colorAttachments[0].storeAction = .store
+renderPassDesc.colorAttachments[0].clearColor  = MTLClearColorMake(0, 0, 0, 1)   // black, matching RayTracedCube
+renderPassDesc.depthAttachment.texture     = depthTexture
+renderPassDesc.depthAttachment.loadAction  = .clear
+renderPassDesc.depthAttachment.storeAction = .dontCare
+renderPassDesc.depthAttachment.clearDepth  = 1.0
 
 let cb  = queue.makeCommandBuffer()!
-let enc = cb.makeRenderCommandEncoder(descriptor: pass)!
+let enc = cb.makeRenderCommandEncoder(descriptor: renderPassDesc)!
 enc.setRenderPipelineState(pipeline)
 enc.setDepthStencilState(depthState)
 enc.setFragmentSamplerState(sampler, index: 0)
 
 for (i, inst) in scene.instances.enumerated() {
-    let material = inst.material
-
-    var vu = VertexUniforms(viewProj: viewProj, model: inst.transform.modelMatrix)
-    withUnsafeBytes(of: &vu) { enc.setVertexBytes($0.baseAddress!, length: $0.count, index: 3) }
-
-    var fu = FragUniforms(
-        diffuseColor: SIMD4(material.diffuseColor, 0),
-        props: SIMD4(Float(material.textureIndex), material.shininess, material.specStrength, 0),
-        lightPosIntensity: SIMD4(light.position, light.intensity),
-        lightColorAmbient: SIMD4(light.color, light.ambient),
-        eye: SIMD4(scene.camera.eye, 0))
-    withUnsafeBytes(of: &fu) { enc.setFragmentBytes($0.baseAddress!, length: $0.count, index: 1) }
+    withUnsafeBytes(of: scene.camera) { enc.setVertexBytes($0.baseAddress!, length: $0.count, index: 3) }
+    withUnsafeBytes(of: inst)         { enc.setVertexBytes($0.baseAddress!, length: $0.count, index: 4) }
+    withUnsafeBytes(of: inst.material)   { enc.setFragmentBytes($0.baseAddress!, length: $0.count, index: 1) }
+    withUnsafeBytes(of: scene.light)     { enc.setFragmentBytes($0.baseAddress!, length: $0.count, index: 2) }
+    withUnsafeBytes(of: scene.camera)    { enc.setFragmentBytes($0.baseAddress!, length: $0.count, index: 3) }
 
     enc.setFragmentTexture(instanceTextures[i], index: 0)
 
@@ -136,24 +106,24 @@ enc.endEncoding()
 
 // MARK: - Readback → PPM
 
-let readback = device.makeBuffer(length: imageSize * imageSize * 4, options: .storageModeShared)!
-let blit = cb.makeBlitCommandEncoder()!
-blit.copy(from: colorTexture, sourceSlice: 0, sourceLevel: 0,
+let outputPixelBuffer = device.makeBuffer(length: imageSize * imageSize * 4, options: .storageModeShared)!
+let blitEnc = cb.makeBlitCommandEncoder()!
+blitEnc.copy(from: colorTexture, sourceSlice: 0, sourceLevel: 0,
           sourceOrigin: MTLOrigin(), sourceSize: MTLSize(width: imageSize, height: imageSize),
-          to: readback, destinationOffset: 0,
+          to: outputPixelBuffer, destinationOffset: 0,
           destinationBytesPerRow: imageSize * 4, destinationBytesPerImage: imageSize * imageSize * 4)
-blit.endEncoding()
+blitEnc.endEncoding()
 cb.commit()
 cb.waitUntilCompleted()
 print("Cube rendered ✓")
 
-let ptr = readback.contents().bindMemory(to: UInt8.self, capacity: imageSize * imageSize * 4)
-var rgb = [UInt8](repeating: 0, count: imageSize * imageSize * 3)
+let outputPixelPtr = outputPixelBuffer.contents().bindMemory(to: UInt8.self, capacity: imageSize * imageSize * 4)
+var output = [UInt8](repeating: 0, count: imageSize * imageSize * 3)
 for i in 0..<(imageSize * imageSize) {
-    rgb[i * 3 + 0] = ptr[i * 4 + 0]
-    rgb[i * 3 + 1] = ptr[i * 4 + 1]
-    rgb[i * 3 + 2] = ptr[i * 4 + 2]
+    output[i * 3 + 0] = outputPixelPtr[i * 4 + 0]
+    output[i * 3 + 1] = outputPixelPtr[i * 4 + 1]
+    output[i * 3 + 2] = outputPixelPtr[i * 4 + 2]
 }
-let outURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("output.ppm")
-try writePPM(rgb, width: imageSize, height: imageSize, to: outURL)
-print("Wrote \(outURL.path)")
+let outputFilepath = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("output.ppm")
+try writePPM(output, width: imageSize, height: imageSize, to: outputFilepath)
+print("Wrote \(outputFilepath.path)")

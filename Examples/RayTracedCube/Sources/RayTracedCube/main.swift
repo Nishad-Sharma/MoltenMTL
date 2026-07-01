@@ -162,12 +162,12 @@ print("Rays cast  ✓")
 
 // MARK: - Readback → PPM
 
-var rgb = [UInt8](repeating: 0, count: pixelCount * 3)
+var output = [UInt8](repeating: 0, count: pixelCount * 3)
 for i in 0..<pixelCount {
-    rgb[i * 3 + 0] = UInt8(min(outputPixelPtr[i * 4 + 0] * 255.0 + 0.5, 255.0))
-    rgb[i * 3 + 1] = UInt8(min(outputPixelPtr[i * 4 + 1] * 255.0 + 0.5, 255.0))
-    rgb[i * 3 + 2] = UInt8(min(outputPixelPtr[i * 4 + 2] * 255.0 + 0.5, 255.0))
+    output[i * 3 + 0] = UInt8(min(outputPixelPtr[i * 4 + 0] * 255.0 + 0.5, 255.0))
+    output[i * 3 + 1] = UInt8(min(outputPixelPtr[i * 4 + 1] * 255.0 + 0.5, 255.0))
+    output[i * 3 + 2] = UInt8(min(outputPixelPtr[i * 4 + 2] * 255.0 + 0.5, 255.0))
 }
-let outURL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("output.ppm")
-try writePPM(rgb, width: imageSize, height: imageSize, to: outURL)
-print("Wrote \(outURL.path)")
+let outputFilePath = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("output.ppm")
+try writePPM(output, width: imageSize, height: imageSize, to: outputFilePath)
+print("Wrote \(outputFilePath.path)")
