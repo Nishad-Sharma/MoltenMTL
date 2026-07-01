@@ -1,4 +1,5 @@
 internal import CVulkan
+import Foundation
 
 @discardableResult
 private func vkCheck(_ result: VkResult, _ label: String) -> Bool {
@@ -7,6 +8,19 @@ private func vkCheck(_ result: VkResult, _ label: String) -> Bool {
         return false
     }
     return true
+}
+
+private func instanceLayerAvailable(_ name: String) -> Bool {
+    var count: UInt32 = 0
+    vkEnumerateInstanceLayerProperties(&count, nil)
+    guard count > 0 else { return false }
+    var props = [VkLayerProperties](repeating: VkLayerProperties(), count: Int(count))
+    vkEnumerateInstanceLayerProperties(&count, &props)
+    return props.contains { prop in
+        withUnsafeBytes(of: prop.layerName) { bytes in
+            String(cString: bytes.bindMemory(to: CChar.self).baseAddress!) == name
+        }
+    }
 }
 
 /// Wraps the Vulkan instance, physical device, and logical device.
@@ -51,11 +65,20 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     appInfo.sType      = VK_STRUCTURE_TYPE_APPLICATION_INFO
     appInfo.apiVersion = SWIFT_VK_API_VERSION_1_4
 
+    // Validation is opt-in: the layer ships with the Vulkan SDK, not the runtime,
+    // so enabling it unconditionally would fail instance creation on end-user machines.
     let validationLayer = "VK_LAYER_KHRONOS_validation"
+    let validationRequested = ["1", "true"].contains(
+        ProcessInfo.processInfo.environment["MOLTENMTL_VALIDATION"]?.lowercased() ?? "")
+    let enableValidation = validationRequested && instanceLayerAvailable(validationLayer)
+    if validationRequested && !enableValidation {
+        print("[MoltenMTL] MOLTENMTL_VALIDATION set but \(validationLayer) is not installed — continuing without validation")
+    }
+
     var instanceResult: VkResult = VK_SUCCESS
 
     validationLayer.withCString { layerCStr in
-        let layers: [UnsafePointer<CChar>?] = [layerCStr]
+        let layers: [UnsafePointer<CChar>?] = enableValidation ? [layerCStr] : []
         // Surface extensions required for SDL3 windowing.
         var instanceExts: [UnsafePointer<CChar>?] = [
             SWIFT_EXT_KHR_SURFACE,
@@ -68,7 +91,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                     var instanceCI = VkInstanceCreateInfo()
                     instanceCI.sType                    = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
                     instanceCI.pApplicationInfo         = appPtr
-                    instanceCI.enabledLayerCount        = 1
+                    instanceCI.enabledLayerCount        = UInt32(layers.count)
                     instanceCI.ppEnabledLayerNames      = layersBuf.baseAddress
                     instanceCI.enabledExtensionCount    = instanceExtCount
                     instanceCI.ppEnabledExtensionNames  = UnsafePointer(extsBuf.baseAddress)
