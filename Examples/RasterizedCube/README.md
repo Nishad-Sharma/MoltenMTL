@@ -11,8 +11,8 @@ depth buffer, per-object draws with model/view/projection matrices, point-light
 `MTLSamplerState` (linear-filtered), rendering to an offscreen color attachment, and
 readback to the CPU — the full rasterization path through MoltenMTL.
 
-The scene lives in [`Scene.swift`](Sources/RasterizedCube/Scene.swift) — a copy of
-RayTracedCube's, with camera view/projection matrices added (the only thing raster needs
+The scene lives in [`Scene.swift`](../Shared/Sources/ExampleSupport/Scene.swift) — shared
+with RayTracedCube, plus camera view/projection matrices (the only thing raster needs
 that ray tracing didn't).
 
 <p align="center">

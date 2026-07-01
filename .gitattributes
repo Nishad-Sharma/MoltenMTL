@@ -1,0 +1,13 @@
+* text=auto
+*.swift text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.comp text eol=lf
+*.vert text eol=lf
+*.frag text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.spv binary
+*.png binary
+*.ppm binary

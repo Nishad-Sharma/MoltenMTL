@@ -10,9 +10,9 @@ sampled from a storage image, point-light (Blinn-Phong) shading, and pixel readb
 the full ray-tracing path through MoltenMTL.
 
 The scene — camera, light, geometry, and materials — is defined in
-[`Scene.swift`](Sources/RayTracedCube/Scene.swift), a render-agnostic description kept
-separate from the rendering code so the same scene can later be reused by a rasterized
-example for a side-by-side comparison.
+[`Scene.swift`](../Shared/Sources/ExampleSupport/Scene.swift), a render-agnostic
+description shared with the [RasterizedCube](../RasterizedCube) example, which renders
+the same scene through the raster pipeline for a side-by-side comparison.
 
 <p align="center">
   <img src="../../docs/raytraced-cube.png" alt="Ray-traced cube output" width="256">

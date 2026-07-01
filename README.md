@@ -1,5 +1,5 @@
 # MoltenMTL
-> ⚠️ **Work in progress.** The compute pipeline, acceleration structures (BLAS/TLAS), and ray tracing via **ray queries** are implemented. The render (vertex/fragment) pipeline is the next milestone.
+> ⚠️ **Work in progress.** The compute pipeline, ray tracing (BLAS/TLAS acceleration structures + ray queries), and the render pipeline (vertex/fragment shaders, depth/stencil, blending) are all implemented. The API surface is still growing — see [Status](#status) and [Known Limitations](#known-limitations).
 
 MoltenMTL - A Swift library that lets you write GPU code against Apple's **Metal API** - `MTLDevice`, `MTLCommandBuffer`, `MTLTexture`, etc.. - and have it compile and run on **Vulkan**. Similar to [MoltenVK](https://github.com/KhronosGroup/MoltenVK): where MoltenVK translates Vulkan into Metal on Apple hardware, MoltenMTL translates the Metal API surface into Vulkan on Windows (and hopefully eventually Linux).
 
@@ -7,39 +7,65 @@ There is **no shader translation**. Shaders are plain SPIR-V, consumed natively 
 
 <p align="center">
   <img src="docs/raytraced-cube.png" alt="Ray-traced cube rendered through MoltenMTL" width="256">
+  &nbsp;&nbsp;
+  <img src="docs/rasterized-cube.png" alt="Rasterized cube rendered through MoltenMTL" width="256">
   <br>
-  <em>A cube ray-traced on the GPU via Metal acceleration structures (BLAS/TLAS) running on Vulkan - see the <a href="Examples/RayTracedCube">RayTracedCube</a> example.</em>
+  <em>The same scene rendered two ways on Vulkan: ray-traced via Metal acceleration structures (left, <a href="Examples/RayTracedCube">RayTracedCube</a>) and rasterized through the render pipeline (right, <a href="Examples/RasterizedCube">RasterizedCube</a>).</em>
 </p>
 
 ---
 
 ## Status
 
+### Core
+
 | Feature | Status |
 |---|---|
 | `MTLDevice` / `MTLCommandQueue` | ✅ Done |
 | `MTLBuffer` (shared + private storage) | ✅ Done |
-| `MTLTexture` / `MTLTextureDescriptor` | ✅ Done |
+| `MTLTexture` / `MTLTextureDescriptor` (2D) | ✅ Done |
 | `MTLHeap` | ✅ Done |
+| `MTLBlitCommandEncoder` (copy, upload) | ✅ Done |
+| `CAMetalLayer` / `CAMetalDrawable` (swapchain) | ✅ Done |
+| Argument buffers (`MTLArgumentEncoder`) | 🚧 Stub — no-op |
+
+### Compute & Ray Tracing
+
+| Feature | Status |
+|---|---|
 | `MTLComputeCommandEncoder` | ✅ Done |
 | Acceleration structures — BLAS / TLAS | ✅ Done |
 | Ray queries (`VK_KHR_ray_query`) from compute shaders | ✅ Done |
-| `CAMetalLayer` / `CAMetalDrawable` (swapchain) | ✅ Done |
-| `MTLBlitCommandEncoder` (copy, upload) | ✅ Done |
-| Render pipeline / fragment shaders | 🚧 Planned |
-| Argument buffers (`MTLArgumentEncoder`) | 🚧 Stub — no-op |
+| Intersection function tables | ❌ Not supported (see [Known Limitations](#known-limitations)) |
+
+### Rendering (Raster)
+
+| Feature | Status |
+|---|---|
+| Render pipeline — vertex/fragment shaders, blending (`MTLRenderCommandEncoder`) | ✅ Done |
+| Vertex descriptors (`MTLVertexDescriptor`) | ✅ Done |
+| Depth / stencil (`MTLDepthStencilState`) | ✅ Done |
+| Samplers (`MTLSamplerState`) | ✅ Done |
 
 ---
 
 ## Requirements
 
-- **Windows 10/11** (64-bit) - the only tested platform for now
-- **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** ≥ 1.3 with ray-tracing extensions (`VK_KHR_acceleration_structure`, `VK_KHR_ray_query`)
+- **Windows 10/11** (64-bit) - the only tested platform for now; Linux is planned
+- **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** ≥ 1.3 with ray-tracing extensions (`VK_KHR_acceleration_structure`, `VK_KHR_ray_query`). The SDK also bundles `glslc` (in `Bin/`), which the `CompileShaders` plugin uses to build shaders — no separate install needed.
 - **Swift 6.2+** ([Swift for Windows](https://www.swift.org/install/windows/))
 - The `VULKAN_INSTALL` environment variable must point to your SDK root before building:
-  ```
+  ```bat
+  :: cmd
   set VULKAN_INSTALL=C:\VulkanSDK\1.4.341.1
   ```
+  ```powershell
+  # PowerShell
+  $env:VULKAN_INSTALL = 'C:\VulkanSDK\1.4.341.1'
+  ```
+  To set it permanently, add it under *Settings → System → About → Advanced system settings → Environment Variables*.
+
+The SDK is only needed to **build**. Running a built app requires just a Vulkan-capable GPU driver (the Vulkan runtime ships with graphics drivers).
 
 ---
 
@@ -49,6 +75,7 @@ There is **no shader translation**. Shaders are plain SPIR-V, consumed natively 
 |---|---|
 | [SimpleCompute](Examples/SimpleCompute) | Doubles a buffer of integers on the GPU - minimal end-to-end walkthrough |
 | [RayTracedCube](Examples/RayTracedCube) | Builds BLAS/TLAS acceleration structures and ray-casts a cube in a compute shader, writing the image above to a PPM file |
+| [RasterizedCube](Examples/RasterizedCube) | Renders the same scene through the raster pipeline - vertex/fragment shaders, depth buffer, texture sampling, Blinn-Phong lighting |
 
 ---
 
@@ -134,16 +161,28 @@ Each `MTL*` type wraps a Vulkan handle directly. `MTLDevice` holds a `VkDevice`,
 | `MTLTexture` | `VkImage` + `VkImageView` |
 | `MTLHeap` | `VmaPool` (sub-allocation) |
 | `MTLComputePipelineState` | `VkPipeline` + `VkPipelineLayout` + `VkDescriptorSetLayout` |
+| `MTLRenderPipelineState` | `VkPipeline` (dynamic rendering) + `VkPipelineLayout` + `VkDescriptorSetLayout` |
 | `MTLAccelerationStructure` | `VkAccelerationStructureKHR` |
 | `CAMetalLayer` / `CAMetalDrawable` | `VkSwapchainKHR` + per-image `VkSemaphore`s |
 
-Memory management uses [VMA (Vulkan Memory Allocator)](https://github.com/GPUOpen-LibraryForSDKs/VulkanMemoryAllocator). `.shared` buffers are persistently host-mapped; `.private` buffers are GPU-only (`DEVICE_LOCAL`).
+Memory management uses [VMA (Vulkan Memory Allocator)](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator). `.shared` buffers are persistently host-mapped; `.private` buffers are GPU-only (`DEVICE_LOCAL`).
+
+## Debugging
+
+Set `MOLTENMTL_VALIDATION=1` to enable the Vulkan validation layer (`VK_LAYER_KHRONOS_validation`) for API-usage diagnostics. The layer ships with the Vulkan SDK, so this is a development-machine feature; it is off by default and skipped gracefully when not installed.
 
 ## Known Limitations
 
 - **Windows only** for now. Linux support is planned but untested.
-- **Compute only.** The render pipeline (vertex/fragment shaders, render passes, render command encoders) is not yet implemented.
+- **Render pipeline gaps:** a single color attachment (no MRT), `.triangle` primitives only, and 2D textures only (no 3D, cube, or array textures). Mipmap generation and texture→texture copies in the blit encoder are not implemented yet.
+- **No `commit()` completion handlers.** Use `waitUntilCompleted()` to synchronize with the GPU.
 - **Ray tracing is ray queries only** (inline ray tracing in compute shaders, via `VK_KHR_ray_query`). The Vulkan ray-tracing pipeline (`VK_KHR_ray_tracing_pipeline` - raygen/hit/miss stages, shader binding tables) and Metal intersection function tables are not supported. This matches Metal's own model, where rays are traced by calling `intersect()` from compute shaders.
 - **`MTLArgumentEncoder`** methods are no-ops. Vulkan uses descriptor sets for resource binding rather than argument buffers. The type exists for Metal source-level compatibility.
 - **`storageMode` on textures** has no effect on allocation. Vulkan images always reside in device-local memory. The property exists for API parity with `MTLTextureDescriptor`.
 - **`useResource(_:usage:)` and `useHeap(_:)`** are no-ops. Vulkan manages residency automatically through descriptor bindings.
+
+## Acknowledgments
+
+- [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) (MIT) — all buffer/texture/heap memory management
+- [SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect) (Apache-2.0) — automatic descriptor-layout reflection from SPIR-V; both are compiled from the Vulkan SDK's bundled sources
+- [kvSIMD.swift](https://github.com/keyvariable/kvSIMD.swift) — `simd`-compatible vector/matrix types used by the examples
