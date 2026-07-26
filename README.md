@@ -1,9 +1,11 @@
 # MoltenMTL
 > ⚠️ **Work in progress.** The compute pipeline, ray tracing (BLAS/TLAS acceleration structures + ray queries), and the render pipeline (vertex/fragment shaders, depth/stencil, blending) are all implemented. The API surface is still growing — see [Status](#status) and [Known Limitations](#known-limitations).
 
-MoltenMTL - A Swift library that lets you write GPU code against Apple's **Metal API** - `MTLDevice`, `MTLCommandBuffer`, `MTLTexture`, etc.. - and have it compile and run on **Vulkan**. Similar to [MoltenVK](https://github.com/KhronosGroup/MoltenVK): where MoltenVK translates Vulkan into Metal on Apple hardware, MoltenMTL translates the Metal API surface into Vulkan on Windows (and hopefully eventually Linux).
+MoltenMTL - A Swift library that lets you write GPU code against Apple's **Metal API** - `MTLDevice`, `MTLCommandBuffer`, `MTLTexture`, etc.. - and have it compile and run on **Vulkan**. Similar to [MoltenVK](https://github.com/KhronosGroup/MoltenVK): where MoltenVK translates Vulkan into Metal, MoltenMTL translates the Metal API surface into Vulkan on Windows (and hopefully eventually Linux).
 
 There is **no shader translation**. Shaders are plain SPIR-V, consumed natively by Vulkan. The `MTL*` wrappers are thin Swift classes that hold Vulkan handles directly, so the runtime overhead of using this library over raw Vulkan is negligible.
+
+For a worked example of crisp, scalable UI text on top of MoltenMTL — pre-baked MSDF font atlases, one atlas per font serving every render size — see [SDFTextSimple](Examples/SDFTextSimple).
 
 <p align="center">
   <img src="docs/raytraced-cube.png" alt="Ray-traced cube rendered through MoltenMTL" width="256">
@@ -46,13 +48,14 @@ There is **no shader translation**. Shaders are plain SPIR-V, consumed natively 
 | Vertex descriptors (`MTLVertexDescriptor`) | ✅ Done |
 | Depth / stencil (`MTLDepthStencilState`) | ✅ Done |
 | Samplers (`MTLSamplerState`) | ✅ Done |
+| Instanced draws (`instanceCount` on draw calls) | ✅ Done |
 
 ---
 
 ## Requirements
 
 - **Windows 10/11** (64-bit) - the only tested platform for now; Linux is planned
-- **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** ≥ 1.3 with ray-tracing extensions (`VK_KHR_acceleration_structure`, `VK_KHR_ray_query`). The SDK also bundles `glslc` (in `Bin/`), which the `CompileShaders` plugin uses to build shaders — no separate install needed.
+- **[Vulkan SDK](https://vulkan.lunarg.com/sdk/home)** ≥ 1.3 with ray-tracing extensions (`VK_KHR_acceleration_structure`, `VK_KHR_ray_query`). The SDK also bundles `glslc` (in `Bin/`), which the `CompileShaders` plugin uses to build shaders — no separate install needed. When installing, also tick the **SPIRV-Reflect source** component (the build compiles SPIRV-Reflect from `<SDK>/Source/SPIRV-Reflect`; a default install omits it and the build fails with a missing-header error).
 - **Swift 6.2+** ([Swift for Windows](https://www.swift.org/install/windows/))
 - The `VULKAN_INSTALL` environment variable must point to your SDK root before building:
   ```bat
@@ -69,6 +72,26 @@ The SDK is only needed to **build**. Running a built app requires just a Vulkan-
 
 ---
 
+## Building & Testing
+
+With the [Requirements](#requirements) in place (`VULKAN_INSTALL` set), build and test from the repo root:
+
+```powershell
+swift build
+swift test
+```
+
+The test suite covers device/queue creation, buffer allocation, an end-to-end compute dispatch with CPU readback, BLAS/TLAS size queries, and offscreen render-and-readback assertions for depth testing and stencil masking. Tests require a Vulkan-capable GPU; on a machine without one (e.g. headless CI) the whole suite skips cleanly instead of failing.
+
+Each example is its own package — run one with:
+
+```powershell
+cd Examples/SDFTextSimple
+swift run
+```
+
+---
+
 ## Examples
 
 | Example | Description |
@@ -76,6 +99,7 @@ The SDK is only needed to **build**. Running a built app requires just a Vulkan-
 | [SimpleCompute](Examples/SimpleCompute) | Doubles a buffer of integers on the GPU - minimal end-to-end walkthrough |
 | [RayTracedCube](Examples/RayTracedCube) | Builds BLAS/TLAS acceleration structures and ray-casts a cube in a compute shader, writing the image above to a PPM file |
 | [RasterizedCube](Examples/RasterizedCube) | Renders the same scene through the raster pipeline - vertex/fragment shaders, depth buffer, texture sampling, Blinn-Phong lighting |
+| [SDFTextSimple](Examples/SDFTextSimple) | Anti-aliased MSDF text - two fonts at five sizes from one atlas each, single-file walkthrough of the CPU/GPU division of labor |
 
 ---
 
@@ -169,7 +193,7 @@ Memory management uses [VMA (Vulkan Memory Allocator)](https://github.com/GPUOpe
 
 ## Debugging
 
-Set `MOLTENMTL_VALIDATION=1` to enable the Vulkan validation layer (`VK_LAYER_KHRONOS_validation`) for API-usage diagnostics. The layer ships with the Vulkan SDK, so this is a development-machine feature; it is off by default and skipped gracefully when not installed.
+Set `MOLTENMTL_VALIDATION=1` to enable the Vulkan validation layer (`VK_LAYER_KHRONOS_validation`) for API-usage diagnostics. The layer ships with the Vulkan SDK. It is off by default and skipped gracefully when not installed.
 
 ## Known Limitations
 

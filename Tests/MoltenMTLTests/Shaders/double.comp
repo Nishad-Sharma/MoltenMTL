@@ -1,0 +1,13 @@
+#version 450
+// Compute kernel for computeDispatchDoublesBuffer: multiplies each element of
+// the binding-0 buffer by two.
+// Compile: glslc double.comp -o ../Resources/double.spv
+
+layout(local_size_x = 64) in;
+
+layout(set = 0, binding = 0) buffer DataBuffer { uint data[]; };
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    data[idx] = data[idx] * 2u;
+}

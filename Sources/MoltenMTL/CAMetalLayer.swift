@@ -33,7 +33,7 @@ public final class CAMetalLayer {
         vkGetPhysicalDeviceSurfaceSupportKHR(physDev, device.computeQueueFamily,
                                               surface, &presentSupported)
         if presentSupported == 0 {
-            print("[CAMetalLayer] queue family \(device.computeQueueFamily) does not support presentation — swapchain will likely fail")
+            print("[MoltenMTL] queue family \(device.computeQueueFamily) does not support presentation — swapchain will likely fail")
         }
 
         var caps = VkSurfaceCapabilitiesKHR()
@@ -82,11 +82,11 @@ public final class CAMetalLayer {
             sci.clipped = VK_TRUE
             let scResult = vkCreateSwapchainKHR(dev, &sci, nil, &sc)
             if scResult != VK_SUCCESS {
-                print("[CAMetalLayer] vkCreateSwapchainKHR failed (VkResult \(scResult.rawValue))")
+                print("[MoltenMTL] vkCreateSwapchainKHR failed (VkResult \(scResult.rawValue))")
             }
         }
         guard let swapchain = sc else {
-            print("[CAMetalLayer] vkCreateSwapchainKHR returned null handle")
+            print("[MoltenMTL] vkCreateSwapchainKHR returned null handle")
             return nil
         }
 
@@ -103,7 +103,7 @@ public final class CAMetalLayer {
         vkCreateSemaphore(dev, &semCI, nil, &imgSem)
         guard let imageAvailableSemaphore = imgSem else {
             vkDestroySwapchainKHR(dev, swapchain, nil)
-            print("[CAMetalLayer] vkCreateSemaphore (acquire) failed")
+            print("[MoltenMTL] vkCreateSemaphore (acquire) failed")
             return nil
         }
 
@@ -117,13 +117,13 @@ public final class CAMetalLayer {
                 renderFinishedSemaphores.forEach { vkDestroySemaphore(dev, $0, nil) }
                 vkDestroySemaphore(dev, imageAvailableSemaphore, nil)
                 vkDestroySwapchainKHR(dev, swapchain, nil)
-                print("[CAMetalLayer] vkCreateSemaphore (render) failed")
+                print("[MoltenMTL] vkCreateSemaphore (render) failed")
                 return nil
             }
             renderFinishedSemaphores.append(sem)
         }
 
-        print("[CAMetalLayer] \(count) images, \(isBGRA ? "BGRA" : "RGBA"), \(scW)×\(scH)")
+        print("[MoltenMTL] swapchain created: \(count) images, \(isBGRA ? "BGRA" : "RGBA"), \(scW)×\(scH)")
 
         self.vkDev = dev
         self.swapchain = swapchain
@@ -138,7 +138,7 @@ public final class CAMetalLayer {
         let result = vkAcquireNextImageKHR(vkDev, swapchain, UInt64.max, imageAvailableSemaphore, nil, &idx)
         guard result == VK_SUCCESS || result.rawValue == 1_000_001_003 /* VK_SUBOPTIMAL_KHR */
         else {
-            print("[CAMetalLayer] vkAcquireNextImageKHR failed (\(result.rawValue))")
+            print("[MoltenMTL] vkAcquireNextImageKHR failed (\(result.rawValue))")
             return nil
         }
         return CAMetalDrawable(

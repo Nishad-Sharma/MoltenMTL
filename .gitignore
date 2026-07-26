@@ -1,5 +1,15 @@
-.envrc
+# Build products
 .build/
-*.ppm
+*.exe
+*.pdb
 Examples/*/Shaders/*.spv
+
+# Local environment
+.envrc
 .claude
+
+# Example output & editor/OS files
+*.ppm
+.vscode/
+.idea/
+.DS_Store

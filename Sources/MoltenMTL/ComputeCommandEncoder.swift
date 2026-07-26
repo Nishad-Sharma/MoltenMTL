@@ -31,7 +31,7 @@ public final class MTLComputeCommandEncoder {
         if let buffer = buffer {
             boundBuffers[index] = (buffer: buffer, offset: offset)
         } else {
-            print("Error: Attempting to set nil buffer for index \(index)")
+            print("[MoltenMTL] setBuffer: nil buffer for index \(index) — binding unchanged")
         }
     }
 
