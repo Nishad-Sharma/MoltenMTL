@@ -246,10 +246,13 @@ public final class MTLRenderCommandEncoder {
         vkCmdSetScissor(commandBuffer.handle, 0, 1, &vk)
     }
 
-    /// Encodes a non-indexed draw.
-    public func drawPrimitives(type: MTLPrimitiveType, vertexStart: Int, vertexCount: Int) {
+    /// Encodes a non-indexed draw. `instanceCount > 1` draws the same vertices that
+    /// many times with `gl_InstanceIndex` distinguishing the instances.
+    public func drawPrimitives(type: MTLPrimitiveType, vertexStart: Int, vertexCount: Int,
+                               instanceCount: Int = 1) {
         guard prepareDraw(type: type) else { return }
-        vkCmdDraw(commandBuffer.handle, UInt32(vertexCount), 1, UInt32(vertexStart), 0)
+        vkCmdDraw(commandBuffer.handle, UInt32(vertexCount), UInt32(instanceCount),
+                  UInt32(vertexStart), 0)
     }
 
     /// Encodes an indexed draw reading indices from `indexBuffer`.
@@ -257,13 +260,14 @@ public final class MTLRenderCommandEncoder {
                                       indexCount: Int,
                                       indexType: MTLIndexType,
                                       indexBuffer: MTLBuffer,
-                                      indexBufferOffset: Int = 0) {
+                                      indexBufferOffset: Int = 0,
+                                      instanceCount: Int = 1) {
         guard prepareDraw(type: type) else { return }
         let vkIndexType = indexType == .uint16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32
         vkCmdBindIndexBuffer(commandBuffer.handle, indexBuffer.handle,
                              VkDeviceSize(indexBufferOffset), vkIndexType)
         commandBuffer.ownedBuffers.append(indexBuffer)
-        vkCmdDrawIndexed(commandBuffer.handle, UInt32(indexCount), 1, 0, 0, 0)
+        vkCmdDrawIndexed(commandBuffer.handle, UInt32(indexCount), UInt32(instanceCount), 0, 0, 0)
     }
 
     /// Ends the render pass. Bound buffers/textures/samplers were already handed
