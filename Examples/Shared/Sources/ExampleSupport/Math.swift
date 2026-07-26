@@ -68,6 +68,15 @@ extension MTLPackedFloat4x3 {
     }
 }
 
+// MARK: - Color
+
+public func srgbToLinear(_ c: SIMD4<Float>) -> SIMD4<Float> {
+    func lin(_ v: Float) -> Float {
+        v <= 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)
+    }
+    return SIMD4(lin(c.x), lin(c.y), lin(c.z), c.w)
+}
+
 // MARK: - Private SIMD3 helpers (avoid importing simd to prevent float4x4 typealias conflict)
 
 private func simd3Dot(_ a: SIMD3<Float>, _ b: SIMD3<Float>) -> Float {
