@@ -3,16 +3,14 @@
 
 MoltenMTL - A Swift library that lets you write GPU code against Apple's **Metal API** - `MTLDevice`, `MTLCommandBuffer`, `MTLTexture`, etc.. - and have it compile and run on **Vulkan**. Similar to [MoltenVK](https://github.com/KhronosGroup/MoltenVK): where MoltenVK translates Vulkan into Metal, MoltenMTL translates the Metal API surface into Vulkan on Windows (and hopefully eventually Linux).
 
-There is **no shader translation**. Shaders are plain SPIR-V, consumed natively by Vulkan. The `MTL*` wrappers are thin Swift classes that hold Vulkan handles directly, so the runtime overhead of using this library over raw Vulkan is negligible.
-
-For a worked example of crisp, scalable UI text on top of MoltenMTL — pre-baked MSDF font atlases, one atlas per font serving every render size — see [SDFTextSimple](Examples/SDFTextSimple).
+There is **no shader translation**. Shaders are plain SPIR-V, consumed natively by Vulkan. The `MTL*` wrappers are thin Swift classes that hold Vulkan handles directly.
 
 <p align="center">
   <img src="docs/raytraced-cube.png" alt="Ray-traced cube rendered through MoltenMTL" width="256">
   &nbsp;&nbsp;
   <img src="docs/rasterized-cube.png" alt="Rasterized cube rendered through MoltenMTL" width="256">
   <br>
-  <em>The same scene rendered two ways on Vulkan: ray-traced via Metal acceleration structures (left, <a href="Examples/RayTracedCube">RayTracedCube</a>) and rasterized through the render pipeline (right, <a href="Examples/RasterizedCube">RasterizedCube</a>).</em>
+  <em>The same scene rendered two ways: ray-traced via Metal acceleration structures (left, <a href="Examples/RayTracedCube">RayTracedCube</a>) and rasterized through the render pipeline (right, <a href="Examples/RasterizedCube">RasterizedCube</a>).</em>
 </p>
 
 ---
