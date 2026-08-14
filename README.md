@@ -1,7 +1,7 @@
 # MoltenMTL
 > ⚠️ **Work in progress.** The compute pipeline, ray tracing (BLAS/TLAS acceleration structures + ray queries), and the render pipeline (vertex/fragment shaders, depth/stencil, blending) are all implemented. The API surface is still growing — see [Status](#status) and [Known Limitations](#known-limitations).
 
-MoltenMTL - A Swift library that lets you write GPU code against Apple's **Metal API** - `MTLDevice`, `MTLCommandBuffer`, `MTLTexture`, etc.. - and have it compile and run on **Vulkan**. Similar to [MoltenVK](https://github.com/KhronosGroup/MoltenVK): where MoltenVK translates Vulkan into Metal, MoltenMTL translates the Metal API surface into Vulkan on Windows (and hopefully eventually Linux).
+MoltenMTL - a cross platform API that allows you to use the Metal API on windows (plans for linux) with spirv shaders
 
 There is **no shader translation**. Shaders are plain SPIR-V, consumed natively by Vulkan. The `MTL*` wrappers are thin Swift classes that hold Vulkan handles directly.
 
