@@ -5,8 +5,9 @@
 /// binding slots are assigned sequentially:
 /// ```
 /// storage buffers:         0 ..< storageBufferCount
-/// acceleration structures: storageBufferCount ..< storageBufferCount + accelerationStructureCount
-/// storage images:          storageBufferCount + accelerationStructureCount ..< total
+/// acceleration structures: storageBufferCount ..< +accelerationStructureCount
+/// storage images:          then ..< +storageImageCount
+/// sampled images:          then ..< +sampledImageCount
 /// ```
 public final class MTLComputePipelineDescriptor {
 
@@ -18,8 +19,11 @@ public final class MTLComputePipelineDescriptor {
     /// Number of acceleration-structure bindings declared in the shader.
     public var accelerationStructureCount: Int = 0
 
-    /// Number of storage-image bindings declared in the shader.
+    /// Number of storage-image bindings declared in the shader (GLSL `image2D`).
     public var storageImageCount: Int = 0
+
+    /// Number of combined-image-sampler bindings declared in the shader.
+    public var sampledImageCount: Int = 0
 
     public init() {}
 }

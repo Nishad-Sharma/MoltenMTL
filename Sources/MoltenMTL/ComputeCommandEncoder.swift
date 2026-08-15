@@ -29,11 +29,12 @@ public final class MTLComputeCommandEncoder {
     /// Mirrors `MTLComputeCommandEncoder.setBuffer(_:offset:index:)`.
     /// Binds `buffer` to the storage-buffer descriptor slot at `index`.
     public func setBuffer(_ buffer: MTLBuffer?, offset: Int = 0, index: Int) {
-        if let buffer = buffer {
-            boundBuffers[index] = (buffer: buffer, offset: offset)
-        } else {
-            print("[MoltenMTL] setBuffer: nil buffer for index \(index) — binding unchanged")
+        guard let buffer = buffer else {
+            print("[MoltenMTL] setBuffer: nil buffer for index \(index) - binding unchanged"); return
         }
+        boundBuffers[index] = (buffer: buffer, offset: offset)
+        // retain while command buffer is recording or in flight.
+        commandBuffer.ownedBuffers.append(buffer)
     }
 
     /// Binds an array of textures to the image slot at `index`.
@@ -42,6 +43,7 @@ public final class MTLComputeCommandEncoder {
     ///   descriptor array at one binding, matching `uniform sampler2D tex[N]` in GLSL.
     public func setTextures(_ textures: [MTLTexture], index: Int) {
         boundTextureSets[index] = textures
+        commandBuffer.ownedTextures.append(contentsOf: textures)   // see setBuffer
     }
 
     /// Binds a single texture to the image slot at `index`.
@@ -50,15 +52,19 @@ public final class MTLComputeCommandEncoder {
     }
 
     /// Sets the sampler used for the combined-image-sampler slot at `index`.
-    /// Optional: slots with no sampler bound use `device.defaultSampler`
+    /// Passing `nil` clears the slot, returning it to `device.defaultSampler`.
     public func setSamplerState(_ sampler: MTLSamplerState?, index: Int) {
-        if let sampler = sampler { boundSamplers[index] = sampler }
+        boundSamplers[index] = sampler
+        if let sampler = sampler {
+            commandBuffer.ownedSamplers.append(sampler)            // see setBuffer
+        }
     }
 
     /// Binds `accelerationStructure` to the AS descriptor slot at `bufferIndex`.
     public func setAccelerationStructure(_ accelerationStructure: MTLAccelerationStructure,
                                          bufferIndex: Int) {
         boundAccelerationStructures[bufferIndex] = accelerationStructure
+        commandBuffer.ownedAccelerationStructures.append(accelerationStructure)  // see setBuffer
     }
 
     /// Convenience for small per-dispatch constants: copies bytes into a transient shared buffer and binds it.
@@ -391,24 +397,10 @@ public final class MTLComputeCommandEncoder {
                       UInt32(threadgroupsPerGrid.depth))
     }
 
-    /// Ends encoding and transfers ownership of bound resources to the parent `MTLCommandBuffer`
-    /// so they remain alive until the GPU has finished execution.
+    /// Ends encoding and clears all bindings. Bound resources are already owned by the
+    /// parent `MTLCommandBuffer`, which keeps them alive until the GPU has finished.
     public func endEncoding() {
         isEnded = true
-        // Transfer all bound resources to the command buffer so their Vulkan
-        // handles remain valid through GPU completion.
-        for (_, binding) in boundBuffers {
-            commandBuffer.ownedBuffers.append(binding.buffer)
-        }
-        for (_, as_) in boundAccelerationStructures {
-            commandBuffer.ownedAccelerationStructures.append(as_)
-        }
-        for (_, textures) in boundTextureSets {
-            commandBuffer.ownedTextures.append(contentsOf: textures)
-        }
-        for (_, sampler) in boundSamplers {
-            commandBuffer.ownedSamplers.append(sampler)
-        }
         boundBuffers.removeAll()
         boundAccelerationStructures.removeAll()
         boundTextureSets.removeAll()

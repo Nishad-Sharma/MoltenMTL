@@ -27,8 +27,9 @@ public extension MTLDevice {
     }
 
     /// Creates a compute pipeline using explicit binding counts from `descriptor`.
-    /// Binding slots are assigned sequentially: storage buffers first, then acceleration structures,
-    /// then storage images — these must match the `layout(binding=N)` declarations in your SPIR-V shader.
+    /// Binding slots are assigned sequentially: storage buffers, acceleration structures,
+    /// storage images, then combined image samplers — these must match the
+    /// `layout(binding=N)` declarations in your SPIR-V shader.
     /// - Throws: `MTLComputePipelineError` if the function is missing or pipeline creation fails.
     func makeComputePipelineState(descriptor: MTLComputePipelineDescriptor) throws -> MTLComputePipelineState {
         guard let function = descriptor.computeFunction else {
@@ -39,18 +40,23 @@ public extension MTLDevice {
             throw MTLComputePipelineError(message: "Failed to create compute pipeline state")
         }
 
-        let numBuf = descriptor.storageBufferCount
-        let numAS  = descriptor.accelerationStructureCount
-        let numImg = descriptor.storageImageCount
+        let numBuf     = descriptor.storageBufferCount
+        let numAS      = descriptor.accelerationStructureCount
+        let numImg     = descriptor.storageImageCount
+        let numSampled = descriptor.sampledImageCount
 
-        let bufSlots = (0..<numBuf).map { UInt32($0) }
-        let asSlots  = (numBuf..<numBuf + numAS).map { UInt32($0) }
-        let imgSlots = (numBuf + numAS..<numBuf + numAS + numImg).map { (slot: UInt32($0), count: UInt32(1)) }
+        let imgFirst     = numBuf + numAS
+        let sampledFirst = imgFirst + numImg
+
+        let bufSlots     = (0..<numBuf).map { UInt32($0) }
+        let asSlots      = (numBuf..<imgFirst).map { UInt32($0) }
+        let imgSlots     = (imgFirst..<sampledFirst).map { (slot: UInt32($0), count: UInt32(1)) }
+        let sampledSlots = (sampledFirst..<sampledFirst + numSampled).map { (slot: UInt32($0), count: UInt32(1)) }
 
         let bindings = makeLayoutBindings(storageBufferSlots: bufSlots,
                                           asSlots:            asSlots,
                                           imageSlots:         imgSlots,
-                                          sampledSlots:       [])
+                                          sampledSlots:       sampledSlots)
         return try buildComputePipeline(device:             vkDev,
                                         shaderModule:       shaderMod,
                                         functionName:       function.name,

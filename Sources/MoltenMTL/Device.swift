@@ -44,7 +44,7 @@ public final class MTLDevice {
     init() {}
 
     deinit {
-        // Shared resources first destroyed first, so they don't 
+        // Shared resources first destroyed first, so they don't
         // try to use the device after it's gone.
         _defaultSampler = nil
         _dummyTextures.removeAll()
