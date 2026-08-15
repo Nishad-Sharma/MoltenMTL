@@ -230,8 +230,10 @@ func sourceScope(leaving layout: VkImageLayout) -> (access: UInt32, stage: UInt3
         return (mask(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT),
                 stage(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
     case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        // Depth writes retire in both fragment-test stages, not just the late one.
         return (mask(VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT),
-                stage(VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT))
+                stage(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT)
+              | stage(VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT))
     default:
         // GENERAL, SHADER_READ_ONLY_OPTIMAL, PRESENT_SRC and friends: the image
         // may hold writes from any earlier stage, so wait on all of them.

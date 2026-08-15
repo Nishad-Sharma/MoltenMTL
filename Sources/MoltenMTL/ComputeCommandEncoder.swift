@@ -108,9 +108,12 @@ public final class MTLComputeCommandEncoder {
         let mtlDevice = commandBuffer.commandQueue.device
 
         // Resize to exactly the declared count - surplus binds are dropped and short ones padded.
+        // Returns nil when a slot cannot be filled: the caller must not dispatch, since
+        // the shader would read a descriptor nothing wrote.
         func resizeToDeclared(_ counts: [Int: Int], kind: String,
-                              dummy: MTLTexture?) -> [(key: Int, value: [MTLTexture])] {
-            counts.sorted { $0.key < $1.key }.compactMap { slot, count in
+                              dummy: MTLTexture?) -> [(key: Int, value: [MTLTexture])]? {
+            var resized: [(key: Int, value: [MTLTexture])] = []
+            for (slot, count) in counts.sorted(by: { $0.key < $1.key }) {
                 var textures = self.boundTextureSets[slot] ?? []
                 if textures.count > count {
                     print("[MoltenMTL] dispatchThreadgroups: \(textures.count) textures bound at \(kind) binding \(slot), which declares \(count) — ignoring the surplus")
@@ -123,8 +126,9 @@ public final class MTLComputeCommandEncoder {
                     }
                     textures += Array(repeating: dummy, count: count - textures.count)
                 }
-                return (key: slot, value: textures)
+                resized.append((key: slot, value: textures))
             }
+            return resized
         }
 
         let storageDummy = pso.imageBindingCounts.isEmpty
@@ -138,10 +142,13 @@ public final class MTLComputeCommandEncoder {
         if pso.imageBindingCounts.isEmpty && pso.sampledImageBindingCounts.isEmpty {
             effectiveTextureSets = boundTextureSets.sorted { $0.key < $1.key }
         } else {
-            effectiveTextureSets = resizeToDeclared(pso.imageBindingCounts,
-                                                    kind: "storage-image", dummy: storageDummy)
-            effectiveSampledSets = resizeToDeclared(pso.sampledImageBindingCounts,
-                                                    kind: "sampled-image", dummy: sampledDummy)
+            guard let storageSets = resizeToDeclared(pso.imageBindingCounts,
+                                                     kind: "storage-image", dummy: storageDummy),
+                  let sampledSets = resizeToDeclared(pso.sampledImageBindingCounts,
+                                                     kind: "sampled-image", dummy: sampledDummy)
+            else { return }
+            effectiveTextureSets = storageSets
+            effectiveSampledSets = sampledSets
         }
 
         // A texture bound as both a storage image and a sampled image in the same
@@ -266,19 +273,20 @@ public final class MTLComputeCommandEncoder {
             }
 
             /// Writes one binding's whole descriptor array in a single update.
+            /// Returns false when the array could not be completed.
             ///
             /// Every element must be written: dropping a view-less texture would
             /// shift later textures into earlier slots and leave the tail
             /// uninitialised, so such a texture falls back to `dummy`'s view.
             func writeImageArray(_ textures: [MTLTexture], binding: Int,
                                  type: VkDescriptorType, layout: (MTLTexture) -> VkImageLayout,
-                                 sampler: VkSampler?, dummy: MTLTexture?) {
+                                 sampler: VkSampler?, dummy: MTLTexture?) -> Bool {
                 var imageInfos: [VkDescriptorImageInfo] = []
                 imageInfos.reserveCapacity(textures.count)
                 for tex in textures {
                     guard let view = tex.imageView ?? dummy?.imageView else {
                         print("[MoltenMTL] dispatchThreadgroups: no image view for binding \(binding) - descriptor array left incomplete")
-                        return
+                        return false
                     }
                     if tex.imageView == nil {
                         print("[MoltenMTL] dispatchThreadgroups: texture at binding \(binding) has no image view - substituting the dummy texture")
@@ -289,7 +297,7 @@ public final class MTLComputeCommandEncoder {
                     info.imageLayout = layout(tex)
                     imageInfos.append(info)
                 }
-                guard !imageInfos.isEmpty else { return }
+                guard !imageInfos.isEmpty else { return true }
 
                 let imageCount = imageInfos.count
                 imageInfos.withUnsafeMutableBufferPointer { infosPtr in
@@ -303,14 +311,16 @@ public final class MTLComputeCommandEncoder {
                     w.pImageInfo      = UnsafePointer(infosPtr.baseAddress)
                     vkUpdateDescriptorSets(dev, 1, &w, 0, nil)
                 }
+                return true
             }
 
             // Write storage-image descriptors
             for (bindingIndex, textures) in effectiveTextureSets {
-                writeImageArray(textures, binding: bindingIndex,
-                                type:    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                layout:  { _ in VK_IMAGE_LAYOUT_GENERAL },
-                                sampler: nil, dummy: storageDummy)
+                guard writeImageArray(textures, binding: bindingIndex,
+                                      type:    VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                      layout:  { _ in VK_IMAGE_LAYOUT_GENERAL },
+                                      sampler: nil, dummy: storageDummy)
+                else { return }
             }
 
             // Write combined-image-sampler descriptors.
@@ -323,12 +333,13 @@ public final class MTLComputeCommandEncoder {
                     slotSampler = mtlDevice.defaultSampler
                 }
                 guard let vkSampler = slotSampler?.sampler else {
-                    print("[MoltenMTL] dispatchThreadgroups: no sampler available for binding \(bindingIndex)"); continue
+                    print("[MoltenMTL] dispatchThreadgroups: no sampler available for binding \(bindingIndex)"); return
                 }
-                writeImageArray(textures, binding: bindingIndex,
-                                type:    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                layout:  sampledLayout(for:),
-                                sampler: vkSampler, dummy: sampledDummy)
+                guard writeImageArray(textures, binding: bindingIndex,
+                                      type:    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                      layout:  sampledLayout(for:),
+                                      sampler: vkSampler, dummy: sampledDummy)
+                else { return }
             }
 
             // Bind descriptor set
@@ -339,8 +350,14 @@ public final class MTLComputeCommandEncoder {
             }
         }
 
-        func transition(_ tex: MTLTexture, to target: VkImageLayout, dstAccess: UInt32) {
-            guard let img = tex.image, tex.currentLayout != target else { return }
+        /// `force` emits the barrier even when the layout already matches. A barrier
+        /// with oldLayout == newLayout is still a memory dependency, and storage
+        /// images need one every dispatch: two dispatches sharing one both sit in
+        /// GENERAL, so a layout-gated barrier would emit nothing between them and the
+        /// second would read what the first wrote with no synchronisation.
+        func transition(_ tex: MTLTexture, to target: VkImageLayout,
+                        dstAccess: UInt32, force: Bool = false) {
+            guard let img = tex.image, force || tex.currentLayout != target else { return }
             let src = sourceScope(leaving: tex.currentLayout)
             imageBarrier(cmd:        cmd,
                          image:      img,
@@ -359,7 +376,7 @@ public final class MTLComputeCommandEncoder {
         let shaderRead      = UInt32(bitPattern: VK_ACCESS_SHADER_READ_BIT.rawValue)
 
         for tex in effectiveTextureSets.flatMap({ $0.value }) {
-            transition(tex, to: VK_IMAGE_LAYOUT_GENERAL, dstAccess: shaderReadWrite)
+            transition(tex, to: VK_IMAGE_LAYOUT_GENERAL, dstAccess: shaderReadWrite, force: true)
         }
         // One also bound as a storage image stays in GENERAL — see `sampledLayout(for:)`.
         for tex in effectiveSampledSets.flatMap({ $0.value })
