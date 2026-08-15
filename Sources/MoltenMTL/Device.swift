@@ -37,9 +37,17 @@ public final class MTLDevice {
     fileprivate(set) var allocator:                  VmaAllocator?
     public fileprivate(set) var computeQueueFamily:  UInt32 = .max
 
+    /// Device-wide shared resources, created on first use.
+    internal var _defaultSampler: MTLSamplerState?
+    internal var _dummyTextures:  [MTLTextureUsage: MTLTexture] = [:]
+
     init() {}
 
     deinit {
+        // Shared resources first destroyed first, so they don't 
+        // try to use the device after it's gone.
+        _defaultSampler = nil
+        _dummyTextures.removeAll()
         // Destroy in reverse-creation order: allocator → device → instance
         if let a = allocator  { CVMA_destroyAllocator(a) }
         if let d = device     { vkDestroyDevice(d, nil) }
@@ -194,16 +202,43 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                             SWIFT_EXT_KHR_SWAPCHAIN
                         ]
                         let devExtCount = UInt32(exts.count)
+
+                        // Descriptor indexing
+                        var diProbe = VkPhysicalDeviceDescriptorIndexingFeatures()
+                        diProbe.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES
+                        withUnsafeMutablePointer(to: &diProbe) { diProbePtr in
+                            var probed = VkPhysicalDeviceFeatures2()
+                            probed.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
+                            probed.pNext = UnsafeMutableRawPointer(diProbePtr)
+                            vkGetPhysicalDeviceFeatures2(dev.physicalDevice, &probed)
+                        }
+                        let hasNonUniformIndexing =
+                            diProbe.shaderSampledImageArrayNonUniformIndexing != 0
+                        if !hasNonUniformIndexing {
+                            print("[MoltenMTL] GPU does not support shaderSampledImageArrayNonUniformIndexing — shaders using nonuniformEXT on a texture array will not work")
+                        }
+
+                        // Built fresh rather than reusing the probe: that one comes
+                        // back with every feature the device supports.
+                        var diFeatures = VkPhysicalDeviceDescriptorIndexingFeatures()
+                        diFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES
+                        diFeatures.pNext = UnsafeMutableRawPointer(drPtr)
+                        diFeatures.shaderSampledImageArrayNonUniformIndexing = 1
+
+                        withUnsafeMutablePointer(to: &diFeatures) { diPtr in
                         exts.withUnsafeMutableBufferPointer { extsBuf in
                             var deviceCI = VkDeviceCreateInfo()
                             deviceCI.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO
-                            deviceCI.pNext                   = UnsafeRawPointer(drPtr)
+                            deviceCI.pNext                   = hasNonUniformIndexing
+                                                             ? UnsafeRawPointer(diPtr)
+                                                             : UnsafeRawPointer(drPtr)
                             deviceCI.queueCreateInfoCount    = 1
                             deviceCI.pQueueCreateInfos       = queueCIPtr
                             deviceCI.enabledExtensionCount   = devExtCount
                             deviceCI.ppEnabledExtensionNames = UnsafePointer(extsBuf.baseAddress)
                             deviceResult = vkCreateDevice(
                                 dev.physicalDevice, &deviceCI, nil, &dev.device)
+                        }
                         }
                     }
                 }

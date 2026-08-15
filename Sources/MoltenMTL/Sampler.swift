@@ -104,4 +104,30 @@ public extension MTLDevice {
 
         return MTLSamplerState(sampler: sampler, vkDevice: dev)
     }
+
+    /// The sampler used for combined-image-sampler bindings that have no explicit sampler bound.
+    internal var defaultSampler: MTLSamplerState? {
+        if let existing = _defaultSampler { return existing }
+        let created = makeSamplerState(descriptor: MTLSamplerDescriptor())
+        _defaultSampler = created
+        return created
+    }
+
+    /// A cached 1×1 opaque-white texture with `usage`, used to fill descriptor
+    /// slots a shader declares but the caller left unbound.
+    ///
+    /// Cached because `MTLTexture.replace` submits and waits on the queue: built
+    /// per dispatch, it would stall the GPU on every dispatch.
+    internal func dummyTexture(usage: MTLTextureUsage) -> MTLTexture? {
+        if let existing = _dummyTextures[usage] { return existing }
+
+        let desc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm, width: 1, height: 1, mipmapped: false)
+        desc.usage = usage
+        guard let texture = makeTexture(descriptor: desc) else { return nil }
+        texture.replace(region: .make2D(width: 1, height: 1), mipmapLevel: 0,
+                        withBytes: [UInt8](repeating: 255, count: 4), bytesPerRow: 4)
+        _dummyTextures[usage] = texture
+        return texture
+    }
 }

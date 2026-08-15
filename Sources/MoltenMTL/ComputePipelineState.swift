@@ -10,8 +10,10 @@ public final class MTLComputePipelineState {
 
     /// Pool sizing must cover all declared layout slots, not just bound ones.
     let storageBufferCount: Int
-    /// Maps each image-binding slot to its declared descriptorCount (1 for non-arrays).
+    /// Maps each storage-image binding slot to its declared descriptorCount.
     let imageBindingCounts: [Int: Int]
+    /// Maps each combined-image-sampler binding slot to its declared descriptorCount.
+    let sampledImageBindingCounts: [Int: Int]
 
     private let vkDevice: VkDevice?
 
@@ -20,12 +22,14 @@ public final class MTLComputePipelineState {
          descriptorSetLayout: VkDescriptorSetLayout?,
          storageBufferCount:  Int,
          imageBindingCounts:  [Int: Int],
+         sampledImageBindingCounts: [Int: Int] = [:],
          vkDevice:            VkDevice?) {
         self.pipeline            = pipeline
         self.pipelineLayout      = pipelineLayout
         self.descriptorSetLayout = descriptorSetLayout
         self.storageBufferCount  = storageBufferCount
         self.imageBindingCounts  = imageBindingCounts
+        self.sampledImageBindingCounts = sampledImageBindingCounts
         self.vkDevice            = vkDevice
     }
 
