@@ -377,13 +377,14 @@ public final class MTLRenderCommandEncoder {
             renderingActive = false
         }
         for tex in stale {
+            let src = sourceScope(leaving: tex.currentLayout)
             imageBarrier(cmd:        cmd,
                          image:      tex.image,
                          oldLayout:  tex.currentLayout,
                          newLayout:  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                         srcAccess:  UInt32(bitPattern: VK_ACCESS_MEMORY_WRITE_BIT.rawValue),
+                         srcAccess:  src.access,
                          dstAccess:  UInt32(bitPattern: VK_ACCESS_SHADER_READ_BIT.rawValue),
-                         srcStage:   UInt32(bitPattern: VK_PIPELINE_STAGE_ALL_COMMANDS_BIT.rawValue),
+                         srcStage:   src.stage,
                          dstStage:   UInt32(bitPattern: VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT.rawValue),
                          aspectMask: tex.pixelFormat.aspectMask)
             tex.currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL

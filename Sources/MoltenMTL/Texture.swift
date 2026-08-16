@@ -207,6 +207,40 @@ public final class MTLTexture {
     }
 }
 
+/// A conservative source access/stage scope for a barrier leaving `layout`.
+///
+/// Using `0`/`TOP_OF_PIPE` is only correct coming out of `UNDEFINED`: a texture
+/// leaving `GENERAL` may carry shader writes from a previous dispatch, and one
+/// leaving a transfer layout may carry a pending copy. Dropping that scope makes
+/// those writes invisible to the next read - the compute-writes-then-samples
+/// case in particular.
+func sourceScope(leaving layout: VkImageLayout) -> (access: UInt32, stage: UInt32) {
+    func mask(_ f: VkAccessFlagBits) -> UInt32 { UInt32(bitPattern: f.rawValue) }
+    func stage(_ f: VkPipelineStageFlagBits) -> UInt32 { UInt32(bitPattern: f.rawValue) }
+
+    switch layout {
+    case VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PREINITIALIZED:
+        // Nothing has touched the image yet - its contents are undefined anyway.
+        return (0, stage(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT))
+    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+        return (mask(VK_ACCESS_TRANSFER_WRITE_BIT), stage(VK_PIPELINE_STAGE_TRANSFER_BIT))
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+        return (mask(VK_ACCESS_TRANSFER_READ_BIT), stage(VK_PIPELINE_STAGE_TRANSFER_BIT))
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+        return (mask(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT),
+                stage(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        // Depth writes retire in both fragment-test stages, not just the late one.
+        return (mask(VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT),
+                stage(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT)
+              | stage(VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT))
+    default:
+        // GENERAL, SHADER_READ_ONLY_OPTIMAL, PRESENT_SRC and friends: the image
+        // may hold writes from any earlier stage, so wait on all of them.
+        return (mask(VK_ACCESS_MEMORY_WRITE_BIT), stage(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT))
+    }
+}
+
 /// Records a `VkImageMemoryBarrier` transitioning `image` between layouts.
 func imageBarrier(cmd:        VkCommandBuffer,
                            image:      VkImage?,

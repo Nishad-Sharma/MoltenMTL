@@ -34,6 +34,7 @@ There is **no shader translation**. Shaders are plain SPIR-V, consumed natively 
 | Feature | Status |
 |---|---|
 | `MTLComputeCommandEncoder` | ✅ Done |
+| Compute textures + samplers (storage and sampled images) | ✅ Done |
 | Acceleration structures — BLAS / TLAS | ✅ Done |
 | Ray queries (`VK_KHR_ray_query`) from compute shaders | ✅ Done |
 | Intersection function tables | ❌ Not supported (see [Known Limitations](#known-limitations)) |

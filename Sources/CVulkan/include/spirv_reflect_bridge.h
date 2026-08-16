@@ -4,7 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Raw VkDescriptorType integer values — avoids pulling in vulkan.h.
+// Raw VkDescriptorType integer values - avoids pulling in vulkan.h.
+#define SPV_BRIDGE_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER     1
 #define SPV_BRIDGE_DESCRIPTOR_TYPE_STORAGE_IMAGE              3
 #define SPV_BRIDGE_DESCRIPTOR_TYPE_STORAGE_BUFFER             7
 #define SPV_BRIDGE_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR 1000150000

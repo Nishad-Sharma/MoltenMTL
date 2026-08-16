@@ -27,8 +27,9 @@ public extension MTLDevice {
     }
 
     /// Creates a compute pipeline using explicit binding counts from `descriptor`.
-    /// Binding slots are assigned sequentially: storage buffers first, then acceleration structures,
-    /// then storage images — these must match the `layout(binding=N)` declarations in your SPIR-V shader.
+    /// Binding slots are assigned sequentially: storage buffers, acceleration structures,
+    /// storage images, then combined image samplers — these must match the
+    /// `layout(binding=N)` declarations in your SPIR-V shader.
     /// - Throws: `MTLComputePipelineError` if the function is missing or pipeline creation fails.
     func makeComputePipelineState(descriptor: MTLComputePipelineDescriptor) throws -> MTLComputePipelineState {
         guard let function = descriptor.computeFunction else {
@@ -39,17 +40,23 @@ public extension MTLDevice {
             throw MTLComputePipelineError(message: "Failed to create compute pipeline state")
         }
 
-        let numBuf = descriptor.storageBufferCount
-        let numAS  = descriptor.accelerationStructureCount
-        let numImg = descriptor.storageImageCount
+        let numBuf     = descriptor.storageBufferCount
+        let numAS      = descriptor.accelerationStructureCount
+        let numImg     = descriptor.storageImageCount
+        let numSampled = descriptor.sampledImageCount
 
-        let bufSlots = (0..<numBuf).map { UInt32($0) }
-        let asSlots  = (numBuf..<numBuf + numAS).map { UInt32($0) }
-        let imgSlots = (numBuf + numAS..<numBuf + numAS + numImg).map { (slot: UInt32($0), count: UInt32(1)) }
+        let imgFirst     = numBuf + numAS
+        let sampledFirst = imgFirst + numImg
+
+        let bufSlots     = (0..<numBuf).map { UInt32($0) }
+        let asSlots      = (numBuf..<imgFirst).map { UInt32($0) }
+        let imgSlots     = (imgFirst..<sampledFirst).map { (slot: UInt32($0), count: UInt32(1)) }
+        let sampledSlots = (sampledFirst..<sampledFirst + numSampled).map { (slot: UInt32($0), count: UInt32(1)) }
 
         let bindings = makeLayoutBindings(storageBufferSlots: bufSlots,
                                           asSlots:            asSlots,
-                                          imageSlots:         imgSlots)
+                                          imageSlots:         imgSlots,
+                                          sampledSlots:       sampledSlots)
         return try buildComputePipeline(device:             vkDev,
                                         shaderModule:       shaderMod,
                                         functionName:       function.name,
@@ -81,6 +88,7 @@ private func reflectBindings(
     var storageBufferBindings: [UInt32] = []
     var asBindings:            [UInt32] = []
     var imageBindings:         [(slot: UInt32, count: UInt32)] = []
+    var sampledBindings:       [(slot: UInt32, count: UInt32)] = []
 
     for i in 0..<Int(bindingCount) {
         let b = rawBindings[i]
@@ -91,17 +99,21 @@ private func reflectBindings(
             asBindings.append(b.binding)
         case UInt32(SPV_BRIDGE_DESCRIPTOR_TYPE_STORAGE_IMAGE):
             imageBindings.append((slot: b.binding, count: b.count))
+        case UInt32(SPV_BRIDGE_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER):
+            sampledBindings.append((slot: b.binding, count: b.count))
         default:
             break
         }
     }
     storageBufferBindings.sort()
     asBindings.sort()
-    imageBindings.sort { $0.slot < $1.slot }
+    imageBindings.sort   { $0.slot < $1.slot }
+    sampledBindings.sort { $0.slot < $1.slot }
 
     let bindings = makeLayoutBindings(storageBufferSlots: storageBufferBindings,
                                       asSlots:            asBindings,
-                                      imageSlots:         imageBindings)
+                                      imageSlots:         imageBindings,
+                                      sampledSlots:       sampledBindings)
     return (bindings, storageBufferBindings.count)
 }
 
@@ -118,6 +130,13 @@ private func buildComputePipeline(
     let imageBindingCounts: [Int: Int] = Dictionary(
         uniqueKeysWithValues: bindings
             .filter { $0.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE }
+            .map    { (Int($0.binding), Int($0.descriptorCount)) })
+
+    // Combined image samplers are tracked separately: they need a sampler attached and
+    // want SHADER_READ_ONLY_OPTIMAL rather than the GENERAL layout storage images use.
+    let sampledImageBindingCounts: [Int: Int] = Dictionary(
+        uniqueKeysWithValues: bindings
+            .filter { $0.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }
             .map    { (Int($0.binding), Int($0.descriptorCount)) })
 
     // Descriptor set layout
@@ -182,12 +201,14 @@ private func buildComputePipeline(
                                    descriptorSetLayout: descriptorSetLayout,
                                    storageBufferCount:  storageBufferCount,
                                    imageBindingCounts:  imageBindingCounts,
+                                   sampledImageBindingCounts: sampledImageBindingCounts,
                                    vkDevice:            device)
     }
 
 private func makeLayoutBindings(storageBufferSlots: [UInt32],
                                 asSlots:            [UInt32],
-                                imageSlots:         [(slot: UInt32, count: UInt32)]
+                                imageSlots:         [(slot: UInt32, count: UInt32)],
+                                sampledSlots:       [(slot: UInt32, count: UInt32)]
 ) -> [VkDescriptorSetLayoutBinding] {
     let stageFlags = UInt32(bitPattern: VK_SHADER_STAGE_COMPUTE_BIT.rawValue)
 
@@ -201,4 +222,5 @@ private func makeLayoutBindings(storageBufferSlots: [UInt32],
     return storageBufferSlots.map { binding($0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) }
          + asSlots.map          { binding($0, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR) }
          + imageSlots.map       { binding($0.slot, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, count: $0.count) }
+         + sampledSlots.map     { binding($0.slot, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, count: $0.count) }
 }

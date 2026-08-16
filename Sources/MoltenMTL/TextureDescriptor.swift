@@ -87,7 +87,7 @@ public enum MTLPixelFormat {
 }
 
 /// Describes how the texture will be accessed by the GPU.
-public struct MTLTextureUsage: OptionSet, Sendable {
+public struct MTLTextureUsage: OptionSet, Hashable, Sendable {
     public let rawValue: UInt32
     public init(rawValue: UInt32) { self.rawValue = rawValue }
 
