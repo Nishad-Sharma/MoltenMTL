@@ -225,7 +225,19 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                         diFeatures.pNext = UnsafeMutableRawPointer(drPtr)
                         diFeatures.shaderSampledImageArrayNonUniformIndexing = 1
 
+                        // shaderInt64 enabled
+                        var coreProbe = VkPhysicalDeviceFeatures()
+                        vkGetPhysicalDeviceFeatures(dev.physicalDevice, &coreProbe)
+                        let hasShaderInt64 = coreProbe.shaderInt64 != 0
+                        if !hasShaderInt64 {
+                            print("[MoltenMTL] GPU does not support shaderInt64 — shaders using 64-bit buffer references will not work")
+                        }
+
+                        var coreFeatures = VkPhysicalDeviceFeatures()
+                        coreFeatures.shaderInt64 = hasShaderInt64 ? 1 : 0
+
                         withUnsafeMutablePointer(to: &diFeatures) { diPtr in
+                        withUnsafePointer(to: &coreFeatures) { corePtr in
                         exts.withUnsafeMutableBufferPointer { extsBuf in
                             var deviceCI = VkDeviceCreateInfo()
                             deviceCI.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO
@@ -236,8 +248,10 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
                             deviceCI.pQueueCreateInfos       = queueCIPtr
                             deviceCI.enabledExtensionCount   = devExtCount
                             deviceCI.ppEnabledExtensionNames = UnsafePointer(extsBuf.baseAddress)
+                            deviceCI.pEnabledFeatures        = corePtr
                             deviceResult = vkCreateDevice(
                                 dev.physicalDevice, &deviceCI, nil, &dev.device)
+                        }
                         }
                         }
                     }
