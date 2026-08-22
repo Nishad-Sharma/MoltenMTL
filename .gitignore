@@ -1,5 +1,8 @@
 # Build products
 .build/
+.zig-cache/
+zig-pkg/
+zig-out/
 *.exe
 *.pdb
 Examples/*/Shaders/*.spv
