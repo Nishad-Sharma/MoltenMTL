@@ -4,6 +4,9 @@ internal import CVulkan
 /// Create via `device.makeComputePipelineState(function:)` - never directly.
 public final class MTLComputePipelineState {
 
+    /// Read-only in Metal - set through `MTLComputePipelineDescriptor.label`.
+    public let label: String?
+
     let pipeline: VkPipeline?
     let pipelineLayout: VkPipelineLayout?
     let descriptorSetLayout: VkDescriptorSetLayout?
@@ -23,7 +26,9 @@ public final class MTLComputePipelineState {
          storageBufferCount:  Int,
          imageBindingCounts:  [Int: Int],
          sampledImageBindingCounts: [Int: Int] = [:],
-         vkDevice:            VkDevice?) {
+         vkDevice:            VkDevice?,
+         label:               String? = nil) {
+        self.label               = label
         self.pipeline            = pipeline
         self.pipelineLayout      = pipelineLayout
         self.descriptorSetLayout = descriptorSetLayout

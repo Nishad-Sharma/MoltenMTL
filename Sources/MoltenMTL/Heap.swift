@@ -38,6 +38,7 @@ public final class MTLHeapDescriptor {
 /// heap itself is destroyed.
 public final class MTLHeap {
 
+    public var label: String?
 
     public let size: Int
     public let storageMode: MTLStorageMode

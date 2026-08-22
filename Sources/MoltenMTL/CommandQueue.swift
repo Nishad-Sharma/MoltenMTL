@@ -4,6 +4,7 @@ internal import CVulkan
 /// Create via `device.makeCommandQueue()` - never instantiate directly.
 public final class MTLCommandQueue {
 
+    public var label: String?
 
     /// Borrowed from `MTLDevice` - not owned by this queue.
     let queue: VkQueue?

@@ -32,6 +32,8 @@ public struct MTLRegion {
 /// Create via `device.makeTexture(descriptor:)` — never instantiate directly.
 public final class MTLTexture {
 
+    public var label: String?
+
     public let width:            Int
     public let height:           Int
     public let pixelFormat:      MTLPixelFormat

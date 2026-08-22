@@ -11,6 +11,8 @@
 /// ```
 public final class MTLComputePipelineDescriptor {
 
+    public var label: String?
+
     public var computeFunction: MTLFunction?
 
     /// Number of storage-buffer bindings declared in the shader.

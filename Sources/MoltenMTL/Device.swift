@@ -29,6 +29,9 @@ public final class MTLDevice {
 
     fileprivate nonisolated(unsafe) static var shared: MTLDevice?
 
+    /// The GPU's reported name, as `VkPhysicalDeviceProperties.deviceName`.
+    public fileprivate(set) var name: String = ""
+
     fileprivate(set) var _instance:                 VkInstance?
     public var instance: OpaquePointer?             { _instance }
     fileprivate(set) var physicalDevice:             VkPhysicalDevice?
@@ -126,6 +129,7 @@ public func MTLCreateSystemDefaultDevice() -> MTLDevice? {
     let gpuName = withUnsafeBytes(of: devProps.deviceName) { bytes in
         String(cString: bytes.bindMemory(to: CChar.self).baseAddress!)
     }
+    dev.name = gpuName
     print("[MoltenMTL] GPU: \(gpuName)")
 
     // Compute queue family

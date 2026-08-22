@@ -12,6 +12,7 @@ public extension MTLDevice {
             frontStencil:     descriptor.frontFaceStencil.vkStencilOpState,
             backStencil:      descriptor.backFaceStencil.vkStencilOpState,
             stencilEnabled:   descriptor.frontFaceStencil.isActive
-                                || descriptor.backFaceStencil.isActive)
+                                || descriptor.backFaceStencil.isActive,
+            label:            descriptor.label)
     }
 }

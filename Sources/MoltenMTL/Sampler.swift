@@ -47,6 +47,7 @@ public enum MTLSamplerAddressMode {
 /// Describes a sampler before creating it via `device.makeSamplerState(descriptor:)`.
 public final class MTLSamplerDescriptor {
 
+    public var label: String?
     public var minFilter:    MTLSamplerMinMagFilter = .nearest
     public var magFilter:    MTLSamplerMinMagFilter = .nearest
     public var mipFilter:    MTLSamplerMipFilter    = .notMipmapped
@@ -60,13 +61,17 @@ public final class MTLSamplerDescriptor {
 /// Wraps a `VkSampler`. Create via `device.makeSamplerState(descriptor:)` - never directly.
 public final class MTLSamplerState {
 
+    /// Read-only in Metal - set through `MTLSamplerDescriptor.label`.
+    public let label: String?
+
     let sampler: VkSampler?
 
     private let vkDevice: VkDevice?
 
-    init(sampler: VkSampler?, vkDevice: VkDevice?) {
+    init(sampler: VkSampler?, vkDevice: VkDevice?, label: String? = nil) {
         self.sampler  = sampler
         self.vkDevice = vkDevice
+        self.label    = label
     }
 
     deinit {
@@ -102,7 +107,7 @@ public extension MTLDevice {
             return nil
         }
 
-        return MTLSamplerState(sampler: sampler, vkDevice: dev)
+        return MTLSamplerState(sampler: sampler, vkDevice: dev, label: descriptor.label)
     }
 
     /// The sampler used for combined-image-sampler bindings that have no explicit sampler bound.

@@ -50,6 +50,9 @@ public final class MTLDepthStencilDescriptor {
 /// backing Vulkan object; this just carries the resolved values.
 public final class MTLDepthStencilState {
 
+    /// Read-only in Metal - set through `MTLDepthStencilDescriptor.label`.
+    public let label: String?
+
     let depthCompareOp:   VkCompareOp
     let depthWriteEnable: Bool
 
@@ -63,7 +66,9 @@ public final class MTLDepthStencilState {
          depthWriteEnable: Bool,
          frontStencil: VkStencilOpState,
          backStencil: VkStencilOpState,
-         stencilEnabled: Bool) {
+         stencilEnabled: Bool,
+         label: String? = nil) {
+        self.label            = label
         self.depthCompareOp   = depthCompareOp
         self.depthWriteEnable = depthWriteEnable
         self.frontStencil     = frontStencil

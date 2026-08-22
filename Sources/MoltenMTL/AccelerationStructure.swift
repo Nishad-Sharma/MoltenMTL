@@ -4,6 +4,8 @@ internal import CVulkan
 /// Create via `device.makeAccelerationStructure(size:)`.
 public final class MTLAccelerationStructure {
 
+    public var label: String?
+
     /// The byte size of this acceleration structure's backing buffer, as returned by
     /// `device.accelerationStructureSizes(descriptor:).accelerationStructureSize`.
     public let size: Int

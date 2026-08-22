@@ -153,7 +153,8 @@ public extension MTLDevice {
                                       setLayouts:           setLayouts,
                                       bindingTypes:         bindingTypes,
                                       vertexBufferBindings: vertexBufferBindings,
-                                      vkDevice:             vkDev)
+                                      vkDevice:             vkDev,
+                                      label:                descriptor.label)
     }
 }
 

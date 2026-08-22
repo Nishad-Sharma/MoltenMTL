@@ -5,6 +5,8 @@ import Foundation
 /// Create via `device.makeLibrary(url:)` — never instantiate directly.
 public final class MTLLibrary {
 
+    public var label: String?
+
     let shaderModule: VkShaderModule?
     let spirvData: Data?
 
@@ -33,6 +35,8 @@ public final class MTLLibrary {
 /// A named entry point within an `MTLLibrary` shader module.
 /// Create via `library.makeFunction(name:)` — never instantiate directly.
 public final class MTLFunction {
+
+    public var label: String?
 
     public let name: String
 

@@ -44,6 +44,8 @@ public struct MTLResourceOptions: OptionSet, Sendable {
 /// Create via `device.makeBuffer(length:options:)` - never instantiate directly.
 public final class MTLBuffer {
 
+    public var label: String?
+
     /// Persistently-mapped CPU pointer. `nil` for `.private` buffers.
     private var _contents: UnsafeMutableRawPointer?
 

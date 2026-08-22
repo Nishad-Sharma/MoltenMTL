@@ -5,6 +5,9 @@ internal import CVulkan
 /// Create via `device.makeRenderPipelineState(descriptor:)` - never directly.
 public final class MTLRenderPipelineState {
 
+    /// Read-only in Metal - set through `MTLRenderPipelineDescriptor.label`.
+    public let label: String?
+
     let pipeline:       VkPipeline?
     let pipelineLayout: VkPipelineLayout?
     /// `[0]` = vertex-stage set layout, `[1]` = fragment-stage set layout.
@@ -24,7 +27,9 @@ public final class MTLRenderPipelineState {
          setLayouts:           [VkDescriptorSetLayout?],
          bindingTypes:         [[UInt32: VkDescriptorType]],
          vertexBufferBindings: Set<Int>,
-         vkDevice:             VkDevice?) {
+         vkDevice:             VkDevice?,
+         label:                String? = nil) {
+        self.label                = label
         self.pipeline             = pipeline
         self.pipelineLayout       = pipelineLayout
         self.setLayouts           = setLayouts

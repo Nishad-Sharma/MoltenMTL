@@ -61,7 +61,8 @@ public extension MTLDevice {
                                         shaderModule:       shaderMod,
                                         functionName:       function.name,
                                         bindings:           bindings,
-                                        storageBufferCount: numBuf)
+                                        storageBufferCount: numBuf,
+                                        label:              descriptor.label)
     }
 }
 
@@ -123,7 +124,8 @@ private func buildComputePipeline(
     shaderModule:       VkShaderModule,
     functionName:       String,
     bindings:           [VkDescriptorSetLayoutBinding],
-    storageBufferCount: Int
+    storageBufferCount: Int,
+    label:              String? = nil
 ) throws -> MTLComputePipelineState {
 
     // Collect per-binding image descriptor counts for pool sizing and array padding.
@@ -202,7 +204,8 @@ private func buildComputePipeline(
                                    storageBufferCount:  storageBufferCount,
                                    imageBindingCounts:  imageBindingCounts,
                                    sampledImageBindingCounts: sampledImageBindingCounts,
-                                   vkDevice:            device)
+                                   vkDevice:            device,
+                                   label:               label)
     }
 
 private func makeLayoutBindings(storageBufferSlots: [UInt32],

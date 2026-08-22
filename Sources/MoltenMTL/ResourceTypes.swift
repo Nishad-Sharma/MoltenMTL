@@ -22,3 +22,22 @@ public func MTLOriginMake(_ x: Int, _ y: Int, _ z: Int) -> MTLOrigin {
 public func MTLSizeMake(_ width: Int, _ height: Int, _ depth: Int) -> MTLSize {
     MTLSize(width: width, height: height, depth: depth)
 }
+
+/// Convenience constructor for a 1-D `MTLRegion` (defined in Texture.swift).
+public func MTLRegionMake1D(_ x: Int, _ width: Int) -> MTLRegion {
+    MTLRegion(origin: MTLOrigin(x: x, y: 0, z: 0),
+              size:   MTLSize(width: width, height: 1, depth: 1))
+}
+
+/// Convenience constructor for a 2-D `MTLRegion`.
+public func MTLRegionMake2D(_ x: Int, _ y: Int, _ width: Int, _ height: Int) -> MTLRegion {
+    MTLRegion(origin: MTLOrigin(x: x, y: y, z: 0),
+              size:   MTLSize(width: width, height: height, depth: 1))
+}
+
+/// Convenience constructor for a 3-D `MTLRegion`.
+public func MTLRegionMake3D(_ x: Int, _ y: Int, _ z: Int,
+                            _ width: Int, _ height: Int, _ depth: Int) -> MTLRegion {
+    MTLRegion(origin: MTLOrigin(x: x, y: y, z: z),
+              size:   MTLSize(width: width, height: height, depth: depth))
+}
