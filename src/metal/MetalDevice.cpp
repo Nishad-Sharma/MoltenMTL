@@ -72,8 +72,22 @@ MMTLResult mmtlCreateDevice(MMTLDevice* outDevice)
         return MMTL_ERROR_UNSUPPORTED;
     }
 
-    auto* device = new (std::nothrow) MMTLDevice_T{native, compiler};
+    slang::IGlobalSession* slangGlobalSession = nullptr;
+    if (SLANG_FAILED(slang::createGlobalSession(&slangGlobalSession))) {
+        compiler->release();
+        native->release();
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
+    auto* device = new (std::nothrow) MMTLDevice_T{
+        native,
+        compiler,
+        slangGlobalSession,
+        {},
+        {},
+    };
     if (device == nullptr) {
+        slangGlobalSession->release();
         compiler->release();
         native->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
@@ -88,6 +102,7 @@ void mmtlDestroyDevice(MMTLDevice device)
     if (device == nullptr) {
         return;
     }
+    device->slangGlobalSession->release();
     device->compiler->release();
     device->native->release();
     delete device;
@@ -308,4 +323,3 @@ MMTLResult mmtlEndCommandBuffer(MMTLCommandBuffer commandBuffer)
 }
 
 } // extern "C"
-

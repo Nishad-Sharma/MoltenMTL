@@ -6,7 +6,13 @@
 #include <Metal/Metal.hpp>
 #include <Metal/MTL4AccelerationStructure.hpp>
 
+#include <slang-com-ptr.h>
+#include <slang.h>
+
 #include <MoltenMTL/MoltenMTL.h>
+
+#include <mutex>
+#include <string>
 
 namespace CA {
 class MetalDrawable;
@@ -16,6 +22,9 @@ class MetalLayer;
 struct MMTLDevice_T {
     MTL::Device* native;
     MTL4::Compiler* compiler;
+    slang::IGlobalSession* slangGlobalSession;
+    std::mutex shaderCompilerMutex;
+    std::string lastShaderError;
 };
 
 struct MMTLCommandQueue_T {
@@ -62,7 +71,9 @@ struct MMTLSurface_T {
 };
 
 struct MMTLLibrary_T {
-    MTL::Library* native;
+    MMTLDevice device;
+    Slang::ComPtr<slang::ISession> session;
+    Slang::ComPtr<slang::IModule> module;
 };
 
 struct MMTLComputePipelineState_T {

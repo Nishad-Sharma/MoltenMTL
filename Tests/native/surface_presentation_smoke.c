@@ -17,12 +17,11 @@
     } while (0)
 
 static const char* computeSource =
-    "#include <metal_stdlib>\n"
-    "using namespace metal;\n"
-    "kernel void writeSurface(texture2d<float, access::write> output [[texture(0)]], "
-    "uint2 position [[thread_position_in_grid]])\n"
+    "RWTexture2D<float4> outputTexture : register(u0);\n"
+    "[numthreads(16, 16, 1)]\n"
+    "void writeSurface(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
     "{\n"
-    "    output.write(float4(1.0f, 0.5f, 0.25f, 1.0f), position);\n"
+    "    outputTexture[dispatchThreadID.xy] = float4(1.0f, 0.5f, 0.25f, 1.0f);\n"
     "}\n";
 
 static int isNear(uint8_t value, uint8_t expected)
@@ -114,7 +113,12 @@ int main(void)
         return 1;
     }
 
-    CHECK(mmtlCreateLibraryWithSource(device, computeSource, &library));
+    const MMTLLibraryDescriptor libraryDescriptor = {
+        .source = computeSource,
+        .moduleName = "surfacePresentation",
+        .sourcePath = "surface_presentation.hlsl",
+    };
+    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
     CHECK(mmtlCreateComputePipelineState(device, library, "writeSurface", &pipelineState));
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {
         .maxBufferBindCount = 0,

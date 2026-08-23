@@ -128,6 +128,20 @@ typedef struct MMTLArgumentTableDescriptor {
     uint32_t maxTextureBindCount;
 } MMTLArgumentTableDescriptor;
 
+/**
+ * Describes one HLSL/Slang source module.
+ *
+ * moduleName and sourcePath are optional. sourcePath is used for diagnostics
+ * and for resolving includes relative to the source file.
+ */
+typedef struct MMTLLibraryDescriptor {
+    const char* source;
+    const char* moduleName;
+    const char* sourcePath;
+    const char* const* searchPaths;
+    uint32_t searchPathCount;
+} MMTLLibraryDescriptor;
+
 typedef uint32_t MMTLIndexType;
 
 enum {
@@ -314,10 +328,10 @@ MMTL_API MMTLResult mmtlQueuePresent(
     MMTLSurface surface,
     uint64_t imageToken);
 
-/** Compiles a Metal Shading Language source string into an owned library. */
-MMTL_API MMTLResult mmtlCreateLibraryWithSource(
+/** Parses an HLSL/Slang source module into an owned shader library. */
+MMTL_API MMTLResult mmtlCreateLibrary(
     MMTLDevice device,
-    const char* source,
+    const MMTLLibraryDescriptor* descriptor,
     MMTLLibrary* outLibrary);
 
 MMTL_API void mmtlDestroyLibrary(MMTLLibrary library);
@@ -328,6 +342,13 @@ MMTL_API MMTLResult mmtlCreateComputePipelineState(
     MMTLLibrary library,
     const char* functionName,
     MMTLComputePipelineState* outPipelineState);
+
+/**
+ * Returns diagnostics from the last shader-library or pipeline operation.
+ * The returned pointer remains valid until the next such operation or until
+ * the device is destroyed. An empty string means no diagnostics were emitted.
+ */
+MMTL_API const char* mmtlGetLastShaderError(MMTLDevice device);
 
 MMTL_API void mmtlDestroyComputePipelineState(MMTLComputePipelineState pipelineState);
 

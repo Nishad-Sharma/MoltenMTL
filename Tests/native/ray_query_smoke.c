@@ -19,25 +19,24 @@ typedef struct Vertex {
 } Vertex;
 
 static const char* rayQuerySource =
-    "#include <metal_stdlib>\n"
-    "#include <metal_raytracing>\n"
-    "using namespace metal;\n"
-    "using namespace raytracing;\n"
-    "kernel void traceScene(instance_acceleration_structure scene [[buffer(0)]], "
-    "device uint* results [[buffer(1)]], "
-    "uint index [[thread_position_in_grid]])\n"
+    "RaytracingAccelerationStructure scene : register(t0);\n"
+    "RWStructuredBuffer<uint> results : register(u1);\n"
+    "[numthreads(3, 1, 1)]\n"
+    "void traceScene(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
     "{\n"
-    "    ray queryRay;\n"
-    "    queryRay.origin = index == 0 ? float3(0.0f, 0.0f, -1.0f) "
+    "    uint index = dispatchThreadID.x;\n"
+    "    RayDesc queryRay;\n"
+    "    queryRay.Origin = index == 0 ? float3(0.0f, 0.0f, -1.0f) "
     ": (index == 1 ? float3(3.0f, 0.0f, -1.0f) "
     ": float3(6.0f, 6.0f, -1.0f));\n"
-    "    queryRay.direction = float3(0.0f, 0.0f, 1.0f);\n"
-    "    queryRay.min_distance = 0.001f;\n"
-    "    queryRay.max_distance = 10.0f;\n"
-    "    intersector<instancing, triangle_data> rayIntersector;\n"
-    "    rayIntersector.assume_geometry_type(geometry_type::triangle);\n"
-    "    auto intersection = rayIntersector.intersect(queryRay, scene, 0xff);\n"
-    "    results[index] = intersection.type != intersection_type::none;\n"
+    "    queryRay.Direction = float3(0.0f, 0.0f, 1.0f);\n"
+    "    queryRay.TMin = 0.001f;\n"
+    "    queryRay.TMax = 10.0f;\n"
+    "    RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_FORCE_OPAQUE> "
+    "rayQuery;\n"
+    "    rayQuery.TraceRayInline(scene, RAY_FLAG_NONE, 0xff, queryRay);\n"
+    "    rayQuery.Proceed();\n"
+    "    results[index] = rayQuery.CommittedStatus() != COMMITTED_NOTHING;\n"
     "}\n";
 
 int main(void)
@@ -164,7 +163,12 @@ int main(void)
     results[1] = 0;
     results[2] = 1;
 
-    CHECK(mmtlCreateLibraryWithSource(device, rayQuerySource, &library));
+    const MMTLLibraryDescriptor libraryDescriptor = {
+        .source = rayQuerySource,
+        .moduleName = "rayQuery",
+        .sourcePath = "ray_query.hlsl",
+    };
+    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
     CHECK(mmtlCreateComputePipelineState(device, library, "traceScene", &pipelineState));
 
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {

@@ -3,6 +3,38 @@
 #include <limits>
 #include <new>
 
+static void setSlangDiagnostics(MMTLDevice device, slang::IBlob* diagnostics)
+{
+    device->lastShaderError.clear();
+    if (diagnostics == nullptr || diagnostics->getBufferPointer() == nullptr) {
+        return;
+    }
+
+    const char* message = static_cast<const char*>(diagnostics->getBufferPointer());
+    size_t messageLength = diagnostics->getBufferSize();
+    if (messageLength > 0 && message[messageLength - 1] == '\0') {
+        --messageLength;
+    }
+    device->lastShaderError.assign(message, messageLength);
+}
+
+static void setMetalError(
+    MMTLDevice device,
+    NS::Error* error,
+    const char* fallbackMessage)
+{
+    device->lastShaderError = fallbackMessage;
+    if (error == nullptr) {
+        return;
+    }
+
+    NS::String* description = error->localizedDescription();
+    const char* message = description == nullptr ? nullptr : description->utf8String();
+    if (message != nullptr && message[0] != '\0') {
+        device->lastShaderError = message;
+    }
+}
+
 static bool isValidSize(MMTLSize size)
 {
     return size.width > 0 && size.height > 0 && size.depth > 0;
@@ -15,39 +47,63 @@ static MTL::Size nativeSize(MMTLSize size)
 
 extern "C" {
 
-MMTLResult mmtlCreateLibraryWithSource(
+MMTLResult mmtlCreateLibrary(
     MMTLDevice device,
-    const char* source,
+    const MMTLLibraryDescriptor* descriptor,
     MMTLLibrary* outLibrary)
 {
-    if (device == nullptr || source == nullptr || source[0] == '\0' || outLibrary == nullptr) {
+    if (device == nullptr || descriptor == nullptr || descriptor->source == nullptr ||
+        descriptor->source[0] == '\0' || outLibrary == nullptr ||
+        (descriptor->searchPathCount > 0 && descriptor->searchPaths == nullptr)) {
         return MMTL_ERROR_INVALID_ARGUMENT;
     }
     *outLibrary = nullptr;
 
-    ScopedAutoreleasePool pool;
-    auto* sourceString = NS::String::string(source, NS::UTF8StringEncoding);
-    auto* descriptor = MTL4::LibraryDescriptor::alloc()->init();
-    if (sourceString == nullptr || descriptor == nullptr) {
-        if (descriptor != nullptr) {
-            descriptor->release();
-        }
-        return MMTL_ERROR_OUT_OF_MEMORY;
-    }
-    descriptor->setSource(sourceString);
+    std::lock_guard<std::mutex> lock(device->shaderCompilerMutex);
+    device->lastShaderError.clear();
 
-    NS::Error* error = nullptr;
-    MTL::Library* native = device->compiler->newLibrary(descriptor, &error);
-    descriptor->release();
-    if (native == nullptr) {
+    slang::TargetDesc targetDescriptor = {};
+    targetDescriptor.format = SLANG_METAL;
+
+    slang::SessionDesc sessionDescriptor = {};
+    sessionDescriptor.targets = &targetDescriptor;
+    sessionDescriptor.targetCount = 1;
+    sessionDescriptor.searchPaths = descriptor->searchPaths;
+    sessionDescriptor.searchPathCount = descriptor->searchPathCount;
+
+    Slang::ComPtr<slang::ISession> session;
+    if (SLANG_FAILED(device->slangGlobalSession->createSession(
+            sessionDescriptor,
+            session.writeRef()))) {
+        device->lastShaderError = "Slang failed to create a compiler session";
         return MMTL_ERROR_COMPILATION_FAILED;
     }
 
-    auto* library = new (std::nothrow) MMTLLibrary_T{native};
+    const char* moduleName = descriptor->moduleName == nullptr || descriptor->moduleName[0] == '\0'
+        ? "mmtlShader"
+        : descriptor->moduleName;
+    const char* sourcePath = descriptor->sourcePath == nullptr || descriptor->sourcePath[0] == '\0'
+        ? "mmtlShader.hlsl"
+        : descriptor->sourcePath;
+
+    Slang::ComPtr<slang::IBlob> diagnostics;
+    Slang::ComPtr<slang::IModule> module(session->loadModuleFromSourceString(
+        moduleName,
+        sourcePath,
+        descriptor->source,
+        diagnostics.writeRef()));
+    setSlangDiagnostics(device, diagnostics);
+    if (module == nullptr) {
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
+    auto* library = new (std::nothrow) MMTLLibrary_T{};
     if (library == nullptr) {
-        native->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
     }
+    library->device = device;
+    library->session = session;
+    library->module = module;
 
     *outLibrary = library;
     return MMTL_SUCCESS;
@@ -58,7 +114,6 @@ void mmtlDestroyLibrary(MMTLLibrary library)
     if (library == nullptr) {
         return;
     }
-    library->native->release();
     delete library;
 }
 
@@ -68,13 +123,86 @@ MMTLResult mmtlCreateComputePipelineState(
     const char* functionName,
     MMTLComputePipelineState* outPipelineState)
 {
-    if (device == nullptr || library == nullptr || functionName == nullptr ||
+    if (device == nullptr || library == nullptr || library->device != device ||
+        functionName == nullptr ||
         functionName[0] == '\0' || outPipelineState == nullptr) {
         return MMTL_ERROR_INVALID_ARGUMENT;
     }
     *outPipelineState = nullptr;
 
+    std::lock_guard<std::mutex> lock(device->shaderCompilerMutex);
+    device->lastShaderError.clear();
+
+    Slang::ComPtr<slang::IBlob> diagnostics;
+    Slang::ComPtr<slang::IEntryPoint> entryPoint;
+    SlangResult slangResult = library->module->findAndCheckEntryPoint(
+        functionName,
+        SLANG_STAGE_COMPUTE,
+        entryPoint.writeRef(),
+        diagnostics.writeRef());
+    setSlangDiagnostics(device, diagnostics);
+    if (SLANG_FAILED(slangResult) || entryPoint == nullptr) {
+        if (device->lastShaderError.empty()) {
+            device->lastShaderError = "Slang could not find the requested compute entry point";
+        }
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
+    slang::IComponentType* components[] = {library->module, entryPoint};
+    Slang::ComPtr<slang::IComponentType> program;
+    diagnostics.setNull();
+    slangResult = library->session->createCompositeComponentType(
+        components,
+        2,
+        program.writeRef(),
+        diagnostics.writeRef());
+    setSlangDiagnostics(device, diagnostics);
+    if (SLANG_FAILED(slangResult) || program == nullptr) {
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
+    Slang::ComPtr<slang::IComponentType> linkedProgram;
+    diagnostics.setNull();
+    slangResult = program->link(linkedProgram.writeRef(), diagnostics.writeRef());
+    setSlangDiagnostics(device, diagnostics);
+    if (SLANG_FAILED(slangResult) || linkedProgram == nullptr) {
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
+    Slang::ComPtr<slang::IBlob> metalSource;
+    diagnostics.setNull();
+    slangResult = linkedProgram->getEntryPointCode(
+        0,
+        0,
+        metalSource.writeRef(),
+        diagnostics.writeRef());
+    setSlangDiagnostics(device, diagnostics);
+    if (SLANG_FAILED(slangResult) || metalSource == nullptr ||
+        metalSource->getBufferPointer() == nullptr) {
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
     ScopedAutoreleasePool pool;
+    auto* sourceString = NS::String::string(
+        static_cast<const char*>(metalSource->getBufferPointer()),
+        NS::UTF8StringEncoding);
+    auto* libraryDescriptor = MTL4::LibraryDescriptor::alloc()->init();
+    if (sourceString == nullptr || libraryDescriptor == nullptr) {
+        if (libraryDescriptor != nullptr) {
+            libraryDescriptor->release();
+        }
+        return MMTL_ERROR_OUT_OF_MEMORY;
+    }
+    libraryDescriptor->setSource(sourceString);
+
+    NS::Error* error = nullptr;
+    MTL::Library* nativeLibrary = device->compiler->newLibrary(libraryDescriptor, &error);
+    libraryDescriptor->release();
+    if (nativeLibrary == nullptr) {
+        setMetalError(device, error, "Metal failed to compile Slang-generated MSL");
+        return MMTL_ERROR_COMPILATION_FAILED;
+    }
+
     auto* name = NS::String::string(functionName, NS::UTF8StringEncoding);
     auto* functionDescriptor = MTL4::LibraryFunctionDescriptor::alloc()->init();
     auto* pipelineDescriptor = MTL4::ComputePipelineDescriptor::alloc()->init();
@@ -85,19 +213,21 @@ MMTLResult mmtlCreateComputePipelineState(
         if (pipelineDescriptor != nullptr) {
             pipelineDescriptor->release();
         }
+        nativeLibrary->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
     }
 
-    functionDescriptor->setLibrary(library->native);
+    functionDescriptor->setLibrary(nativeLibrary);
     functionDescriptor->setName(name);
     pipelineDescriptor->setComputeFunctionDescriptor(functionDescriptor);
     functionDescriptor->release();
 
-    NS::Error* error = nullptr;
     MTL::ComputePipelineState* native =
         device->compiler->newComputePipelineState(pipelineDescriptor, nullptr, &error);
     pipelineDescriptor->release();
+    nativeLibrary->release();
     if (native == nullptr) {
+        setMetalError(device, error, "Metal failed to create the compute pipeline");
         return MMTL_ERROR_COMPILATION_FAILED;
     }
 
@@ -109,6 +239,14 @@ MMTLResult mmtlCreateComputePipelineState(
 
     *outPipelineState = pipelineState;
     return MMTL_SUCCESS;
+}
+
+const char* mmtlGetLastShaderError(MMTLDevice device)
+{
+    if (device == nullptr) {
+        return "";
+    }
+    return device->lastShaderError.c_str();
 }
 
 void mmtlDestroyComputePipelineState(MMTLComputePipelineState pipelineState)

@@ -13,13 +13,13 @@
     } while (0)
 
 static const char* computeSource =
-    "#include <metal_stdlib>\n"
-    "using namespace metal;\n"
-    "kernel void writeOutput(texture2d<float, access::write> output [[texture(0)]], "
-    "uint2 position [[thread_position_in_grid]])\n"
+    "RWTexture2D<float4> outputTexture : register(u0);\n"
+    "[numthreads(4, 2, 1)]\n"
+    "void writeOutput(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
     "{\n"
-    "    output.write(float4(float(position.x) + 0.25f, "
-    "float(position.y) + 0.5f, 0.75f, 1.0f), position);\n"
+    "    uint2 position = dispatchThreadID.xy;\n"
+    "    outputTexture[position] = float4(float(position.x) + 0.25f, "
+    "float(position.y) + 0.5f, 0.75f, 1.0f);\n"
     "}\n";
 
 int main(void)
@@ -76,7 +76,12 @@ int main(void)
         return 1;
     }
 
-    CHECK(mmtlCreateLibraryWithSource(device, computeSource, &library));
+    const MMTLLibraryDescriptor libraryDescriptor = {
+        .source = computeSource,
+        .moduleName = "outputTexture",
+        .sourcePath = "output_texture.hlsl",
+    };
+    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
     CHECK(mmtlCreateComputePipelineState(device, library, "writeOutput", &pipelineState));
 
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {

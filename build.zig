@@ -1,5 +1,15 @@
 const std = @import("std");
 
+fn linkMoltenMTL(
+    module: *std.Build.Module,
+    library: *std.Build.Step.Compile,
+    slangLib: []const u8,
+) void {
+    module.addLibraryPath(.{ .cwd_relative = slangLib });
+    module.addRPath(.{ .cwd_relative = slangLib });
+    module.linkLibrary(library);
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -12,6 +22,10 @@ pub fn build(b: *std.Build) void {
     }
 
     const metal_cpp = b.dependency("metal_cpp", .{});
+    const slangInstall = b.graph.environ_map.get("SLANG_INSTALL") orelse
+        @panic("SLANG_INSTALL must point to a Slang development package");
+    const slangInclude = b.pathResolve(&.{ slangInstall, "include" });
+    const slangLib = b.pathResolve(&.{ slangInstall, "lib" });
 
     const library_module = b.createModule(.{
         .target = target,
@@ -21,6 +35,9 @@ pub fn build(b: *std.Build) void {
     });
     library_module.addIncludePath(b.path("include"));
     library_module.addSystemIncludePath(metal_cpp.path(""));
+    library_module.addSystemIncludePath(.{ .cwd_relative = slangInclude });
+    library_module.addLibraryPath(.{ .cwd_relative = slangLib });
+    library_module.addRPath(.{ .cwd_relative = slangLib });
     library_module.addCSourceFiles(.{
         .files = &.{
             "src/metal/MetalCppImplementation.cpp",
@@ -42,6 +59,7 @@ pub fn build(b: *std.Build) void {
     library_module.linkFramework("Foundation", .{});
     library_module.linkFramework("Metal", .{});
     library_module.linkFramework("QuartzCore", .{});
+    library_module.linkSystemLibrary("slang-compiler", .{ .use_pkg_config = .no });
 
     const library = b.addLibrary(.{
         .name = "MoltenMTL",
@@ -69,7 +87,7 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    smoke_module.linkLibrary(library);
+    linkMoltenMTL(smoke_module, library, slangLib);
 
     const smoke_test = b.addExecutable(.{
         .name = "device-queue-smoke",
@@ -92,7 +110,7 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    compute_smoke_module.linkLibrary(library);
+    linkMoltenMTL(compute_smoke_module, library, slangLib);
 
     const compute_smoke_test = b.addExecutable(.{
         .name = "buffer-compute-smoke",
@@ -115,7 +133,7 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    ray_query_smoke_module.linkLibrary(library);
+    linkMoltenMTL(ray_query_smoke_module, library, slangLib);
 
     const ray_query_smoke_test = b.addExecutable(.{
         .name = "ray-query-smoke",
@@ -138,7 +156,7 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    output_texture_smoke_module.linkLibrary(library);
+    linkMoltenMTL(output_texture_smoke_module, library, slangLib);
 
     const output_texture_smoke_test = b.addExecutable(.{
         .name = "output-texture-smoke",
@@ -167,7 +185,7 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    surface_smoke_module.linkLibrary(library);
+    linkMoltenMTL(surface_smoke_module, library, slangLib);
     surface_smoke_module.linkSystemLibrary("SDL3", .{});
 
     const surface_smoke_test = b.addExecutable(.{

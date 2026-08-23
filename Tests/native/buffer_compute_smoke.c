@@ -13,11 +13,11 @@
     } while (0)
 
 static const char* computeSource =
-    "#include <metal_stdlib>\n"
-    "using namespace metal;\n"
-    "kernel void doubleValues(device uint* values [[buffer(0)]], "
-    "uint index [[thread_position_in_grid]])\n"
+    "RWStructuredBuffer<uint> values : register(u0);\n"
+    "[numthreads(4, 1, 1)]\n"
+    "void doubleValues(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
     "{\n"
+    "    uint index = dispatchThreadID.x;\n"
     "    values[index] *= 2;\n"
     "}\n";
 
@@ -57,7 +57,24 @@ int main(void)
     values[2] = 3;
     values[3] = 4;
 
-    CHECK(mmtlCreateLibraryWithSource(device, computeSource, &library));
+    const MMTLLibraryDescriptor invalidLibraryDescriptor = {
+        .source = "this is not valid HLSL",
+        .moduleName = "invalidShader",
+        .sourcePath = "invalid_shader.hlsl",
+    };
+    if (mmtlCreateLibrary(device, &invalidLibraryDescriptor, &library) !=
+            MMTL_ERROR_COMPILATION_FAILED ||
+        mmtlGetLastShaderError(device)[0] == '\0') {
+        fprintf(stderr, "invalid HLSL did not produce Slang diagnostics\n");
+        return 1;
+    }
+
+    const MMTLLibraryDescriptor libraryDescriptor = {
+        .source = computeSource,
+        .moduleName = "bufferCompute",
+        .sourcePath = "buffer_compute.hlsl",
+    };
+    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
     CHECK(mmtlCreateComputePipelineState(device, library, "doubleValues", &pipelineState));
 
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {
