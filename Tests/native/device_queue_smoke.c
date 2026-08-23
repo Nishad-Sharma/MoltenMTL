@@ -11,7 +11,7 @@
         }                                                                           \
     } while (0)
 
-int main(void)
+int runDeviceQueueSmoke(void)
 {
     MMTLDevice device = NULL;
     MMTLCommandQueue queue = NULL;

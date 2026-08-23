@@ -21,7 +21,7 @@ static const char* computeSource =
     "    values[index] *= 2;\n"
     "}\n";
 
-int main(void)
+int runBufferComputeSmoke(void)
 {
     MMTLDevice device = NULL;
     MMTLCommandQueue queue = NULL;

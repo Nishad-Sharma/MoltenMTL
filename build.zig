@@ -72,13 +72,19 @@ pub fn build(b: *std.Build) void {
     );
     b.installArtifact(library);
 
-    const smoke_module = b.createModule(.{
+    const nativeSmokeModule = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
     });
-    smoke_module.addCSourceFile(.{
-        .file = b.path("Tests/native/device_queue_smoke.c"),
+    nativeSmokeModule.addCSourceFiles(.{
+        .files = &.{
+            "Tests/native/native_smoke.c",
+            "Tests/native/device_queue_smoke.c",
+            "Tests/native/buffer_compute_smoke.c",
+            "Tests/native/output_texture_smoke.c",
+            "Tests/native/ray_query_smoke.c",
+        },
         .flags = &.{
             "-std=c17",
             "-Wall",
@@ -87,88 +93,16 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    linkMoltenMTL(smoke_module, library, slangLib);
+    linkMoltenMTL(nativeSmokeModule, library, slangLib);
 
-    const smoke_test = b.addExecutable(.{
-        .name = "device-queue-smoke",
-        .root_module = smoke_module,
+    const nativeSmokeTest = b.addExecutable(.{
+        .name = "native-smoke",
+        .root_module = nativeSmokeModule,
     });
-    const run_smoke_test = b.addRunArtifact(smoke_test);
-
-    const compute_smoke_module = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
-    });
-    compute_smoke_module.addCSourceFile(.{
-        .file = b.path("Tests/native/buffer_compute_smoke.c"),
-        .flags = &.{
-            "-std=c17",
-            "-Wall",
-            "-Wextra",
-            "-Wpedantic",
-            "-Werror",
-        },
-    });
-    linkMoltenMTL(compute_smoke_module, library, slangLib);
-
-    const compute_smoke_test = b.addExecutable(.{
-        .name = "buffer-compute-smoke",
-        .root_module = compute_smoke_module,
-    });
-    const run_compute_smoke_test = b.addRunArtifact(compute_smoke_test);
-
-    const ray_query_smoke_module = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
-    });
-    ray_query_smoke_module.addCSourceFile(.{
-        .file = b.path("Tests/native/ray_query_smoke.c"),
-        .flags = &.{
-            "-std=c17",
-            "-Wall",
-            "-Wextra",
-            "-Wpedantic",
-            "-Werror",
-        },
-    });
-    linkMoltenMTL(ray_query_smoke_module, library, slangLib);
-
-    const ray_query_smoke_test = b.addExecutable(.{
-        .name = "ray-query-smoke",
-        .root_module = ray_query_smoke_module,
-    });
-    const run_ray_query_smoke_test = b.addRunArtifact(ray_query_smoke_test);
-
-    const output_texture_smoke_module = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
-    });
-    output_texture_smoke_module.addCSourceFile(.{
-        .file = b.path("Tests/native/output_texture_smoke.c"),
-        .flags = &.{
-            "-std=c17",
-            "-Wall",
-            "-Wextra",
-            "-Wpedantic",
-            "-Werror",
-        },
-    });
-    linkMoltenMTL(output_texture_smoke_module, library, slangLib);
-
-    const output_texture_smoke_test = b.addExecutable(.{
-        .name = "output-texture-smoke",
-        .root_module = output_texture_smoke_module,
-    });
-    const run_output_texture_smoke_test = b.addRunArtifact(output_texture_smoke_test);
+    const runNativeSmokeTest = b.addRunArtifact(nativeSmokeTest);
 
     const test_step = b.step("test", "Run native C API tests");
-    test_step.dependOn(&run_smoke_test.step);
-    test_step.dependOn(&run_compute_smoke_test.step);
-    test_step.dependOn(&run_ray_query_smoke_test.step);
-    test_step.dependOn(&run_output_texture_smoke_test.step);
+    test_step.dependOn(&runNativeSmokeTest.step);
 
     const surface_smoke_module = b.createModule(.{
         .target = target,

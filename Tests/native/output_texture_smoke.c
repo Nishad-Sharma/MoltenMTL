@@ -22,7 +22,7 @@ static const char* computeSource =
     "float(position.y) + 0.5f, 0.75f, 1.0f);\n"
     "}\n";
 
-int main(void)
+int runOutputTextureSmoke(void)
 {
     const uint32_t width = 4;
     const uint32_t height = 2;

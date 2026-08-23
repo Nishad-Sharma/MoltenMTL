@@ -39,7 +39,7 @@ static const char* rayQuerySource =
     "    results[index] = rayQuery.CommittedStatus() != COMMITTED_NOTHING;\n"
     "}\n";
 
-int main(void)
+int runRayQuerySmoke(void)
 {
     MMTLDevice device = NULL;
     MMTLCommandQueue queue = NULL;
