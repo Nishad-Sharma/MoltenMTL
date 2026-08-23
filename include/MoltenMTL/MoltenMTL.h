@@ -42,6 +42,7 @@ typedef struct MMTLCommandQueue_T* MMTLCommandQueue;
 typedef struct MMTLCommandAllocator_T* MMTLCommandAllocator;
 typedef struct MMTLCommandBuffer_T* MMTLCommandBuffer;
 typedef struct MMTLBuffer_T* MMTLBuffer;
+typedef struct MMTLTexture_T* MMTLTexture;
 typedef struct MMTLLibrary_T* MMTLLibrary;
 typedef struct MMTLComputePipelineState_T* MMTLComputePipelineState;
 typedef struct MMTLArgumentTable_T* MMTLArgumentTable;
@@ -59,8 +60,41 @@ typedef struct MMTLBufferDescriptor {
     MMTLStorageMode storageMode;
 } MMTLBufferDescriptor;
 
+typedef uint32_t MMTLPixelFormat;
+
+enum {
+    MMTL_PIXEL_FORMAT_UNDEFINED = 0,
+    MMTL_PIXEL_FORMAT_RGBA8_UNORM = 1,
+    MMTL_PIXEL_FORMAT_BGRA8_UNORM = 2,
+    MMTL_PIXEL_FORMAT_RGBA16_FLOAT = 3,
+    MMTL_PIXEL_FORMAT_RGBA32_FLOAT = 4,
+};
+
+typedef uint32_t MMTLTextureUsage;
+
+enum {
+    MMTL_TEXTURE_USAGE_SHADER_READ = 1u << 0,
+    MMTL_TEXTURE_USAGE_SHADER_WRITE = 1u << 1,
+    MMTL_TEXTURE_USAGE_COPY_SOURCE = 1u << 2,
+    MMTL_TEXTURE_USAGE_COPY_DESTINATION = 1u << 3,
+};
+
+enum {
+    MMTL_TEXTURE_COPY_BYTES_PER_ROW_ALIGNMENT = 256,
+};
+
+/** Describes a single-mip, single-sample 2D texture. */
+typedef struct MMTLTextureDescriptor {
+    uint32_t width;
+    uint32_t height;
+    MMTLPixelFormat pixelFormat;
+    MMTLTextureUsage usage;
+    MMTLStorageMode storageMode;
+} MMTLTextureDescriptor;
+
 typedef struct MMTLArgumentTableDescriptor {
     uint32_t maxBufferBindCount;
+    uint32_t maxTextureBindCount;
 } MMTLArgumentTableDescriptor;
 
 typedef uint32_t MMTLIndexType;
@@ -198,6 +232,22 @@ MMTL_API uint64_t mmtlGetBufferLength(MMTLBuffer buffer);
 /** Returns NULL for buffers that aren't CPU-visible. */
 MMTL_API void* mmtlGetBufferContents(MMTLBuffer buffer);
 
+/** Creates an owned single-mip, single-sample 2D texture. */
+MMTL_API MMTLResult mmtlCreateTexture(
+    MMTLDevice device,
+    const MMTLTextureDescriptor* descriptor,
+    MMTLTexture* outTexture);
+
+MMTL_API void mmtlDestroyTexture(MMTLTexture texture);
+
+MMTL_API uint32_t mmtlGetTextureWidth(MMTLTexture texture);
+
+MMTL_API uint32_t mmtlGetTextureHeight(MMTLTexture texture);
+
+MMTL_API MMTLPixelFormat mmtlGetTexturePixelFormat(MMTLTexture texture);
+
+MMTL_API MMTLTextureUsage mmtlGetTextureUsage(MMTLTexture texture);
+
 /** Compiles a Metal Shading Language source string into an owned library. */
 MMTL_API MMTLResult mmtlCreateLibraryWithSource(
     MMTLDevice device,
@@ -242,10 +292,8 @@ MMTL_API uint64_t mmtlGetAccelerationStructureSize(
     MMTLAccelerationStructure accelerationStructure);
 
 /**
- * Creates an owned Metal 4 argument table with buffer-compatible binding slots.
- *
- * Each slot can hold a buffer or acceleration structure. Texture and sampler
- * slots can extend this descriptor separately in a later slice.
+ * Creates an owned Metal 4 argument table with independently indexed buffer
+ * and texture binding slots. Acceleration structures use buffer slots.
  */
 MMTL_API MMTLResult mmtlCreateArgumentTable(
     MMTLDevice device,
@@ -264,6 +312,11 @@ MMTL_API MMTLResult mmtlSetArgumentTableAccelerationStructure(
     MMTLArgumentTable argumentTable,
     uint32_t bindingIndex,
     MMTLAccelerationStructure accelerationStructure);
+
+MMTL_API MMTLResult mmtlSetArgumentTableTexture(
+    MMTLArgumentTable argumentTable,
+    uint32_t bindingIndex,
+    MMTLTexture texture);
 
 /**
  * Encodes a BLAS or TLAS build and makes it visible to later builds and
@@ -284,6 +337,25 @@ MMTL_API MMTLResult mmtlCmdDispatchThreads(
     MMTLArgumentTable argumentTable,
     MMTLSize threadsPerGrid,
     MMTLSize threadsPerThreadgroup);
+
+/** Copies the complete contents of one compatible 2D texture to another. */
+MMTL_API MMTLResult mmtlCmdCopyTexture(
+    MMTLCommandBuffer commandBuffer,
+    MMTLTexture sourceTexture,
+    MMTLTexture destinationTexture);
+
+/**
+ * Copies a complete 2D texture into a buffer.
+ *
+ * destinationBytesPerRow must be at least the tightly packed row size and a
+ * multiple of MMTL_TEXTURE_COPY_BYTES_PER_ROW_ALIGNMENT.
+ */
+MMTL_API MMTLResult mmtlCmdCopyTextureToBuffer(
+    MMTLCommandBuffer commandBuffer,
+    MMTLTexture sourceTexture,
+    MMTLBuffer destinationBuffer,
+    uint64_t destinationOffset,
+    uint64_t destinationBytesPerRow);
 
 #ifdef __cplusplus
 }

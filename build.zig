@@ -115,8 +115,32 @@ pub fn build(b: *std.Build) void {
     });
     const run_ray_query_smoke_test = b.addRunArtifact(ray_query_smoke_test);
 
+    const output_texture_smoke_module = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    output_texture_smoke_module.addCSourceFile(.{
+        .file = b.path("Tests/native/output_texture_smoke.c"),
+        .flags = &.{
+            "-std=c17",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+        },
+    });
+    output_texture_smoke_module.linkLibrary(library);
+
+    const output_texture_smoke_test = b.addExecutable(.{
+        .name = "output-texture-smoke",
+        .root_module = output_texture_smoke_module,
+    });
+    const run_output_texture_smoke_test = b.addRunArtifact(output_texture_smoke_test);
+
     const test_step = b.step("test", "Run native C API tests");
     test_step.dependOn(&run_smoke_test.step);
     test_step.dependOn(&run_compute_smoke_test.step);
     test_step.dependOn(&run_ray_query_smoke_test.step);
+    test_step.dependOn(&run_output_texture_smoke_test.step);
 }

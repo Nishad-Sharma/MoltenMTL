@@ -20,7 +20,8 @@ Use Metal 4 as the semantic reference and implement narrow vertical slices in bo
 
 Device, queue, allocator and command buffer.
 Buffer plus compute dispatch.
-Texture, sampler and argument table.
+Output textures: 2D creation, compute binding and texture copies.
+Sampler and sampled-texture support.
 Render pipeline, attachment map and triangle.
 Presentation.
 BLAS/TLAS and inline ray queries.
