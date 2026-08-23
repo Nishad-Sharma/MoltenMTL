@@ -21,8 +21,14 @@ pub fn build(b: *std.Build) void {
     });
     library_module.addIncludePath(b.path("include"));
     library_module.addSystemIncludePath(metal_cpp.path(""));
-    library_module.addCSourceFile(.{
-        .file = b.path("src/metal/MetalBackend.cpp"),
+    library_module.addCSourceFiles(.{
+        .files = &.{
+            "src/metal/MetalCppImplementation.cpp",
+            "src/metal/MetalDevice.cpp",
+            "src/metal/MetalResources.cpp",
+            "src/metal/MetalCompute.cpp",
+            "src/metal/MetalAccelerationStructure.cpp",
+        },
         .flags = &.{
             "-std=c++17",
             "-fvisibility=hidden",
