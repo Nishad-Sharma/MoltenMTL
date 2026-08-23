@@ -27,6 +27,8 @@ typedef int32_t MMTLResult;
 
 enum {
     MMTL_SUCCESS = 0,
+    MMTL_NOT_READY = 1,
+    MMTL_SUBOPTIMAL = 2,
     MMTL_ERROR_INVALID_ARGUMENT = -1,
     MMTL_ERROR_INVALID_STATE = -2,
     MMTL_ERROR_UNSUPPORTED = -3,
@@ -35,6 +37,8 @@ enum {
     MMTL_ERROR_INTERNAL = -6,
     MMTL_ERROR_COMPILATION_FAILED = -7,
     MMTL_ERROR_TIMEOUT = -8,
+    MMTL_ERROR_SURFACE_LOST = -9,
+    MMTL_ERROR_SURFACE_OUT_OF_DATE = -10,
 };
 
 typedef struct MMTLDevice_T* MMTLDevice;
@@ -43,6 +47,7 @@ typedef struct MMTLCommandAllocator_T* MMTLCommandAllocator;
 typedef struct MMTLCommandBuffer_T* MMTLCommandBuffer;
 typedef struct MMTLBuffer_T* MMTLBuffer;
 typedef struct MMTLTexture_T* MMTLTexture;
+typedef struct MMTLSurface_T* MMTLSurface;
 typedef struct MMTLLibrary_T* MMTLLibrary;
 typedef struct MMTLComputePipelineState_T* MMTLComputePipelineState;
 typedef struct MMTLArgumentTable_T* MMTLArgumentTable;
@@ -91,6 +96,32 @@ typedef struct MMTLTextureDescriptor {
     MMTLTextureUsage usage;
     MMTLStorageMode storageMode;
 } MMTLTextureDescriptor;
+
+typedef uint32_t MMTLPresentMode;
+
+enum {
+    MMTL_PRESENT_MODE_FIFO = 0,
+    MMTL_PRESENT_MODE_IMMEDIATE = 1,
+};
+
+typedef struct MMTLSurfaceConfiguration {
+    uint32_t width;
+    uint32_t height;
+    MMTLPixelFormat pixelFormat;
+    MMTLPresentMode presentMode;
+    uint32_t imageCount;
+} MMTLSurfaceConfiguration;
+
+/**
+ * One acquired presentation image.
+ *
+ * texture is borrowed from the surface and remains valid until imageToken is
+ * presented or the surface is destroyed. It must not be destroyed directly.
+ */
+typedef struct MMTLSurfaceImage {
+    MMTLTexture texture;
+    uint64_t imageToken;
+} MMTLSurfaceImage;
 
 typedef struct MMTLArgumentTableDescriptor {
     uint32_t maxBufferBindCount;
@@ -247,6 +278,41 @@ MMTL_API uint32_t mmtlGetTextureHeight(MMTLTexture texture);
 MMTL_API MMTLPixelFormat mmtlGetTexturePixelFormat(MMTLTexture texture);
 
 MMTL_API MMTLTextureUsage mmtlGetTextureUsage(MMTLTexture texture);
+
+/**
+ * Creates a surface around a CAMetalLayer supplied by the window system.
+ *
+ * The layer is retained by the surface. SDL applications can obtain it from
+ * SDL_Metal_GetLayer() without making MoltenMTL depend on SDL.
+ */
+MMTL_API MMTLResult mmtlCreateSurfaceFromMetalLayer(
+    MMTLDevice device,
+    void* metalLayer,
+    MMTLSurface* outSurface);
+
+MMTL_API void mmtlDestroySurface(MMTLSurface surface);
+
+/** Configures or resizes the surface when no image is currently acquired. */
+MMTL_API MMTLResult mmtlConfigureSurface(
+    MMTLSurface surface,
+    const MMTLSurfaceConfiguration* configuration);
+
+/**
+ * Acquires the next presentation image and schedules its queue-side wait.
+ *
+ * Returns MMTL_NOT_READY when the window system temporarily has no drawable.
+ * Only one not-yet-presented image may be acquired from a surface at a time.
+ */
+MMTL_API MMTLResult mmtlAcquireNextSurfaceImage(
+    MMTLSurface surface,
+    MMTLCommandQueue queue,
+    MMTLSurfaceImage* outSurfaceImage);
+
+/** Presents an acquired image after work previously submitted to queue. */
+MMTL_API MMTLResult mmtlQueuePresent(
+    MMTLCommandQueue queue,
+    MMTLSurface surface,
+    uint64_t imageToken);
 
 /** Compiles a Metal Shading Language source string into an owned library. */
 MMTL_API MMTLResult mmtlCreateLibraryWithSource(

@@ -174,7 +174,7 @@ MMTLResult mmtlCreateTexture(
         return MMTL_ERROR_OUT_OF_MEMORY;
     }
 
-    auto* texture = new (std::nothrow) MMTLTexture_T{native, *descriptor};
+    auto* texture = new (std::nothrow) MMTLTexture_T{native, *descriptor, true};
     if (texture == nullptr) {
         native->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
@@ -186,7 +186,7 @@ MMTLResult mmtlCreateTexture(
 
 void mmtlDestroyTexture(MMTLTexture texture)
 {
-    if (texture == nullptr) {
+    if (texture == nullptr || !texture->ownsNative) {
         return;
     }
     texture->native->release();
@@ -214,4 +214,3 @@ MMTLTextureUsage mmtlGetTextureUsage(MMTLTexture texture)
 }
 
 } // extern "C"
-

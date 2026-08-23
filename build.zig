@@ -28,6 +28,7 @@ pub fn build(b: *std.Build) void {
             "src/metal/MetalResources.cpp",
             "src/metal/MetalCompute.cpp",
             "src/metal/MetalAccelerationStructure.cpp",
+            "src/metal/MetalSurface.cpp",
         },
         .flags = &.{
             "-std=c++17",
@@ -40,6 +41,7 @@ pub fn build(b: *std.Build) void {
     });
     library_module.linkFramework("Foundation", .{});
     library_module.linkFramework("Metal", .{});
+    library_module.linkFramework("QuartzCore", .{});
 
     const library = b.addLibrary(.{
         .name = "MoltenMTL",
@@ -149,4 +151,31 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_compute_smoke_test.step);
     test_step.dependOn(&run_ray_query_smoke_test.step);
     test_step.dependOn(&run_output_texture_smoke_test.step);
+
+    const surface_smoke_module = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    surface_smoke_module.addCSourceFile(.{
+        .file = b.path("Tests/native/surface_presentation_smoke.c"),
+        .flags = &.{
+            "-std=c17",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+        },
+    });
+    surface_smoke_module.linkLibrary(library);
+    surface_smoke_module.linkSystemLibrary("SDL3", .{});
+
+    const surface_smoke_test = b.addExecutable(.{
+        .name = "surface-presentation-smoke",
+        .root_module = surface_smoke_module,
+    });
+    const run_surface_smoke_test = b.addRunArtifact(surface_smoke_test);
+
+    const sdl_test_step = b.step("test-sdl", "Run the SDL3 surface presentation test");
+    sdl_test_step.dependOn(&run_surface_smoke_test.step);
 }

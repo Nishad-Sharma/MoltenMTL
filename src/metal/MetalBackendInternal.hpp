@@ -8,6 +8,11 @@
 
 #include <MoltenMTL/MoltenMTL.h>
 
+namespace CA {
+class MetalDrawable;
+class MetalLayer;
+}
+
 struct MMTLDevice_T {
     MTL::Device* native;
     MTL4::Compiler* compiler;
@@ -42,6 +47,18 @@ struct MMTLBuffer_T {
 struct MMTLTexture_T {
     MTL::Texture* native;
     MMTLTextureDescriptor descriptor;
+    bool ownsNative;
+};
+
+struct MMTLSurface_T {
+    CA::MetalLayer* native;
+    MTL::Device* device;
+    MMTLSurfaceConfiguration configuration;
+    CA::MetalDrawable* acquiredDrawable;
+    MMTLTexture acquiredTexture;
+    MMTLCommandQueue acquiredQueue;
+    uint64_t imageToken;
+    bool configured;
 };
 
 struct MMTLLibrary_T {
@@ -102,4 +119,3 @@ bool getNativePixelFormat(
     uint32_t* outBytesPerPixel);
 
 #endif
-

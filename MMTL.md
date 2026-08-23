@@ -23,5 +23,5 @@ Buffer plus compute dispatch.
 Output textures: 2D creation, compute binding and texture copies.
 Sampler and sampled-texture support.
 Render pipeline, attachment map and triangle.
-Presentation.
+Presentation: cross-platform surface with platform-specific native creation.
 BLAS/TLAS and inline ray queries.
