@@ -1,7 +1,10 @@
 #include <MoltenMTL/MoltenMTL.h>
 
+#include "shader_source.h"
+
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define CHECK(call)                                                                 \
     do {                                                                            \
@@ -18,28 +21,7 @@ typedef struct Vertex {
     float z;
 } Vertex;
 
-static const char* rayQuerySource =
-    "RaytracingAccelerationStructure scene : register(t0);\n"
-    "RWStructuredBuffer<uint> results : register(u1);\n"
-    "[numthreads(3, 1, 1)]\n"
-    "void traceScene(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
-    "{\n"
-    "    uint index = dispatchThreadID.x;\n"
-    "    RayDesc queryRay;\n"
-    "    queryRay.Origin = index == 0 ? float3(0.0f, 0.0f, -1.0f) "
-    ": (index == 1 ? float3(3.0f, 0.0f, -1.0f) "
-    ": float3(6.0f, 6.0f, -1.0f));\n"
-    "    queryRay.Direction = float3(0.0f, 0.0f, 1.0f);\n"
-    "    queryRay.TMin = 0.001f;\n"
-    "    queryRay.TMax = 10.0f;\n"
-    "    RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_FORCE_OPAQUE> "
-    "rayQuery;\n"
-    "    rayQuery.TraceRayInline(scene, RAY_FLAG_NONE, 0xff, queryRay);\n"
-    "    rayQuery.Proceed();\n"
-    "    results[index] = rayQuery.CommittedStatus() != COMMITTED_NOTHING;\n"
-    "}\n";
-
-int runRayQuerySmoke(void)
+int runRayQuerySmoke(const char* shaderPath)
 {
     MMTLDevice device = NULL;
     MMTLCommandQueue queue = NULL;
@@ -163,12 +145,27 @@ int runRayQuerySmoke(void)
     results[1] = 0;
     results[2] = 1;
 
+    char* rayQuerySource = readShaderSource(shaderPath);
+    if (rayQuerySource == NULL) {
+        fprintf(stderr, "failed to read ray-query shader: %s\n", shaderPath);
+        return 1;
+    }
+
     const MMTLLibraryDescriptor libraryDescriptor = {
         .source = rayQuerySource,
         .moduleName = "rayQuery",
-        .sourcePath = "ray_query.hlsl",
+        .sourcePath = shaderPath,
     };
-    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
+    const MMTLResult libraryResult = mmtlCreateLibrary(device, &libraryDescriptor, &library);
+    free(rayQuerySource);
+    if (libraryResult != MMTL_SUCCESS) {
+        fprintf(
+            stderr,
+            "mmtlCreateLibrary failed with result %d: %s\n",
+            (int)libraryResult,
+            mmtlGetLastShaderError(device));
+        return 1;
+    }
     CHECK(mmtlCreateComputePipelineState(device, library, "traceScene", &pipelineState));
 
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {

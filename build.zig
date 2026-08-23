@@ -84,6 +84,7 @@ pub fn build(b: *std.Build) void {
             "Tests/native/buffer_compute_smoke.c",
             "Tests/native/output_texture_smoke.c",
             "Tests/native/ray_query_smoke.c",
+            "Tests/native/shader_source.c",
         },
         .flags = &.{
             "-std=c17",
@@ -100,6 +101,7 @@ pub fn build(b: *std.Build) void {
         .root_module = nativeSmokeModule,
     });
     const runNativeSmokeTest = b.addRunArtifact(nativeSmokeTest);
+    runNativeSmokeTest.addFileArg(b.path("Tests/native/Shaders/ray_query.comp.hlsl"));
 
     const test_step = b.step("test", "Run native C API tests");
     test_step.dependOn(&runNativeSmokeTest.step);
@@ -109,8 +111,11 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
-    surface_smoke_module.addCSourceFile(.{
-        .file = b.path("Tests/native/surface_presentation_smoke.c"),
+    surface_smoke_module.addCSourceFiles(.{
+        .files = &.{
+            "Tests/native/surface_presentation_smoke.c",
+            "Tests/native/shader_source.c",
+        },
         .flags = &.{
             "-std=c17",
             "-Wall",
@@ -127,6 +132,9 @@ pub fn build(b: *std.Build) void {
         .root_module = surface_smoke_module,
     });
     const run_surface_smoke_test = b.addRunArtifact(surface_smoke_test);
+    run_surface_smoke_test.addFileArg(
+        b.path("Tests/native/Shaders/surface_presentation.comp.hlsl"),
+    );
 
     const sdl_test_step = b.step("test-sdl", "Run the SDL3 surface presentation test");
     sdl_test_step.dependOn(&run_surface_smoke_test.step);

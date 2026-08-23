@@ -1,0 +1,8 @@
+CompileFlags:
+  Add:
+    - -std=c++17
+    - -I/Users/rishflab/MoltenMTL/include
+    - -isystem
+    - /Users/rishflab/MoltenMTL/zig-pkg/N-V-__8AAJQvGQDuuRwMK2lVKTZw2WlzhuT8XNP7M1pTr7rk
+    - -isystem
+    - /Users/rishflab/Library/Developer/Slang/2026.14/include

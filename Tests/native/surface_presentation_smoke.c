@@ -1,5 +1,7 @@
 #include <MoltenMTL/MoltenMTL.h>
 
+#include "shader_source.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_metal.h>
 
@@ -15,14 +17,6 @@
             return 1;                                                               \
         }                                                                           \
     } while (0)
-
-static const char* computeSource =
-    "RWTexture2D<float4> outputTexture : register(u0);\n"
-    "[numthreads(16, 16, 1)]\n"
-    "void writeSurface(uint3 dispatchThreadID : SV_DispatchThreadID)\n"
-    "{\n"
-    "    outputTexture[dispatchThreadID.xy] = float4(1.0f, 0.5f, 0.25f, 1.0f);\n"
-    "}\n";
 
 static int isNear(uint8_t value, uint8_t expected)
 {
@@ -45,8 +39,13 @@ static MMTLResult acquireSurfaceImage(
     return result;
 }
 
-int main(void)
+int main(int argumentCount, char** arguments)
 {
+    if (argumentCount != 2) {
+        fprintf(stderr, "usage: surface-presentation-smoke <compute-shader>\n");
+        return 1;
+    }
+
     const uint32_t width = 16;
     const uint32_t height = 16;
     const uint64_t bytesPerRow = MMTL_TEXTURE_COPY_BYTES_PER_ROW_ALIGNMENT;
@@ -113,12 +112,27 @@ int main(void)
         return 1;
     }
 
+    char* computeSource = readShaderSource(arguments[1]);
+    if (computeSource == NULL) {
+        fprintf(stderr, "failed to read surface-presentation shader: %s\n", arguments[1]);
+        return 1;
+    }
+
     const MMTLLibraryDescriptor libraryDescriptor = {
         .source = computeSource,
         .moduleName = "surfacePresentation",
-        .sourcePath = "surface_presentation.hlsl",
+        .sourcePath = arguments[1],
     };
-    CHECK(mmtlCreateLibrary(device, &libraryDescriptor, &library));
+    const MMTLResult libraryResult = mmtlCreateLibrary(device, &libraryDescriptor, &library);
+    free(computeSource);
+    if (libraryResult != MMTL_SUCCESS) {
+        fprintf(
+            stderr,
+            "mmtlCreateLibrary failed with result %d: %s\n",
+            (int)libraryResult,
+            mmtlGetLastShaderError(device));
+        return 1;
+    }
     CHECK(mmtlCreateComputePipelineState(device, library, "writeSurface", &pipelineState));
     const MMTLArgumentTableDescriptor argumentTableDescriptor = {
         .maxBufferBindCount = 0,
