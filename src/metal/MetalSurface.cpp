@@ -176,6 +176,7 @@ MMTLResult mmtlQueuePresent(
     }
 
     queue->native->signalDrawable(surface->acquiredDrawable);
+    surface->acquiredDrawable->present();
     ++queue->submittedValue;
     queue->native->signalEvent(queue->completionEvent, queue->submittedValue);
     releaseAcquiredSurfaceImage(surface);

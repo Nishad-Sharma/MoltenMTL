@@ -59,6 +59,10 @@ struct MMTLTexture_T {
     bool ownsNative;
 };
 
+struct MMTLSampler_T {
+    MTL::SamplerState* native;
+};
+
 struct MMTLSurface_T {
     CA::MetalLayer* native;
     MTL::Device* device;
@@ -83,9 +87,13 @@ struct MMTLComputePipelineState_T {
 struct MMTLArgumentTable_T {
     MTL4::ArgumentTable* native;
     MTL::Allocation** bufferBindings;
+    MTL::Allocation*** bufferBindingDependencies;
+    uint32_t* bufferBindingDependencyCounts;
     MTL::Allocation** textureBindings;
+    MTL::SamplerState** samplerBindings;
     uint32_t maxBufferBindCount;
     uint32_t maxTextureBindCount;
+    uint32_t maxSamplerBindCount;
 };
 
 enum class AccelerationStructureKind {

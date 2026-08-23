@@ -84,6 +84,7 @@ pub fn build(b: *std.Build) void {
             "Tests/native/buffer_compute_smoke.c",
             "Tests/native/output_texture_smoke.c",
             "Tests/native/ray_query_smoke.c",
+            "Tests/native/sampled_texture_smoke.c",
             "Tests/native/shader_source.c",
         },
         .flags = &.{
@@ -102,6 +103,7 @@ pub fn build(b: *std.Build) void {
     });
     const runNativeSmokeTest = b.addRunArtifact(nativeSmokeTest);
     runNativeSmokeTest.addFileArg(b.path("Tests/native/Shaders/ray_query.comp.hlsl"));
+    runNativeSmokeTest.addFileArg(b.path("Tests/native/Shaders/sampled_texture.comp.hlsl"));
 
     const test_step = b.step("test", "Run native C API tests");
     test_step.dependOn(&runNativeSmokeTest.step);

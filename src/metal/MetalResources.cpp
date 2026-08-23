@@ -45,6 +45,60 @@ static bool getNativeStorageMode(
     }
 }
 
+static bool getNativeSamplerFilter(
+    MMTLSamplerFilter filter,
+    MTL::SamplerMinMagFilter* outFilter)
+{
+    switch (filter) {
+    case MMTL_SAMPLER_FILTER_NEAREST:
+        *outFilter = MTL::SamplerMinMagFilterNearest;
+        return true;
+    case MMTL_SAMPLER_FILTER_LINEAR:
+        *outFilter = MTL::SamplerMinMagFilterLinear;
+        return true;
+    default:
+        return false;
+    }
+}
+
+static bool getNativeSamplerMipFilter(
+    MMTLSamplerMipFilter filter,
+    MTL::SamplerMipFilter* outFilter)
+{
+    switch (filter) {
+    case MMTL_SAMPLER_MIP_FILTER_NOT_MIPMAPPED:
+        *outFilter = MTL::SamplerMipFilterNotMipmapped;
+        return true;
+    case MMTL_SAMPLER_MIP_FILTER_NEAREST:
+        *outFilter = MTL::SamplerMipFilterNearest;
+        return true;
+    case MMTL_SAMPLER_MIP_FILTER_LINEAR:
+        *outFilter = MTL::SamplerMipFilterLinear;
+        return true;
+    default:
+        return false;
+    }
+}
+
+static bool getNativeSamplerAddressMode(
+    MMTLSamplerAddressMode addressMode,
+    MTL::SamplerAddressMode* outAddressMode)
+{
+    switch (addressMode) {
+    case MMTL_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE:
+        *outAddressMode = MTL::SamplerAddressModeClampToEdge;
+        return true;
+    case MMTL_SAMPLER_ADDRESS_MODE_REPEAT:
+        *outAddressMode = MTL::SamplerAddressModeRepeat;
+        return true;
+    case MMTL_SAMPLER_ADDRESS_MODE_MIRROR_REPEAT:
+        *outAddressMode = MTL::SamplerAddressModeMirrorRepeat;
+        return true;
+    default:
+        return false;
+    }
+}
+
 extern "C" {
 
 MMTLResult mmtlCreateBuffer(
@@ -211,6 +265,70 @@ MMTLPixelFormat mmtlGetTexturePixelFormat(MMTLTexture texture)
 MMTLTextureUsage mmtlGetTextureUsage(MMTLTexture texture)
 {
     return texture == nullptr ? 0 : texture->descriptor.usage;
+}
+
+MMTLResult mmtlCreateSampler(
+    MMTLDevice device,
+    const MMTLSamplerDescriptor* descriptor,
+    MMTLSampler* outSampler)
+{
+    if (device == nullptr || descriptor == nullptr || outSampler == nullptr) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+    *outSampler = nullptr;
+
+    MTL::SamplerMinMagFilter minFilter;
+    MTL::SamplerMinMagFilter magFilter;
+    MTL::SamplerMipFilter mipFilter;
+    MTL::SamplerAddressMode addressModeU;
+    MTL::SamplerAddressMode addressModeV;
+    MTL::SamplerAddressMode addressModeW;
+    if (!getNativeSamplerFilter(descriptor->minFilter, &minFilter) ||
+        !getNativeSamplerFilter(descriptor->magFilter, &magFilter) ||
+        !getNativeSamplerMipFilter(descriptor->mipFilter, &mipFilter) ||
+        !getNativeSamplerAddressMode(descriptor->addressModeU, &addressModeU) ||
+        !getNativeSamplerAddressMode(descriptor->addressModeV, &addressModeV) ||
+        !getNativeSamplerAddressMode(descriptor->addressModeW, &addressModeW)) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+
+    ScopedAutoreleasePool pool;
+    auto* nativeDescriptor = MTL::SamplerDescriptor::alloc()->init();
+    if (nativeDescriptor == nullptr) {
+        return MMTL_ERROR_OUT_OF_MEMORY;
+    }
+    nativeDescriptor->setMinFilter(minFilter);
+    nativeDescriptor->setMagFilter(magFilter);
+    nativeDescriptor->setMipFilter(mipFilter);
+    nativeDescriptor->setSAddressMode(addressModeU);
+    nativeDescriptor->setTAddressMode(addressModeV);
+    nativeDescriptor->setRAddressMode(addressModeW);
+    nativeDescriptor->setNormalizedCoordinates(true);
+    nativeDescriptor->setSupportArgumentBuffers(true);
+
+    MTL::SamplerState* native = device->native->newSamplerState(nativeDescriptor);
+    nativeDescriptor->release();
+    if (native == nullptr) {
+        return MMTL_ERROR_OUT_OF_MEMORY;
+    }
+
+    auto* sampler = new (std::nothrow) MMTLSampler_T{native};
+    if (sampler == nullptr) {
+        native->release();
+        return MMTL_ERROR_OUT_OF_MEMORY;
+    }
+
+    *outSampler = sampler;
+    return MMTL_SUCCESS;
+}
+
+void mmtlDestroySampler(MMTLSampler sampler)
+{
+    if (sampler == nullptr) {
+        return;
+    }
+    sampler->native->release();
+    delete sampler;
 }
 
 } // extern "C"

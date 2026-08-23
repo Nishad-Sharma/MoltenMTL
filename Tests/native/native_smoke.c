@@ -4,18 +4,22 @@ int runDeviceQueueSmoke(void);
 int runBufferComputeSmoke(void);
 int runOutputTextureSmoke(void);
 int runRayQuerySmoke(const char* shaderPath);
+int runSampledTextureSmoke(const char* shaderPath);
 
 int main(int argumentCount, char** arguments)
 {
-    if (argumentCount != 2) {
-        fprintf(stderr, "usage: native-smoke <ray-query-shader>\n");
+    if (argumentCount != 3) {
+        fprintf(
+            stderr,
+            "usage: native-smoke <ray-query-shader> <sampled-texture-shader>\n");
         return 1;
     }
 
     if (runDeviceQueueSmoke() != 0 ||
         runBufferComputeSmoke() != 0 ||
         runOutputTextureSmoke() != 0 ||
-        runRayQuerySmoke(arguments[1]) != 0) {
+        runRayQuerySmoke(arguments[1]) != 0 ||
+        runSampledTextureSmoke(arguments[2]) != 0) {
         return 1;
     }
 

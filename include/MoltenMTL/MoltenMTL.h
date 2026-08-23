@@ -47,6 +47,7 @@ typedef struct MMTLCommandAllocator_T* MMTLCommandAllocator;
 typedef struct MMTLCommandBuffer_T* MMTLCommandBuffer;
 typedef struct MMTLBuffer_T* MMTLBuffer;
 typedef struct MMTLTexture_T* MMTLTexture;
+typedef struct MMTLSampler_T* MMTLSampler;
 typedef struct MMTLSurface_T* MMTLSurface;
 typedef struct MMTLLibrary_T* MMTLLibrary;
 typedef struct MMTLComputePipelineState_T* MMTLComputePipelineState;
@@ -97,6 +98,38 @@ typedef struct MMTLTextureDescriptor {
     MMTLStorageMode storageMode;
 } MMTLTextureDescriptor;
 
+typedef uint32_t MMTLSamplerFilter;
+
+enum {
+    MMTL_SAMPLER_FILTER_NEAREST = 0,
+    MMTL_SAMPLER_FILTER_LINEAR = 1,
+};
+
+typedef uint32_t MMTLSamplerMipFilter;
+
+enum {
+    MMTL_SAMPLER_MIP_FILTER_NOT_MIPMAPPED = 0,
+    MMTL_SAMPLER_MIP_FILTER_NEAREST = 1,
+    MMTL_SAMPLER_MIP_FILTER_LINEAR = 2,
+};
+
+typedef uint32_t MMTLSamplerAddressMode;
+
+enum {
+    MMTL_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 0,
+    MMTL_SAMPLER_ADDRESS_MODE_REPEAT = 1,
+    MMTL_SAMPLER_ADDRESS_MODE_MIRROR_REPEAT = 2,
+};
+
+typedef struct MMTLSamplerDescriptor {
+    MMTLSamplerFilter minFilter;
+    MMTLSamplerFilter magFilter;
+    MMTLSamplerMipFilter mipFilter;
+    MMTLSamplerAddressMode addressModeU;
+    MMTLSamplerAddressMode addressModeV;
+    MMTLSamplerAddressMode addressModeW;
+} MMTLSamplerDescriptor;
+
 typedef uint32_t MMTLPresentMode;
 
 enum {
@@ -126,6 +159,7 @@ typedef struct MMTLSurfaceImage {
 typedef struct MMTLArgumentTableDescriptor {
     uint32_t maxBufferBindCount;
     uint32_t maxTextureBindCount;
+    uint32_t maxSamplerBindCount;
 } MMTLArgumentTableDescriptor;
 
 /**
@@ -293,6 +327,13 @@ MMTL_API MMTLPixelFormat mmtlGetTexturePixelFormat(MMTLTexture texture);
 
 MMTL_API MMTLTextureUsage mmtlGetTextureUsage(MMTLTexture texture);
 
+MMTL_API MMTLResult mmtlCreateSampler(
+    MMTLDevice device,
+    const MMTLSamplerDescriptor* descriptor,
+    MMTLSampler* outSampler);
+
+MMTL_API void mmtlDestroySampler(MMTLSampler sampler);
+
 /**
  * Creates a surface around a CAMetalLayer supplied by the window system.
  *
@@ -405,6 +446,18 @@ MMTL_API MMTLResult mmtlSetArgumentTableTexture(
     uint32_t bindingIndex,
     MMTLTexture texture);
 
+/** Binds a contiguous HLSL texture array beginning at firstBindingIndex. */
+MMTL_API MMTLResult mmtlSetArgumentTableTextures(
+    MMTLArgumentTable argumentTable,
+    uint32_t firstBindingIndex,
+    const MMTLTexture* textures,
+    uint32_t textureCount);
+
+MMTL_API MMTLResult mmtlSetArgumentTableSampler(
+    MMTLArgumentTable argumentTable,
+    uint32_t bindingIndex,
+    MMTLSampler sampler);
+
 /**
  * Encodes a BLAS or TLAS build and makes it visible to later builds and
  * dispatches in the command buffer.
@@ -429,6 +482,19 @@ MMTL_API MMTLResult mmtlCmdDispatchThreads(
 MMTL_API MMTLResult mmtlCmdCopyTexture(
     MMTLCommandBuffer commandBuffer,
     MMTLTexture sourceTexture,
+    MMTLTexture destinationTexture);
+
+/**
+ * Uploads a complete 2D texture from a buffer.
+ *
+ * sourceBytesPerRow must cover one tightly packed row and be a multiple of
+ * MMTL_TEXTURE_COPY_BYTES_PER_ROW_ALIGNMENT.
+ */
+MMTL_API MMTLResult mmtlCmdCopyBufferToTexture(
+    MMTLCommandBuffer commandBuffer,
+    MMTLBuffer sourceBuffer,
+    uint64_t sourceOffset,
+    uint64_t sourceBytesPerRow,
     MMTLTexture destinationTexture);
 
 /**

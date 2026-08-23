@@ -40,6 +40,19 @@ static bool isValidSize(MMTLSize size)
     return size.width > 0 && size.height > 0 && size.depth > 0;
 }
 
+static void releaseBufferBindingDependencies(
+    MMTLArgumentTable argumentTable,
+    uint32_t bindingIndex)
+{
+    const uint32_t count = argumentTable->bufferBindingDependencyCounts[bindingIndex];
+    for (uint32_t index = 0; index < count; ++index) {
+        argumentTable->bufferBindingDependencies[bindingIndex][index]->release();
+    }
+    delete[] argumentTable->bufferBindingDependencies[bindingIndex];
+    argumentTable->bufferBindingDependencies[bindingIndex] = nullptr;
+    argumentTable->bufferBindingDependencyCounts[bindingIndex] = 0;
+}
+
 static MTL::Size nativeSize(MMTLSize size)
 {
     return MTL::Size(size.width, size.height, size.depth);
@@ -264,7 +277,8 @@ MMTLResult mmtlCreateArgumentTable(
     MMTLArgumentTable* outArgumentTable)
 {
     if (device == nullptr || descriptor == nullptr || outArgumentTable == nullptr ||
-        (descriptor->maxBufferBindCount == 0 && descriptor->maxTextureBindCount == 0)) {
+        (descriptor->maxBufferBindCount == 0 && descriptor->maxTextureBindCount == 0 &&
+         descriptor->maxSamplerBindCount == 0)) {
         return MMTL_ERROR_INVALID_ARGUMENT;
     }
     *outArgumentTable = nullptr;
@@ -276,6 +290,7 @@ MMTLResult mmtlCreateArgumentTable(
     }
     nativeDescriptor->setMaxBufferBindCount(descriptor->maxBufferBindCount);
     nativeDescriptor->setMaxTextureBindCount(descriptor->maxTextureBindCount);
+    nativeDescriptor->setMaxSamplerStateBindCount(descriptor->maxSamplerBindCount);
     nativeDescriptor->setInitializeBindings(true);
 
     NS::Error* error = nullptr;
@@ -286,18 +301,35 @@ MMTLResult mmtlCreateArgumentTable(
     }
 
     MTL::Allocation** bufferBindings = nullptr;
+    MTL::Allocation*** bufferBindingDependencies = nullptr;
+    uint32_t* bufferBindingDependencyCounts = nullptr;
     if (descriptor->maxBufferBindCount > 0) {
         bufferBindings =
             new (std::nothrow) MTL::Allocation*[descriptor->maxBufferBindCount]();
+        bufferBindingDependencies =
+            new (std::nothrow) MTL::Allocation**[descriptor->maxBufferBindCount]();
+        bufferBindingDependencyCounts =
+            new (std::nothrow) uint32_t[descriptor->maxBufferBindCount]();
     }
     MTL::Allocation** textureBindings = nullptr;
     if (descriptor->maxTextureBindCount > 0) {
         textureBindings =
             new (std::nothrow) MTL::Allocation*[descriptor->maxTextureBindCount]();
     }
-    if ((descriptor->maxBufferBindCount > 0 && bufferBindings == nullptr) ||
-        (descriptor->maxTextureBindCount > 0 && textureBindings == nullptr)) {
+    MTL::SamplerState** samplerBindings = nullptr;
+    if (descriptor->maxSamplerBindCount > 0) {
+        samplerBindings =
+            new (std::nothrow) MTL::SamplerState*[descriptor->maxSamplerBindCount]();
+    }
+    if ((descriptor->maxBufferBindCount > 0 &&
+         (bufferBindings == nullptr || bufferBindingDependencies == nullptr ||
+          bufferBindingDependencyCounts == nullptr)) ||
+        (descriptor->maxTextureBindCount > 0 && textureBindings == nullptr) ||
+        (descriptor->maxSamplerBindCount > 0 && samplerBindings == nullptr)) {
+        delete[] samplerBindings;
         delete[] textureBindings;
+        delete[] bufferBindingDependencyCounts;
+        delete[] bufferBindingDependencies;
         delete[] bufferBindings;
         native->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
@@ -306,12 +338,19 @@ MMTLResult mmtlCreateArgumentTable(
     auto* argumentTable = new (std::nothrow) MMTLArgumentTable_T{
         native,
         bufferBindings,
+        bufferBindingDependencies,
+        bufferBindingDependencyCounts,
         textureBindings,
+        samplerBindings,
         descriptor->maxBufferBindCount,
         descriptor->maxTextureBindCount,
+        descriptor->maxSamplerBindCount,
     };
     if (argumentTable == nullptr) {
+        delete[] samplerBindings;
         delete[] textureBindings;
+        delete[] bufferBindingDependencyCounts;
+        delete[] bufferBindingDependencies;
         delete[] bufferBindings;
         native->release();
         return MMTL_ERROR_OUT_OF_MEMORY;
@@ -328,6 +367,7 @@ void mmtlDestroyArgumentTable(MMTLArgumentTable argumentTable)
     }
 
     for (uint32_t index = 0; index < argumentTable->maxBufferBindCount; ++index) {
+        releaseBufferBindingDependencies(argumentTable, index);
         if (argumentTable->bufferBindings[index] != nullptr) {
             argumentTable->bufferBindings[index]->release();
         }
@@ -337,7 +377,15 @@ void mmtlDestroyArgumentTable(MMTLArgumentTable argumentTable)
             argumentTable->textureBindings[index]->release();
         }
     }
+    for (uint32_t index = 0; index < argumentTable->maxSamplerBindCount; ++index) {
+        if (argumentTable->samplerBindings[index] != nullptr) {
+            argumentTable->samplerBindings[index]->release();
+        }
+    }
+    delete[] argumentTable->samplerBindings;
     delete[] argumentTable->textureBindings;
+    delete[] argumentTable->bufferBindingDependencyCounts;
+    delete[] argumentTable->bufferBindingDependencies;
     delete[] argumentTable->bufferBindings;
     argumentTable->native->release();
     delete argumentTable;
@@ -368,6 +416,7 @@ MMTLResult mmtlSetArgumentTableBuffer(
     if (argumentTable->bufferBindings[bindingIndex] != nullptr) {
         argumentTable->bufferBindings[bindingIndex]->release();
     }
+    releaseBufferBindingDependencies(argumentTable, bindingIndex);
     argumentTable->bufferBindings[bindingIndex] =
         buffer == nullptr ? nullptr : buffer->native;
     return MMTL_SUCCESS;
@@ -382,6 +431,22 @@ MMTLResult mmtlSetArgumentTableAccelerationStructure(
         return MMTL_ERROR_INVALID_ARGUMENT;
     }
 
+    MTL::Allocation** dependencies = nullptr;
+    uint32_t dependencyCount = 0;
+    if (accelerationStructure != nullptr) {
+        dependencyCount = accelerationStructure->retainedAllocationCount;
+        if (dependencyCount > 0) {
+            dependencies = new (std::nothrow) MTL::Allocation*[dependencyCount];
+            if (dependencies == nullptr) {
+                return MMTL_ERROR_OUT_OF_MEMORY;
+            }
+            for (uint32_t index = 0; index < dependencyCount; ++index) {
+                dependencies[index] = accelerationStructure->retainedAllocations[index];
+                dependencies[index]->retain();
+            }
+        }
+    }
+
     if (accelerationStructure == nullptr) {
         argumentTable->native->setResource(MTL::ResourceID{}, bindingIndex);
     } else {
@@ -394,8 +459,11 @@ MMTLResult mmtlSetArgumentTableAccelerationStructure(
     if (argumentTable->bufferBindings[bindingIndex] != nullptr) {
         argumentTable->bufferBindings[bindingIndex]->release();
     }
+    releaseBufferBindingDependencies(argumentTable, bindingIndex);
     argumentTable->bufferBindings[bindingIndex] =
         accelerationStructure == nullptr ? nullptr : accelerationStructure->native;
+    argumentTable->bufferBindingDependencies[bindingIndex] = dependencies;
+    argumentTable->bufferBindingDependencyCounts[bindingIndex] = dependencyCount;
     return MMTL_SUCCESS;
 }
 
@@ -420,6 +488,56 @@ MMTLResult mmtlSetArgumentTableTexture(
     }
     argumentTable->textureBindings[bindingIndex] =
         texture == nullptr ? nullptr : texture->native;
+    return MMTL_SUCCESS;
+}
+
+MMTLResult mmtlSetArgumentTableTextures(
+    MMTLArgumentTable argumentTable,
+    uint32_t firstBindingIndex,
+    const MMTLTexture* textures,
+    uint32_t textureCount)
+{
+    if (argumentTable == nullptr || textures == nullptr || textureCount == 0 ||
+        firstBindingIndex > argumentTable->maxTextureBindCount ||
+        textureCount > argumentTable->maxTextureBindCount - firstBindingIndex) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+
+    for (uint32_t index = 0; index < textureCount; ++index) {
+        const MMTLResult result = mmtlSetArgumentTableTexture(
+            argumentTable,
+            firstBindingIndex + index,
+            textures[index]);
+        if (result != MMTL_SUCCESS) {
+            return result;
+        }
+    }
+    return MMTL_SUCCESS;
+}
+
+MMTLResult mmtlSetArgumentTableSampler(
+    MMTLArgumentTable argumentTable,
+    uint32_t bindingIndex,
+    MMTLSampler sampler)
+{
+    if (argumentTable == nullptr || bindingIndex >= argumentTable->maxSamplerBindCount) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (sampler == nullptr) {
+        argumentTable->native->setSamplerState(MTL::ResourceID{}, bindingIndex);
+    } else {
+        sampler->native->retain();
+        argumentTable->native->setSamplerState(
+            sampler->native->gpuResourceID(),
+            bindingIndex);
+    }
+
+    if (argumentTable->samplerBindings[bindingIndex] != nullptr) {
+        argumentTable->samplerBindings[bindingIndex]->release();
+    }
+    argumentTable->samplerBindings[bindingIndex] =
+        sampler == nullptr ? nullptr : sampler->native;
     return MMTL_SUCCESS;
 }
 
@@ -448,6 +566,15 @@ MMTLResult mmtlCmdDispatchThreads(
             MTL::Allocation* resource = argumentTable->bufferBindings[index];
             if (resource != nullptr) {
                 addResidentAllocation(commandBuffer, resource);
+            }
+            const uint32_t dependencyCount =
+                argumentTable->bufferBindingDependencyCounts[index];
+            for (uint32_t dependencyIndex = 0;
+                 dependencyIndex < dependencyCount;
+                 ++dependencyIndex) {
+                addResidentAllocation(
+                    commandBuffer,
+                    argumentTable->bufferBindingDependencies[index][dependencyIndex]);
             }
         }
         for (uint32_t index = 0; index < argumentTable->maxTextureBindCount; ++index) {
@@ -508,6 +635,83 @@ MMTLResult mmtlCmdCopyTexture(
         return MMTL_ERROR_INTERNAL;
     }
     encoder->copyFromTexture(sourceTexture->native, destinationTexture->native);
+    encoder->barrierAfterStages(
+        MTL::StageBlit,
+        MTL::StageDispatch | MTL::StageBlit | MTL::StageAccelerationStructure,
+        MTL4::VisibilityOptionDevice);
+    encoder->endEncoding();
+    return MMTL_SUCCESS;
+}
+
+MMTLResult mmtlCmdCopyBufferToTexture(
+    MMTLCommandBuffer commandBuffer,
+    MMTLBuffer sourceBuffer,
+    uint64_t sourceOffset,
+    uint64_t sourceBytesPerRow,
+    MMTLTexture destinationTexture)
+{
+    if (commandBuffer == nullptr || sourceBuffer == nullptr || destinationTexture == nullptr) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+    if (commandBuffer->state != CommandBufferState::recording) {
+        return MMTL_ERROR_INVALID_STATE;
+    }
+    if ((destinationTexture->descriptor.usage & MMTL_TEXTURE_USAGE_COPY_DESTINATION) == 0 ||
+        sourceBytesPerRow % MMTL_TEXTURE_COPY_BYTES_PER_ROW_ALIGNMENT != 0) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+
+    MTL::PixelFormat nativePixelFormat;
+    uint32_t bytesPerPixel = 0;
+    if (!getNativePixelFormat(
+            destinationTexture->descriptor.pixelFormat,
+            &nativePixelFormat,
+            &bytesPerPixel)) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+    (void)nativePixelFormat;
+
+    const uint64_t tightlyPackedBytesPerRow =
+        static_cast<uint64_t>(destinationTexture->descriptor.width) * bytesPerPixel;
+    if (sourceBytesPerRow < tightlyPackedBytesPerRow ||
+        sourceBytesPerRow > std::numeric_limits<uint64_t>::max() /
+            destinationTexture->descriptor.height) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+    const uint64_t sourceBytesPerImage =
+        sourceBytesPerRow * destinationTexture->descriptor.height;
+    const uint64_t sourceBufferLength = sourceBuffer->native->length();
+    if (sourceOffset > sourceBufferLength ||
+        sourceBytesPerImage > sourceBufferLength - sourceOffset) {
+        return MMTL_ERROR_INVALID_ARGUMENT;
+    }
+
+    const MMTLResult residencyResult = ensureResidencySet(commandBuffer);
+    if (residencyResult != MMTL_SUCCESS) {
+        return residencyResult;
+    }
+    addResidentAllocation(commandBuffer, sourceBuffer->native);
+    addResidentAllocation(commandBuffer, destinationTexture->native);
+    commandBuffer->residencySet->commit();
+
+    ScopedAutoreleasePool pool;
+    MTL4::ComputeCommandEncoder* encoder = commandBuffer->native->computeCommandEncoder();
+    if (encoder == nullptr) {
+        return MMTL_ERROR_INTERNAL;
+    }
+    encoder->copyFromBuffer(
+        sourceBuffer->native,
+        sourceOffset,
+        sourceBytesPerRow,
+        sourceBytesPerImage,
+        MTL::Size(
+            destinationTexture->descriptor.width,
+            destinationTexture->descriptor.height,
+            1),
+        destinationTexture->native,
+        0,
+        0,
+        MTL::Origin(0, 0, 0));
     encoder->barrierAfterStages(
         MTL::StageBlit,
         MTL::StageDispatch | MTL::StageBlit | MTL::StageAccelerationStructure,

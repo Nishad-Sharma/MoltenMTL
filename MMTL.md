@@ -19,6 +19,9 @@ metal-cpp and vulkan are he backend.
   backend.
 - Use explicit HLSL `register(...)` bindings so the same numeric resource
   bindings map to MMTL argument-table indices and future Vulkan descriptors.
+- Fixed-size HLSL texture arrays occupy consecutive texture bindings. Bind them
+  with `mmtlSetArgumentTableTextures()` starting at the array's first register;
+  samplers use their own binding-index namespace.
 - `moduleName` and `sourcePath` are optional source identities. Use
   `searchPaths` for shared HLSL includes and imported Slang modules.
 - Shader compilation diagnostics are available through
@@ -46,7 +49,8 @@ Use Metal 4 as the semantic reference and implement narrow vertical slices in bo
 Device, queue, allocator and command buffer.
 Buffer plus compute dispatch.
 Output textures: 2D creation, compute binding and texture copies.
-Sampler and sampled-texture support.
+Sampler and sampled-texture support: sampler binding, contiguous texture arrays,
+and aligned staging-buffer uploads.
 Render pipeline, attachment map and triangle.
 Presentation: cross-platform surface with platform-specific native creation.
 BLAS/TLAS and inline ray queries.
