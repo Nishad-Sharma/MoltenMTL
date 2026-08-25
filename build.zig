@@ -24,7 +24,8 @@ pub fn build(b: *std.Build) void {
     library_module.addCSourceFiles(.{
         .files = &.{
             "src/Metal/MetalCppImplementation.cpp",
-            "src/Metal/MTLDefines.cpp",
+            "src/Metal/MTLObject.cpp",
+            "src/Metal/MTLError.cpp",
             "src/Metal/MTLDevice.cpp",
             "src/Metal/MTLResource.cpp",
             "src/Metal/MTLResidencySet.cpp",

@@ -8,16 +8,17 @@ extern "C" {
 #endif
 
 typedef struct MTLResource MTLResource;
-typedef uint64_t MTLResourceOptions;
-#define MTLResourceCPUCacheModeDefaultCache ((MTLResourceOptions)0)
-#define MTLResourceCPUCacheModeWriteCombined ((MTLResourceOptions)1)
-#define MTLResourceStorageModeShared ((MTLResourceOptions)0)
-#define MTLResourceStorageModeManaged ((MTLResourceOptions)0x10)
-#define MTLResourceStorageModePrivate ((MTLResourceOptions)0x20)
-#define MTLResourceStorageModeMemoryless ((MTLResourceOptions)0x30)
-#define MTLResourceHazardTrackingModeDefault ((MTLResourceOptions)0)
-#define MTLResourceHazardTrackingModeUntracked ((MTLResourceOptions)0x100)
-#define MTLResourceHazardTrackingModeTracked ((MTLResourceOptions)0x200)
+MTL_C_OPTIONS(uint64_t, MTLResourceOptions) {
+    MTLResourceCPUCacheModeDefaultCache = 0,
+    MTLResourceCPUCacheModeWriteCombined = 1,
+    MTLResourceStorageModeShared = 0,
+    MTLResourceStorageModeManaged = 0x10,
+    MTLResourceStorageModePrivate = 0x20,
+    MTLResourceStorageModeMemoryless = 0x30,
+    MTLResourceHazardTrackingModeDefault = 0,
+    MTLResourceHazardTrackingModeUntracked = 0x100,
+    MTLResourceHazardTrackingModeTracked = 0x200
+};
 
 METAL_C_EXPORT void MTLResourceSetLabel(MTLResource* resource, const char* label);
 METAL_C_EXPORT size_t MTLResourceGetAllocatedSize(const MTLResource* resource);

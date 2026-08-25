@@ -1,6 +1,8 @@
 #ifndef METAL_C_METAL_H
 #define METAL_C_METAL_H
 #include <Metal/MTLDefines.h>
+#include <Metal/MTLObject.h>
+#include <Metal/MTLError.h>
 #include <Metal/MTLTypes.h>
 #include <Metal/MTLPixelFormat.h>
 #include <Metal/MTLResource.h>

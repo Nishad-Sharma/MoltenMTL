@@ -3,6 +3,7 @@
 
 #include <Metal/MTLAccelerationStructure.h>
 #include <Metal/MTLBuffer.h>
+#include <Metal/MTLError.h>
 #include <Metal/MTLEvent.h>
 #include <Metal/MTLResidencySet.h>
 #include <Metal/MTLTexture.h>

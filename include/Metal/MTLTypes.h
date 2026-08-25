@@ -23,26 +23,30 @@ static inline MTLRegion MTLRegionMake3D(size_t x, size_t y, size_t z, size_t wid
     MTLRegion value = {MTLOriginMake(x, y, z), MTLSizeMake(width, height, depth)}; return value;
 }
 
-typedef uint64_t MTLStages;
-#define MTLStageVertex ((MTLStages)1)
-#define MTLStageFragment ((MTLStages)1 << 1)
-#define MTLStageTile ((MTLStages)1 << 2)
-#define MTLStageObject ((MTLStages)1 << 3)
-#define MTLStageMesh ((MTLStages)1 << 4)
-#define MTLStageResourceState ((MTLStages)1 << 26)
-#define MTLStageDispatch ((MTLStages)1 << 27)
-#define MTLStageBlit ((MTLStages)1 << 28)
-#define MTLStageAccelerationStructure ((MTLStages)1 << 29)
-#define MTLStageAll UINT64_C(0x7fffffffffffffff)
+MTL_C_OPTIONS(uint64_t, MTLStages) {
+    MTLStageVertex = 1,
+    MTLStageFragment = 1 << 1,
+    MTLStageTile = 1 << 2,
+    MTLStageObject = 1 << 3,
+    MTLStageMesh = 1 << 4,
+    MTLStageResourceState = 1 << 26,
+    MTLStageDispatch = 1 << 27,
+    MTLStageBlit = 1 << 28,
+    MTLStageAccelerationStructure = 1 << 29
+};
+#define MTLStageAll ((MTLStages)UINT64_C(0x7fffffffffffffff))
 
-typedef enum MTLIndexType { MTLIndexTypeUInt16 = 0, MTLIndexTypeUInt32 = 1 } MTLIndexType;
-typedef enum MTLAttributeFormat {
+MTL_C_ENUM(uint64_t, MTLIndexType) {
+    MTLIndexTypeUInt16 = 0,
+    MTLIndexTypeUInt32 = 1
+};
+MTL_C_ENUM(uint64_t, MTLAttributeFormat) {
     MTLAttributeFormatInvalid = 0,
     MTLAttributeFormatFloat = 28,
     MTLAttributeFormatFloat2 = 29,
     MTLAttributeFormatFloat3 = 30,
     MTLAttributeFormatFloat4 = 31
-} MTLAttributeFormat;
+};
 
 #ifdef __cplusplus
 }

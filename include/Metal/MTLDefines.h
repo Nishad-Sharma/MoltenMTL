@@ -11,21 +11,7 @@
 
 #define METAL_C_EXPORT __attribute__((visibility("default")))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct MTLAutoreleasePool MTLAutoreleasePool;
-typedef struct MTLError MTLError;
-
-METAL_C_EXPORT MTLAutoreleasePool* MTLAutoreleasePoolCreate(void);
-METAL_C_EXPORT void* MTLRetain(void* object);
-METAL_C_EXPORT void MTLRelease(void* object);
-METAL_C_EXPORT int64_t MTLErrorGetCode(const MTLError* error);
-METAL_C_EXPORT const char* MTLErrorGetLocalizedDescription(const MTLError* error);
-
-#ifdef __cplusplus
-}
-#endif
+#define MTL_C_ENUM(type, name) typedef type name; enum
+#define MTL_C_OPTIONS(type, name) typedef type name; enum
 
 #endif

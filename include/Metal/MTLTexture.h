@@ -10,13 +10,22 @@ extern "C" {
 #endif
 typedef struct MTLTexture MTLTexture;
 typedef struct MTLTextureDescriptor MTLTextureDescriptor;
-typedef enum MTLTextureType { MTLTextureType1D = 0, MTLTextureType1DArray = 1, MTLTextureType2D = 2, MTLTextureType2DArray = 3, MTLTextureTypeCube = 5, MTLTextureTypeCubeArray = 6, MTLTextureType3D = 7 } MTLTextureType;
-typedef uint64_t MTLTextureUsage;
-#define MTLTextureUsageUnknown ((MTLTextureUsage)0)
-#define MTLTextureUsageShaderRead ((MTLTextureUsage)1)
-#define MTLTextureUsageShaderWrite ((MTLTextureUsage)2)
-#define MTLTextureUsageRenderTarget ((MTLTextureUsage)4)
-#define MTLTextureUsagePixelFormatView ((MTLTextureUsage)16)
+MTL_C_ENUM(uint64_t, MTLTextureType) {
+    MTLTextureType1D = 0,
+    MTLTextureType1DArray = 1,
+    MTLTextureType2D = 2,
+    MTLTextureType2DArray = 3,
+    MTLTextureTypeCube = 5,
+    MTLTextureTypeCubeArray = 6,
+    MTLTextureType3D = 7
+};
+MTL_C_OPTIONS(uint64_t, MTLTextureUsage) {
+    MTLTextureUsageUnknown = 0,
+    MTLTextureUsageShaderRead = 1,
+    MTLTextureUsageShaderWrite = 2,
+    MTLTextureUsageRenderTarget = 4,
+    MTLTextureUsagePixelFormatView = 16
+};
 
 METAL_C_EXPORT MTLTextureDescriptor* MTLTextureDescriptorCreate(void);
 METAL_C_EXPORT MTLTextureDescriptor* MTLTextureDescriptorCreate2D(MTLPixelFormat format, size_t width, size_t height, bool mipmapped);

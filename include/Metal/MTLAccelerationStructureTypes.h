@@ -3,26 +3,28 @@
 
 #include <Metal/MTLTypes.h>
 
-typedef uint64_t MTLAccelerationStructureUsage;
-#define MTLAccelerationStructureUsageNone ((MTLAccelerationStructureUsage)0)
-#define MTLAccelerationStructureUsageRefit ((MTLAccelerationStructureUsage)1)
-#define MTLAccelerationStructureUsagePreferFastBuild ((MTLAccelerationStructureUsage)2)
-#define MTLAccelerationStructureUsageExtendedLimits ((MTLAccelerationStructureUsage)4)
-#define MTLAccelerationStructureUsagePreferFastIntersection ((MTLAccelerationStructureUsage)16)
-#define MTLAccelerationStructureUsageMinimizeMemory ((MTLAccelerationStructureUsage)32)
+MTL_C_OPTIONS(uint64_t, MTLAccelerationStructureUsage) {
+    MTLAccelerationStructureUsageNone = 0,
+    MTLAccelerationStructureUsageRefit = 1,
+    MTLAccelerationStructureUsagePreferFastBuild = 2,
+    MTLAccelerationStructureUsageExtendedLimits = 4,
+    MTLAccelerationStructureUsagePreferFastIntersection = 16,
+    MTLAccelerationStructureUsageMinimizeMemory = 32
+};
 
-typedef enum MTLAccelerationStructureInstanceDescriptorType {
+MTL_C_ENUM(uint64_t, MTLAccelerationStructureInstanceDescriptorType) {
     MTLAccelerationStructureInstanceDescriptorTypeDefault = 0,
     MTLAccelerationStructureInstanceDescriptorTypeUserID = 1,
     MTLAccelerationStructureInstanceDescriptorTypeIndirect = 3
-} MTLAccelerationStructureInstanceDescriptorType;
+};
 
-typedef uint32_t MTLAccelerationStructureInstanceOptions;
-#define MTLAccelerationStructureInstanceOptionNone ((MTLAccelerationStructureInstanceOptions)0)
-#define MTLAccelerationStructureInstanceOptionDisableTriangleCulling ((MTLAccelerationStructureInstanceOptions)1)
-#define MTLAccelerationStructureInstanceOptionTriangleFrontFacingWindingCounterClockwise ((MTLAccelerationStructureInstanceOptions)2)
-#define MTLAccelerationStructureInstanceOptionOpaque ((MTLAccelerationStructureInstanceOptions)4)
-#define MTLAccelerationStructureInstanceOptionNonOpaque ((MTLAccelerationStructureInstanceOptions)8)
+MTL_C_OPTIONS(uint32_t, MTLAccelerationStructureInstanceOptions) {
+    MTLAccelerationStructureInstanceOptionNone = 0,
+    MTLAccelerationStructureInstanceOptionDisableTriangleCulling = 1,
+    MTLAccelerationStructureInstanceOptionTriangleFrontFacingWindingCounterClockwise = 2,
+    MTLAccelerationStructureInstanceOptionOpaque = 4,
+    MTLAccelerationStructureInstanceOptionNonOpaque = 8
+};
 
 #pragma pack(push, 1)
 typedef struct MTLAccelerationStructureInstanceDescriptor {

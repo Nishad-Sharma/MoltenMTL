@@ -3,6 +3,7 @@
 #include <Metal/MTL4ComputePipeline.h>
 #include <Metal/MTL4LibraryDescriptor.h>
 #include <Metal/MTLComputePipeline.h>
+#include <Metal/MTLError.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

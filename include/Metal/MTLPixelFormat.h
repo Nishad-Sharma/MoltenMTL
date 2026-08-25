@@ -1,7 +1,9 @@
 #ifndef METAL_C_MTL_PIXEL_FORMAT_H
 #define METAL_C_MTL_PIXEL_FORMAT_H
 
-typedef enum MTLPixelFormat {
+#include <Metal/MTLDefines.h>
+
+MTL_C_ENUM(uint64_t, MTLPixelFormat) {
     MTLPixelFormatInvalid = 0,
     MTLPixelFormatR8Unorm = 10,
     MTLPixelFormatR16Float = 25,
@@ -15,6 +17,6 @@ typedef enum MTLPixelFormat {
     MTLPixelFormatR32Float = 55,
     MTLPixelFormatRG32Float = 105,
     MTLPixelFormatRGBA32Float = 125
-} MTLPixelFormat;
+};
 
 #endif
