@@ -83,6 +83,7 @@ pub fn build(b: *std.Build) void {
             "Tests/native/device_queue_smoke.c",
             "Tests/native/buffer_compute_smoke.c",
             "Tests/native/output_texture_smoke.c",
+            "Tests/native/pixel_format_smoke.c",
             "Tests/native/ray_query_smoke.c",
             "Tests/native/sampled_texture_smoke.c",
             "Tests/native/shader_source.c",

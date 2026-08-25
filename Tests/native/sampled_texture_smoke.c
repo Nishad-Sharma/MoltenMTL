@@ -33,6 +33,24 @@ static void fillStagingTexture(
     }
 }
 
+static void fillStagingTextureRGBA8(
+    MMTLBuffer stagingBuffer,
+    uint64_t bytesPerRow,
+    uint32_t width,
+    uint32_t height,
+    const uint8_t color[4])
+{
+    uint8_t* bytes = mmtlGetBufferContents(stagingBuffer);
+    for (uint32_t y = 0; y < height; ++y) {
+        uint8_t* row = bytes + y * bytesPerRow;
+        for (uint32_t x = 0; x < width; ++x) {
+            for (uint32_t channel = 0; channel < 4; ++channel) {
+                row[x * 4 + channel] = color[channel];
+            }
+        }
+    }
+}
+
 int runSampledTextureSmoke(const char* shaderPath)
 {
     const uint32_t width = 2;
@@ -67,20 +85,27 @@ int runSampledTextureSmoke(const char* shaderPath)
     CHECK(mmtlCreateBuffer(device, &transferBufferDescriptor, &secondStagingBuffer));
     CHECK(mmtlCreateBuffer(device, &transferBufferDescriptor, &readbackBuffer));
 
-    const float firstColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+    const uint8_t firstColor[4] = {128, 0, 0, 255};
     const float secondColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
-    fillStagingTexture(firstStagingBuffer, bytesPerRow, width, height, firstColor);
+    fillStagingTextureRGBA8(firstStagingBuffer, bytesPerRow, width, height, firstColor);
     fillStagingTexture(secondStagingBuffer, bytesPerRow, width, height, secondColor);
 
-    const MMTLTextureDescriptor inputTextureDescriptor = {
+    const MMTLTextureDescriptor firstTextureDescriptor = {
+        .width = width,
+        .height = height,
+        .pixelFormat = MMTL_PIXEL_FORMAT_RGBA8_UNORM_SRGB,
+        .usage = MMTL_TEXTURE_USAGE_SHADER_READ | MMTL_TEXTURE_USAGE_COPY_DESTINATION,
+        .storageMode = MMTL_STORAGE_MODE_PRIVATE,
+    };
+    const MMTLTextureDescriptor secondTextureDescriptor = {
         .width = width,
         .height = height,
         .pixelFormat = MMTL_PIXEL_FORMAT_RGBA32_FLOAT,
         .usage = MMTL_TEXTURE_USAGE_SHADER_READ | MMTL_TEXTURE_USAGE_COPY_DESTINATION,
         .storageMode = MMTL_STORAGE_MODE_PRIVATE,
     };
-    CHECK(mmtlCreateTexture(device, &inputTextureDescriptor, &firstTexture));
-    CHECK(mmtlCreateTexture(device, &inputTextureDescriptor, &secondTexture));
+    CHECK(mmtlCreateTexture(device, &firstTextureDescriptor, &firstTexture));
+    CHECK(mmtlCreateTexture(device, &secondTextureDescriptor, &secondTexture));
 
     const MMTLTextureDescriptor outputTextureDescriptor = {
         .width = width,
@@ -167,9 +192,10 @@ int runSampledTextureSmoke(const char* shaderPath)
         const float* row = (const float*)(readbackBytes + y * bytesPerRow);
         for (uint32_t x = 0; x < width; ++x) {
             const float* pixel = row + x * 4;
-            const float expected[4] = {0.25f, 0.0f, 0.75f, 1.0f};
+            const float expected[4] = {0.0539651f, 0.0f, 0.75f, 1.0f};
             for (uint32_t channel = 0; channel < 4; ++channel) {
-                if (pixel[channel] != expected[channel]) {
+                const float difference = pixel[channel] - expected[channel];
+                if (difference < -0.00001f || difference > 0.00001f) {
                     fprintf(
                         stderr,
                         "unexpected sampled pixel (%u, %u) channel %u: got %f, expected %f\n",
@@ -199,6 +225,6 @@ int runSampledTextureSmoke(const char* shaderPath)
     mmtlDestroyCommandQueue(queue);
     mmtlDestroyDevice(device);
 
-    puts("sampled texture-array and upload smoke test passed");
+    puts("sampled texture-array, sRGB decode, and upload smoke test passed");
     return 0;
 }

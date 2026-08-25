@@ -3,6 +3,7 @@
 int runDeviceQueueSmoke(void);
 int runBufferComputeSmoke(void);
 int runOutputTextureSmoke(void);
+int runPixelFormatSmoke(void);
 int runRayQuerySmoke(const char* shaderPath);
 int runSampledTextureSmoke(const char* shaderPath);
 
@@ -18,6 +19,7 @@ int main(int argumentCount, char** arguments)
     if (runDeviceQueueSmoke() != 0 ||
         runBufferComputeSmoke() != 0 ||
         runOutputTextureSmoke() != 0 ||
+        runPixelFormatSmoke() != 0 ||
         runRayQuerySmoke(arguments[1]) != 0 ||
         runSampledTextureSmoke(arguments[2]) != 0) {
         return 1;
