@@ -15,6 +15,7 @@
         "include",
         "src",
         "Tests/native",
+        "Tests/zig",
         "LICENSE",
     },
 }

@@ -1,4 +1,8 @@
-# metal-c
+# Slag
+
+Zig graphics API that abstracts over Vulkan and Metal4.
+
+## metal-c
 
 An Apple-only C wrapper over Apple's metal-cpp headers. The public headers mirror
 metal-cpp's `Metal/` layout and expose the Metal 4 path needed for compute-based

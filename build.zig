@@ -13,15 +13,15 @@ pub fn build(b: *std.Build) void {
 
     const metal_cpp = b.dependency("metal_cpp", .{});
 
-    const library_module = b.createModule(.{
+    const metal_c_module = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
         .link_libcpp = true,
     });
-    library_module.addIncludePath(b.path("include"));
-    library_module.addSystemIncludePath(metal_cpp.path(""));
-    library_module.addCSourceFiles(.{
+    metal_c_module.addIncludePath(b.path("include"));
+    metal_c_module.addSystemIncludePath(metal_cpp.path(""));
+    metal_c_module.addCSourceFiles(.{
         .files = &.{
             "src/Metal/MetalCppImplementation.cpp",
             "src/Metal/MTLObject.cpp",
@@ -45,16 +45,38 @@ pub fn build(b: *std.Build) void {
             "-Werror",
         },
     });
-    library_module.linkFramework("Foundation", .{});
-    library_module.linkFramework("Metal", .{});
-    library_module.linkFramework("QuartzCore", .{});
+    metal_c_module.linkFramework("Foundation", .{});
+    metal_c_module.linkFramework("Metal", .{});
+    metal_c_module.linkFramework("QuartzCore", .{});
 
-    const library = b.addLibrary(.{
+    const metal_c_library = b.addLibrary(.{
         .name = "metal-c",
         .linkage = .static,
-        .root_module = library_module,
+        .root_module = metal_c_module,
     });
-    library.installHeadersDirectory(b.path("include/Metal"), "Metal", .{});
-    library.installHeadersDirectory(b.path("include/QuartzCore"), "QuartzCore", .{});
-    b.installArtifact(library);
+
+    const slag_module = b.addModule("metal", .{
+        .root_source_file = b.path("src/slag.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    slag_module.addIncludePath(b.path("include"));
+    slag_module.linkLibrary(metal_c_library);
+
+    metal_c_library.installHeadersDirectory(b.path("include/Metal"), "Metal", .{});
+    metal_c_library.installHeadersDirectory(b.path("include/QuartzCore"), "QuartzCore", .{});
+    b.installArtifact(metal_c_library);
+
+    const wrapper_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("Tests/zig/slag_test.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{.{ .name = "slag", .module = slag_module }},
+        }),
+    });
+    const run_wrapper_tests = b.addRunArtifact(wrapper_tests);
+    const test_step = b.step("test", "Run the Zig wrapper tests");
+    test_step.dependOn(&run_wrapper_tests.step);
 }
