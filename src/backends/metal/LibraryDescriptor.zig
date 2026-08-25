@@ -12,11 +12,8 @@ pub const LibraryDescriptor = extern struct {
     pub fn setSource(self: LibraryDescriptor, source: [*:0]const u8) void {
         c.MTL4LibraryDescriptorSetSource(self.ptr, source);
     }
-    pub fn retain(self: LibraryDescriptor) LibraryDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *LibraryDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *LibraryDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

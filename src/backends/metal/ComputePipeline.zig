@@ -13,11 +13,8 @@ pub const ComputePipelineDescriptor = extern struct {
     pub fn setMaxTotalThreadsPerThreadgroup(self: ComputePipelineDescriptor, count: usize) void {
         c.MTL4ComputePipelineDescriptorSetMaxTotalThreadsPerThreadgroup(self.ptr, count);
     }
-    pub fn retain(self: ComputePipelineDescriptor) ComputePipelineDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ComputePipelineDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ComputePipelineDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -30,11 +27,8 @@ pub const ComputePipelineState = extern struct {
     pub fn maxTotalThreadsPerThreadgroup(self: ComputePipelineState) usize {
         return c.MTLComputePipelineStateGetMaxTotalThreadsPerThreadgroup(self.ptr);
     }
-    pub fn retain(self: ComputePipelineState) ComputePipelineState {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ComputePipelineState) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ComputePipelineState) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

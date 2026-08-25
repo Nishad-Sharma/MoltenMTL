@@ -19,11 +19,8 @@ pub const ArgumentTableDescriptor = extern struct {
     pub fn setInitializeBindings(self: ArgumentTableDescriptor, initialize: bool) void {
         c.MTL4ArgumentTableDescriptorSetInitializeBindings(self.ptr, initialize);
     }
-    pub fn retain(self: ArgumentTableDescriptor) ArgumentTableDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ArgumentTableDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ArgumentTableDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -42,11 +39,8 @@ pub const ArgumentTable = extern struct {
     pub fn setAccelerationStructure(self: ArgumentTable, acceleration_structure: AccelerationStructure, binding_index: usize) void {
         c.MTL4ArgumentTableSetAccelerationStructure(self.ptr, @ptrCast(acceleration_structure.ptr), binding_index);
     }
-    pub fn retain(self: ArgumentTable) ArgumentTable {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ArgumentTable) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ArgumentTable) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

@@ -21,11 +21,8 @@ pub const Resource = extern struct {
     pub fn allocatedSize(self: Resource) usize {
         return c.MTLResourceGetAllocatedSize(self.ptr);
     }
-    pub fn retain(self: Resource) Resource {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Resource) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Resource) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

@@ -9,11 +9,8 @@ pub const SharedEvent = extern struct {
     pub fn waitUntilSignaledValue(self: SharedEvent, value: u64, timeout_ms: u64) bool {
         return c.MTLSharedEventWaitUntilSignaledValue(self.ptr, value, timeout_ms);
     }
-    pub fn retain(self: SharedEvent) SharedEvent {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *SharedEvent) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *SharedEvent) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

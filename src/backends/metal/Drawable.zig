@@ -10,11 +10,8 @@ pub const Drawable = extern struct {
     pub fn texture(self: Drawable) ?Texture {
         return object.wrap(Texture, c.CAMetalDrawableGetTexture(@ptrCast(self.ptr)));
     }
-    pub fn retain(self: Drawable) Drawable {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Drawable) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Drawable) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

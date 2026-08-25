@@ -13,11 +13,8 @@ pub const ResidencySetDescriptor = extern struct {
     pub fn setInitialCapacity(self: ResidencySetDescriptor, capacity: usize) void {
         c.MTLResidencySetDescriptorSetInitialCapacity(self.ptr, capacity);
     }
-    pub fn retain(self: ResidencySetDescriptor) ResidencySetDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ResidencySetDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ResidencySetDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -42,11 +39,8 @@ pub const ResidencySet = extern struct {
     pub fn commit(self: ResidencySet) void {
         c.MTLResidencySetCommit(self.ptr);
     }
-    pub fn retain(self: ResidencySet) ResidencySet {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ResidencySet) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ResidencySet) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

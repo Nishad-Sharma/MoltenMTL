@@ -5,7 +5,8 @@ const Buffer = @import("Buffer.zig").Buffer;
 const Texture = @import("Texture.zig").Texture;
 const arguments = @import("ArgumentTable.zig");
 const pipeline = @import("ComputePipeline.zig");
-const acceleration = @import("AccelerationStructure.zig");
+const AccelerationStructure = @import("AccelerationStructure.zig").AccelerationStructure;
+const AccelerationStructureDescriptor = @import("AccelerationStructure.zig").AccelerationStructureDescriptor;
 const command = @import("CommandEncoder.zig");
 
 pub const ComputeCommandEncoder = extern struct {
@@ -34,20 +35,17 @@ pub const ComputeCommandEncoder = extern struct {
     pub fn copyBufferToTexture(self: ComputeCommandEncoder, source: Buffer, source_offset: usize, source_bytes_per_row: usize, source_bytes_per_image: usize, source_size: types.Size, destination: Texture, destination_slice: usize, destination_level: usize, destination_origin: types.Origin) void {
         c.MTL4ComputeCommandEncoderCopyBufferToTexture(self.ptr, source.ptr, source_offset, source_bytes_per_row, source_bytes_per_image, source_size, destination.ptr, destination_slice, destination_level, destination_origin);
     }
-    pub fn buildAccelerationStructure(self: ComputeCommandEncoder, structure: acceleration.AccelerationStructure, descriptor: acceleration.AccelerationStructureDescriptor, scratch_buffer: types.BufferRange) void {
+    pub fn buildAccelerationStructure(self: ComputeCommandEncoder, structure: AccelerationStructure, descriptor: AccelerationStructureDescriptor, scratch_buffer: types.BufferRange) void {
         c.MTL4ComputeCommandEncoderBuildAccelerationStructure(self.ptr, structure.ptr, descriptor.ptr, scratch_buffer.raw());
     }
-    pub fn refitAccelerationStructure(self: ComputeCommandEncoder, source: acceleration.AccelerationStructure, descriptor: acceleration.AccelerationStructureDescriptor, destination: acceleration.AccelerationStructure, scratch_buffer: types.BufferRange) void {
+    pub fn refitAccelerationStructure(self: ComputeCommandEncoder, source: AccelerationStructure, descriptor: AccelerationStructureDescriptor, destination: AccelerationStructure, scratch_buffer: types.BufferRange) void {
         c.MTL4ComputeCommandEncoderRefitAccelerationStructure(self.ptr, source.ptr, descriptor.ptr, destination.ptr, scratch_buffer.raw());
     }
     pub fn asCommandEncoder(self: ComputeCommandEncoder) command.CommandEncoder {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: ComputeCommandEncoder) ComputeCommandEncoder {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *ComputeCommandEncoder) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *ComputeCommandEncoder) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

@@ -3,11 +3,8 @@ const object = @import("Object.zig");
 
 pub const Library = extern struct {
     ptr: *c.MTLLibrary,
-    pub fn retain(self: Library) Library {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Library) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Library) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

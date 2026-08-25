@@ -30,11 +30,8 @@ pub const MetalLayer = extern struct {
     pub fn nextDrawable(self: MetalLayer) ?Drawable {
         return object.wrap(Drawable, c.CAMetalLayerNextDrawable(self.ptr));
     }
-    pub fn retain(self: MetalLayer) MetalLayer {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *MetalLayer) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *MetalLayer) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

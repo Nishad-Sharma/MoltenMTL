@@ -15,11 +15,8 @@ pub const CommandEncoder = extern struct {
     pub fn endEncoding(self: CommandEncoder) void {
         c.MTL4CommandEncoderEndEncoding(self.ptr);
     }
-    pub fn retain(self: CommandEncoder) CommandEncoder {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *CommandEncoder) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *CommandEncoder) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

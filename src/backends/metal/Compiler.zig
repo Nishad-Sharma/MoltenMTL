@@ -11,11 +11,8 @@ pub const CompilerDescriptor = extern struct {
     pub fn create() ?CompilerDescriptor {
         return object.wrap(CompilerDescriptor, c.MTL4CompilerDescriptorCreate());
     }
-    pub fn retain(self: CompilerDescriptor) CompilerDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *CompilerDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *CompilerDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -34,11 +31,8 @@ pub const Compiler = extern struct {
         errors.write(error_out, raw_error);
         return object.wrap(ComputePipelineState, result);
     }
-    pub fn retain(self: Compiler) Compiler {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Compiler) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Compiler) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

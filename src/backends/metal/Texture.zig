@@ -55,11 +55,8 @@ pub const TextureDescriptor = extern struct {
     pub fn setUsage(self: TextureDescriptor, usage: TextureUsage) void {
         c.MTLTextureDescriptorSetUsage(self.ptr, usage);
     }
-    pub fn retain(self: TextureDescriptor) TextureDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *TextureDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *TextureDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -97,11 +94,8 @@ pub const Texture = extern struct {
     pub fn asAllocation(self: Texture) resource.Allocation {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: Texture) Texture {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Texture) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Texture) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

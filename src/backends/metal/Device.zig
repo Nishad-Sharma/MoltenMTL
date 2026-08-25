@@ -14,7 +14,8 @@ const residency = @import("ResidencySet.zig");
 const SharedEvent = @import("Event.zig").SharedEvent;
 
 pub fn createSystemDefaultDevice() ?Device {
-    return object.wrap(Device, c.MTLCreateSystemDefaultDevice());
+    const ptr = c.MTLCreateSystemDefaultDevice() orelse return null;
+    return .{ .ptr = ptr };
 }
 
 pub const Device = extern struct {
@@ -70,11 +71,8 @@ pub const Device = extern struct {
     pub fn newSharedEvent(self: Device) ?SharedEvent {
         return object.wrap(SharedEvent, c.MTLDeviceNewSharedEvent(self.ptr));
     }
-    pub fn retain(self: Device) Device {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Device) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Device) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

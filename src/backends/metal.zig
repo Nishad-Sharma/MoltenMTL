@@ -28,7 +28,6 @@ const command_queues = @import("metal/CommandQueue.zig");
 const command_encoders = @import("metal/CommandEncoder.zig");
 const compute_encoders = @import("metal/ComputeCommandEncoder.zig");
 const devices = @import("metal/Device.zig");
-const ca_metal_layer = @import("metal/CAMetalLayer.zig");
 
 pub const GPUAddress = types.GPUAddress;
 pub const ResourceID = types.ResourceID;

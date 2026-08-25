@@ -18,11 +18,8 @@ pub const CommandBuffer = extern struct {
     pub fn end(self: CommandBuffer) void {
         c.MTL4CommandBufferEnd(self.ptr);
     }
-    pub fn retain(self: CommandBuffer) CommandBuffer {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *CommandBuffer) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *CommandBuffer) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

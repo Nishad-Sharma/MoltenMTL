@@ -30,11 +30,8 @@ pub const Buffer = extern struct {
     pub fn asAllocation(self: Buffer) resource.Allocation {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: Buffer) Buffer {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *Buffer) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *Buffer) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

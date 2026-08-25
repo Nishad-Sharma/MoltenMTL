@@ -36,11 +36,8 @@ pub const AccelerationStructure = extern struct {
     pub fn asAllocation(self: AccelerationStructure) resource.Allocation {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: AccelerationStructure) AccelerationStructure {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *AccelerationStructure) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *AccelerationStructure) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -48,7 +45,7 @@ pub const AccelerationStructure = extern struct {
 pub const AccelerationStructureDescriptor = extern struct { ptr: *c.MTL4AccelerationStructureDescriptor };
 pub const AccelerationStructureTriangleGeometryDescriptor = extern struct {
     ptr: *c.MTL4AccelerationStructureTriangleGeometryDescriptor,
-    pub fn create() ?AccelerationStructureTriangleGeometryDescriptor {
+    pub fn init() ?AccelerationStructureTriangleGeometryDescriptor {
         return object.wrap(AccelerationStructureTriangleGeometryDescriptor, c.MTL4AccelerationStructureTriangleGeometryDescriptorCreate());
     }
     pub fn setVertexBuffer(self: AccelerationStructureTriangleGeometryDescriptor, buffer: types.BufferRange) void {
@@ -72,11 +69,8 @@ pub const AccelerationStructureTriangleGeometryDescriptor = extern struct {
     pub fn setOpaque(self: AccelerationStructureTriangleGeometryDescriptor, is_opaque: bool) void {
         c.MTL4AccelerationStructureTriangleGeometryDescriptorSetOpaque(self.ptr, is_opaque);
     }
-    pub fn retain(self: AccelerationStructureTriangleGeometryDescriptor) AccelerationStructureTriangleGeometryDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *AccelerationStructureTriangleGeometryDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *AccelerationStructureTriangleGeometryDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -95,11 +89,8 @@ pub const PrimitiveAccelerationStructureDescriptor = extern struct {
     pub fn asAccelerationStructureDescriptor(self: PrimitiveAccelerationStructureDescriptor) AccelerationStructureDescriptor {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: PrimitiveAccelerationStructureDescriptor) PrimitiveAccelerationStructureDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *PrimitiveAccelerationStructureDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *PrimitiveAccelerationStructureDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
@@ -127,11 +118,8 @@ pub const InstanceAccelerationStructureDescriptor = extern struct {
     pub fn asAccelerationStructureDescriptor(self: InstanceAccelerationStructureDescriptor) AccelerationStructureDescriptor {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
-    pub fn retain(self: InstanceAccelerationStructureDescriptor) InstanceAccelerationStructureDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *InstanceAccelerationStructureDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *InstanceAccelerationStructureDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

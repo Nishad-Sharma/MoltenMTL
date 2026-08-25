@@ -13,11 +13,8 @@ pub const LibraryFunctionDescriptor = extern struct {
     pub fn setName(self: LibraryFunctionDescriptor, name: [*:0]const u8) void {
         c.MTL4LibraryFunctionDescriptorSetName(self.ptr, name);
     }
-    pub fn retain(self: LibraryFunctionDescriptor) LibraryFunctionDescriptor {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *LibraryFunctionDescriptor) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *LibraryFunctionDescriptor) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };

@@ -21,11 +21,8 @@ pub const CommandQueue = extern struct {
     pub fn signalDrawable(self: CommandQueue, drawable: Drawable) void {
         c.MTL4CommandQueueSignalDrawable(self.ptr, drawable.ptr);
     }
-    pub fn retain(self: CommandQueue) CommandQueue {
-        return .{ .ptr = object.retain(self.ptr) };
-    }
-    pub fn release(self: *CommandQueue) void {
-        object.release(self.ptr);
+    pub fn deinit(self: *CommandQueue) void {
+        object.deinit(self.ptr);
         self.* = undefined;
     }
 };
