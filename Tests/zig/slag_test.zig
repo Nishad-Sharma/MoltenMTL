@@ -22,7 +22,6 @@ test "wrapper objects remain pointer-sized" {
         slag.CommandBuffer,
         slag.ComputeCommandEncoder,
         slag.AccelerationStructure,
-        slag.MetalLayer,
     }) |T| {
         try std.testing.expectEqual(@sizeOf(usize), @sizeOf(T));
         try std.testing.expectEqual(@alignOf(usize), @alignOf(T));
@@ -48,7 +47,6 @@ test "metal-cpp style methods are present" {
         _ = slag.CommandBuffer.computeCommandEncoder;
         _ = slag.ComputeCommandEncoder.dispatchThreads;
         _ = slag.PrimitiveAccelerationStructureDescriptor.asAccelerationStructureDescriptor;
-        _ = slag.MetalLayer.nextDrawable;
     }
 }
 
@@ -82,24 +80,22 @@ export fn compileWrapperMethodBodies() void {
     var residency_descriptor: slag.ResidencySetDescriptor = undefined;
     var residency_set: slag.ResidencySet = undefined;
     var drawable: slag.Drawable = undefined;
-    var layer: slag.MetalLayer = undefined;
-    var metal_error: ?slag.Error = null;
+    var slag_error: ?slag.Error = null;
 
     _ = slag.AutoreleasePool.create();
     _ = slag.createSystemDefaultDevice();
     _ = device.name();
-    _ = device.supportsMetal4();
     _ = device.newBuffer(16, slag.ResourceStorageModeShared);
     _ = device.newBufferWithBytes(@ptrCast(&device), @sizeOf(slag.Device), slag.ResourceStorageModeShared);
     _ = device.newTexture(texture_descriptor);
     _ = device.newCommandAllocator();
     _ = device.newCommandBuffer();
     _ = device.newCommandQueue();
-    _ = device.newCompiler(compiler_descriptor, &metal_error);
-    _ = device.newArgumentTable(argument_descriptor, &metal_error);
+    _ = device.newCompiler(compiler_descriptor, &slag_error);
+    _ = device.newArgumentTable(argument_descriptor, &slag_error);
     _ = device.accelerationStructureSizes(primitive_descriptor.asAccelerationStructureDescriptor());
     _ = device.newAccelerationStructure(16);
-    _ = device.newResidencySet(residency_descriptor, &metal_error);
+    _ = device.newResidencySet(residency_descriptor, &slag_error);
     _ = device.newSharedEvent();
 
     _ = buffer.contents();
@@ -166,8 +162,8 @@ export fn compileWrapperMethodBodies() void {
     pipeline_descriptor.setComputeFunctionDescriptor(function_descriptor);
     pipeline_descriptor.setMaxTotalThreadsPerThreadgroup(64);
     _ = slag.CompilerDescriptor.create();
-    _ = compiler.newLibrary(library_descriptor, &metal_error);
-    _ = compiler.newComputePipelineState(pipeline_descriptor, &metal_error);
+    _ = compiler.newLibrary(library_descriptor, &slag_error);
+    _ = compiler.newComputePipelineState(pipeline_descriptor, &slag_error);
     _ = pipeline.threadExecutionWidth();
     _ = pipeline.maxTotalThreadsPerThreadgroup();
 
@@ -220,14 +216,6 @@ export fn compileWrapperMethodBodies() void {
 
     drawable.present();
     _ = drawable.texture();
-    _ = slag.MetalLayer.create();
-    _ = slag.MetalLayer.fromNative(@ptrCast(&layer));
-    _ = layer.native();
-    layer.setDevice(device);
-    layer.setPixelFormat(slag.PixelFormatBGRA8Unorm);
-    layer.setFramebufferOnly(false);
-    layer.setDrawableSize(1, 1);
-    _ = layer.nextDrawable();
 
     _ = pool.retain();
     _ = device.retain();
@@ -245,7 +233,6 @@ export fn compileWrapperMethodBodies() void {
     _ = acceleration_structure.retain();
     _ = residency_set.retain();
     _ = drawable.retain();
-    _ = layer.retain();
 
     pool.release();
     device.release();
@@ -273,7 +260,6 @@ export fn compileWrapperMethodBodies() void {
     residency_descriptor.release();
     residency_set.release();
     drawable.release();
-    layer.release();
     texture_descriptor.release();
-    if (metal_error) |*value| value.release();
+    if (slag_error) |*value| value.release();
 }
