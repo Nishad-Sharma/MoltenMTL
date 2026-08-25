@@ -5,11 +5,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(_WIN32)
-#define METAL_C_EXPORT __declspec(dllexport)
-#else
-#define METAL_C_EXPORT __attribute__((visibility("default")))
+#if !defined(__APPLE__)
+#error "metal-c supports Apple platforms only"
 #endif
+
+#define METAL_C_EXPORT __attribute__((visibility("default")))
 
 #ifdef __cplusplus
 extern "C" {

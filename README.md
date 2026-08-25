@@ -1,6 +1,6 @@
 # metal-c
 
-A focused C wrapper over Apple's metal-cpp headers. The public headers mirror
+An Apple-only C wrapper over Apple's metal-cpp headers. The public headers mirror
 metal-cpp's `Metal/` layout and expose the Metal 4 path needed for compute-based
 inline ray tracing:
 
