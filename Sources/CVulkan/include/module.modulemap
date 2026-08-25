@@ -1,8 +1,0 @@
-module CVulkan {
-    header "CVulkan.h"
-    header "CVMA.h"
-    header "CSwapchain.h"
-    header "CRenderPipeline.h"
-    header "spirv_reflect_bridge.h"
-    export *
-}
