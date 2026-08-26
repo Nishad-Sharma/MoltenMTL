@@ -1,0 +1,25 @@
+.{
+    .name = .mach_objc,
+    .fingerprint = 0xd0611af9d25e5da4, // Changing this has security and trust implications.
+    .version = "0.0.0",
+    .mach_zig_version = "2026.4.10-mach",
+    .paths = .{
+        "src",
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE",
+        "LICENSE-APACHE",
+        "LICENSE-MIT",
+        "README.md",
+        "generator.zig",
+        "registry.zig",
+        "verify.sh",
+    },
+    .dependencies = .{
+        .xcode_frameworks = .{
+            .url = "https://pkg.hexops.org/pkg/hexops/xcode-frameworks/62f660e82e4eddb5007cb4cf06a6d3d31237f05e.tar.gz",
+            .hash = "N-V-__8AAMikhQnOIqoH0uy5aepJKs8Zy0VqznnW3n94VSZN",
+            .lazy = true,
+        },
+    },
+}
