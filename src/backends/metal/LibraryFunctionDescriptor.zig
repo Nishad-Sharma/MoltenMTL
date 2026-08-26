@@ -5,7 +5,8 @@ const Library = @import("Library.zig").Library;
 pub const LibraryFunctionDescriptor = extern struct {
     ptr: *c.MTL4LibraryFunctionDescriptor,
     pub fn init() ?LibraryFunctionDescriptor {
-        return .{ .ptr = c.MTL4LibraryFunctionDescriptorCreate() };
+        const ptr = c.MTL4LibraryFunctionDescriptorCreate() orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn setLibrary(self: LibraryFunctionDescriptor, library: Library) void {
         c.MTL4LibraryFunctionDescriptorSetLibrary(self.ptr, library.ptr);

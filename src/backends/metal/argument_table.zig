@@ -8,7 +8,8 @@ const AccelerationStructure = @import("acceleration_structure.zig").Acceleration
 pub const ArgumentTableDescriptor = extern struct {
     ptr: *c.MTL4ArgumentTableDescriptor,
     pub fn init() ?ArgumentTableDescriptor {
-        return .{ .ptr = c.MTL4ArgumentTableDescriptorCreate() };
+        const ptr = c.MTL4ArgumentTableDescriptorCreate() orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn setMaxBufferBindCount(self: ArgumentTableDescriptor, count: usize) void {
         c.MTL4ArgumentTableDescriptorSetMaxBufferBindCount(self.ptr, count);

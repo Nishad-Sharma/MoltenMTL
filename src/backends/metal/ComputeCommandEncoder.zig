@@ -24,16 +24,16 @@ pub const ComputeCommandEncoder = extern struct {
         c.MTL4ComputeCommandEncoderEndEncoding(self.ptr);
     }
     pub fn dispatchThreads(self: ComputeCommandEncoder, threads_per_grid: types.Size, threads_per_threadgroup: types.Size) void {
-        c.MTL4ComputeCommandEncoderDispatchThreads(self.ptr, threads_per_grid, threads_per_threadgroup);
+        c.MTL4ComputeCommandEncoderDispatchThreads(self.ptr, types.rawSize(threads_per_grid), types.rawSize(threads_per_threadgroup));
     }
     pub fn dispatchThreadgroups(self: ComputeCommandEncoder, threadgroups_per_grid: types.Size, threads_per_threadgroup: types.Size) void {
-        c.MTL4ComputeCommandEncoderDispatchThreadgroups(self.ptr, threadgroups_per_grid, threads_per_threadgroup);
+        c.MTL4ComputeCommandEncoderDispatchThreadgroups(self.ptr, types.rawSize(threadgroups_per_grid), types.rawSize(threads_per_threadgroup));
     }
     pub fn copyBuffer(self: ComputeCommandEncoder, source: Buffer, source_offset: usize, destination: Buffer, destination_offset: usize, byte_count: usize) void {
         c.MTL4ComputeCommandEncoderCopyBuffer(self.ptr, source.ptr, source_offset, destination.ptr, destination_offset, byte_count);
     }
     pub fn copyBufferToTexture(self: ComputeCommandEncoder, source: Buffer, source_offset: usize, source_bytes_per_row: usize, source_bytes_per_image: usize, source_size: types.Size, destination: Texture, destination_slice: usize, destination_level: usize, destination_origin: types.Origin) void {
-        c.MTL4ComputeCommandEncoderCopyBufferToTexture(self.ptr, source.ptr, source_offset, source_bytes_per_row, source_bytes_per_image, source_size, destination.ptr, destination_slice, destination_level, destination_origin);
+        c.MTL4ComputeCommandEncoderCopyBufferToTexture(self.ptr, source.ptr, source_offset, source_bytes_per_row, source_bytes_per_image, types.rawSize(source_size), destination.ptr, destination_slice, destination_level, types.rawOrigin(destination_origin));
     }
     pub fn buildAccelerationStructure(self: ComputeCommandEncoder, structure: AccelerationStructure, descriptor: AccelerationStructureDescriptor, scratch_buffer: types.BufferRange) void {
         c.MTL4ComputeCommandEncoderBuildAccelerationStructure(self.ptr, structure.ptr, descriptor.ptr, scratch_buffer.raw());

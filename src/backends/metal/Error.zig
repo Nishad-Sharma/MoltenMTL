@@ -11,7 +11,7 @@ pub const Error = error{
 
 pub fn fromMetalError(ptr: *c.NSError) Error {
     defer object.release(ptr);
-    switch (c.MTLErrorGetCode(ptr)) {
+    switch (c.NSErrorGetCode(ptr)) {
         1 => return error.Unsupported,
         else => return error.Internal,
     }

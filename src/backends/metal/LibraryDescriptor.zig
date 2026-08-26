@@ -4,7 +4,8 @@ const object = @import("Object.zig");
 pub const LibraryDescriptor = extern struct {
     ptr: *c.MTL4LibraryDescriptor,
     pub fn init() ?LibraryDescriptor {
-        return .{ .ptr = c.MTL4LibraryDescriptorCreate() };
+        const ptr = c.MTL4LibraryDescriptorCreate() orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn setName(self: LibraryDescriptor, name: [*:0]const u8) void {
         c.MTL4LibraryDescriptorSetName(self.ptr, name);

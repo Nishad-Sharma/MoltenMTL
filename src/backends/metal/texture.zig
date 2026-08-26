@@ -80,7 +80,7 @@ pub const Texture = extern struct {
         return c.MTLTextureGetGPUResourceID(self.ptr);
     }
     pub fn replaceRegion(self: Texture, destination: types.Region, mipmap_level: usize, slice: usize, bytes: *const anyopaque, bytes_per_row: usize, bytes_per_image: usize) void {
-        c.MTLTextureReplaceRegion(self.ptr, destination, mipmap_level, slice, bytes, bytes_per_row, bytes_per_image);
+        c.MTLTextureReplaceRegion(self.ptr, types.rawRegion(destination), mipmap_level, slice, bytes, bytes_per_row, bytes_per_image);
     }
     pub fn setLabel(self: Texture, label: [*:0]const u8) void {
         self.asResource().setLabel(label);

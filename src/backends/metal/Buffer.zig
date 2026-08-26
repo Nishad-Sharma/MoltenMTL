@@ -16,7 +16,7 @@ pub const Buffer = extern struct {
         return c.MTLBufferGetGPUAddress(self.ptr);
     }
     pub fn didModifyRange(self: Buffer, modified_range: types.Range) void {
-        c.MTLBufferDidModifyRange(self.ptr, modified_range);
+        c.MTLBufferDidModifyRange(self.ptr, types.rawRange(modified_range));
     }
     pub fn setLabel(self: Buffer, label: [*:0]const u8) void {
         self.asResource().setLabel(label);

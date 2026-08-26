@@ -1,7 +1,7 @@
 #include "MetalInternal.hpp"
 
 extern "C" {
-MTLDevice* MTLCreateSystemDefaultDevice(void)
+MTLDevice* MTLDeviceCreateSystemDefault(void)
 {
     return cobject<MTLDevice>(MTL::CreateSystemDefaultDevice());
 }

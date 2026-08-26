@@ -14,7 +14,7 @@ const residency = @import("residency_set.zig");
 const SharedEvent = @import("Event.zig").SharedEvent;
 
 pub fn createSystemDefaultDevice() ?Device {
-    const ptr = c.MTLCreateSystemDefaultDevice() orelse return null;
+    const ptr = c.MTLDeviceCreateSystemDefault() orelse return null;
     return .{ .ptr = ptr };
 }
 
@@ -54,7 +54,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateCompiler(self.ptr, descriptor.ptr, &raw_error);
         if (raw_error) |ptr| {
-            return errors.fromMTLError(ptr);
+            return errors.fromMetalError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
@@ -66,7 +66,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateArgumentTable(self.ptr, @ptrCast(descriptor.ptr), &raw_error);
         if (raw_error) |ptr| {
-            return errors.fromMTLError(ptr);
+            return errors.fromMetalError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
@@ -82,7 +82,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateResidencySet(self.ptr, descriptor.ptr, &raw_error);
         if (raw_error) |ptr| {
-            return errors.fromMTLError(ptr);
+            return errors.fromMetalError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };

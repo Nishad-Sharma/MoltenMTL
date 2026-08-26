@@ -43,7 +43,7 @@ pub fn build(b: *std.Build) void {
 
     const wrapper_tests = b.addTest(.{
         .root_module = b.createModule(.{
-            .root_source_file = b.path("Tests/zig/slag_test.zig"),
+            .root_source_file = b.path("tests/vector_add.zig"),
             .target = target,
             .optimize = optimize,
             .imports = &.{.{ .name = "slag", .module = slag_module }},

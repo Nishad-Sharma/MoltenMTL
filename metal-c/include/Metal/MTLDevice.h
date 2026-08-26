@@ -21,7 +21,7 @@ typedef struct MTL4Compiler MTL4Compiler;
 typedef struct MTL4CompilerDescriptor MTL4CompilerDescriptor;
 typedef struct MTLAccelerationStructureSizes { size_t accelerationStructureSize, buildScratchBufferSize, refitScratchBufferSize; } MTLAccelerationStructureSizes;
 
-METAL_C_EXPORT MTLDevice* MTLCreateSystemDefaultDevice(void);
+METAL_C_EXPORT MTLDevice* MTLDeviceCreateSystemDefault(void);
 METAL_C_EXPORT const char* MTLDeviceGetName(const MTLDevice* device);
 METAL_C_EXPORT bool MTLDeviceSupportsMetal4(const MTLDevice* device);
 METAL_C_EXPORT MTLBuffer* MTLDeviceCreateBuffer(MTLDevice* device, size_t length, MTLResourceOptions options);

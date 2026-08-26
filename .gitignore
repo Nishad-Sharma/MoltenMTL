@@ -10,6 +10,7 @@ zig-out/
 # Local environment
 .envrc
 .claude
+.tmp/
 
 # Example output & editor/OS files
 *.ppm

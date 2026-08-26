@@ -1,11 +1,6 @@
 const c = @import("c.zig").c;
-
 pub const GPUAddress = c.MTLGPUAddress;
 pub const ResourceID = c.MTLResourceID;
-pub const Origin = c.MTLOrigin;
-pub const Size = c.MTLSize;
-pub const Range = c.MTLRange;
-pub const Region = c.MTLRegion;
 pub const PackedFloat4x3 = c.MTLPackedFloat4x3;
 pub const Stages = c.MTLStages;
 pub const IndexType = c.MTLIndexType;
@@ -30,19 +25,6 @@ pub const AttributeFormatFloat2: AttributeFormat = c.MTLAttributeFormatFloat2;
 pub const AttributeFormatFloat3: AttributeFormat = c.MTLAttributeFormatFloat3;
 pub const AttributeFormatFloat4: AttributeFormat = c.MTLAttributeFormatFloat4;
 
-pub fn origin(x: usize, y: usize, z: usize) Origin {
-    return c.MTLOriginMake(x, y, z);
-}
-pub fn size(width: usize, height: usize, depth: usize) Size {
-    return c.MTLSizeMake(width, height, depth);
-}
-pub fn range(location: usize, length: usize) Range {
-    return c.MTLRangeMake(location, length);
-}
-pub fn region3D(x: usize, y: usize, z: usize, width: usize, height: usize, depth: usize) Region {
-    return c.MTLRegionMake3D(x, y, z, width, height, depth);
-}
-
 pub const BufferRange = extern struct {
     address: GPUAddress,
     length: usize,
@@ -55,3 +37,57 @@ pub const BufferRange = extern struct {
         return .{ .address = self.address, .length = self.length };
     }
 };
+
+pub const Origin = extern struct {
+    x: usize,
+    y: usize,
+    z: usize,
+};
+
+pub const Size = extern struct {
+    width: usize,
+    height: usize,
+    depth: usize,
+};
+
+pub const Range = extern struct {
+    location: usize,
+    length: usize,
+};
+
+pub const Region = extern struct {
+    origin: Origin,
+    size: Size,
+};
+
+pub fn origin(x: usize, y: usize, z: usize) Origin {
+    return .{ .x = x, .y = y, .z = z };
+}
+
+pub fn size(width: usize, height: usize, depth: usize) Size {
+    return .{ .width = width, .height = height, .depth = depth };
+}
+
+pub fn range(location: usize, length: usize) Range {
+    return .{ .location = location, .length = length };
+}
+
+pub fn region3D(x: usize, y: usize, z: usize, width: usize, height: usize, depth: usize) Region {
+    return .{ .origin = origin(x, y, z), .size = size(width, height, depth) };
+}
+
+pub fn rawOrigin(value: Origin) c.MTLOrigin {
+    return .{ .x = value.x, .y = value.y, .z = value.z };
+}
+
+pub fn rawSize(value: Size) c.MTLSize {
+    return .{ .width = value.width, .height = value.height, .depth = value.depth };
+}
+
+pub fn rawRange(value: Range) c.MTLRange {
+    return .{ .location = value.location, .length = value.length };
+}
+
+pub fn rawRegion(value: Region) c.MTLRegion {
+    return .{ .origin = rawOrigin(value.origin), .size = rawSize(value.size) };
+}

@@ -10,7 +10,8 @@ pub const CommandBuffer = extern struct {
         c.MTL4CommandBufferBegin(self.ptr, allocator.ptr);
     }
     pub fn computeCommandEncoder(self: CommandBuffer) ?ComputeCommandEncoder {
-        return ComputeCommandEncoder{ .ptr = c.MTL4CommandBufferGetComputeCommandEncoder(self.ptr) };
+        const ptr = c.MTL4CommandBufferGetComputeCommandEncoder(self.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn useResidencySet(self: CommandBuffer, residency_set: ResidencySet) void {
         c.MTL4CommandBufferUseResidencySet(self.ptr, residency_set.ptr);

@@ -1,11 +1,13 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const LibraryFunctionDescriptor = @import("LibraryFunctionDescriptor.zig").LibraryFunctionDescriptor;
+const resource = @import("resource.zig");
 
 pub const ComputePipelineDescriptor = extern struct {
     ptr: *c.MTL4ComputePipelineDescriptor,
     pub fn init() ?ComputePipelineDescriptor {
-        return .{ .ptr = c.MTL4ComputePipelineDescriptorCreate() };
+        const ptr = c.MTL4ComputePipelineDescriptorCreate() orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn setComputeFunctionDescriptor(self: ComputePipelineDescriptor, descriptor: LibraryFunctionDescriptor) void {
         c.MTL4ComputePipelineDescriptorSetComputeFunctionDescriptor(self.ptr, descriptor.ptr);
@@ -29,6 +31,9 @@ pub const ComputePipelineState = extern struct {
     }
     pub fn maxTotalThreadsPerThreadgroup(self: ComputePipelineState) usize {
         return c.MTLComputePipelineStateGetMaxTotalThreadsPerThreadgroup(self.ptr);
+    }
+    pub fn asAllocation(self: ComputePipelineState) resource.Allocation {
+        return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *ComputePipelineState) void {
         object.release(self.ptr);
