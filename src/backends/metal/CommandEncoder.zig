@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const types = @import("Types.zig");
 
@@ -16,7 +16,7 @@ pub const CommandEncoder = extern struct {
         c.MTL4CommandEncoderEndEncoding(self.ptr);
     }
     pub fn deinit(self: *CommandEncoder) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

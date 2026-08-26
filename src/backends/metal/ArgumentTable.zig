@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const types = @import("Types.zig");
 const Buffer = @import("Buffer.zig").Buffer;
@@ -20,7 +20,7 @@ pub const ArgumentTableDescriptor = extern struct {
         c.MTL4ArgumentTableDescriptorSetInitializeBindings(self.ptr, initialize);
     }
     pub fn deinit(self: *ArgumentTableDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -40,7 +40,7 @@ pub const ArgumentTable = extern struct {
         c.MTL4ArgumentTableSetAccelerationStructure(self.ptr, @ptrCast(acceleration_structure.ptr), binding_index);
     }
     pub fn deinit(self: *ArgumentTable) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

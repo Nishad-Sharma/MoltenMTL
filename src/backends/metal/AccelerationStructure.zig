@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const resource = @import("Resource.zig");
 const types = @import("Types.zig");
@@ -37,7 +37,7 @@ pub const AccelerationStructure = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *AccelerationStructure) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -70,7 +70,7 @@ pub const AccelerationStructureTriangleGeometryDescriptor = extern struct {
         c.MTL4AccelerationStructureTriangleGeometryDescriptorSetOpaque(self.ptr, is_opaque);
     }
     pub fn deinit(self: *AccelerationStructureTriangleGeometryDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -90,7 +90,7 @@ pub const PrimitiveAccelerationStructureDescriptor = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *PrimitiveAccelerationStructureDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -119,7 +119,7 @@ pub const InstanceAccelerationStructureDescriptor = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *InstanceAccelerationStructureDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

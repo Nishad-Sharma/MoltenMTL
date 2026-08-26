@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 MTL4CompilerDescriptor* MTL4CompilerDescriptorCreate(void) { return cobject<MTL4CompilerDescriptor>(MTL4::CompilerDescriptor::alloc()->init()); }
@@ -12,7 +12,7 @@ MTL4ComputePipelineDescriptor* MTL4ComputePipelineDescriptorCreate(void) { retur
 void MTL4ComputePipelineDescriptorSetComputeFunctionDescriptor(MTL4ComputePipelineDescriptor* d, const MTL4LibraryFunctionDescriptor* f) { if (d) native<MTL4::ComputePipelineDescriptor>(d)->setComputeFunctionDescriptor(native<MTL4::LibraryFunctionDescriptor>(f)); }
 void MTL4ComputePipelineDescriptorSetMaxTotalThreadsPerThreadgroup(MTL4ComputePipelineDescriptor* d, size_t v) { if (d) native<MTL4::ComputePipelineDescriptor>(d)->setMaxTotalThreadsPerThreadgroup(v); }
 
-MTLLibrary* MTL4CompilerCreateLibrary(MTL4Compiler* c, const MTL4LibraryDescriptor* d, MTLError** error)
+MTLLibrary* MTL4CompilerCreateLibrary(MTL4Compiler* c, const MTL4LibraryDescriptor* d, NSError** error)
 {
     if (error) *error = nullptr;
     if (!c || !d) return nullptr;
@@ -21,7 +21,7 @@ MTLLibrary* MTL4CompilerCreateLibrary(MTL4Compiler* c, const MTL4LibraryDescript
     if (!library) returnError(e, error);
     return cobject<MTLLibrary>(library);
 }
-MTLComputePipelineState* MTL4CompilerCreateComputePipelineState(MTL4Compiler* c, const MTL4ComputePipelineDescriptor* d, MTLError** error)
+MTLComputePipelineState* MTL4CompilerCreateComputePipelineState(MTL4Compiler* c, const MTL4ComputePipelineDescriptor* d, NSError** error)
 {
     if (error) *error = nullptr;
     if (!c || !d) return nullptr;

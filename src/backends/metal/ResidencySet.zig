@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const Resource = @import("Resource.zig");
 const Buffer = @import("Buffer.zig").Buffer;
@@ -14,7 +14,7 @@ pub const ResidencySetDescriptor = extern struct {
         c.MTLResidencySetDescriptorSetInitialCapacity(self.ptr, capacity);
     }
     pub fn deinit(self: *ResidencySetDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -40,7 +40,7 @@ pub const ResidencySet = extern struct {
         c.MTLResidencySetCommit(self.ptr);
     }
     pub fn deinit(self: *ResidencySet) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

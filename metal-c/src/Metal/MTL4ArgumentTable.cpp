@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 MTL4ArgumentTableDescriptor* MTL4ArgumentTableDescriptorCreate(void) { return cobject<MTL4ArgumentTableDescriptor>(MTL4::ArgumentTableDescriptor::alloc()->init()); }

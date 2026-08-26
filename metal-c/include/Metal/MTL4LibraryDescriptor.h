@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_LIBRARY_DESCRIPTOR_H
-#define METAL_C_MTL4_LIBRARY_DESCRIPTOR_H
+#pragma once
 #include <Metal/MTLDefines.h>
 #ifdef __cplusplus
 extern "C" {
@@ -10,5 +9,4 @@ METAL_C_EXPORT void MTL4LibraryDescriptorSetName(MTL4LibraryDescriptor* descript
 METAL_C_EXPORT void MTL4LibraryDescriptorSetSource(MTL4LibraryDescriptor* descriptor, const char* source);
 #ifdef __cplusplus
 }
-#endif
 #endif

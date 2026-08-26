@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_BUFFER_H
-#define METAL_C_MTL_BUFFER_H
+#pragma once
 
 #include <Metal/MTLResource.h>
 #include <Metal/MTLTypes.h>
@@ -14,5 +13,4 @@ METAL_C_EXPORT MTLGPUAddress MTLBufferGetGPUAddress(const MTLBuffer* buffer);
 METAL_C_EXPORT void MTLBufferDidModifyRange(MTLBuffer* buffer, MTLRange range);
 #ifdef __cplusplus
 }
-#endif
 #endif

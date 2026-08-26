@@ -74,9 +74,7 @@ fn createMetalBackend(b: *std.Build, target: std.Build.ResolvedTarget, optimize:
     backend_module.addCSourceFiles(.{
         .root = b.path("metal-c/src"),
         .files = &.{
-            "Metal/MetalCppImplementation.cpp",
-            "Metal/MTLObject.cpp",
-            "Metal/MTLError.cpp",
+            "Metal/MetalImplementation.cpp",
             "Metal/MTLDevice.cpp",
             "Metal/MTLResource.cpp",
             "Metal/MTLResidencySet.cpp",
@@ -85,6 +83,8 @@ fn createMetalBackend(b: *std.Build, target: std.Build.ResolvedTarget, optimize:
             "Metal/MTL4Compiler.cpp",
             "Metal/MTL4ComputeCommandEncoder.cpp",
             "Metal/MTL4AccelerationStructure.cpp",
+            "Foundation/NSError.cpp",
+            "Foundation/NSObject.cpp",
             "QuartzCore/CAMetalLayer.cpp",
         },
         .flags = &.{

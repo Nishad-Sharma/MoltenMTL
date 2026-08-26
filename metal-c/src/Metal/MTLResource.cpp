@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 void MTLResourceSetLabel(MTLResource* resource, const char* label)

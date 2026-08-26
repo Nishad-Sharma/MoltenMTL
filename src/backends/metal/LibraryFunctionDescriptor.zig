@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const Library = @import("Library.zig").Library;
 
@@ -14,7 +14,7 @@ pub const LibraryFunctionDescriptor = extern struct {
         c.MTL4LibraryFunctionDescriptorSetName(self.ptr, name);
     }
     pub fn deinit(self: *LibraryFunctionDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

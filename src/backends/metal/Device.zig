@@ -1,6 +1,6 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const errors = @import("Error.zig");
+const metal_error = @import("Error.zig");
 const resource = @import("Resource.zig");
 const Buffer = @import("Buffer.zig").Buffer;
 const texture = @import("Texture.zig");
@@ -50,18 +50,25 @@ pub const Device = extern struct {
         const ptr = c.MTLDeviceCreateMTL4CommandQueue(self.ptr) orelse return null;
         return .{ .ptr = ptr };
     }
-    pub fn createCompiler(self: Device, descriptor: compiler.CompilerDescriptor, error_out: ?*?errors.Error) ?compiler.Compiler {
-        var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceCreateCompiler(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
-        const ptr = result orelse return null;
+    pub fn createCompiler(self: Device, descriptor: compiler.CompilerDescriptor) !compiler.Compiler {
+        var raw_error: ?*c.NSError = null;
+        const result = c.MTLDeviceCreateCompiler(self.ptr, descriptor.ptr, &raw_error);
+        if (raw_error) |ptr| {
+            return metal_error.fromMetalError(ptr);
+        }
+        const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
     }
-    pub fn createArgumentTable(self: Device, descriptor: arguments.ArgumentTableDescriptor, error_out: ?*?errors.Error) ?arguments.ArgumentTable {
-        var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceCreateArgumentTable(self.ptr, @ptrCast(descriptor.ptr), if (error_out != null) &raw_error else null);
-        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
-        const ptr = result orelse return null;
+    pub fn createArgumentTable(
+        self: Device,
+        descriptor: arguments.ArgumentTableDescriptor,
+    ) !arguments.ArgumentTable {
+        var raw_error: ?*c.NSError = null;
+        const result = c.MTLDeviceCreateArgumentTable(self.ptr, @ptrCast(descriptor.ptr), &raw_error);
+        if (raw_error) |ptr| {
+            return metal_error.fromMetalError(ptr);
+        }
+        const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
     }
     pub fn accelerationStructureSizes(self: Device, descriptor: acceleration.AccelerationStructureDescriptor) acceleration.AccelerationStructureSizes {
@@ -71,11 +78,13 @@ pub const Device = extern struct {
         const ptr = c.MTLDeviceCreateAccelerationStructure(self.ptr, byte_size) orelse return null;
         return .{ .ptr = ptr };
     }
-    pub fn createResidencySet(self: Device, descriptor: residency.ResidencySetDescriptor, error_out: ?*?errors.Error) ?residency.ResidencySet {
-        var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceCreateResidencySet(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
-        const ptr = result orelse return null;
+    pub fn createResidencySet(self: Device, descriptor: residency.ResidencySetDescriptor) !residency.ResidencySet {
+        var raw_error: ?*c.NSError = null;
+        const result = c.MTLDeviceCreateResidencySet(self.ptr, descriptor.ptr, &raw_error);
+        if (raw_error) |ptr| {
+            return metal_error.fromMetalError(ptr);
+        }
+        const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
     }
     pub fn createSharedEvent(self: Device) ?SharedEvent {
@@ -83,7 +92,7 @@ pub const Device = extern struct {
         return .{ .ptr = ptr };
     }
     pub fn deinit(self: *Device) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

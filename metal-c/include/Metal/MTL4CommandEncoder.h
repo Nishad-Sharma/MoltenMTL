@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_COMMAND_ENCODER_H
-#define METAL_C_MTL4_COMMAND_ENCODER_H
+#pragma once
 #include <Metal/MTLTypes.h>
 #ifdef __cplusplus
 extern "C" {
@@ -14,5 +13,4 @@ METAL_C_EXPORT void MTL4CommandEncoderBarrierAfterEncoderStages(MTL4CommandEncod
 METAL_C_EXPORT void MTL4CommandEncoderEndEncoding(MTL4CommandEncoder* encoder);
 #ifdef __cplusplus
 }
-#endif
 #endif

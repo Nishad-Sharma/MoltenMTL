@@ -1,7 +1,7 @@
-#ifndef METAL_C_MTL4_ACCELERATION_STRUCTURE_H
-#define METAL_C_MTL4_ACCELERATION_STRUCTURE_H
+#pragma once
 #include <Metal/MTL4ComputeCommandEncoder.h>
 #include <Metal/MTLAccelerationStructureTypes.h>
+#include <Metal/MTLDefines.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,5 +31,4 @@ METAL_C_EXPORT void MTL4InstanceAccelerationStructureDescriptorSetInstanceCount(
 METAL_C_EXPORT void MTL4InstanceAccelerationStructureDescriptorSetUsage(MTL4InstanceAccelerationStructureDescriptor* descriptor, MTLAccelerationStructureUsage usage);
 #ifdef __cplusplus
 }
-#endif
 #endif

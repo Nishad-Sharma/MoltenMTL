@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 
 pub const CommandAllocator = extern struct {
@@ -10,7 +10,7 @@ pub const CommandAllocator = extern struct {
         return c.MTL4CommandAllocatorGetAllocatedSize(self.ptr);
     }
     pub fn deinit(self: *CommandAllocator) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

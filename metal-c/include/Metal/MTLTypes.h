@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_TYPES_H
-#define METAL_C_MTL_TYPES_H
+#pragma once
 
 #include <Metal/MTLDefines.h>
 
@@ -50,5 +49,4 @@ MTL_C_ENUM(uint64_t, MTLAttributeFormat) {
 
 #ifdef __cplusplus
 }
-#endif
 #endif

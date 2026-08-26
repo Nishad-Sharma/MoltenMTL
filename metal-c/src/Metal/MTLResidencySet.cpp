@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 MTLResidencySetDescriptor* MTLResidencySetDescriptorCreate(void) { return cobject<MTLResidencySetDescriptor>(MTL::ResidencySetDescriptor::alloc()->init()); }

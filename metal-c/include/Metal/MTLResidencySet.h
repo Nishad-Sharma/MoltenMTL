@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_RESIDENCY_SET_H
-#define METAL_C_MTL_RESIDENCY_SET_H
+#pragma once
 #include <Metal/MTLDefines.h>
 #ifdef __cplusplus
 extern "C" {
@@ -20,5 +19,4 @@ METAL_C_EXPORT void MTLResidencySetAddAccelerationStructure(MTLResidencySet* res
 METAL_C_EXPORT void MTLResidencySetCommit(MTLResidencySet* residencySet);
 #ifdef __cplusplus
 }
-#endif
 #endif

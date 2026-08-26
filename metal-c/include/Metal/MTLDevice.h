@@ -1,9 +1,8 @@
-#ifndef METAL_C_MTL_DEVICE_H
-#define METAL_C_MTL_DEVICE_H
+#pragma once
 
 #include <Metal/MTLAccelerationStructure.h>
 #include <Metal/MTLBuffer.h>
-#include <Metal/MTLError.h>
+#include <Foundation/NSError.h>
 #include <Metal/MTLEvent.h>
 #include <Metal/MTLResidencySet.h>
 #include <Metal/MTLTexture.h>
@@ -31,13 +30,12 @@ METAL_C_EXPORT MTLTexture* MTLDeviceCreateTexture(MTLDevice* device, const MTLTe
 METAL_C_EXPORT MTL4CommandAllocator* MTLDeviceCreateCommandAllocator(MTLDevice* device);
 METAL_C_EXPORT MTL4CommandBuffer* MTLDeviceCreateCommandBuffer(MTLDevice* device);
 METAL_C_EXPORT MTL4CommandQueue* MTLDeviceCreateMTL4CommandQueue(MTLDevice* device);
-METAL_C_EXPORT MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error);
-METAL_C_EXPORT MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, NSError** error);
+METAL_C_EXPORT MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, NSError** error);
 METAL_C_EXPORT MTLAccelerationStructureSizes MTLDeviceGetAccelerationStructureSizes(MTLDevice* device, const MTL4AccelerationStructureDescriptor* descriptor);
 METAL_C_EXPORT MTLAccelerationStructure* MTLDeviceCreateAccelerationStructure(MTLDevice* device, size_t size);
-METAL_C_EXPORT MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, NSError** error);
 METAL_C_EXPORT MTLSharedEvent* MTLDeviceCreateSharedEvent(MTLDevice* device);
 #ifdef __cplusplus
 }
-#endif
 #endif

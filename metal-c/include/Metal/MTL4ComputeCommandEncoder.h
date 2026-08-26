@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_COMPUTE_COMMAND_ENCODER_H
-#define METAL_C_MTL4_COMPUTE_COMMAND_ENCODER_H
+#pragma once
 #include <Metal/MTL4ArgumentTable.h>
 #include <Metal/MTL4CommandEncoder.h>
 #include <Metal/MTL4ComputePipeline.h>
@@ -23,5 +22,4 @@ METAL_C_EXPORT void MTL4ComputeCommandEncoderBuildAccelerationStructure(MTL4Comp
 METAL_C_EXPORT void MTL4ComputeCommandEncoderRefitAccelerationStructure(MTL4ComputeCommandEncoder* encoder, const MTLAccelerationStructure* source, const MTL4AccelerationStructureDescriptor* descriptor, const MTLAccelerationStructure* destination, MTL4BufferRange scratchBuffer);
 #ifdef __cplusplus
 }
-#endif
 #endif

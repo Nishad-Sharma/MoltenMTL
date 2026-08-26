@@ -1,8 +1,5 @@
-#ifndef METAL_C_METAL_H
-#define METAL_C_METAL_H
+#pragma once
 #include <Metal/MTLDefines.h>
-#include <Metal/MTLObject.h>
-#include <Metal/MTLError.h>
 #include <Metal/MTLTypes.h>
 #include <Metal/MTLPixelFormat.h>
 #include <Metal/MTLResource.h>
@@ -27,4 +24,3 @@
 #include <Metal/MTL4Compiler.h>
 #include <Metal/MTL4ComputeCommandEncoder.h>
 #include <Metal/MTL4AccelerationStructure.h>
-#endif

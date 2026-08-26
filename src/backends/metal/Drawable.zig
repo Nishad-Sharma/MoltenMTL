@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const Texture = @import("Texture.zig").Texture;
 
@@ -11,7 +11,7 @@ pub const Drawable = extern struct {
         return Texture{ .ptr = c.CAMetalDrawableGetTexture(@ptrCast(self.ptr)) };
     }
     pub fn deinit(self: *Drawable) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

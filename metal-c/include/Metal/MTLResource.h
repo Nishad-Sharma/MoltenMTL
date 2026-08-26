@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_RESOURCE_H
-#define METAL_C_MTL_RESOURCE_H
+#pragma once
 
 #include <Metal/MTLDefines.h>
 
@@ -25,5 +24,4 @@ METAL_C_EXPORT size_t MTLResourceGetAllocatedSize(const MTLResource* resource);
 
 #ifdef __cplusplus
 }
-#endif
 #endif

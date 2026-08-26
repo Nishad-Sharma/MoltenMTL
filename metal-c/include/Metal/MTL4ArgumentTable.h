@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_ARGUMENT_TABLE_H
-#define METAL_C_MTL4_ARGUMENT_TABLE_H
+#pragma once
 #include <Metal/MTLAccelerationStructure.h>
 #include <Metal/MTLBuffer.h>
 #include <Metal/MTLTexture.h>
@@ -18,5 +17,4 @@ METAL_C_EXPORT void MTL4ArgumentTableSetTexture(MTL4ArgumentTable* table, const 
 METAL_C_EXPORT void MTL4ArgumentTableSetAccelerationStructure(MTL4ArgumentTable* table, const MTLAccelerationStructure* accelerationStructure, size_t bindingIndex);
 #ifdef __cplusplus
 }
-#endif
 #endif

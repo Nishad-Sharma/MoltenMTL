@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 static_assert(sizeof(MTLPackedFloat4x3) == sizeof(MTL::PackedFloat4x3));
 static_assert(sizeof(MTLAccelerationStructureInstanceDescriptor) == sizeof(MTL::AccelerationStructureInstanceDescriptor));

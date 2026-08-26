@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const pixel = @import("PixelFormat.zig");
 const resource = @import("Resource.zig");
@@ -56,7 +56,7 @@ pub const TextureDescriptor = extern struct {
         c.MTLTextureDescriptorSetUsage(self.ptr, usage);
     }
     pub fn deinit(self: *TextureDescriptor) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };
@@ -95,7 +95,7 @@ pub const Texture = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *Texture) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

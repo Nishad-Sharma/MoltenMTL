@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_TEXTURE_H
-#define METAL_C_MTL_TEXTURE_H
+#pragma once
 
 #include <Metal/MTLPixelFormat.h>
 #include <Metal/MTLResource.h>
@@ -47,5 +46,4 @@ METAL_C_EXPORT MTLResourceID MTLTextureGetGPUResourceID(const MTLTexture* textur
 METAL_C_EXPORT void MTLTextureReplaceRegion(MTLTexture* texture, MTLRegion region, size_t mipmapLevel, size_t slice, const void* bytes, size_t bytesPerRow, size_t bytesPerImage);
 #ifdef __cplusplus
 }
-#endif
 #endif

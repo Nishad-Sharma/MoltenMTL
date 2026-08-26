@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const Device = @import("Device.zig").Device;
 const Drawable = @import("Drawable.zig").Drawable;

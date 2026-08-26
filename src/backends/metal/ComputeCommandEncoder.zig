@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const types = @import("Types.zig");
 const Buffer = @import("Buffer.zig").Buffer;
@@ -45,7 +45,7 @@ pub const ComputeCommandEncoder = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *ComputeCommandEncoder) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

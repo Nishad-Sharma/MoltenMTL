@@ -25,4 +25,4 @@ zig build
 ```
 
 Every returned object follows Metal retain/release ownership. Release it with
-`MTLRelease`; use `MTLAutoreleasePoolCreate` on threads that call Metal APIs.
+`NSRelease`; use `NSAutoreleasePoolCreate` on threads that call Metal APIs.

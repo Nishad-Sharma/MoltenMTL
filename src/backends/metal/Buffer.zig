@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const resource = @import("Resource.zig");
 const types = @import("Types.zig");
@@ -31,7 +31,7 @@ pub const Buffer = extern struct {
         return .{ .ptr = @ptrCast(self.ptr) };
     }
     pub fn deinit(self: *Buffer) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

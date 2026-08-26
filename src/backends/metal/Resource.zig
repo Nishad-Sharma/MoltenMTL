@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 
 pub const ResourceOptions = c.MTLResourceOptions;
@@ -22,7 +22,7 @@ pub const Resource = extern struct {
         return c.MTLResourceGetAllocatedSize(self.ptr);
     }
     pub fn deinit(self: *Resource) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

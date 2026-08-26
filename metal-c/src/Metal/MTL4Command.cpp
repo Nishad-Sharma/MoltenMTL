@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 void MTL4CommandAllocatorReset(MTL4CommandAllocator* a) { if (a) native<MTL4::CommandAllocator>(a)->reset(); }

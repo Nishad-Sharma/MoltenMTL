@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_ACCELERATION_STRUCTURE_H
-#define METAL_C_MTL_ACCELERATION_STRUCTURE_H
+#pragma once
 
 #include <Metal/MTLDefines.h>
 #include <Metal/MTLTypes.h>
@@ -12,5 +11,4 @@ METAL_C_EXPORT size_t MTLAccelerationStructureGetSize(const MTLAccelerationStruc
 METAL_C_EXPORT MTLResourceID MTLAccelerationStructureGetGPUResourceID(const MTLAccelerationStructure* accelerationStructure);
 #ifdef __cplusplus
 }
-#endif
 #endif

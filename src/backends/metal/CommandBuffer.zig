@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const CommandAllocator = @import("CommandAllocator.zig").CommandAllocator;
 const ComputeCommandEncoder = @import("ComputeCommandEncoder.zig").ComputeCommandEncoder;
@@ -19,7 +19,7 @@ pub const CommandBuffer = extern struct {
         c.MTL4CommandBufferEnd(self.ptr);
     }
     pub fn deinit(self: *CommandBuffer) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

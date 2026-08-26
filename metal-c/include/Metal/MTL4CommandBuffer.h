@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_COMMAND_BUFFER_H
-#define METAL_C_MTL4_COMMAND_BUFFER_H
+#pragma once
 #include <Metal/MTL4CommandAllocator.h>
 #include <Metal/MTLResidencySet.h>
 #ifdef __cplusplus
@@ -13,5 +12,4 @@ METAL_C_EXPORT void MTL4CommandBufferUseResidencySet(MTL4CommandBuffer* commandB
 METAL_C_EXPORT void MTL4CommandBufferEnd(MTL4CommandBuffer* commandBuffer);
 #ifdef __cplusplus
 }
-#endif
 #endif

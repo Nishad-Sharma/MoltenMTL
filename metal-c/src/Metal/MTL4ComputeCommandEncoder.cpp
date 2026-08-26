@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 MTL4BufferRange MTL4BufferRangeMake(const MTLBuffer* b, size_t offset, size_t length) { return MTL4BufferRange{b ? native<MTL::Buffer>(b)->gpuAddress() + offset : 0, length}; }

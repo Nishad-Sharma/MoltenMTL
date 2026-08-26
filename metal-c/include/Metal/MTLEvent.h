@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_EVENT_H
-#define METAL_C_MTL_EVENT_H
+#pragma once
 #include <Metal/MTLDefines.h>
 #ifdef __cplusplus
 extern "C" {
@@ -9,5 +8,4 @@ METAL_C_EXPORT uint64_t MTLSharedEventGetSignaledValue(const MTLSharedEvent* eve
 METAL_C_EXPORT bool MTLSharedEventWaitUntilSignaledValue(MTLSharedEvent* event, uint64_t value, uint64_t timeoutMS);
 #ifdef __cplusplus
 }
-#endif
 #endif

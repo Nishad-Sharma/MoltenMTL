@@ -1,12 +1,12 @@
-#include "MetalCInternal.hpp"
+#include "FoundationInternal.hpp"
 
 extern "C" {
-int64_t MTLErrorGetCode(const MTLError* error)
+int64_t NSErrorGetCode(const NSError* error)
 {
     return error == nullptr ? 0 : native<NS::Error>(error)->code();
 }
 
-const char* MTLErrorGetLocalizedDescription(const MTLError* error)
+const char* NSErrorGetLocalizedDescription(const NSError* error)
 {
     if (error == nullptr) return "";
     NS::String* description = native<NS::Error>(error)->localizedDescription();

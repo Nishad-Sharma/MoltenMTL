@@ -1,4 +1,4 @@
-#include "MetalCInternal.hpp"
+#include "MetalInternal.hpp"
 
 extern "C" {
 MTLDevice* MTLCreateSystemDefaultDevice(void)
@@ -51,7 +51,7 @@ MTL4CommandQueue* MTLDeviceCreateMTL4CommandQueue(MTLDevice* device)
     return device == nullptr ? nullptr : cobject<MTL4CommandQueue>(native<MTL::Device>(device)->newMTL4CommandQueue());
 }
 
-MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error)
+MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, NSError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;
@@ -61,7 +61,7 @@ MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescr
     return cobject<MTL4Compiler>(compiler);
 }
 
-MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error)
+MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, NSError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;
@@ -83,7 +83,7 @@ MTLAccelerationStructure* MTLDeviceCreateAccelerationStructure(MTLDevice* device
     return device == nullptr ? nullptr : cobject<MTLAccelerationStructure>(native<MTL::Device>(device)->newAccelerationStructure(size));
 }
 
-MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error)
+MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, NSError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;

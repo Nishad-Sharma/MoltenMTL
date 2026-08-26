@@ -1,5 +1,5 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 
-pub fn deinit(ptr: anytype) void {
+pub fn release(ptr: anytype) void {
     c.MTLRelease(@ptrCast(ptr));
 }

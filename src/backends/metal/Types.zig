@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 
 pub const GPUAddress = c.MTLGPUAddress;
 pub const ResourceID = c.MTLResourceID;

@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const CommandBuffer = @import("CommandBuffer.zig").CommandBuffer;
 const Drawable = @import("Drawable.zig").Drawable;
@@ -22,7 +22,7 @@ pub const CommandQueue = extern struct {
         c.MTL4CommandQueueSignalDrawable(self.ptr, drawable.ptr);
     }
     pub fn deinit(self: *CommandQueue) void {
-        object.deinit(self.ptr);
+        object.release(self.ptr);
         self.* = undefined;
     }
 };

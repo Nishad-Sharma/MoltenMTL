@@ -3,8 +3,6 @@
 //! Wrapper types live beside their matching metal-c/metal-cpp header family in
 //! `Metal/` and `QuartzCore/`. This file preserves the flat `@import("metal")` API.
 
-const raw = @import("metal/Raw.zig");
-const object = @import("metal/Object.zig");
 const types = @import("metal/Types.zig");
 const errors = @import("metal/Error.zig");
 const resources = @import("metal/Resource.zig");

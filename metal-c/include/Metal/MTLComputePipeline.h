@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_COMPUTE_PIPELINE_H
-#define METAL_C_MTL_COMPUTE_PIPELINE_H
+#pragma once
 
 #include <Metal/MTLDefines.h>
 #ifdef __cplusplus
@@ -10,5 +9,4 @@ METAL_C_EXPORT size_t MTLComputePipelineStateGetThreadExecutionWidth(const MTLCo
 METAL_C_EXPORT size_t MTLComputePipelineStateGetMaxTotalThreadsPerThreadgroup(const MTLComputePipelineState* state);
 #ifdef __cplusplus
 }
-#endif
 #endif

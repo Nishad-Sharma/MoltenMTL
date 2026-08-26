@@ -1,4 +1,4 @@
-const c = @import("Raw.zig").c;
+const c = @import("c.zig").c;
 
 pub const PixelFormat = c.MTLPixelFormat;
 pub const PixelFormatInvalid: PixelFormat = c.MTLPixelFormatInvalid;

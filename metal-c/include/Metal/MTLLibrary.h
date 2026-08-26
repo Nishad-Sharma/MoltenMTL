@@ -1,4 +1,2 @@
-#ifndef METAL_C_MTL_LIBRARY_H
-#define METAL_C_MTL_LIBRARY_H
+#pragma once
 typedef struct MTLLibrary MTLLibrary;
-#endif

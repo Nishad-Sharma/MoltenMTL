@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_PIXEL_FORMAT_H
-#define METAL_C_MTL_PIXEL_FORMAT_H
+#pragma once
 
 #include <Metal/MTLDefines.h>
 
@@ -18,5 +17,3 @@ MTL_C_ENUM(uint64_t, MTLPixelFormat) {
     MTLPixelFormatRG32Float = 105,
     MTLPixelFormatRGBA32Float = 125
 };
-
-#endif

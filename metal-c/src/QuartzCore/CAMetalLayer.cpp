@@ -1,4 +1,7 @@
-#include "../Metal/MetalCInternal.hpp"
+#include "../Metal/MetalInternal.hpp"
+
+#include <QuartzCore/QuartzCore.hpp>
+#include <QuartzCore/CAMetalLayer.h>
 
 extern "C" {
 CAMetalLayer* CAMetalLayerCreate(void)

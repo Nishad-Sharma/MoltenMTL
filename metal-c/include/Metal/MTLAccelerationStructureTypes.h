@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL_ACCELERATION_STRUCTURE_TYPES_H
-#define METAL_C_MTL_ACCELERATION_STRUCTURE_TYPES_H
+#pragma once
 
 #include <Metal/MTLTypes.h>
 
@@ -51,5 +50,3 @@ typedef struct MTLIndirectAccelerationStructureInstanceDescriptor {
     MTLResourceID accelerationStructureID;
 } MTLIndirectAccelerationStructureInstanceDescriptor;
 #pragma pack(pop)
-
-#endif

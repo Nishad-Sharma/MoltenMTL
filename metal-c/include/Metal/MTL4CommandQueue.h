@@ -1,5 +1,4 @@
-#ifndef METAL_C_MTL4_COMMAND_QUEUE_H
-#define METAL_C_MTL4_COMMAND_QUEUE_H
+#pragma once
 #include <Metal/MTL4CommandBuffer.h>
 #include <Metal/MTLDrawable.h>
 #include <Metal/MTLEvent.h>
@@ -14,5 +13,4 @@ METAL_C_EXPORT void MTL4CommandQueueWaitForDrawable(MTL4CommandQueue* queue, MTL
 METAL_C_EXPORT void MTL4CommandQueueSignalDrawable(MTL4CommandQueue* queue, MTLDrawable* drawable);
 #ifdef __cplusplus
 }
-#endif
 #endif
