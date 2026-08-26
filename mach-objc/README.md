@@ -1,23 +1,42 @@
-# mach-objc: Generated Objective-C bindings for Zig
+# Metal Objective-C bindings for Zig
 
-Zig bindings to various Objective-C APIs, e.g. Metal, AVFAudio, etc.
+Generated direct Objective-C bindings for the graphics frameworks shipped with Xcode 26:
 
-## Usage
+- Metal's complete `MTL*` and `MTL4*` Objective-C interfaces, protocols, methods, and enums
+- MetalFX, including `MTLFX*` and `MTL4FX*`
+- QuartzCore's `CALayer`, `CAMetalLayer`, and `CAMetalDrawable` presentation path
+- the Objective-C and Foundation runtime types required by those APIs
 
-See https://machengine.org/pkg/mach-objc
+The package deliberately does not generate unrelated Apple frameworks.
 
-To regenerate the contents of this repository using the upstream version it currently targets, run `./generate.sh`.
+## Generate
 
-To update this repository to the latest upstream version, run `./update.sh` then `./generate.sh`.
+The default generation command reads the SDK selected by the stable Xcode SDK symlink:
 
-## Issues
+```sh
+zig build generate
+```
 
-Issues are tracked in the [main Mach repository](https://github.com/hexops/mach/issues?q=is%3Aissue+is%3Aopen+label%3Aobjc).
+An explicit SDK can be selected when required:
 
-## Community
+```sh
+zig build generate -Dmacos-sdk="$(xcrun --sdk macosx --show-sdk-path)"
+```
 
-Join the Mach engine community [on Discord](https://discord.gg/XNG3NZgCqp) to discuss this project, ask questions, get help, etc.
+Generated sources are checked in under `src/generated`. The handful of C records used by Metal
+4 remain explicit `extern struct` declarations in `src/metal.zig`; Objective-C interfaces,
+protocols, methods, and enums are generated from the SDK AST.
 
-## Special thanks
+## Use
 
-Special thanks to @pdoane who did all of the initial work on the generator and generously contributed this to the Mach ecosystem.
+```zig
+const apple = @import("mach-objc");
+
+const device = apple.metal.createSystemDefaultDevice() orelse return error.NoDevice;
+defer device.release();
+
+const queue = device.newMTL4CommandQueue() orelse return error.Metal4Unavailable;
+defer queue.release();
+```
+
+This package is derived from [mach-objc](https://code.hexops.org/hexops/mach-objc).

@@ -15,11 +15,5 @@
         "registry.zig",
         "verify.sh",
     },
-    .dependencies = .{
-        .xcode_frameworks = .{
-            .url = "https://pkg.hexops.org/pkg/hexops/xcode-frameworks/62f660e82e4eddb5007cb4cf06a6d3d31237f05e.tar.gz",
-            .hash = "N-V-__8AAMikhQnOIqoH0uy5aepJKs8Zy0VqznnW3n94VSZN",
-            .lazy = true,
-        },
-    },
+    .dependencies = .{},
 }

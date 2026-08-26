@@ -980,9 +980,15 @@ pub const Converter = struct {
 
 // ------------------------------------------------------------------------------------------------
 
-const prefixes = [_][]const u8{ "CA", "CF", "CG", "MTK", "MTL", "NS", "CV" };
+const prefixes = [_][]const u8{ "CA", "CF", "CG", "MTK", "MTLFX", "MTL", "NS", "CV" };
+
+fn stringLessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
+    return std.mem.order(u8, lhs, rhs) == .lt;
+}
 
 pub fn getNamespace(id: []const u8) []const u8 {
+    if (std.mem.startsWith(u8, id, "MTL4FX")) return "MTLFX";
+    if (std.mem.startsWith(u8, id, "MTL4")) return "MTL";
     for (prefixes) |prefix| {
         if (std.mem.startsWith(u8, id, prefix)) {
             return prefix;
@@ -993,6 +999,10 @@ pub fn getNamespace(id: []const u8) []const u8 {
 }
 
 pub fn trimNamespace(id: []const u8) []const u8 {
+    // Metal 4 and Metal 4 FX share files with their original API families. Preserve their
+    // complete names so they remain valid and unambiguous Zig declarations.
+    if (std.mem.startsWith(u8, id, "MTL4FX")) return id;
+    if (std.mem.startsWith(u8, id, "MTL4")) return id;
     for (prefixes) |prefix| {
         if (std.mem.startsWith(u8, id, prefix)) {
             return id[prefix.len..];
@@ -1085,6 +1095,49 @@ fn Generator(comptime WriterType: type) type {
             };
 
             try self.enums.append(e);
+        }
+
+        pub fn addEnumsWithPrefix(self: *Self, prefix: []const u8) !void {
+            var names: std.ArrayList([]const u8) = .empty;
+            defer names.deinit(self.allocator);
+            var iterator = registry.enums.keyIterator();
+            while (iterator.next()) |name| {
+                if (std.mem.startsWith(u8, name.*, prefix)) {
+                    try names.append(self.allocator, name.*);
+                }
+            }
+            std.sort.insertion([]const u8, names.items, {}, stringLessThan);
+            for (names.items) |name| try self.addEnum(name);
+        }
+
+        pub fn addInterfacesWithPrefix(self: *Self, prefix: []const u8) !void {
+            var names: std.ArrayList([]const u8) = .empty;
+            defer names.deinit(self.allocator);
+            var iterator = registry.interfaces.keyIterator();
+            while (iterator.next()) |name| {
+                const container = registry.interfaces.get(name.*).?;
+                const is_forward_declaration = container.super == null and
+                    container.methods.items.len == 0 and
+                    container.properties.items.len == 0;
+                if (std.mem.startsWith(u8, name.*, prefix) and !is_forward_declaration) {
+                    try names.append(self.allocator, name.*);
+                }
+            }
+            std.sort.insertion([]const u8, names.items, {}, stringLessThan);
+            for (names.items) |name| try self.addInterface(name);
+        }
+
+        pub fn addProtocolsWithPrefix(self: *Self, prefix: []const u8) !void {
+            var names: std.ArrayList([]const u8) = .empty;
+            defer names.deinit(self.allocator);
+            var iterator = registry.protocols.keyIterator();
+            while (iterator.next()) |name| {
+                if (std.mem.startsWith(u8, name.*, prefix)) {
+                    try names.append(self.allocator, name.*);
+                }
+            }
+            std.sort.insertion([]const u8, names.items, {}, stringLessThan);
+            for (names.items) |name| try self.addProtocol(name);
         }
 
         fn addContainer(self: *Self, container: *Container) !void {
@@ -1539,6 +1592,15 @@ fn generateMetal(generator: anytype) !void {
     generator.namespace = "MTL";
     generator.allow_methods = &.{};
 
+    try generator.addEnumsWithPrefix("MTL");
+    try generator.addInterfacesWithPrefix("MTL");
+    try generator.addProtocolsWithPrefix("MTL");
+}
+
+fn generateMetalLegacy(generator: anytype) !void {
+    generator.namespace = "MTL";
+    generator.allow_methods = &.{};
+
     // MTLAccelerationStructure
     try generator.addEnum("MTLAccelerationStructureUsage");
     try generator.addEnum("MTLAccelerationStructureInstanceOptions");
@@ -1962,6 +2024,24 @@ fn generateMetal(generator: anytype) !void {
     // MTLVisibleFunctionTable
     try generator.addInterface("MTLVisibleFunctionTableDescriptor");
     try generator.addProtocol("MTLVisibleFunctionTable");
+
+    // Metal 4 is part of Metal.framework but uses a separate MTL4 prefix. Generate the complete
+    // family from the selected SDK so the bindings track the Metal 4 surface shipped by Xcode.
+    try generator.addEnumsWithPrefix("MTL4");
+    try generator.addInterfacesWithPrefix("MTL4");
+    try generator.addProtocolsWithPrefix("MTL4");
+}
+
+fn generateMetalFX(generator: anytype) !void {
+    generator.namespace = "MTLFX";
+    generator.allow_methods = &.{};
+
+    try generator.addEnumsWithPrefix("MTLFX");
+    try generator.addInterfacesWithPrefix("MTLFX");
+    try generator.addProtocolsWithPrefix("MTLFX");
+    try generator.addEnumsWithPrefix("MTL4FX");
+    try generator.addInterfacesWithPrefix("MTL4FX");
+    try generator.addProtocolsWithPrefix("MTL4FX");
 }
 
 fn generateAVFAudio(generator: anytype) !void {
@@ -2039,44 +2119,11 @@ fn generateQuartzCore(generator: anytype) !void {
         // CAMetalDrawable
         [2][]const u8{ "CAMetalDrawable", "texture" },
         [2][]const u8{ "CAMetalDrawable", "layer" },
-
-        // CADisplayLink
-        [2][]const u8{ "CADisplayLink", "addToRunLoop:forMode" },
-        [2][]const u8{ "CADisplayLink", "removeFromRunLoop:forMode" },
-        [2][]const u8{ "CADisplayLink", "invalidate" },
-        [2][]const u8{ "CADisplayLink", "timestamp" },
-        [2][]const u8{ "CADisplayLink", "duration" },
-        [2][]const u8{ "CADisplayLink", "targetTimestamp" },
-        [2][]const u8{ "CADisplayLink", "isPaused" },
-        [2][]const u8{ "CADisplayLink", "setPaused" },
-
-        // CAMetalDisplayLink
-        [2][]const u8{ "CAMetalDisplayLink", "initWithMetalLayer" },
-        [2][]const u8{ "CAMetalDisplayLink", "addToRunLoop:forMode" },
-        [2][]const u8{ "CAMetalDisplayLink", "removeFromRunLoop:forMode" },
-        [2][]const u8{ "CAMetalDisplayLink", "invalidate" },
-        [2][]const u8{ "CAMetalDisplayLink", "isPaused" },
-        [2][]const u8{ "CAMetalDisplayLink", "setPaused" },
-        [2][]const u8{ "CAMetalDisplayLink", "delegate" },
-        [2][]const u8{ "CAMetalDisplayLink", "setDelegate" },
-        [2][]const u8{ "CAMetalDisplayLink", "preferredFrameLatency" },
-        [2][]const u8{ "CAMetalDisplayLink", "setPreferredFrameLatency" },
-        [2][]const u8{ "CAMetalDisplayLink", "preferredFrameRateRange" },
-        [2][]const u8{ "CAMetalDisplayLink", "setPreferredFrameRateRange" },
-
-        // CAMetalDisplayLinkUpdate
-        [2][]const u8{ "CAMetalDisplayLinkUpdate", "drawable" },
-        [2][]const u8{ "CAMetalDisplayLinkUpdate", "targetTimestamp" },
-        [2][]const u8{ "CAMetalDisplayLinkUpdate", "targetPresentationTimestamp" },
     };
 
     try generator.addInterface("CALayer");
     try generator.addInterface("CAMetalLayer");
     try generator.addProtocol("CAMetalDrawable");
-    try generator.addInterface("CADisplayLink");
-    try generator.addInterface("CAMetalDisplayLink");
-    try generator.addInterface("CAMetalDisplayLinkUpdate");
-    try generator.addProtocol("CAMetalDisplayLinkDelegate");
 }
 
 fn generateAppKit(generator: anytype) !void {
@@ -2652,15 +2699,6 @@ fn generateUIKit(generator: anytype) !void {
     try generator.addProtocol("NSObject");
 }
 
-const SdkKind = enum {
-    /// Use the macOS frameworks dir provided via --frameworks-dir.
-    macos,
-    /// Use the iPhoneOS frameworks dir provided via --iphoneos-frameworks-dir, plus
-    /// `-target arm64-apple-ios18.0` and the matching system include dir from
-    /// --iphoneos-include-dir.
-    iphoneos,
-};
-
 const FrameworkSpec = struct {
     name: []const u8,
     tag: Framework,
@@ -2670,7 +2708,6 @@ const FrameworkSpec = struct {
         inline_text: []const u8,
         file_path: []const u8,
     },
-    sdk: SdkKind = .macos,
     extra_clang_args: []const []const u8,
 };
 
@@ -2684,19 +2721,11 @@ const framework_specs = [_]FrameworkSpec{
         .extra_clang_args = &.{},
     },
     .{
-        .name = "AVFAudio",
-        .tag = .avf_audio,
-        .manual_path = "src/avf_audio.zig",
-        .output_path = "src/generated/avf_audio.zig",
-        .header_content = .{ .file_path = "src/avf_audio_headers.m" },
-        .extra_clang_args = &.{},
-    },
-    .{
-        .name = "CoreMIDI",
-        .tag = .core_midi,
-        .manual_path = "src/core_midi.zig",
-        .output_path = "src/generated/core_midi.zig",
-        .header_content = .{ .inline_text = "\n#include <CoreMIDI/MidiServices.h>\n" },
+        .name = "MetalFX",
+        .tag = .metal_fx,
+        .manual_path = "src/metal_fx.zig",
+        .output_path = "src/generated/metal_fx.zig",
+        .header_content = .{ .inline_text = "\n#include <MetalFX/MetalFX.h>\n" },
         .extra_clang_args = &.{},
     },
     .{
@@ -2705,31 +2734,6 @@ const framework_specs = [_]FrameworkSpec{
         .manual_path = "src/quartz_core.zig",
         .output_path = "src/generated/quartz_core.zig",
         .header_content = .{ .inline_text = "\n#include <QuartzCore/QuartzCore.h>\n" },
-        .extra_clang_args = &.{"-Wno-availability"},
-    },
-    .{
-        .name = "AppKit",
-        .tag = .app_kit,
-        .manual_path = "src/app_kit.zig",
-        .output_path = "src/generated/app_kit.zig",
-        .header_content = .{ .inline_text = "\n#include <AppKit/AppKit.h>\n" },
-        .extra_clang_args = &.{"-Wno-availability"},
-    },
-    .{
-        .name = "CoreVideo",
-        .tag = .core_video,
-        .manual_path = "src/core_video.zig",
-        .output_path = "src/generated/core_video.zig",
-        .header_content = .{ .inline_text = "\n#include <CoreVideo/CoreVideo.h>\n" },
-        .extra_clang_args = &.{"-Wno-availability"},
-    },
-    .{
-        .name = "UIKit",
-        .tag = .ui_kit,
-        .manual_path = "src/ui_kit.zig",
-        .output_path = "src/generated/ui_kit.zig",
-        .header_content = .{ .inline_text = "\n#include <UIKit/UIKit.h>\n" },
-        .sdk = .iphoneos,
         .extra_clang_args = &.{"-Wno-availability"},
     },
 };
@@ -2767,13 +2771,8 @@ fn readFileContents(allocator: std.mem.Allocator, io: std.Io, path: []const u8) 
 }
 
 const SdkDirs = struct {
-    /// macOS frameworks dir (also used as fallback if a per-sdk dir is absent).
+    macos_sdk_root: []const u8,
     macos_frameworks_dir: []const u8,
-    /// iPhoneOS frameworks dir. Required when generating a framework with `.sdk = .iphoneos`.
-    iphoneos_frameworks_dir: ?[]const u8,
-    /// iPhoneOS system include dir (e.g. SDK's `/usr/include`). Required when generating a
-    /// framework with `.sdk = .iphoneos`.
-    iphoneos_include_dir: ?[]const u8,
 };
 
 fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: FrameworkSpec, dirs: SdkDirs) !void {
@@ -2801,26 +2800,12 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
         "-fsyntax-only",
         "-Wno-deprecated-declarations",
     });
-    switch (spec.sdk) {
-        .macos => try argv.appendSlice(allocator, &.{ "-F", dirs.macos_frameworks_dir }),
-        .iphoneos => {
-            const fw = dirs.iphoneos_frameworks_dir orelse {
-                std.log.err("iOS framework '{s}' requested but --iphoneos-frameworks-dir not provided", .{spec.name});
-                return error.MissingIphoneosFrameworksDir;
-            };
-            const inc = dirs.iphoneos_include_dir orelse {
-                std.log.err("iOS framework '{s}' requested but --iphoneos-include-dir not provided", .{spec.name});
-                return error.MissingIphoneosIncludeDir;
-            };
-            try argv.appendSlice(allocator, &.{
-                "-target",  "arm64-apple-ios18.0",
-                "-F",       fw,
-                "-isystem", inc,
-                // Don't let the host macOS SDK leak in.
-                "-Xclang",  "-nostdsysteminc",
-            });
-        },
-    }
+    try argv.appendSlice(allocator, &.{
+        "-isysroot",
+        dirs.macos_sdk_root,
+        "-F",
+        dirs.macos_frameworks_dir,
+    });
     for (spec.extra_clang_args) |arg| {
         try argv.append(allocator, arg);
     }
@@ -2868,12 +2853,8 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
 
     switch (spec.tag) {
         .metal => try generateMetal(&generator),
-        .avf_audio => try generateAVFAudio(&generator),
-        .core_midi => try generateCoreMIDI(&generator),
+        .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
-        .app_kit => try generateAppKit(&generator),
-        .core_video => try generateCoreVideo(&generator),
-        .ui_kit => try generateUIKit(&generator),
     }
     try generator.generate();
     try file_writer.flush();
@@ -2881,11 +2862,6 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
 
 fn generateAllFrameworks(allocator: std.mem.Allocator, io: std.Io, dirs: SdkDirs) !void {
     for (framework_specs) |spec| {
-        // Skip iOS-only specs if the iOS dirs aren't available, instead of erroring out.
-        if (spec.sdk == .iphoneos and dirs.iphoneos_frameworks_dir == null) {
-            std.debug.print("Skipping {s} (no --iphoneos-frameworks-dir provided)\n", .{spec.name});
-            continue;
-        }
         try generateForFramework(allocator, io, spec, dirs);
     }
 
@@ -2894,12 +2870,8 @@ fn generateAllFrameworks(allocator: std.mem.Allocator, io: std.Io, dirs: SdkDirs
         "zig",
         "fmt",
         "src/generated/metal.zig",
-        "src/generated/avf_audio.zig",
-        "src/generated/core_midi.zig",
+        "src/generated/metal_fx.zig",
         "src/generated/quartz_core.zig",
-        "src/generated/app_kit.zig",
-        "src/generated/core_video.zig",
-        "src/generated/ui_kit.zig",
     });
     allocator.free(fmt_stdout);
 }
@@ -2943,12 +2915,8 @@ fn generateSingleFramework(allocator: std.mem.Allocator, io: std.Io, framework: 
 
     switch (framework) {
         .metal => try generateMetal(&generator),
-        .avf_audio => try generateAVFAudio(&generator),
-        .core_midi => try generateCoreMIDI(&generator),
+        .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
-        .app_kit => try generateAppKit(&generator),
-        .core_video => try generateCoreVideo(&generator),
-        .ui_kit => try generateUIKit(&generator),
     }
     try generator.generate();
     try stdout_writer.flush();
@@ -2959,11 +2927,10 @@ fn usage() void {
         \\mach-objc-generator [options]
         \\
         \\Options:
-        \\  --framework  Metal,AVFAudio,CoreMIDI,QuartzCore,AppKit,CoreVideo,UIKit  generate a single framework to stdout
-        \\  --generate-all                                              generate all frameworks
-        \\  --frameworks-dir <path>                                     path to macOS Frameworks dir
-        \\  --iphoneos-frameworks-dir <path>                            path to iPhoneOS Frameworks dir (required for UIKit)
-        \\  --iphoneos-include-dir <path>                               path to iPhoneOS usr/include dir (required for UIKit)
+        \\  --framework Metal,MetalFX,QuartzCore  generate a single framework to stdout
+        \\  --generate-all                         generate all frameworks
+        \\  --sdk-root <path>                      path to the macOS SDK
+        \\  --frameworks-dir <path>                path to the SDK Frameworks directory
         \\  --help
         \\
     , .{});
@@ -2971,12 +2938,8 @@ fn usage() void {
 
 const Framework = enum {
     metal,
-    avf_audio,
-    core_midi,
+    metal_fx,
     quartz_core,
-    app_kit,
-    core_video,
-    ui_kit,
 };
 
 pub fn main(init: std.process.Init) anyerror!void {
@@ -2989,9 +2952,8 @@ pub fn main(init: std.process.Init) anyerror!void {
 
     var framework: ?Framework = null;
     var generate_all = false;
-    var frameworks_dir: []const u8 = "./xcode-frameworks/Frameworks";
-    var iphoneos_frameworks_dir: ?[]const u8 = null;
-    var iphoneos_include_dir: ?[]const u8 = null;
+    var sdk_root: []const u8 = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
+    var frameworks_dir: []const u8 = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks";
 
     while (args_iter.next()) |arg| {
         if (std.mem.eql(u8, arg, "--framework")) {
@@ -3001,29 +2963,20 @@ pub fn main(init: std.process.Init) anyerror!void {
             };
             framework = blk: {
                 if (std.mem.eql(u8, fw_arg, "Metal")) break :blk .metal;
-                if (std.mem.eql(u8, fw_arg, "AVFAudio")) break :blk .avf_audio;
-                if (std.mem.eql(u8, fw_arg, "CoreMIDI")) break :blk .core_midi;
+                if (std.mem.eql(u8, fw_arg, "MetalFX")) break :blk .metal_fx;
                 if (std.mem.eql(u8, fw_arg, "QuartzCore")) break :blk .quartz_core;
-                if (std.mem.eql(u8, fw_arg, "AppKit")) break :blk .app_kit;
-                if (std.mem.eql(u8, fw_arg, "CoreVideo")) break :blk .core_video;
-                if (std.mem.eql(u8, fw_arg, "UIKit")) break :blk .ui_kit;
                 usage();
                 std.process.exit(1);
             };
         } else if (std.mem.eql(u8, arg, "--generate-all")) {
             generate_all = true;
+        } else if (std.mem.eql(u8, arg, "--sdk-root")) {
+            sdk_root = args_iter.next() orelse {
+                usage();
+                std.process.exit(1);
+            };
         } else if (std.mem.eql(u8, arg, "--frameworks-dir")) {
             frameworks_dir = args_iter.next() orelse {
-                usage();
-                std.process.exit(1);
-            };
-        } else if (std.mem.eql(u8, arg, "--iphoneos-frameworks-dir")) {
-            iphoneos_frameworks_dir = args_iter.next() orelse {
-                usage();
-                std.process.exit(1);
-            };
-        } else if (std.mem.eql(u8, arg, "--iphoneos-include-dir")) {
-            iphoneos_include_dir = args_iter.next() orelse {
                 usage();
                 std.process.exit(1);
             };
@@ -3031,9 +2984,8 @@ pub fn main(init: std.process.Init) anyerror!void {
     }
 
     const dirs: SdkDirs = .{
+        .macos_sdk_root = sdk_root,
         .macos_frameworks_dir = frameworks_dir,
-        .iphoneos_frameworks_dir = iphoneos_frameworks_dir,
-        .iphoneos_include_dir = iphoneos_include_dir,
     };
 
     if (generate_all) {

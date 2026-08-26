@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./generate.sh
-diff_output=$(git diff)
+zig build generate
+zig build test
 
-if [ -n "$diff_output" ]; then
-    echo "$diff_output"
-    exit 1
-else
-    echo "(no diff compared to upstream)"
-fi
+repo_root=$(git rev-parse --show-toplevel)
+git -C "$repo_root" diff --exit-code -- mach-objc

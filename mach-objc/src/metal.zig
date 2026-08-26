@@ -9,6 +9,12 @@ const objc = @import("../objc.zig");
 pub const dispatch_data_t = *opaque {};
 pub const dispatch_queue_t = *opaque {};
 pub const IOSurfaceRef = *opaque {};
+pub const GPUAddress = u64;
+pub const task_id_token_t = u32;
+pub const kern_return_t = c_int;
+
+// Forward-declared by MTLDevice.h but not defined as an Objective-C class in the SDK.
+pub const TilePipelineColorAttachmentDescriptor = opaque {};
 
 // ------------------------------------------------------------------------------------------------
 // Types
@@ -234,4 +240,57 @@ pub const SizeAndAlign = extern struct {
     size: ns.UInteger,
     @"align": ns.UInteger,
 };
+
+// MTL4BufferRange.h
+pub const MTL4BufferRange = extern struct {
+    bufferAddress: u64,
+    length: u64,
+
+    pub fn init(buffer_address: u64, length: u64) MTL4BufferRange {
+        return .{ .bufferAddress = buffer_address, .length = length };
+    }
+};
+
+// MTL4Counters.h
+pub const MTL4TimestampHeapEntry = extern struct {
+    timestamp: u64,
+};
+
+// MTL4CommandQueue.h
+pub const MTL4UpdateSparseTextureMappingOperation = extern struct {
+    mode: SparseTextureMappingMode,
+    textureRegion: Region,
+    textureLevel: ns.UInteger,
+    textureSlice: ns.UInteger,
+    heapOffset: ns.UInteger,
+};
+
+pub const MTL4CopySparseTextureMappingOperation = extern struct {
+    sourceRegion: Region,
+    sourceLevel: ns.UInteger,
+    sourceSlice: ns.UInteger,
+    destinationOrigin: Origin,
+    destinationLevel: ns.UInteger,
+    destinationSlice: ns.UInteger,
+};
+
+pub const MTL4UpdateSparseBufferMappingOperation = extern struct {
+    mode: SparseTextureMappingMode,
+    bufferRange: ns.Range,
+    heapOffset: ns.UInteger,
+};
+
+pub const MTL4CopySparseBufferMappingOperation = extern struct {
+    sourceRange: ns.Range,
+    destinationOffset: ns.UInteger,
+};
+
+comptime {
+    std.debug.assert(@sizeOf(MTL4BufferRange) == 16);
+    std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
+    std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
+    std.debug.assert(@sizeOf(MTL4CopySparseTextureMappingOperation) == 104);
+    std.debug.assert(@sizeOf(MTL4UpdateSparseBufferMappingOperation) == 32);
+    std.debug.assert(@sizeOf(MTL4CopySparseBufferMappingOperation) == 24);
+}
 // ------------------------------------------------------------------------------------------------

@@ -9,6 +9,12 @@ const objc = @import("../objc.zig");
 pub const dispatch_data_t = *opaque {};
 pub const dispatch_queue_t = *opaque {};
 pub const IOSurfaceRef = *opaque {};
+pub const GPUAddress = u64;
+pub const task_id_token_t = u32;
+pub const kern_return_t = c_int;
+
+// Forward-declared by MTLDevice.h but not defined as an Objective-C class in the SDK.
+pub const TilePipelineColorAttachmentDescriptor = opaque {};
 
 // ------------------------------------------------------------------------------------------------
 // Types
@@ -234,24 +240,127 @@ pub const SizeAndAlign = extern struct {
     size: ns.UInteger,
     @"align": ns.UInteger,
 };
+
+// MTL4BufferRange.h
+pub const MTL4BufferRange = extern struct {
+    bufferAddress: u64,
+    length: u64,
+
+    pub fn init(buffer_address: u64, length: u64) MTL4BufferRange {
+        return .{ .bufferAddress = buffer_address, .length = length };
+    }
+};
+
+// MTL4Counters.h
+pub const MTL4TimestampHeapEntry = extern struct {
+    timestamp: u64,
+};
+
+// MTL4CommandQueue.h
+pub const MTL4UpdateSparseTextureMappingOperation = extern struct {
+    mode: SparseTextureMappingMode,
+    textureRegion: Region,
+    textureLevel: ns.UInteger,
+    textureSlice: ns.UInteger,
+    heapOffset: ns.UInteger,
+};
+
+pub const MTL4CopySparseTextureMappingOperation = extern struct {
+    sourceRegion: Region,
+    sourceLevel: ns.UInteger,
+    sourceSlice: ns.UInteger,
+    destinationOrigin: Origin,
+    destinationLevel: ns.UInteger,
+    destinationSlice: ns.UInteger,
+};
+
+pub const MTL4UpdateSparseBufferMappingOperation = extern struct {
+    mode: SparseTextureMappingMode,
+    bufferRange: ns.Range,
+    heapOffset: ns.UInteger,
+};
+
+pub const MTL4CopySparseBufferMappingOperation = extern struct {
+    sourceRange: ns.Range,
+    destinationOffset: ns.UInteger,
+};
+
+comptime {
+    std.debug.assert(@sizeOf(MTL4BufferRange) == 16);
+    std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
+    std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
+    std.debug.assert(@sizeOf(MTL4CopySparseTextureMappingOperation) == 104);
+    std.debug.assert(@sizeOf(MTL4UpdateSparseBufferMappingOperation) == 32);
+    std.debug.assert(@sizeOf(MTL4CopySparseBufferMappingOperation) == 24);
+}
 // ------------------------------------------------------------------------------------------------
 
-pub const AccelerationStructureUsage = ns.UInteger;
-pub const AccelerationStructureUsageNone: AccelerationStructureUsage = 0;
-pub const AccelerationStructureUsageRefit: AccelerationStructureUsage = 1;
-pub const AccelerationStructureUsagePreferFastBuild: AccelerationStructureUsage = 2;
-pub const AccelerationStructureUsageExtendedLimits: AccelerationStructureUsage = 4;
+pub const MTL4AlphaToCoverageState = ns.Integer;
+pub const MTL4AlphaToCoverageStateDisabled: MTL4AlphaToCoverageState = 0;
+pub const MTL4AlphaToCoverageStateEnabled: MTL4AlphaToCoverageState = 1;
 
-pub const AccelerationStructureInstanceOptions = u32;
-pub const AccelerationStructureInstanceOptionNone: AccelerationStructureInstanceOptions = 0;
-pub const AccelerationStructureInstanceOptionDisableTriangleCulling: AccelerationStructureInstanceOptions = 1;
-pub const AccelerationStructureInstanceOptionTriangleFrontFacingWindingCounterClockwise: AccelerationStructureInstanceOptions = 2;
-pub const AccelerationStructureInstanceOptionOpaque: AccelerationStructureInstanceOptions = 4;
-pub const AccelerationStructureInstanceOptionNonOpaque: AccelerationStructureInstanceOptions = 8;
+pub const MTL4AlphaToOneState = ns.Integer;
+pub const MTL4AlphaToOneStateDisabled: MTL4AlphaToOneState = 0;
+pub const MTL4AlphaToOneStateEnabled: MTL4AlphaToOneState = 1;
 
-pub const MotionBorderMode = u32;
-pub const MotionBorderModeClamp: MotionBorderMode = 0;
-pub const MotionBorderModeVanish: MotionBorderMode = 1;
+pub const MTL4BinaryFunctionOptions = ns.UInteger;
+pub const MTL4BinaryFunctionOptionNone: MTL4BinaryFunctionOptions = 0;
+pub const MTL4BinaryFunctionOptionPipelineIndependent: MTL4BinaryFunctionOptions = 2;
+
+pub const MTL4BlendState = ns.Integer;
+pub const MTL4BlendStateDisabled: MTL4BlendState = 0;
+pub const MTL4BlendStateEnabled: MTL4BlendState = 1;
+pub const MTL4BlendStateUnspecialized: MTL4BlendState = 2;
+
+pub const MTL4CommandQueueError = ns.Integer;
+pub const MTL4CommandQueueErrorNone: MTL4CommandQueueError = 0;
+pub const MTL4CommandQueueErrorTimeout: MTL4CommandQueueError = 1;
+pub const MTL4CommandQueueErrorNotPermitted: MTL4CommandQueueError = 2;
+pub const MTL4CommandQueueErrorOutOfMemory: MTL4CommandQueueError = 3;
+pub const MTL4CommandQueueErrorDeviceRemoved: MTL4CommandQueueError = 4;
+pub const MTL4CommandQueueErrorAccessRevoked: MTL4CommandQueueError = 5;
+pub const MTL4CommandQueueErrorInternal: MTL4CommandQueueError = 6;
+
+pub const MTL4CompilerTaskStatus = ns.Integer;
+pub const MTL4CompilerTaskStatusNone: MTL4CompilerTaskStatus = 0;
+pub const MTL4CompilerTaskStatusScheduled: MTL4CompilerTaskStatus = 1;
+pub const MTL4CompilerTaskStatusCompiling: MTL4CompilerTaskStatus = 2;
+pub const MTL4CompilerTaskStatusFinished: MTL4CompilerTaskStatus = 3;
+
+pub const MTL4CounterHeapType = ns.Integer;
+pub const MTL4CounterHeapTypeInvalid: MTL4CounterHeapType = 0;
+pub const MTL4CounterHeapTypeTimestamp: MTL4CounterHeapType = 0;
+
+pub const MTL4IndirectCommandBufferSupportState = ns.Integer;
+pub const MTL4IndirectCommandBufferSupportStateDisabled: MTL4IndirectCommandBufferSupportState = 0;
+pub const MTL4IndirectCommandBufferSupportStateEnabled: MTL4IndirectCommandBufferSupportState = 1;
+
+pub const MTL4LogicalToPhysicalColorAttachmentMappingState = ns.Integer;
+pub const MTL4LogicalToPhysicalColorAttachmentMappingStateIdentity: MTL4LogicalToPhysicalColorAttachmentMappingState = 0;
+pub const MTL4LogicalToPhysicalColorAttachmentMappingStateInherited: MTL4LogicalToPhysicalColorAttachmentMappingState = 1;
+
+pub const MTL4PipelineDataSetSerializerConfiguration = ns.UInteger;
+pub const MTL4PipelineDataSetSerializerConfigurationCaptureDescriptors: MTL4PipelineDataSetSerializerConfiguration = 1;
+pub const MTL4PipelineDataSetSerializerConfigurationCaptureBinaries: MTL4PipelineDataSetSerializerConfiguration = 2;
+
+pub const MTL4RenderEncoderOptions = ns.UInteger;
+pub const MTL4RenderEncoderOptionNone: MTL4RenderEncoderOptions = 0;
+pub const MTL4RenderEncoderOptionSuspending: MTL4RenderEncoderOptions = 1;
+pub const MTL4RenderEncoderOptionResuming: MTL4RenderEncoderOptions = 2;
+
+pub const MTL4ShaderReflection = ns.UInteger;
+pub const MTL4ShaderReflectionNone: MTL4ShaderReflection = 0;
+pub const MTL4ShaderReflectionBindingInfo: MTL4ShaderReflection = 1;
+pub const MTL4ShaderReflectionBufferTypeInfo: MTL4ShaderReflection = 2;
+
+pub const MTL4TimestampGranularity = ns.Integer;
+pub const MTL4TimestampGranularityRelaxed: MTL4TimestampGranularity = 0;
+pub const MTL4TimestampGranularityPrecise: MTL4TimestampGranularity = 1;
+
+pub const MTL4VisibilityOptions = ns.UInteger;
+pub const MTL4VisibilityOptionNone: MTL4VisibilityOptions = 0;
+pub const MTL4VisibilityOptionDevice: MTL4VisibilityOptions = 1;
+pub const MTL4VisibilityOptionResourceAlias: MTL4VisibilityOptions = 2;
 
 pub const AccelerationStructureInstanceDescriptorType = ns.UInteger;
 pub const AccelerationStructureInstanceDescriptorTypeDefault: AccelerationStructureInstanceDescriptorType = 0;
@@ -260,9 +369,271 @@ pub const AccelerationStructureInstanceDescriptorTypeMotion: AccelerationStructu
 pub const AccelerationStructureInstanceDescriptorTypeIndirect: AccelerationStructureInstanceDescriptorType = 3;
 pub const AccelerationStructureInstanceDescriptorTypeIndirectMotion: AccelerationStructureInstanceDescriptorType = 4;
 
+pub const AccelerationStructureInstanceOptions = u32;
+pub const AccelerationStructureInstanceOptionNone: AccelerationStructureInstanceOptions = 0;
+pub const AccelerationStructureInstanceOptionDisableTriangleCulling: AccelerationStructureInstanceOptions = 1;
+pub const AccelerationStructureInstanceOptionTriangleFrontFacingWindingCounterClockwise: AccelerationStructureInstanceOptions = 2;
+pub const AccelerationStructureInstanceOptionOpaque: AccelerationStructureInstanceOptions = 4;
+pub const AccelerationStructureInstanceOptionNonOpaque: AccelerationStructureInstanceOptions = 8;
+
 pub const AccelerationStructureRefitOptions = ns.UInteger;
 pub const AccelerationStructureRefitOptionVertexData: AccelerationStructureRefitOptions = 1;
 pub const AccelerationStructureRefitOptionPerPrimitiveData: AccelerationStructureRefitOptions = 2;
+
+pub const AccelerationStructureUsage = ns.UInteger;
+pub const AccelerationStructureUsageNone: AccelerationStructureUsage = 0;
+pub const AccelerationStructureUsageRefit: AccelerationStructureUsage = 1;
+pub const AccelerationStructureUsagePreferFastBuild: AccelerationStructureUsage = 2;
+pub const AccelerationStructureUsageExtendedLimits: AccelerationStructureUsage = 4;
+pub const AccelerationStructureUsagePreferFastIntersection: AccelerationStructureUsage = 16;
+pub const AccelerationStructureUsageMinimizeMemory: AccelerationStructureUsage = 32;
+
+pub const ArgumentBuffersTier = ns.UInteger;
+pub const ArgumentBuffersTier1: ArgumentBuffersTier = 0;
+pub const ArgumentBuffersTier2: ArgumentBuffersTier = 1;
+
+pub const ArgumentType = ns.UInteger;
+pub const ArgumentTypeBuffer: ArgumentType = 0;
+pub const ArgumentTypeThreadgroupMemory: ArgumentType = 1;
+pub const ArgumentTypeTexture: ArgumentType = 2;
+pub const ArgumentTypeSampler: ArgumentType = 3;
+pub const ArgumentTypeImageblockData: ArgumentType = 16;
+pub const ArgumentTypeImageblock: ArgumentType = 17;
+pub const ArgumentTypeVisibleFunctionTable: ArgumentType = 24;
+pub const ArgumentTypePrimitiveAccelerationStructure: ArgumentType = 25;
+pub const ArgumentTypeInstanceAccelerationStructure: ArgumentType = 26;
+pub const ArgumentTypeIntersectionFunctionTable: ArgumentType = 27;
+
+pub const AttributeFormat = ns.UInteger;
+pub const AttributeFormatInvalid: AttributeFormat = 0;
+pub const AttributeFormatUChar2: AttributeFormat = 1;
+pub const AttributeFormatUChar3: AttributeFormat = 2;
+pub const AttributeFormatUChar4: AttributeFormat = 3;
+pub const AttributeFormatChar2: AttributeFormat = 4;
+pub const AttributeFormatChar3: AttributeFormat = 5;
+pub const AttributeFormatChar4: AttributeFormat = 6;
+pub const AttributeFormatUChar2Normalized: AttributeFormat = 7;
+pub const AttributeFormatUChar3Normalized: AttributeFormat = 8;
+pub const AttributeFormatUChar4Normalized: AttributeFormat = 9;
+pub const AttributeFormatChar2Normalized: AttributeFormat = 10;
+pub const AttributeFormatChar3Normalized: AttributeFormat = 11;
+pub const AttributeFormatChar4Normalized: AttributeFormat = 12;
+pub const AttributeFormatUShort2: AttributeFormat = 13;
+pub const AttributeFormatUShort3: AttributeFormat = 14;
+pub const AttributeFormatUShort4: AttributeFormat = 15;
+pub const AttributeFormatShort2: AttributeFormat = 16;
+pub const AttributeFormatShort3: AttributeFormat = 17;
+pub const AttributeFormatShort4: AttributeFormat = 18;
+pub const AttributeFormatUShort2Normalized: AttributeFormat = 19;
+pub const AttributeFormatUShort3Normalized: AttributeFormat = 20;
+pub const AttributeFormatUShort4Normalized: AttributeFormat = 21;
+pub const AttributeFormatShort2Normalized: AttributeFormat = 22;
+pub const AttributeFormatShort3Normalized: AttributeFormat = 23;
+pub const AttributeFormatShort4Normalized: AttributeFormat = 24;
+pub const AttributeFormatHalf2: AttributeFormat = 25;
+pub const AttributeFormatHalf3: AttributeFormat = 26;
+pub const AttributeFormatHalf4: AttributeFormat = 27;
+pub const AttributeFormatFloat: AttributeFormat = 28;
+pub const AttributeFormatFloat2: AttributeFormat = 29;
+pub const AttributeFormatFloat3: AttributeFormat = 30;
+pub const AttributeFormatFloat4: AttributeFormat = 31;
+pub const AttributeFormatInt: AttributeFormat = 32;
+pub const AttributeFormatInt2: AttributeFormat = 33;
+pub const AttributeFormatInt3: AttributeFormat = 34;
+pub const AttributeFormatInt4: AttributeFormat = 35;
+pub const AttributeFormatUInt: AttributeFormat = 36;
+pub const AttributeFormatUInt2: AttributeFormat = 37;
+pub const AttributeFormatUInt3: AttributeFormat = 38;
+pub const AttributeFormatUInt4: AttributeFormat = 39;
+pub const AttributeFormatInt1010102Normalized: AttributeFormat = 40;
+pub const AttributeFormatUInt1010102Normalized: AttributeFormat = 41;
+pub const AttributeFormatUChar4Normalized_BGRA: AttributeFormat = 42;
+pub const AttributeFormatUChar: AttributeFormat = 45;
+pub const AttributeFormatChar: AttributeFormat = 46;
+pub const AttributeFormatUCharNormalized: AttributeFormat = 47;
+pub const AttributeFormatCharNormalized: AttributeFormat = 48;
+pub const AttributeFormatUShort: AttributeFormat = 49;
+pub const AttributeFormatShort: AttributeFormat = 50;
+pub const AttributeFormatUShortNormalized: AttributeFormat = 51;
+pub const AttributeFormatShortNormalized: AttributeFormat = 52;
+pub const AttributeFormatHalf: AttributeFormat = 53;
+pub const AttributeFormatFloatRG11B10: AttributeFormat = 54;
+pub const AttributeFormatFloatRGB9E5: AttributeFormat = 55;
+
+pub const BarrierScope = ns.UInteger;
+pub const BarrierScopeBuffers: BarrierScope = 1;
+pub const BarrierScopeTextures: BarrierScope = 2;
+pub const BarrierScopeRenderTargets: BarrierScope = 4;
+
+pub const BinaryArchiveError = ns.UInteger;
+pub const BinaryArchiveErrorNone: BinaryArchiveError = 0;
+pub const BinaryArchiveErrorInvalidFile: BinaryArchiveError = 1;
+pub const BinaryArchiveErrorUnexpectedElement: BinaryArchiveError = 2;
+pub const BinaryArchiveErrorCompilationFailure: BinaryArchiveError = 3;
+pub const BinaryArchiveErrorInternalError: BinaryArchiveError = 4;
+
+pub const BindingAccess = ns.UInteger;
+pub const BindingAccessReadOnly: BindingAccess = 0;
+pub const BindingAccessReadWrite: BindingAccess = 1;
+pub const BindingAccessWriteOnly: BindingAccess = 2;
+pub const ArgumentAccessReadOnly: BindingAccess = 0;
+pub const ArgumentAccessReadWrite: BindingAccess = 1;
+pub const ArgumentAccessWriteOnly: BindingAccess = 2;
+
+pub const BindingType = ns.Integer;
+pub const BindingTypeBuffer: BindingType = 0;
+pub const BindingTypeThreadgroupMemory: BindingType = 1;
+pub const BindingTypeTexture: BindingType = 2;
+pub const BindingTypeSampler: BindingType = 3;
+pub const BindingTypeImageblockData: BindingType = 16;
+pub const BindingTypeImageblock: BindingType = 17;
+pub const BindingTypeVisibleFunctionTable: BindingType = 24;
+pub const BindingTypePrimitiveAccelerationStructure: BindingType = 25;
+pub const BindingTypeInstanceAccelerationStructure: BindingType = 26;
+pub const BindingTypeIntersectionFunctionTable: BindingType = 27;
+pub const BindingTypeObjectPayload: BindingType = 34;
+pub const BindingTypeTensor: BindingType = 37;
+
+pub const BlendFactor = ns.UInteger;
+pub const BlendFactorZero: BlendFactor = 0;
+pub const BlendFactorOne: BlendFactor = 1;
+pub const BlendFactorSourceColor: BlendFactor = 2;
+pub const BlendFactorOneMinusSourceColor: BlendFactor = 3;
+pub const BlendFactorSourceAlpha: BlendFactor = 4;
+pub const BlendFactorOneMinusSourceAlpha: BlendFactor = 5;
+pub const BlendFactorDestinationColor: BlendFactor = 6;
+pub const BlendFactorOneMinusDestinationColor: BlendFactor = 7;
+pub const BlendFactorDestinationAlpha: BlendFactor = 8;
+pub const BlendFactorOneMinusDestinationAlpha: BlendFactor = 9;
+pub const BlendFactorSourceAlphaSaturated: BlendFactor = 10;
+pub const BlendFactorBlendColor: BlendFactor = 11;
+pub const BlendFactorOneMinusBlendColor: BlendFactor = 12;
+pub const BlendFactorBlendAlpha: BlendFactor = 13;
+pub const BlendFactorOneMinusBlendAlpha: BlendFactor = 14;
+pub const BlendFactorSource1Color: BlendFactor = 15;
+pub const BlendFactorOneMinusSource1Color: BlendFactor = 16;
+pub const BlendFactorSource1Alpha: BlendFactor = 17;
+pub const BlendFactorOneMinusSource1Alpha: BlendFactor = 18;
+pub const BlendFactorUnspecialized: BlendFactor = 19;
+
+pub const BlendOperation = ns.UInteger;
+pub const BlendOperationAdd: BlendOperation = 0;
+pub const BlendOperationSubtract: BlendOperation = 1;
+pub const BlendOperationReverseSubtract: BlendOperation = 2;
+pub const BlendOperationMin: BlendOperation = 3;
+pub const BlendOperationMax: BlendOperation = 4;
+pub const BlendOperationUnspecialized: BlendOperation = 5;
+
+pub const BlitOption = ns.UInteger;
+pub const BlitOptionNone: BlitOption = 0;
+pub const BlitOptionDepthFromDepthStencil: BlitOption = 1;
+pub const BlitOptionStencilFromDepthStencil: BlitOption = 2;
+pub const BlitOptionRowLinearPVRTC: BlitOption = 4;
+
+pub const BufferSparseTier = ns.Integer;
+pub const BufferSparseTierNone: BufferSparseTier = 0;
+pub const BufferSparseTier1: BufferSparseTier = 1;
+
+pub const CPUCacheMode = ns.UInteger;
+pub const CPUCacheModeDefaultCache: CPUCacheMode = 0;
+pub const CPUCacheModeWriteCombined: CPUCacheMode = 1;
+
+pub const CaptureDestination = ns.Integer;
+pub const CaptureDestinationDeveloperTools: CaptureDestination = 1;
+pub const CaptureDestinationGPUTraceDocument: CaptureDestination = 0;
+
+pub const CaptureError = ns.Integer;
+pub const CaptureErrorNotSupported: CaptureError = 1;
+pub const CaptureErrorAlreadyCapturing: CaptureError = 0;
+pub const CaptureErrorInvalidDescriptor: CaptureError = 0;
+
+pub const ColorWriteMask = ns.UInteger;
+pub const ColorWriteMaskNone: ColorWriteMask = 0;
+pub const ColorWriteMaskRed: ColorWriteMask = 8;
+pub const ColorWriteMaskGreen: ColorWriteMask = 4;
+pub const ColorWriteMaskBlue: ColorWriteMask = 2;
+pub const ColorWriteMaskAlpha: ColorWriteMask = 1;
+pub const ColorWriteMaskAll: ColorWriteMask = 15;
+pub const ColorWriteMaskUnspecialized: ColorWriteMask = 16;
+
+pub const CommandBufferError = ns.UInteger;
+pub const CommandBufferErrorNone: CommandBufferError = 0;
+pub const CommandBufferErrorInternal: CommandBufferError = 1;
+pub const CommandBufferErrorTimeout: CommandBufferError = 2;
+pub const CommandBufferErrorPageFault: CommandBufferError = 3;
+pub const CommandBufferErrorBlacklisted: CommandBufferError = 4;
+pub const CommandBufferErrorAccessRevoked: CommandBufferError = 4;
+pub const CommandBufferErrorNotPermitted: CommandBufferError = 7;
+pub const CommandBufferErrorOutOfMemory: CommandBufferError = 8;
+pub const CommandBufferErrorInvalidResource: CommandBufferError = 9;
+pub const CommandBufferErrorMemoryless: CommandBufferError = 10;
+pub const CommandBufferErrorDeviceRemoved: CommandBufferError = 11;
+pub const CommandBufferErrorStackOverflow: CommandBufferError = 12;
+
+pub const CommandBufferErrorOption = ns.UInteger;
+pub const CommandBufferErrorOptionNone: CommandBufferErrorOption = 0;
+pub const CommandBufferErrorOptionEncoderExecutionStatus: CommandBufferErrorOption = 1;
+
+pub const CommandBufferStatus = ns.UInteger;
+pub const CommandBufferStatusNotEnqueued: CommandBufferStatus = 0;
+pub const CommandBufferStatusEnqueued: CommandBufferStatus = 1;
+pub const CommandBufferStatusCommitted: CommandBufferStatus = 2;
+pub const CommandBufferStatusScheduled: CommandBufferStatus = 3;
+pub const CommandBufferStatusCompleted: CommandBufferStatus = 4;
+pub const CommandBufferStatusError: CommandBufferStatus = 5;
+
+pub const CommandEncoderErrorState = ns.Integer;
+pub const CommandEncoderErrorStateUnknown: CommandEncoderErrorState = 0;
+pub const CommandEncoderErrorStateCompleted: CommandEncoderErrorState = 1;
+pub const CommandEncoderErrorStateAffected: CommandEncoderErrorState = 2;
+pub const CommandEncoderErrorStatePending: CommandEncoderErrorState = 3;
+pub const CommandEncoderErrorStateFaulted: CommandEncoderErrorState = 4;
+
+pub const CompareFunction = ns.UInteger;
+pub const CompareFunctionNever: CompareFunction = 0;
+pub const CompareFunctionLess: CompareFunction = 1;
+pub const CompareFunctionEqual: CompareFunction = 2;
+pub const CompareFunctionLessEqual: CompareFunction = 3;
+pub const CompareFunctionGreater: CompareFunction = 4;
+pub const CompareFunctionNotEqual: CompareFunction = 5;
+pub const CompareFunctionGreaterEqual: CompareFunction = 6;
+pub const CompareFunctionAlways: CompareFunction = 7;
+
+pub const CompileSymbolVisibility = ns.Integer;
+pub const CompileSymbolVisibilityDefault: CompileSymbolVisibility = 0;
+pub const CompileSymbolVisibilityHidden: CompileSymbolVisibility = 1;
+
+pub const CounterSampleBufferError = ns.Integer;
+pub const CounterSampleBufferErrorOutOfMemory: CounterSampleBufferError = 0;
+pub const CounterSampleBufferErrorInvalid: CounterSampleBufferError = 0;
+pub const CounterSampleBufferErrorInternal: CounterSampleBufferError = 0;
+
+pub const CounterSamplingPoint = ns.UInteger;
+pub const CounterSamplingPointAtStageBoundary: CounterSamplingPoint = 0;
+pub const CounterSamplingPointAtDrawBoundary: CounterSamplingPoint = 0;
+pub const CounterSamplingPointAtDispatchBoundary: CounterSamplingPoint = 0;
+pub const CounterSamplingPointAtTileDispatchBoundary: CounterSamplingPoint = 0;
+pub const CounterSamplingPointAtBlitBoundary: CounterSamplingPoint = 0;
+
+pub const CullMode = ns.UInteger;
+pub const CullModeNone: CullMode = 0;
+pub const CullModeFront: CullMode = 1;
+pub const CullModeBack: CullMode = 2;
+
+pub const CurveBasis = ns.Integer;
+pub const CurveBasisBSpline: CurveBasis = 0;
+pub const CurveBasisCatmullRom: CurveBasis = 1;
+pub const CurveBasisLinear: CurveBasis = 2;
+pub const CurveBasisBezier: CurveBasis = 3;
+
+pub const CurveEndCaps = ns.Integer;
+pub const CurveEndCapsNone: CurveEndCaps = 0;
+pub const CurveEndCapsDisk: CurveEndCaps = 1;
+pub const CurveEndCapsSphere: CurveEndCaps = 2;
+
+pub const CurveType = ns.Integer;
+pub const CurveTypeRound: CurveType = 0;
+pub const CurveTypeFlat: CurveType = 1;
 
 pub const DataType = ns.UInteger;
 pub const DataTypeNone: DataType = 0;
@@ -360,140 +731,34 @@ pub const DataTypeBFloat: DataType = 121;
 pub const DataTypeBFloat2: DataType = 122;
 pub const DataTypeBFloat3: DataType = 123;
 pub const DataTypeBFloat4: DataType = 124;
+pub const DataTypeDepthStencilState: DataType = 139;
+pub const DataTypeTensor: DataType = 140;
 
-pub const BindingType = ns.Integer;
-pub const BindingTypeBuffer: BindingType = 0;
-pub const BindingTypeThreadgroupMemory: BindingType = 1;
-pub const BindingTypeTexture: BindingType = 2;
-pub const BindingTypeSampler: BindingType = 3;
-pub const BindingTypeImageblockData: BindingType = 16;
-pub const BindingTypeImageblock: BindingType = 17;
-pub const BindingTypeVisibleFunctionTable: BindingType = 24;
-pub const BindingTypePrimitiveAccelerationStructure: BindingType = 25;
-pub const BindingTypeInstanceAccelerationStructure: BindingType = 26;
-pub const BindingTypeIntersectionFunctionTable: BindingType = 27;
-pub const BindingTypeObjectPayload: BindingType = 34;
+pub const DepthClipMode = ns.UInteger;
+pub const DepthClipModeClip: DepthClipMode = 0;
+pub const DepthClipModeClamp: DepthClipMode = 1;
 
-pub const ArgumentType = ns.UInteger;
-pub const ArgumentTypeBuffer: ArgumentType = 0;
-pub const ArgumentTypeThreadgroupMemory: ArgumentType = 1;
-pub const ArgumentTypeTexture: ArgumentType = 2;
-pub const ArgumentTypeSampler: ArgumentType = 3;
-pub const ArgumentTypeImageblockData: ArgumentType = 16;
-pub const ArgumentTypeImageblock: ArgumentType = 17;
-pub const ArgumentTypeVisibleFunctionTable: ArgumentType = 24;
-pub const ArgumentTypePrimitiveAccelerationStructure: ArgumentType = 25;
-pub const ArgumentTypeInstanceAccelerationStructure: ArgumentType = 26;
-pub const ArgumentTypeIntersectionFunctionTable: ArgumentType = 27;
+pub const DeviceError = ns.Integer;
+pub const DeviceErrorNone: DeviceError = 0;
+pub const DeviceErrorNotSupported: DeviceError = 1;
 
-pub const BindingAccess = ns.UInteger;
-pub const BindingAccessReadOnly: BindingAccess = 0;
-pub const BindingAccessReadWrite: BindingAccess = 1;
-pub const BindingAccessWriteOnly: BindingAccess = 2;
-pub const ArgumentAccessReadOnly: BindingAccess = 0;
-pub const ArgumentAccessReadWrite: BindingAccess = 1;
-pub const ArgumentAccessWriteOnly: BindingAccess = 2;
-
-pub const BinaryArchiveError = ns.UInteger;
-pub const BinaryArchiveErrorNone: BinaryArchiveError = 0;
-pub const BinaryArchiveErrorInvalidFile: BinaryArchiveError = 1;
-pub const BinaryArchiveErrorUnexpectedElement: BinaryArchiveError = 2;
-pub const BinaryArchiveErrorCompilationFailure: BinaryArchiveError = 3;
-pub const BinaryArchiveErrorInternalError: BinaryArchiveError = 4;
-
-pub const BlitOption = ns.UInteger;
-pub const BlitOptionNone: BlitOption = 0;
-pub const BlitOptionDepthFromDepthStencil: BlitOption = 1;
-pub const BlitOptionStencilFromDepthStencil: BlitOption = 2;
-pub const BlitOptionRowLinearPVRTC: BlitOption = 4;
-
-pub const CaptureError = ns.Integer;
-pub const CaptureErrorNotSupported: CaptureError = 1;
-pub const CaptureErrorAlreadyCapturing: CaptureError = 0;
-pub const CaptureErrorInvalidDescriptor: CaptureError = 0;
-
-pub const CaptureDestination = ns.Integer;
-pub const CaptureDestinationDeveloperTools: CaptureDestination = 1;
-pub const CaptureDestinationGPUTraceDocument: CaptureDestination = 0;
-
-pub const CommandBufferStatus = ns.UInteger;
-pub const CommandBufferStatusNotEnqueued: CommandBufferStatus = 0;
-pub const CommandBufferStatusEnqueued: CommandBufferStatus = 1;
-pub const CommandBufferStatusCommitted: CommandBufferStatus = 2;
-pub const CommandBufferStatusScheduled: CommandBufferStatus = 3;
-pub const CommandBufferStatusCompleted: CommandBufferStatus = 4;
-pub const CommandBufferStatusError: CommandBufferStatus = 5;
-
-pub const CommandBufferError = ns.UInteger;
-pub const CommandBufferErrorNone: CommandBufferError = 0;
-pub const CommandBufferErrorInternal: CommandBufferError = 1;
-pub const CommandBufferErrorTimeout: CommandBufferError = 2;
-pub const CommandBufferErrorPageFault: CommandBufferError = 3;
-pub const CommandBufferErrorBlacklisted: CommandBufferError = 4;
-pub const CommandBufferErrorAccessRevoked: CommandBufferError = 4;
-pub const CommandBufferErrorNotPermitted: CommandBufferError = 7;
-pub const CommandBufferErrorOutOfMemory: CommandBufferError = 8;
-pub const CommandBufferErrorInvalidResource: CommandBufferError = 9;
-pub const CommandBufferErrorMemoryless: CommandBufferError = 10;
-pub const CommandBufferErrorDeviceRemoved: CommandBufferError = 11;
-pub const CommandBufferErrorStackOverflow: CommandBufferError = 12;
-
-pub const CommandBufferErrorOption = ns.UInteger;
-pub const CommandBufferErrorOptionNone: CommandBufferErrorOption = 0;
-pub const CommandBufferErrorOptionEncoderExecutionStatus: CommandBufferErrorOption = 1;
-
-pub const CommandEncoderErrorState = ns.Integer;
-pub const CommandEncoderErrorStateUnknown: CommandEncoderErrorState = 0;
-pub const CommandEncoderErrorStateCompleted: CommandEncoderErrorState = 1;
-pub const CommandEncoderErrorStateAffected: CommandEncoderErrorState = 2;
-pub const CommandEncoderErrorStatePending: CommandEncoderErrorState = 3;
-pub const CommandEncoderErrorStateFaulted: CommandEncoderErrorState = 4;
+pub const DeviceLocation = ns.UInteger;
+pub const DeviceLocationBuiltIn: DeviceLocation = 0;
+pub const DeviceLocationSlot: DeviceLocation = 1;
+pub const DeviceLocationExternal: DeviceLocation = 2;
+pub const DeviceLocationUnspecified: DeviceLocation = std.math.maxInt(ns.UInteger);
 
 pub const DispatchType = ns.UInteger;
 pub const DispatchTypeSerial: DispatchType = 0;
 pub const DispatchTypeConcurrent: DispatchType = 0;
 
-pub const ResourceUsage = ns.UInteger;
-pub const ResourceUsageRead: ResourceUsage = 1;
-pub const ResourceUsageWrite: ResourceUsage = 2;
-pub const ResourceUsageSample: ResourceUsage = 4;
-
-pub const BarrierScope = ns.UInteger;
-pub const BarrierScopeBuffers: BarrierScope = 1;
-pub const BarrierScopeTextures: BarrierScope = 2;
-pub const BarrierScopeRenderTargets: BarrierScope = 4;
-
-pub const CounterSampleBufferError = ns.Integer;
-pub const CounterSampleBufferErrorOutOfMemory: CounterSampleBufferError = 0;
-pub const CounterSampleBufferErrorInvalid: CounterSampleBufferError = 0;
-pub const CounterSampleBufferErrorInternal: CounterSampleBufferError = 0;
-
-pub const CompareFunction = ns.UInteger;
-pub const CompareFunctionNever: CompareFunction = 0;
-pub const CompareFunctionLess: CompareFunction = 1;
-pub const CompareFunctionEqual: CompareFunction = 2;
-pub const CompareFunctionLessEqual: CompareFunction = 3;
-pub const CompareFunctionGreater: CompareFunction = 4;
-pub const CompareFunctionNotEqual: CompareFunction = 5;
-pub const CompareFunctionGreaterEqual: CompareFunction = 6;
-pub const CompareFunctionAlways: CompareFunction = 7;
-
-pub const StencilOperation = ns.UInteger;
-pub const StencilOperationKeep: StencilOperation = 0;
-pub const StencilOperationZero: StencilOperation = 1;
-pub const StencilOperationReplace: StencilOperation = 2;
-pub const StencilOperationIncrementClamp: StencilOperation = 3;
-pub const StencilOperationDecrementClamp: StencilOperation = 4;
-pub const StencilOperationInvert: StencilOperation = 5;
-pub const StencilOperationIncrementWrap: StencilOperation = 6;
-pub const StencilOperationDecrementWrap: StencilOperation = 7;
-
-pub const IOCompressionMethod = ns.Integer;
-pub const IOCompressionMethodZlib: IOCompressionMethod = 0;
-pub const IOCompressionMethodLZFSE: IOCompressionMethod = 1;
-pub const IOCompressionMethodLZ4: IOCompressionMethod = 2;
-pub const IOCompressionMethodLZMA: IOCompressionMethod = 3;
-pub const IOCompressionMethodLZBitmap: IOCompressionMethod = 4;
+pub const DynamicLibraryError = ns.UInteger;
+pub const DynamicLibraryErrorNone: DynamicLibraryError = 0;
+pub const DynamicLibraryErrorInvalidFile: DynamicLibraryError = 1;
+pub const DynamicLibraryErrorCompilationFailure: DynamicLibraryError = 2;
+pub const DynamicLibraryErrorUnresolvedInstallName: DynamicLibraryError = 3;
+pub const DynamicLibraryErrorDependencyLoadFailure: DynamicLibraryError = 4;
+pub const DynamicLibraryErrorUnsupported: DynamicLibraryError = 5;
 
 pub const FeatureSet = ns.UInteger;
 pub const FeatureSet_iOS_GPUFamily1_v1: FeatureSet = 0;
@@ -530,6 +795,26 @@ pub const FeatureSet_tvOS_GPUFamily2_v1: FeatureSet = 30003;
 pub const FeatureSet_tvOS_GPUFamily1_v4: FeatureSet = 30004;
 pub const FeatureSet_tvOS_GPUFamily2_v2: FeatureSet = 30005;
 
+pub const FunctionLogType = ns.UInteger;
+pub const FunctionLogTypeValidation: FunctionLogType = 0;
+
+pub const FunctionOptions = ns.UInteger;
+pub const FunctionOptionNone: FunctionOptions = 0;
+pub const FunctionOptionCompileToBinary: FunctionOptions = 1;
+pub const FunctionOptionStoreFunctionInMetalPipelinesScript: FunctionOptions = 2;
+pub const FunctionOptionStoreFunctionInMetalScript: FunctionOptions = 2;
+pub const FunctionOptionFailOnBinaryArchiveMiss: FunctionOptions = 4;
+pub const FunctionOptionPipelineIndependent: FunctionOptions = 8;
+
+pub const FunctionType = ns.UInteger;
+pub const FunctionTypeVertex: FunctionType = 1;
+pub const FunctionTypeFragment: FunctionType = 2;
+pub const FunctionTypeKernel: FunctionType = 3;
+pub const FunctionTypeVisible: FunctionType = 5;
+pub const FunctionTypeIntersection: FunctionType = 6;
+pub const FunctionTypeMesh: FunctionType = 7;
+pub const FunctionTypeObject: FunctionType = 8;
+
 pub const GPUFamily = ns.Integer;
 pub const GPUFamilyApple1: GPUFamily = 1001;
 pub const GPUFamilyApple2: GPUFamily = 1002;
@@ -540,6 +825,7 @@ pub const GPUFamilyApple6: GPUFamily = 1006;
 pub const GPUFamilyApple7: GPUFamily = 1007;
 pub const GPUFamilyApple8: GPUFamily = 1008;
 pub const GPUFamilyApple9: GPUFamily = 1009;
+pub const GPUFamilyApple10: GPUFamily = 1010;
 pub const GPUFamilyMac1: GPUFamily = 2001;
 pub const GPUFamilyMac2: GPUFamily = 2002;
 pub const GPUFamilyCommon1: GPUFamily = 3001;
@@ -548,64 +834,51 @@ pub const GPUFamilyCommon3: GPUFamily = 3003;
 pub const GPUFamilyMacCatalyst1: GPUFamily = 4001;
 pub const GPUFamilyMacCatalyst2: GPUFamily = 4002;
 pub const GPUFamilyMetal3: GPUFamily = 5001;
+pub const GPUFamilyMetal4: GPUFamily = 5002;
 
-pub const DeviceLocation = ns.UInteger;
-pub const DeviceLocationBuiltIn: DeviceLocation = 0;
-pub const DeviceLocationSlot: DeviceLocation = 1;
-pub const DeviceLocationExternal: DeviceLocation = 2;
-pub const DeviceLocationUnspecified: DeviceLocation = std.math.maxInt(ns.UInteger);
-
-pub const PipelineOption = ns.UInteger;
-pub const PipelineOptionNone: PipelineOption = 0;
-pub const PipelineOptionArgumentInfo: PipelineOption = 1;
-pub const PipelineOptionBufferTypeInfo: PipelineOption = 2;
-pub const PipelineOptionFailOnBinaryArchiveMiss: PipelineOption = 4;
-
-pub const ReadWriteTextureTier = ns.UInteger;
-pub const ReadWriteTextureTierNone: ReadWriteTextureTier = 0;
-pub const ReadWriteTextureTier1: ReadWriteTextureTier = 1;
-pub const ReadWriteTextureTier2: ReadWriteTextureTier = 2;
-
-pub const ArgumentBuffersTier = ns.UInteger;
-pub const ArgumentBuffersTier1: ArgumentBuffersTier = 0;
-pub const ArgumentBuffersTier2: ArgumentBuffersTier = 1;
-
-pub const SparseTextureRegionAlignmentMode = ns.UInteger;
-pub const SparseTextureRegionAlignmentModeOutward: SparseTextureRegionAlignmentMode = 0;
-pub const SparseTextureRegionAlignmentModeInward: SparseTextureRegionAlignmentMode = 1;
-
-pub const SparsePageSize = ns.Integer;
-pub const SparsePageSize16: SparsePageSize = 101;
-pub const SparsePageSize64: SparsePageSize = 102;
-pub const SparsePageSize256: SparsePageSize = 103;
-
-pub const CounterSamplingPoint = ns.UInteger;
-pub const CounterSamplingPointAtStageBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtDrawBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtDispatchBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtTileDispatchBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtBlitBoundary: CounterSamplingPoint = 0;
-
-pub const DynamicLibraryError = ns.UInteger;
-pub const DynamicLibraryErrorNone: DynamicLibraryError = 0;
-pub const DynamicLibraryErrorInvalidFile: DynamicLibraryError = 1;
-pub const DynamicLibraryErrorCompilationFailure: DynamicLibraryError = 2;
-pub const DynamicLibraryErrorUnresolvedInstallName: DynamicLibraryError = 3;
-pub const DynamicLibraryErrorDependencyLoadFailure: DynamicLibraryError = 4;
-pub const DynamicLibraryErrorUnsupported: DynamicLibraryError = 5;
-
-pub const FunctionOptions = ns.UInteger;
-pub const FunctionOptionNone: FunctionOptions = 0;
-pub const FunctionOptionCompileToBinary: FunctionOptions = 1;
-pub const FunctionOptionStoreFunctionInMetalScript: FunctionOptions = 2;
-
-pub const FunctionLogType = ns.UInteger;
-pub const FunctionLogTypeValidation: FunctionLogType = 0;
+pub const HazardTrackingMode = ns.UInteger;
+pub const HazardTrackingModeDefault: HazardTrackingMode = 0;
+pub const HazardTrackingModeUntracked: HazardTrackingMode = 1;
+pub const HazardTrackingModeTracked: HazardTrackingMode = 2;
 
 pub const HeapType = ns.Integer;
 pub const HeapTypeAutomatic: HeapType = 0;
 pub const HeapTypePlacement: HeapType = 1;
 pub const HeapTypeSparse: HeapType = 2;
+
+pub const IOCommandQueueType = ns.Integer;
+pub const IOCommandQueueTypeConcurrent: IOCommandQueueType = 0;
+pub const IOCommandQueueTypeSerial: IOCommandQueueType = 1;
+
+pub const IOCompressionMethod = ns.Integer;
+pub const IOCompressionMethodZlib: IOCompressionMethod = 0;
+pub const IOCompressionMethodLZFSE: IOCompressionMethod = 1;
+pub const IOCompressionMethodLZ4: IOCompressionMethod = 2;
+pub const IOCompressionMethodLZMA: IOCompressionMethod = 3;
+pub const IOCompressionMethodLZBitmap: IOCompressionMethod = 4;
+
+pub const IOCompressionStatus = ns.Integer;
+pub const IOCompressionStatusComplete: IOCompressionStatus = 0;
+pub const IOCompressionStatusError: IOCompressionStatus = 1;
+
+pub const IOError = ns.Integer;
+pub const IOErrorURLInvalid: IOError = 1;
+pub const IOErrorInternal: IOError = 2;
+
+pub const IOPriority = ns.Integer;
+pub const IOPriorityHigh: IOPriority = 0;
+pub const IOPriorityNormal: IOPriority = 1;
+pub const IOPriorityLow: IOPriority = 2;
+
+pub const IOStatus = ns.Integer;
+pub const IOStatusPending: IOStatus = 0;
+pub const IOStatusCancelled: IOStatus = 1;
+pub const IOStatusError: IOStatus = 2;
+pub const IOStatusComplete: IOStatus = 3;
+
+pub const IndexType = ns.UInteger;
+pub const IndexTypeUInt16: IndexType = 0;
+pub const IndexTypeUInt32: IndexType = 1;
 
 pub const IndirectCommandType = ns.UInteger;
 pub const IndirectCommandTypeDraw: IndirectCommandType = 1;
@@ -627,39 +900,8 @@ pub const IntersectionFunctionSignaturePrimitiveMotion: IntersectionFunctionSign
 pub const IntersectionFunctionSignatureExtendedLimits: IntersectionFunctionSignature = 32;
 pub const IntersectionFunctionSignatureMaxLevels: IntersectionFunctionSignature = 64;
 pub const IntersectionFunctionSignatureCurveData: IntersectionFunctionSignature = 128;
-
-pub const IOStatus = ns.Integer;
-pub const IOStatusPending: IOStatus = 0;
-pub const IOStatusCancelled: IOStatus = 1;
-pub const IOStatusError: IOStatus = 2;
-pub const IOStatusComplete: IOStatus = 3;
-
-pub const IOPriority = ns.Integer;
-pub const IOPriorityHigh: IOPriority = 0;
-pub const IOPriorityNormal: IOPriority = 1;
-pub const IOPriorityLow: IOPriority = 2;
-
-pub const IOCommandQueueType = ns.Integer;
-pub const IOCommandQueueTypeConcurrent: IOCommandQueueType = 0;
-pub const IOCommandQueueTypeSerial: IOCommandQueueType = 1;
-
-pub const IOError = ns.Integer;
-pub const IOErrorURLInvalid: IOError = 1;
-pub const IOErrorInternal: IOError = 2;
-
-pub const PatchType = ns.UInteger;
-pub const PatchTypeNone: PatchType = 0;
-pub const PatchTypeTriangle: PatchType = 1;
-pub const PatchTypeQuad: PatchType = 2;
-
-pub const FunctionType = ns.UInteger;
-pub const FunctionTypeVertex: FunctionType = 1;
-pub const FunctionTypeFragment: FunctionType = 2;
-pub const FunctionTypeKernel: FunctionType = 3;
-pub const FunctionTypeVisible: FunctionType = 5;
-pub const FunctionTypeIntersection: FunctionType = 6;
-pub const FunctionTypeMesh: FunctionType = 7;
-pub const FunctionTypeObject: FunctionType = 8;
+pub const IntersectionFunctionSignatureIntersectionFunctionBuffer: IntersectionFunctionSignature = 256;
+pub const IntersectionFunctionSignatureUserData: IntersectionFunctionSignature = 512;
 
 pub const LanguageVersion = ns.UInteger;
 pub const LanguageVersion1_0: LanguageVersion = 65536;
@@ -672,18 +914,8 @@ pub const LanguageVersion2_3: LanguageVersion = 131075;
 pub const LanguageVersion2_4: LanguageVersion = 131076;
 pub const LanguageVersion3_0: LanguageVersion = 196608;
 pub const LanguageVersion3_1: LanguageVersion = 196609;
-
-pub const LibraryType = ns.Integer;
-pub const LibraryTypeExecutable: LibraryType = 0;
-pub const LibraryTypeDynamic: LibraryType = 1;
-
-pub const LibraryOptimizationLevel = ns.Integer;
-pub const LibraryOptimizationLevelDefault: LibraryOptimizationLevel = 0;
-pub const LibraryOptimizationLevelSize: LibraryOptimizationLevel = 1;
-
-pub const CompileSymbolVisibility = ns.Integer;
-pub const CompileSymbolVisibilityDefault: CompileSymbolVisibility = 0;
-pub const CompileSymbolVisibilityHidden: CompileSymbolVisibility = 1;
+pub const LanguageVersion3_2: LanguageVersion = 196610;
+pub const LanguageVersion4_0: LanguageVersion = 262144;
 
 pub const LibraryError = ns.UInteger;
 pub const LibraryErrorUnsupported: LibraryError = 1;
@@ -693,10 +925,73 @@ pub const LibraryErrorCompileWarning: LibraryError = 4;
 pub const LibraryErrorFunctionNotFound: LibraryError = 5;
 pub const LibraryErrorFileNotFound: LibraryError = 6;
 
+pub const LibraryOptimizationLevel = ns.Integer;
+pub const LibraryOptimizationLevelDefault: LibraryOptimizationLevel = 0;
+pub const LibraryOptimizationLevelSize: LibraryOptimizationLevel = 1;
+
+pub const LibraryType = ns.Integer;
+pub const LibraryTypeExecutable: LibraryType = 0;
+pub const LibraryTypeDynamic: LibraryType = 1;
+
+pub const LoadAction = ns.UInteger;
+pub const LoadActionDontCare: LoadAction = 0;
+pub const LoadActionLoad: LoadAction = 1;
+pub const LoadActionClear: LoadAction = 2;
+
+pub const LogLevel = ns.Integer;
+pub const LogLevelUndefined: LogLevel = 0;
+pub const LogLevelDebug: LogLevel = 0;
+pub const LogLevelInfo: LogLevel = 0;
+pub const LogLevelNotice: LogLevel = 0;
+pub const LogLevelError: LogLevel = 0;
+pub const LogLevelFault: LogLevel = 0;
+
+pub const LogStateError = ns.UInteger;
+pub const LogStateErrorInvalidSize: LogStateError = 1;
+pub const LogStateErrorInvalid: LogStateError = 2;
+
+pub const MathFloatingPointFunctions = ns.Integer;
+pub const MathFloatingPointFunctionsFast: MathFloatingPointFunctions = 0;
+pub const MathFloatingPointFunctionsPrecise: MathFloatingPointFunctions = 1;
+
+pub const MathMode = ns.Integer;
+pub const MathModeSafe: MathMode = 0;
+pub const MathModeRelaxed: MathMode = 1;
+pub const MathModeFast: MathMode = 2;
+
+pub const MatrixLayout = ns.Integer;
+pub const MatrixLayoutColumnMajor: MatrixLayout = 0;
+pub const MatrixLayoutRowMajor: MatrixLayout = 1;
+
+pub const MotionBorderMode = u32;
+pub const MotionBorderModeClamp: MotionBorderMode = 0;
+pub const MotionBorderModeVanish: MotionBorderMode = 1;
+
+pub const MultisampleDepthResolveFilter = ns.UInteger;
+pub const MultisampleDepthResolveFilterSample0: MultisampleDepthResolveFilter = 0;
+pub const MultisampleDepthResolveFilterMin: MultisampleDepthResolveFilter = 1;
+pub const MultisampleDepthResolveFilterMax: MultisampleDepthResolveFilter = 2;
+
+pub const MultisampleStencilResolveFilter = ns.UInteger;
+pub const MultisampleStencilResolveFilterSample0: MultisampleStencilResolveFilter = 0;
+pub const MultisampleStencilResolveFilterDepthResolvedSample: MultisampleStencilResolveFilter = 1;
+
 pub const Mutability = ns.UInteger;
 pub const MutabilityDefault: Mutability = 0;
 pub const MutabilityMutable: Mutability = 1;
 pub const MutabilityImmutable: Mutability = 2;
+
+pub const PatchType = ns.UInteger;
+pub const PatchTypeNone: PatchType = 0;
+pub const PatchTypeTriangle: PatchType = 1;
+pub const PatchTypeQuad: PatchType = 2;
+
+pub const PipelineOption = ns.UInteger;
+pub const PipelineOptionNone: PipelineOption = 0;
+pub const PipelineOptionArgumentInfo: PipelineOption = 1;
+pub const PipelineOptionBindingInfo: PipelineOption = 1;
+pub const PipelineOptionBufferTypeInfo: PipelineOption = 2;
+pub const PipelineOptionFailOnBinaryArchiveMiss: PipelineOption = 4;
 
 pub const PixelFormat = ns.UInteger;
 pub const PixelFormatInvalid: PixelFormat = 0;
@@ -838,6 +1133,13 @@ pub const PixelFormatDepth24Unorm_Stencil8: PixelFormat = 255;
 pub const PixelFormatDepth32Float_Stencil8: PixelFormat = 260;
 pub const PixelFormatX32_Stencil8: PixelFormat = 261;
 pub const PixelFormatX24_Stencil8: PixelFormat = 262;
+pub const PixelFormatUnspecialized: PixelFormat = 263;
+
+pub const PrimitiveTopologyClass = ns.UInteger;
+pub const PrimitiveTopologyClassUnspecified: PrimitiveTopologyClass = 0;
+pub const PrimitiveTopologyClassPoint: PrimitiveTopologyClass = 1;
+pub const PrimitiveTopologyClassLine: PrimitiveTopologyClass = 2;
+pub const PrimitiveTopologyClassTriangle: PrimitiveTopologyClass = 3;
 
 pub const PrimitiveType = ns.UInteger;
 pub const PrimitiveTypePoint: PrimitiveType = 0;
@@ -846,27 +1148,16 @@ pub const PrimitiveTypeLineStrip: PrimitiveType = 2;
 pub const PrimitiveTypeTriangle: PrimitiveType = 3;
 pub const PrimitiveTypeTriangleStrip: PrimitiveType = 4;
 
-pub const VisibilityResultMode = ns.UInteger;
-pub const VisibilityResultModeDisabled: VisibilityResultMode = 0;
-pub const VisibilityResultModeBoolean: VisibilityResultMode = 1;
-pub const VisibilityResultModeCounting: VisibilityResultMode = 2;
+pub const PurgeableState = ns.UInteger;
+pub const PurgeableStateKeepCurrent: PurgeableState = 1;
+pub const PurgeableStateNonVolatile: PurgeableState = 2;
+pub const PurgeableStateVolatile: PurgeableState = 3;
+pub const PurgeableStateEmpty: PurgeableState = 4;
 
-pub const CullMode = ns.UInteger;
-pub const CullModeNone: CullMode = 0;
-pub const CullModeFront: CullMode = 1;
-pub const CullModeBack: CullMode = 2;
-
-pub const Winding = ns.UInteger;
-pub const WindingClockwise: Winding = 0;
-pub const WindingCounterClockwise: Winding = 1;
-
-pub const DepthClipMode = ns.UInteger;
-pub const DepthClipModeClip: DepthClipMode = 0;
-pub const DepthClipModeClamp: DepthClipMode = 1;
-
-pub const TriangleFillMode = ns.UInteger;
-pub const TriangleFillModeFill: TriangleFillMode = 0;
-pub const TriangleFillModeLines: TriangleFillMode = 1;
+pub const ReadWriteTextureTier = ns.UInteger;
+pub const ReadWriteTextureTierNone: ReadWriteTextureTier = 0;
+pub const ReadWriteTextureTier1: ReadWriteTextureTier = 1;
+pub const ReadWriteTextureTier2: ReadWriteTextureTier = 2;
 
 pub const RenderStages = ns.UInteger;
 pub const RenderStageVertex: RenderStages = 1;
@@ -874,115 +1165,6 @@ pub const RenderStageFragment: RenderStages = 2;
 pub const RenderStageTile: RenderStages = 4;
 pub const RenderStageObject: RenderStages = 8;
 pub const RenderStageMesh: RenderStages = 16;
-
-pub const LoadAction = ns.UInteger;
-pub const LoadActionDontCare: LoadAction = 0;
-pub const LoadActionLoad: LoadAction = 1;
-pub const LoadActionClear: LoadAction = 2;
-
-pub const StoreAction = ns.UInteger;
-pub const StoreActionDontCare: StoreAction = 0;
-pub const StoreActionStore: StoreAction = 1;
-pub const StoreActionMultisampleResolve: StoreAction = 2;
-pub const StoreActionStoreAndMultisampleResolve: StoreAction = 3;
-pub const StoreActionUnknown: StoreAction = 4;
-pub const StoreActionCustomSampleDepthStore: StoreAction = 5;
-
-pub const StoreActionOptions = ns.UInteger;
-pub const StoreActionOptionNone: StoreActionOptions = 0;
-pub const StoreActionOptionCustomSamplePositions: StoreActionOptions = 1;
-
-pub const MultisampleDepthResolveFilter = ns.UInteger;
-pub const MultisampleDepthResolveFilterSample0: MultisampleDepthResolveFilter = 0;
-pub const MultisampleDepthResolveFilterMin: MultisampleDepthResolveFilter = 1;
-pub const MultisampleDepthResolveFilterMax: MultisampleDepthResolveFilter = 2;
-
-pub const MultisampleStencilResolveFilter = ns.UInteger;
-pub const MultisampleStencilResolveFilterSample0: MultisampleStencilResolveFilter = 0;
-pub const MultisampleStencilResolveFilterDepthResolvedSample: MultisampleStencilResolveFilter = 1;
-
-pub const BlendFactor = ns.UInteger;
-pub const BlendFactorZero: BlendFactor = 0;
-pub const BlendFactorOne: BlendFactor = 1;
-pub const BlendFactorSourceColor: BlendFactor = 2;
-pub const BlendFactorOneMinusSourceColor: BlendFactor = 3;
-pub const BlendFactorSourceAlpha: BlendFactor = 4;
-pub const BlendFactorOneMinusSourceAlpha: BlendFactor = 5;
-pub const BlendFactorDestinationColor: BlendFactor = 6;
-pub const BlendFactorOneMinusDestinationColor: BlendFactor = 7;
-pub const BlendFactorDestinationAlpha: BlendFactor = 8;
-pub const BlendFactorOneMinusDestinationAlpha: BlendFactor = 9;
-pub const BlendFactorSourceAlphaSaturated: BlendFactor = 10;
-pub const BlendFactorBlendColor: BlendFactor = 11;
-pub const BlendFactorOneMinusBlendColor: BlendFactor = 12;
-pub const BlendFactorBlendAlpha: BlendFactor = 13;
-pub const BlendFactorOneMinusBlendAlpha: BlendFactor = 14;
-pub const BlendFactorSource1Color: BlendFactor = 15;
-pub const BlendFactorOneMinusSource1Color: BlendFactor = 16;
-pub const BlendFactorSource1Alpha: BlendFactor = 17;
-pub const BlendFactorOneMinusSource1Alpha: BlendFactor = 18;
-
-pub const BlendOperation = ns.UInteger;
-pub const BlendOperationAdd: BlendOperation = 0;
-pub const BlendOperationSubtract: BlendOperation = 1;
-pub const BlendOperationReverseSubtract: BlendOperation = 2;
-pub const BlendOperationMin: BlendOperation = 3;
-pub const BlendOperationMax: BlendOperation = 4;
-
-pub const ColorWriteMask = ns.UInteger;
-pub const ColorWriteMaskNone: ColorWriteMask = 0;
-pub const ColorWriteMaskRed: ColorWriteMask = 8;
-pub const ColorWriteMaskGreen: ColorWriteMask = 4;
-pub const ColorWriteMaskBlue: ColorWriteMask = 2;
-pub const ColorWriteMaskAlpha: ColorWriteMask = 1;
-pub const ColorWriteMaskAll: ColorWriteMask = 15;
-
-pub const PrimitiveTopologyClass = ns.UInteger;
-pub const PrimitiveTopologyClassUnspecified: PrimitiveTopologyClass = 0;
-pub const PrimitiveTopologyClassPoint: PrimitiveTopologyClass = 1;
-pub const PrimitiveTopologyClassLine: PrimitiveTopologyClass = 2;
-pub const PrimitiveTopologyClassTriangle: PrimitiveTopologyClass = 3;
-
-pub const TessellationPartitionMode = ns.UInteger;
-pub const TessellationPartitionModePow2: TessellationPartitionMode = 0;
-pub const TessellationPartitionModeInteger: TessellationPartitionMode = 1;
-pub const TessellationPartitionModeFractionalOdd: TessellationPartitionMode = 2;
-pub const TessellationPartitionModeFractionalEven: TessellationPartitionMode = 3;
-
-pub const TessellationFactorStepFunction = ns.UInteger;
-pub const TessellationFactorStepFunctionConstant: TessellationFactorStepFunction = 0;
-pub const TessellationFactorStepFunctionPerPatch: TessellationFactorStepFunction = 1;
-pub const TessellationFactorStepFunctionPerInstance: TessellationFactorStepFunction = 2;
-pub const TessellationFactorStepFunctionPerPatchAndPerInstance: TessellationFactorStepFunction = 3;
-
-pub const TessellationFactorFormat = ns.UInteger;
-pub const TessellationFactorFormatHalf: TessellationFactorFormat = 0;
-
-pub const TessellationControlPointIndexType = ns.UInteger;
-pub const TessellationControlPointIndexTypeNone: TessellationControlPointIndexType = 0;
-pub const TessellationControlPointIndexTypeUInt16: TessellationControlPointIndexType = 1;
-pub const TessellationControlPointIndexTypeUInt32: TessellationControlPointIndexType = 2;
-
-pub const PurgeableState = ns.UInteger;
-pub const PurgeableStateKeepCurrent: PurgeableState = 1;
-pub const PurgeableStateNonVolatile: PurgeableState = 2;
-pub const PurgeableStateVolatile: PurgeableState = 3;
-pub const PurgeableStateEmpty: PurgeableState = 4;
-
-pub const CPUCacheMode = ns.UInteger;
-pub const CPUCacheModeDefaultCache: CPUCacheMode = 0;
-pub const CPUCacheModeWriteCombined: CPUCacheMode = 1;
-
-pub const StorageMode = ns.UInteger;
-pub const StorageModeShared: StorageMode = 0;
-pub const StorageModeManaged: StorageMode = 1;
-pub const StorageModePrivate: StorageMode = 2;
-pub const StorageModeMemoryless: StorageMode = 3;
-
-pub const HazardTrackingMode = ns.UInteger;
-pub const HazardTrackingModeDefault: HazardTrackingMode = 0;
-pub const HazardTrackingModeUntracked: HazardTrackingMode = 1;
-pub const HazardTrackingModeTracked: HazardTrackingMode = 2;
 
 pub const ResourceOptions = ns.UInteger;
 pub const ResourceCPUCacheModeDefaultCache: ResourceOptions = 0;
@@ -997,18 +1179,10 @@ pub const ResourceHazardTrackingModeTracked: ResourceOptions = 512;
 pub const ResourceOptionCPUCacheModeDefault: ResourceOptions = 0;
 pub const ResourceOptionCPUCacheModeWriteCombined: ResourceOptions = 1;
 
-pub const SparseTextureMappingMode = ns.UInteger;
-pub const SparseTextureMappingModeMap: SparseTextureMappingMode = 0;
-pub const SparseTextureMappingModeUnmap: SparseTextureMappingMode = 1;
-
-pub const SamplerMinMagFilter = ns.UInteger;
-pub const SamplerMinMagFilterNearest: SamplerMinMagFilter = 0;
-pub const SamplerMinMagFilterLinear: SamplerMinMagFilter = 1;
-
-pub const SamplerMipFilter = ns.UInteger;
-pub const SamplerMipFilterNotMipmapped: SamplerMipFilter = 0;
-pub const SamplerMipFilterNearest: SamplerMipFilter = 1;
-pub const SamplerMipFilterLinear: SamplerMipFilter = 2;
+pub const ResourceUsage = ns.UInteger;
+pub const ResourceUsageRead: ResourceUsage = 1;
+pub const ResourceUsageWrite: ResourceUsage = 2;
+pub const ResourceUsageSample: ResourceUsage = 4;
 
 pub const SamplerAddressMode = ns.UInteger;
 pub const SamplerAddressModeClampToEdge: SamplerAddressMode = 0;
@@ -1023,65 +1197,60 @@ pub const SamplerBorderColorTransparentBlack: SamplerBorderColor = 0;
 pub const SamplerBorderColorOpaqueBlack: SamplerBorderColor = 1;
 pub const SamplerBorderColorOpaqueWhite: SamplerBorderColor = 2;
 
-pub const AttributeFormat = ns.UInteger;
-pub const AttributeFormatInvalid: AttributeFormat = 0;
-pub const AttributeFormatUChar2: AttributeFormat = 1;
-pub const AttributeFormatUChar3: AttributeFormat = 2;
-pub const AttributeFormatUChar4: AttributeFormat = 3;
-pub const AttributeFormatChar2: AttributeFormat = 4;
-pub const AttributeFormatChar3: AttributeFormat = 5;
-pub const AttributeFormatChar4: AttributeFormat = 6;
-pub const AttributeFormatUChar2Normalized: AttributeFormat = 7;
-pub const AttributeFormatUChar3Normalized: AttributeFormat = 8;
-pub const AttributeFormatUChar4Normalized: AttributeFormat = 9;
-pub const AttributeFormatChar2Normalized: AttributeFormat = 10;
-pub const AttributeFormatChar3Normalized: AttributeFormat = 11;
-pub const AttributeFormatChar4Normalized: AttributeFormat = 12;
-pub const AttributeFormatUShort2: AttributeFormat = 13;
-pub const AttributeFormatUShort3: AttributeFormat = 14;
-pub const AttributeFormatUShort4: AttributeFormat = 15;
-pub const AttributeFormatShort2: AttributeFormat = 16;
-pub const AttributeFormatShort3: AttributeFormat = 17;
-pub const AttributeFormatShort4: AttributeFormat = 18;
-pub const AttributeFormatUShort2Normalized: AttributeFormat = 19;
-pub const AttributeFormatUShort3Normalized: AttributeFormat = 20;
-pub const AttributeFormatUShort4Normalized: AttributeFormat = 21;
-pub const AttributeFormatShort2Normalized: AttributeFormat = 22;
-pub const AttributeFormatShort3Normalized: AttributeFormat = 23;
-pub const AttributeFormatShort4Normalized: AttributeFormat = 24;
-pub const AttributeFormatHalf2: AttributeFormat = 25;
-pub const AttributeFormatHalf3: AttributeFormat = 26;
-pub const AttributeFormatHalf4: AttributeFormat = 27;
-pub const AttributeFormatFloat: AttributeFormat = 28;
-pub const AttributeFormatFloat2: AttributeFormat = 29;
-pub const AttributeFormatFloat3: AttributeFormat = 30;
-pub const AttributeFormatFloat4: AttributeFormat = 31;
-pub const AttributeFormatInt: AttributeFormat = 32;
-pub const AttributeFormatInt2: AttributeFormat = 33;
-pub const AttributeFormatInt3: AttributeFormat = 34;
-pub const AttributeFormatInt4: AttributeFormat = 35;
-pub const AttributeFormatUInt: AttributeFormat = 36;
-pub const AttributeFormatUInt2: AttributeFormat = 37;
-pub const AttributeFormatUInt3: AttributeFormat = 38;
-pub const AttributeFormatUInt4: AttributeFormat = 39;
-pub const AttributeFormatInt1010102Normalized: AttributeFormat = 40;
-pub const AttributeFormatUInt1010102Normalized: AttributeFormat = 41;
-pub const AttributeFormatUChar4Normalized_BGRA: AttributeFormat = 42;
-pub const AttributeFormatUChar: AttributeFormat = 45;
-pub const AttributeFormatChar: AttributeFormat = 46;
-pub const AttributeFormatUCharNormalized: AttributeFormat = 47;
-pub const AttributeFormatCharNormalized: AttributeFormat = 48;
-pub const AttributeFormatUShort: AttributeFormat = 49;
-pub const AttributeFormatShort: AttributeFormat = 50;
-pub const AttributeFormatUShortNormalized: AttributeFormat = 51;
-pub const AttributeFormatShortNormalized: AttributeFormat = 52;
-pub const AttributeFormatHalf: AttributeFormat = 53;
-pub const AttributeFormatFloatRG11B10: AttributeFormat = 54;
-pub const AttributeFormatFloatRGB9E5: AttributeFormat = 55;
+pub const SamplerMinMagFilter = ns.UInteger;
+pub const SamplerMinMagFilterNearest: SamplerMinMagFilter = 0;
+pub const SamplerMinMagFilterLinear: SamplerMinMagFilter = 1;
 
-pub const IndexType = ns.UInteger;
-pub const IndexTypeUInt16: IndexType = 0;
-pub const IndexTypeUInt32: IndexType = 1;
+pub const SamplerMipFilter = ns.UInteger;
+pub const SamplerMipFilterNotMipmapped: SamplerMipFilter = 0;
+pub const SamplerMipFilterNearest: SamplerMipFilter = 1;
+pub const SamplerMipFilterLinear: SamplerMipFilter = 2;
+
+pub const SamplerReductionMode = ns.UInteger;
+pub const SamplerReductionModeWeightedAverage: SamplerReductionMode = 0;
+pub const SamplerReductionModeMinimum: SamplerReductionMode = 1;
+pub const SamplerReductionModeMaximum: SamplerReductionMode = 2;
+
+pub const ShaderValidation = ns.Integer;
+pub const ShaderValidationDefault: ShaderValidation = 0;
+pub const ShaderValidationEnabled: ShaderValidation = 1;
+pub const ShaderValidationDisabled: ShaderValidation = 2;
+
+pub const SparsePageSize = ns.Integer;
+pub const SparsePageSize16: SparsePageSize = 101;
+pub const SparsePageSize64: SparsePageSize = 102;
+pub const SparsePageSize256: SparsePageSize = 103;
+
+pub const SparseTextureMappingMode = ns.UInteger;
+pub const SparseTextureMappingModeMap: SparseTextureMappingMode = 0;
+pub const SparseTextureMappingModeUnmap: SparseTextureMappingMode = 1;
+
+pub const SparseTextureRegionAlignmentMode = ns.UInteger;
+pub const SparseTextureRegionAlignmentModeOutward: SparseTextureRegionAlignmentMode = 0;
+pub const SparseTextureRegionAlignmentModeInward: SparseTextureRegionAlignmentMode = 1;
+
+pub const Stages = ns.UInteger;
+pub const StageVertex: Stages = 1;
+pub const StageFragment: Stages = 2;
+pub const StageTile: Stages = 4;
+pub const StageObject: Stages = 8;
+pub const StageMesh: Stages = 16;
+pub const StageResourceState: Stages = 67108864;
+pub const StageDispatch: Stages = 134217728;
+pub const StageBlit: Stages = 268435456;
+pub const StageAccelerationStructure: Stages = 536870912;
+pub const StageMachineLearning: Stages = 1073741824;
+pub const StageAll: Stages = 9223372036854775807;
+
+pub const StencilOperation = ns.UInteger;
+pub const StencilOperationKeep: StencilOperation = 0;
+pub const StencilOperationZero: StencilOperation = 1;
+pub const StencilOperationReplace: StencilOperation = 2;
+pub const StencilOperationIncrementClamp: StencilOperation = 3;
+pub const StencilOperationDecrementClamp: StencilOperation = 4;
+pub const StencilOperationInvert: StencilOperation = 5;
+pub const StencilOperationIncrementWrap: StencilOperation = 6;
+pub const StencilOperationDecrementWrap: StencilOperation = 7;
 
 pub const StepFunction = ns.UInteger;
 pub const StepFunctionConstant: StepFunction = 0;
@@ -1093,6 +1262,90 @@ pub const StepFunctionThreadPositionInGridX: StepFunction = 5;
 pub const StepFunctionThreadPositionInGridY: StepFunction = 6;
 pub const StepFunctionThreadPositionInGridXIndexed: StepFunction = 7;
 pub const StepFunctionThreadPositionInGridYIndexed: StepFunction = 8;
+
+pub const StitchedLibraryOptions = ns.UInteger;
+pub const StitchedLibraryOptionNone: StitchedLibraryOptions = 0;
+pub const StitchedLibraryOptionFailOnBinaryArchiveMiss: StitchedLibraryOptions = 1;
+pub const StitchedLibraryOptionStoreLibraryInMetalPipelinesScript: StitchedLibraryOptions = 2;
+
+pub const StorageMode = ns.UInteger;
+pub const StorageModeShared: StorageMode = 0;
+pub const StorageModeManaged: StorageMode = 1;
+pub const StorageModePrivate: StorageMode = 2;
+pub const StorageModeMemoryless: StorageMode = 3;
+
+pub const StoreAction = ns.UInteger;
+pub const StoreActionDontCare: StoreAction = 0;
+pub const StoreActionStore: StoreAction = 1;
+pub const StoreActionMultisampleResolve: StoreAction = 2;
+pub const StoreActionStoreAndMultisampleResolve: StoreAction = 3;
+pub const StoreActionUnknown: StoreAction = 4;
+pub const StoreActionCustomSampleDepthStore: StoreAction = 5;
+
+pub const StoreActionOptions = ns.UInteger;
+pub const StoreActionOptionNone: StoreActionOptions = 0;
+pub const StoreActionOptionCustomSamplePositions: StoreActionOptions = 1;
+
+pub const TensorDataType = ns.Integer;
+pub const TensorDataTypeNone: TensorDataType = 0;
+pub const TensorDataTypeFloat32: TensorDataType = 3;
+pub const TensorDataTypeFloat16: TensorDataType = 16;
+pub const TensorDataTypeBFloat16: TensorDataType = 121;
+pub const TensorDataTypeInt8: TensorDataType = 45;
+pub const TensorDataTypeUInt8: TensorDataType = 49;
+pub const TensorDataTypeInt16: TensorDataType = 37;
+pub const TensorDataTypeUInt16: TensorDataType = 41;
+pub const TensorDataTypeInt32: TensorDataType = 29;
+pub const TensorDataTypeUInt32: TensorDataType = 33;
+pub const TensorDataTypeInt4: TensorDataType = 143;
+pub const TensorDataTypeUInt4: TensorDataType = 144;
+
+pub const TensorError = ns.Integer;
+pub const TensorErrorNone: TensorError = 0;
+pub const TensorErrorInternalError: TensorError = 1;
+pub const TensorErrorInvalidDescriptor: TensorError = 2;
+
+pub const TensorUsage = ns.UInteger;
+pub const TensorUsageCompute: TensorUsage = 1;
+pub const TensorUsageRender: TensorUsage = 2;
+pub const TensorUsageMachineLearning: TensorUsage = 4;
+
+pub const TessellationControlPointIndexType = ns.UInteger;
+pub const TessellationControlPointIndexTypeNone: TessellationControlPointIndexType = 0;
+pub const TessellationControlPointIndexTypeUInt16: TessellationControlPointIndexType = 1;
+pub const TessellationControlPointIndexTypeUInt32: TessellationControlPointIndexType = 2;
+
+pub const TessellationFactorFormat = ns.UInteger;
+pub const TessellationFactorFormatHalf: TessellationFactorFormat = 0;
+
+pub const TessellationFactorStepFunction = ns.UInteger;
+pub const TessellationFactorStepFunctionConstant: TessellationFactorStepFunction = 0;
+pub const TessellationFactorStepFunctionPerPatch: TessellationFactorStepFunction = 1;
+pub const TessellationFactorStepFunctionPerInstance: TessellationFactorStepFunction = 2;
+pub const TessellationFactorStepFunctionPerPatchAndPerInstance: TessellationFactorStepFunction = 3;
+
+pub const TessellationPartitionMode = ns.UInteger;
+pub const TessellationPartitionModePow2: TessellationPartitionMode = 0;
+pub const TessellationPartitionModeInteger: TessellationPartitionMode = 1;
+pub const TessellationPartitionModeFractionalOdd: TessellationPartitionMode = 2;
+pub const TessellationPartitionModeFractionalEven: TessellationPartitionMode = 3;
+
+pub const TextureCompressionType = ns.Integer;
+pub const TextureCompressionTypeLossless: TextureCompressionType = 0;
+pub const TextureCompressionTypeLossy: TextureCompressionType = 1;
+
+pub const TextureSparseTier = ns.Integer;
+pub const TextureSparseTierNone: TextureSparseTier = 0;
+pub const TextureSparseTier1: TextureSparseTier = 1;
+pub const TextureSparseTier2: TextureSparseTier = 2;
+
+pub const TextureSwizzle = u8;
+pub const TextureSwizzleZero: TextureSwizzle = 0;
+pub const TextureSwizzleOne: TextureSwizzle = 1;
+pub const TextureSwizzleRed: TextureSwizzle = 2;
+pub const TextureSwizzleGreen: TextureSwizzle = 3;
+pub const TextureSwizzleBlue: TextureSwizzle = 4;
+pub const TextureSwizzleAlpha: TextureSwizzle = 5;
 
 pub const TextureType = ns.UInteger;
 pub const TextureType1D: TextureType = 0;
@@ -1106,14 +1359,6 @@ pub const TextureType3D: TextureType = 7;
 pub const TextureType2DMultisampleArray: TextureType = 8;
 pub const TextureTypeTextureBuffer: TextureType = 9;
 
-pub const TextureSwizzle = u8;
-pub const TextureSwizzleZero: TextureSwizzle = 0;
-pub const TextureSwizzleOne: TextureSwizzle = 1;
-pub const TextureSwizzleRed: TextureSwizzle = 2;
-pub const TextureSwizzleGreen: TextureSwizzle = 3;
-pub const TextureSwizzleBlue: TextureSwizzle = 4;
-pub const TextureSwizzleAlpha: TextureSwizzle = 5;
-
 pub const TextureUsage = ns.UInteger;
 pub const TextureUsageUnknown: TextureUsage = 0;
 pub const TextureUsageShaderRead: TextureUsage = 1;
@@ -1122,9 +1367,13 @@ pub const TextureUsageRenderTarget: TextureUsage = 4;
 pub const TextureUsagePixelFormatView: TextureUsage = 16;
 pub const TextureUsageShaderAtomic: TextureUsage = 32;
 
-pub const TextureCompressionType = ns.Integer;
-pub const TextureCompressionTypeLossless: TextureCompressionType = 0;
-pub const TextureCompressionTypeLossy: TextureCompressionType = 1;
+pub const TransformType = ns.Integer;
+pub const TransformTypePackedFloat4x3: TransformType = 0;
+pub const TransformTypeComponent: TransformType = 1;
+
+pub const TriangleFillMode = ns.UInteger;
+pub const TriangleFillModeFill: TriangleFillMode = 0;
+pub const TriangleFillModeLines: TriangleFillMode = 1;
 
 pub const VertexFormat = ns.UInteger;
 pub const VertexFormatInvalid: VertexFormat = 0;
@@ -1188,6 +1437,1967 @@ pub const VertexStepFunctionPerVertex: VertexStepFunction = 1;
 pub const VertexStepFunctionPerInstance: VertexStepFunction = 2;
 pub const VertexStepFunctionPerPatch: VertexStepFunction = 3;
 pub const VertexStepFunctionPerPatchControlPoint: VertexStepFunction = 4;
+
+pub const VisibilityResultMode = ns.UInteger;
+pub const VisibilityResultModeDisabled: VisibilityResultMode = 0;
+pub const VisibilityResultModeBoolean: VisibilityResultMode = 1;
+pub const VisibilityResultModeCounting: VisibilityResultMode = 2;
+
+pub const VisibilityResultType = ns.Integer;
+pub const VisibilityResultTypeReset: VisibilityResultType = 0;
+pub const VisibilityResultTypeAccumulate: VisibilityResultType = 1;
+
+pub const Winding = ns.UInteger;
+pub const WindingClockwise: Winding = 0;
+pub const WindingCounterClockwise: Winding = 1;
+
+pub const MTL4AccelerationStructureBoundingBoxGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureBoundingBoxGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn boundingBoxBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "boundingBoxBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setBoundingBoxBuffer(self_: *@This(), boundingBoxBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setBoundingBoxBuffer:", void, .{boundingBoxBuffer_});
+    }
+    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
+    }
+    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
+    }
+};
+
+pub const MTL4AccelerationStructureCurveGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureCurveGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn controlPointBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "controlPointBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setControlPointBuffer(self_: *@This(), controlPointBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setControlPointBuffer:", void, .{controlPointBuffer_});
+    }
+    pub fn controlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointCount", ns.UInteger, .{});
+    }
+    pub fn setControlPointCount(self_: *@This(), controlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointCount:", void, .{controlPointCount_});
+    }
+    pub fn controlPointStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointStride", ns.UInteger, .{});
+    }
+    pub fn setControlPointStride(self_: *@This(), controlPointStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointStride:", void, .{controlPointStride_});
+    }
+    pub fn controlPointFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "controlPointFormat", AttributeFormat, .{});
+    }
+    pub fn setControlPointFormat(self_: *@This(), controlPointFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setControlPointFormat:", void, .{controlPointFormat_});
+    }
+    pub fn radiusBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "radiusBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setRadiusBuffer(self_: *@This(), radiusBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setRadiusBuffer:", void, .{radiusBuffer_});
+    }
+    pub fn radiusFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "radiusFormat", AttributeFormat, .{});
+    }
+    pub fn setRadiusFormat(self_: *@This(), radiusFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setRadiusFormat:", void, .{radiusFormat_});
+    }
+    pub fn radiusStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "radiusStride", ns.UInteger, .{});
+    }
+    pub fn setRadiusStride(self_: *@This(), radiusStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRadiusStride:", void, .{radiusStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "indexBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn segmentCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentCount(self_: *@This(), segmentCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentCount:", void, .{segmentCount_});
+    }
+    pub fn segmentControlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentControlPointCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentControlPointCount(self_: *@This(), segmentControlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentControlPointCount:", void, .{segmentControlPointCount_});
+    }
+    pub fn curveType(self_: *@This()) CurveType {
+        return objc.msgSend(self_, "curveType", CurveType, .{});
+    }
+    pub fn setCurveType(self_: *@This(), curveType_: CurveType) void {
+        return objc.msgSend(self_, "setCurveType:", void, .{curveType_});
+    }
+    pub fn curveBasis(self_: *@This()) CurveBasis {
+        return objc.msgSend(self_, "curveBasis", CurveBasis, .{});
+    }
+    pub fn setCurveBasis(self_: *@This(), curveBasis_: CurveBasis) void {
+        return objc.msgSend(self_, "setCurveBasis:", void, .{curveBasis_});
+    }
+    pub fn curveEndCaps(self_: *@This()) CurveEndCaps {
+        return objc.msgSend(self_, "curveEndCaps", CurveEndCaps, .{});
+    }
+    pub fn setCurveEndCaps(self_: *@This(), curveEndCaps_: CurveEndCaps) void {
+        return objc.msgSend(self_, "setCurveEndCaps:", void, .{curveEndCaps_});
+    }
+};
+
+pub const MTL4AccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureDescriptor", @This(), AccelerationStructureDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+};
+
+pub const MTL4AccelerationStructureGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureGeometryDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn intersectionFunctionTableOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "intersectionFunctionTableOffset", ns.UInteger, .{});
+    }
+    pub fn setIntersectionFunctionTableOffset(self_: *@This(), intersectionFunctionTableOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIntersectionFunctionTableOffset:", void, .{intersectionFunctionTableOffset_});
+    }
+    pub fn @"opaque"(self_: *@This()) bool {
+        return objc.msgSend(self_, "opaque", bool, .{});
+    }
+    pub fn setOpaque(self_: *@This(), opaque_: bool) void {
+        return objc.msgSend(self_, "setOpaque:", void, .{opaque_});
+    }
+    pub fn allowDuplicateIntersectionFunctionInvocation(self_: *@This()) bool {
+        return objc.msgSend(self_, "allowDuplicateIntersectionFunctionInvocation", bool, .{});
+    }
+    pub fn setAllowDuplicateIntersectionFunctionInvocation(self_: *@This(), allowDuplicateIntersectionFunctionInvocation_: bool) void {
+        return objc.msgSend(self_, "setAllowDuplicateIntersectionFunctionInvocation:", void, .{allowDuplicateIntersectionFunctionInvocation_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn primitiveDataBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "primitiveDataBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setPrimitiveDataBuffer(self_: *@This(), primitiveDataBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setPrimitiveDataBuffer:", void, .{primitiveDataBuffer_});
+    }
+    pub fn primitiveDataStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "primitiveDataStride", ns.UInteger, .{});
+    }
+    pub fn setPrimitiveDataStride(self_: *@This(), primitiveDataStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setPrimitiveDataStride:", void, .{primitiveDataStride_});
+    }
+    pub fn primitiveDataElementSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "primitiveDataElementSize", ns.UInteger, .{});
+    }
+    pub fn setPrimitiveDataElementSize(self_: *@This(), primitiveDataElementSize_: ns.UInteger) void {
+        return objc.msgSend(self_, "setPrimitiveDataElementSize:", void, .{primitiveDataElementSize_});
+    }
+};
+
+pub const MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn boundingBoxBuffers(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "boundingBoxBuffers", MTL4BufferRange, .{});
+    }
+    pub fn setBoundingBoxBuffers(self_: *@This(), boundingBoxBuffers_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setBoundingBoxBuffers:", void, .{boundingBoxBuffers_});
+    }
+    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
+    }
+    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
+    }
+};
+
+pub const MTL4AccelerationStructureMotionCurveGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureMotionCurveGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn controlPointBuffers(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "controlPointBuffers", MTL4BufferRange, .{});
+    }
+    pub fn setControlPointBuffers(self_: *@This(), controlPointBuffers_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setControlPointBuffers:", void, .{controlPointBuffers_});
+    }
+    pub fn controlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointCount", ns.UInteger, .{});
+    }
+    pub fn setControlPointCount(self_: *@This(), controlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointCount:", void, .{controlPointCount_});
+    }
+    pub fn controlPointStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointStride", ns.UInteger, .{});
+    }
+    pub fn setControlPointStride(self_: *@This(), controlPointStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointStride:", void, .{controlPointStride_});
+    }
+    pub fn controlPointFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "controlPointFormat", AttributeFormat, .{});
+    }
+    pub fn setControlPointFormat(self_: *@This(), controlPointFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setControlPointFormat:", void, .{controlPointFormat_});
+    }
+    pub fn radiusBuffers(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "radiusBuffers", MTL4BufferRange, .{});
+    }
+    pub fn setRadiusBuffers(self_: *@This(), radiusBuffers_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setRadiusBuffers:", void, .{radiusBuffers_});
+    }
+    pub fn radiusFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "radiusFormat", AttributeFormat, .{});
+    }
+    pub fn setRadiusFormat(self_: *@This(), radiusFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setRadiusFormat:", void, .{radiusFormat_});
+    }
+    pub fn radiusStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "radiusStride", ns.UInteger, .{});
+    }
+    pub fn setRadiusStride(self_: *@This(), radiusStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRadiusStride:", void, .{radiusStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "indexBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn segmentCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentCount(self_: *@This(), segmentCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentCount:", void, .{segmentCount_});
+    }
+    pub fn segmentControlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentControlPointCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentControlPointCount(self_: *@This(), segmentControlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentControlPointCount:", void, .{segmentControlPointCount_});
+    }
+    pub fn curveType(self_: *@This()) CurveType {
+        return objc.msgSend(self_, "curveType", CurveType, .{});
+    }
+    pub fn setCurveType(self_: *@This(), curveType_: CurveType) void {
+        return objc.msgSend(self_, "setCurveType:", void, .{curveType_});
+    }
+    pub fn curveBasis(self_: *@This()) CurveBasis {
+        return objc.msgSend(self_, "curveBasis", CurveBasis, .{});
+    }
+    pub fn setCurveBasis(self_: *@This(), curveBasis_: CurveBasis) void {
+        return objc.msgSend(self_, "setCurveBasis:", void, .{curveBasis_});
+    }
+    pub fn curveEndCaps(self_: *@This()) CurveEndCaps {
+        return objc.msgSend(self_, "curveEndCaps", CurveEndCaps, .{});
+    }
+    pub fn setCurveEndCaps(self_: *@This(), curveEndCaps_: CurveEndCaps) void {
+        return objc.msgSend(self_, "setCurveEndCaps:", void, .{curveEndCaps_});
+    }
+};
+
+pub const MTL4AccelerationStructureMotionTriangleGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureMotionTriangleGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexBuffers(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "vertexBuffers", MTL4BufferRange, .{});
+    }
+    pub fn setVertexBuffers(self_: *@This(), vertexBuffers_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setVertexBuffers:", void, .{vertexBuffers_});
+    }
+    pub fn vertexFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "vertexFormat", AttributeFormat, .{});
+    }
+    pub fn setVertexFormat(self_: *@This(), vertexFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setVertexFormat:", void, .{vertexFormat_});
+    }
+    pub fn vertexStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "vertexStride", ns.UInteger, .{});
+    }
+    pub fn setVertexStride(self_: *@This(), vertexStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVertexStride:", void, .{vertexStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "indexBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn triangleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "triangleCount", ns.UInteger, .{});
+    }
+    pub fn setTriangleCount(self_: *@This(), triangleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTriangleCount:", void, .{triangleCount_});
+    }
+    pub fn transformationMatrixBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "transformationMatrixBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setTransformationMatrixBuffer(self_: *@This(), transformationMatrixBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setTransformationMatrixBuffer:", void, .{transformationMatrixBuffer_});
+    }
+    pub fn transformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "transformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setTransformationMatrixLayout(self_: *@This(), transformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setTransformationMatrixLayout:", void, .{transformationMatrixLayout_});
+    }
+};
+
+pub const MTL4AccelerationStructureTriangleGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4AccelerationStructureTriangleGeometryDescriptor", @This(), MTL4AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "vertexBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setVertexBuffer(self_: *@This(), vertexBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setVertexBuffer:", void, .{vertexBuffer_});
+    }
+    pub fn vertexFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "vertexFormat", AttributeFormat, .{});
+    }
+    pub fn setVertexFormat(self_: *@This(), vertexFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setVertexFormat:", void, .{vertexFormat_});
+    }
+    pub fn vertexStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "vertexStride", ns.UInteger, .{});
+    }
+    pub fn setVertexStride(self_: *@This(), vertexStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVertexStride:", void, .{vertexStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "indexBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn triangleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "triangleCount", ns.UInteger, .{});
+    }
+    pub fn setTriangleCount(self_: *@This(), triangleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTriangleCount:", void, .{triangleCount_});
+    }
+    pub fn transformationMatrixBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "transformationMatrixBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setTransformationMatrixBuffer(self_: *@This(), transformationMatrixBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setTransformationMatrixBuffer:", void, .{transformationMatrixBuffer_});
+    }
+    pub fn transformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "transformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setTransformationMatrixLayout(self_: *@This(), transformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setTransformationMatrixLayout:", void, .{transformationMatrixLayout_});
+    }
+};
+
+pub const MTL4ArgumentTableDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4ArgumentTableDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn maxBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxBufferBindCount(self_: *@This(), maxBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxBufferBindCount:", void, .{maxBufferBindCount_});
+    }
+    pub fn maxTextureBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTextureBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxTextureBindCount(self_: *@This(), maxTextureBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTextureBindCount:", void, .{maxTextureBindCount_});
+    }
+    pub fn maxSamplerStateBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxSamplerStateBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxSamplerStateBindCount(self_: *@This(), maxSamplerStateBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxSamplerStateBindCount:", void, .{maxSamplerStateBindCount_});
+    }
+    pub fn initializeBindings(self_: *@This()) bool {
+        return objc.msgSend(self_, "initializeBindings", bool, .{});
+    }
+    pub fn setInitializeBindings(self_: *@This(), initializeBindings_: bool) void {
+        return objc.msgSend(self_, "setInitializeBindings:", void, .{initializeBindings_});
+    }
+    pub fn supportAttributeStrides(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportAttributeStrides", bool, .{});
+    }
+    pub fn setSupportAttributeStrides(self_: *@This(), supportAttributeStrides_: bool) void {
+        return objc.msgSend(self_, "setSupportAttributeStrides:", void, .{supportAttributeStrides_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const MTL4BinaryFunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4BinaryFunctionDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn setName(self_: *@This(), name_: *ns.String) void {
+        return objc.msgSend(self_, "setName:", void, .{name_});
+    }
+    pub fn functionDescriptor(self_: *@This()) *MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "functionDescriptor", *MTL4FunctionDescriptor, .{});
+    }
+    pub fn setFunctionDescriptor(self_: *@This(), functionDescriptor_: *MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setFunctionDescriptor:", void, .{functionDescriptor_});
+    }
+    pub fn options(self_: *@This()) MTL4BinaryFunctionOptions {
+        return objc.msgSend(self_, "options", MTL4BinaryFunctionOptions, .{});
+    }
+    pub fn setOptions(self_: *@This(), options_: MTL4BinaryFunctionOptions) void {
+        return objc.msgSend(self_, "setOptions:", void, .{options_});
+    }
+};
+
+pub const MTL4CommandAllocatorDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CommandAllocatorDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const MTL4CommandBufferOptions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CommandBufferOptions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn logState(self_: *@This()) ?*LogState {
+        return objc.msgSend(self_, "logState", ?*LogState, .{});
+    }
+    pub fn setLogState(self_: *@This(), logState_: ?*LogState) void {
+        return objc.msgSend(self_, "setLogState:", void, .{logState_});
+    }
+};
+
+pub const MTL4CommandQueueDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CommandQueueDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn feedbackQueue(self_: *@This()) dispatch_queue_t {
+        return objc.msgSend(self_, "feedbackQueue", dispatch_queue_t, .{});
+    }
+    pub fn setFeedbackQueue(self_: *@This(), feedbackQueue_: dispatch_queue_t) void {
+        return objc.msgSend(self_, "setFeedbackQueue:", void, .{feedbackQueue_});
+    }
+};
+
+pub const MTL4CommitOptions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CommitOptions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn addFeedbackHandler(self_: *@This(), block_: *ns.Block(fn (*MTL4CommitFeedback) void)) void {
+        return objc.msgSend(self_, "addFeedbackHandler:", void, .{block_});
+    }
+};
+
+pub const MTL4CompilerDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CompilerDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn pipelineDataSetSerializer(self_: *@This()) ?*MTL4PipelineDataSetSerializer {
+        return objc.msgSend(self_, "pipelineDataSetSerializer", ?*MTL4PipelineDataSetSerializer, .{});
+    }
+    pub fn setPipelineDataSetSerializer(self_: *@This(), pipelineDataSetSerializer_: ?*MTL4PipelineDataSetSerializer) void {
+        return objc.msgSend(self_, "setPipelineDataSetSerializer:", void, .{pipelineDataSetSerializer_});
+    }
+};
+
+pub const MTL4CompilerTaskOptions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CompilerTaskOptions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn lookupArchives(self_: *@This()) ?*ns.Array(*MTL4Archive) {
+        return objc.msgSend(self_, "lookupArchives", ?*ns.Array(*MTL4Archive), .{});
+    }
+    pub fn setLookupArchives(self_: *@This(), lookupArchives_: ?*ns.Array(*MTL4Archive)) void {
+        return objc.msgSend(self_, "setLookupArchives:", void, .{lookupArchives_});
+    }
+};
+
+pub const MTL4ComputePipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4ComputePipelineDescriptor", @This(), MTL4PipelineDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn computeFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "computeFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setComputeFunctionDescriptor(self_: *@This(), computeFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setComputeFunctionDescriptor:", void, .{computeFunctionDescriptor_});
+    }
+    pub fn threadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "threadGroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setThreadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), threadGroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setThreadGroupSizeIsMultipleOfThreadExecutionWidth:", void, .{threadGroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerThreadgroup(self_: *@This(), requiredThreadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerThreadgroup:", void, .{requiredThreadsPerThreadgroup_});
+    }
+    pub fn supportBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportBinaryLinking", bool, .{});
+    }
+    pub fn setSupportBinaryLinking(self_: *@This(), supportBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportBinaryLinking:", void, .{supportBinaryLinking_});
+    }
+    pub fn staticLinkingDescriptor(self_: *@This()) ?*MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "staticLinkingDescriptor", ?*MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setStaticLinkingDescriptor(self_: *@This(), staticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setStaticLinkingDescriptor:", void, .{staticLinkingDescriptor_});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) MTL4IndirectCommandBufferSupportState {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", MTL4IndirectCommandBufferSupportState, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: MTL4IndirectCommandBufferSupportState) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+};
+
+pub const MTL4CounterHeapDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4CounterHeapDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn @"type"(self_: *@This()) MTL4CounterHeapType {
+        return objc.msgSend(self_, "type", MTL4CounterHeapType, .{});
+    }
+    pub fn setType(self_: *@This(), type_: MTL4CounterHeapType) void {
+        return objc.msgSend(self_, "setType:", void, .{type_});
+    }
+    pub fn count(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "count", ns.UInteger, .{});
+    }
+    pub fn setCount(self_: *@This(), count_: ns.UInteger) void {
+        return objc.msgSend(self_, "setCount:", void, .{count_});
+    }
+};
+
+pub const MTL4FunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4FunctionDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+};
+
+pub const MTL4IndirectInstanceAccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4IndirectInstanceAccelerationStructureDescriptor", @This(), MTL4AccelerationStructureDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn instanceDescriptorBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "instanceDescriptorBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setInstanceDescriptorBuffer(self_: *@This(), instanceDescriptorBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setInstanceDescriptorBuffer:", void, .{instanceDescriptorBuffer_});
+    }
+    pub fn instanceDescriptorStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceDescriptorStride", ns.UInteger, .{});
+    }
+    pub fn setInstanceDescriptorStride(self_: *@This(), instanceDescriptorStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceDescriptorStride:", void, .{instanceDescriptorStride_});
+    }
+    pub fn maxInstanceCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxInstanceCount", ns.UInteger, .{});
+    }
+    pub fn setMaxInstanceCount(self_: *@This(), maxInstanceCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxInstanceCount:", void, .{maxInstanceCount_});
+    }
+    pub fn instanceCountBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "instanceCountBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setInstanceCountBuffer(self_: *@This(), instanceCountBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setInstanceCountBuffer:", void, .{instanceCountBuffer_});
+    }
+    pub fn instanceDescriptorType(self_: *@This()) AccelerationStructureInstanceDescriptorType {
+        return objc.msgSend(self_, "instanceDescriptorType", AccelerationStructureInstanceDescriptorType, .{});
+    }
+    pub fn setInstanceDescriptorType(self_: *@This(), instanceDescriptorType_: AccelerationStructureInstanceDescriptorType) void {
+        return objc.msgSend(self_, "setInstanceDescriptorType:", void, .{instanceDescriptorType_});
+    }
+    pub fn motionTransformBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "motionTransformBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setMotionTransformBuffer(self_: *@This(), motionTransformBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setMotionTransformBuffer:", void, .{motionTransformBuffer_});
+    }
+    pub fn maxMotionTransformCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxMotionTransformCount", ns.UInteger, .{});
+    }
+    pub fn setMaxMotionTransformCount(self_: *@This(), maxMotionTransformCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxMotionTransformCount:", void, .{maxMotionTransformCount_});
+    }
+    pub fn motionTransformCountBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "motionTransformCountBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setMotionTransformCountBuffer(self_: *@This(), motionTransformCountBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setMotionTransformCountBuffer:", void, .{motionTransformCountBuffer_});
+    }
+    pub fn instanceTransformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "instanceTransformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setInstanceTransformationMatrixLayout(self_: *@This(), instanceTransformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setInstanceTransformationMatrixLayout:", void, .{instanceTransformationMatrixLayout_});
+    }
+    pub fn motionTransformType(self_: *@This()) TransformType {
+        return objc.msgSend(self_, "motionTransformType", TransformType, .{});
+    }
+    pub fn setMotionTransformType(self_: *@This(), motionTransformType_: TransformType) void {
+        return objc.msgSend(self_, "setMotionTransformType:", void, .{motionTransformType_});
+    }
+    pub fn motionTransformStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformStride", ns.UInteger, .{});
+    }
+    pub fn setMotionTransformStride(self_: *@This(), motionTransformStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformStride:", void, .{motionTransformStride_});
+    }
+};
+
+pub const MTL4InstanceAccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4InstanceAccelerationStructureDescriptor", @This(), MTL4AccelerationStructureDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn instanceDescriptorBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "instanceDescriptorBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setInstanceDescriptorBuffer(self_: *@This(), instanceDescriptorBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setInstanceDescriptorBuffer:", void, .{instanceDescriptorBuffer_});
+    }
+    pub fn instanceDescriptorStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceDescriptorStride", ns.UInteger, .{});
+    }
+    pub fn setInstanceDescriptorStride(self_: *@This(), instanceDescriptorStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceDescriptorStride:", void, .{instanceDescriptorStride_});
+    }
+    pub fn instanceCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceCount", ns.UInteger, .{});
+    }
+    pub fn setInstanceCount(self_: *@This(), instanceCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceCount:", void, .{instanceCount_});
+    }
+    pub fn instanceDescriptorType(self_: *@This()) AccelerationStructureInstanceDescriptorType {
+        return objc.msgSend(self_, "instanceDescriptorType", AccelerationStructureInstanceDescriptorType, .{});
+    }
+    pub fn setInstanceDescriptorType(self_: *@This(), instanceDescriptorType_: AccelerationStructureInstanceDescriptorType) void {
+        return objc.msgSend(self_, "setInstanceDescriptorType:", void, .{instanceDescriptorType_});
+    }
+    pub fn motionTransformBuffer(self_: *@This()) MTL4BufferRange {
+        return objc.msgSend(self_, "motionTransformBuffer", MTL4BufferRange, .{});
+    }
+    pub fn setMotionTransformBuffer(self_: *@This(), motionTransformBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "setMotionTransformBuffer:", void, .{motionTransformBuffer_});
+    }
+    pub fn motionTransformCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformCount", ns.UInteger, .{});
+    }
+    pub fn setMotionTransformCount(self_: *@This(), motionTransformCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformCount:", void, .{motionTransformCount_});
+    }
+    pub fn instanceTransformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "instanceTransformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setInstanceTransformationMatrixLayout(self_: *@This(), instanceTransformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setInstanceTransformationMatrixLayout:", void, .{instanceTransformationMatrixLayout_});
+    }
+    pub fn motionTransformType(self_: *@This()) TransformType {
+        return objc.msgSend(self_, "motionTransformType", TransformType, .{});
+    }
+    pub fn setMotionTransformType(self_: *@This(), motionTransformType_: TransformType) void {
+        return objc.msgSend(self_, "setMotionTransformType:", void, .{motionTransformType_});
+    }
+    pub fn motionTransformStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformStride", ns.UInteger, .{});
+    }
+    pub fn setMotionTransformStride(self_: *@This(), motionTransformStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformStride:", void, .{motionTransformStride_});
+    }
+};
+
+pub const MTL4LibraryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4LibraryDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn source(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "source", ?*ns.String, .{});
+    }
+    pub fn setSource(self_: *@This(), source_: ?*ns.String) void {
+        return objc.msgSend(self_, "setSource:", void, .{source_});
+    }
+    pub fn options(self_: *@This()) ?*CompileOptions {
+        return objc.msgSend(self_, "options", ?*CompileOptions, .{});
+    }
+    pub fn setOptions(self_: *@This(), options_: ?*CompileOptions) void {
+        return objc.msgSend(self_, "setOptions:", void, .{options_});
+    }
+    pub fn name(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "name", ?*ns.String, .{});
+    }
+    pub fn setName(self_: *@This(), name_: ?*ns.String) void {
+        return objc.msgSend(self_, "setName:", void, .{name_});
+    }
+};
+
+pub const MTL4LibraryFunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4LibraryFunctionDescriptor", @This(), MTL4FunctionDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn name(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "name", ?*ns.String, .{});
+    }
+    pub fn setName(self_: *@This(), name_: ?*ns.String) void {
+        return objc.msgSend(self_, "setName:", void, .{name_});
+    }
+    pub fn library(self_: *@This()) ?*Library {
+        return objc.msgSend(self_, "library", ?*Library, .{});
+    }
+    pub fn setLibrary(self_: *@This(), library_: ?*Library) void {
+        return objc.msgSend(self_, "setLibrary:", void, .{library_});
+    }
+};
+
+pub const MTL4MachineLearningPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4MachineLearningPipelineDescriptor", @This(), MTL4PipelineDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn setInputDimensions_atBufferIndex(self_: *@This(), dimensions_: ?*TensorExtents, bufferIndex_: ns.Integer) void {
+        return objc.msgSend(self_, "setInputDimensions:atBufferIndex:", void, .{ dimensions_, bufferIndex_ });
+    }
+    pub fn setInputDimensions_withRange(self_: *@This(), dimensions_: *ns.Array(*TensorExtents), range_: ns.Range) void {
+        return objc.msgSend(self_, "setInputDimensions:withRange:", void, .{ dimensions_, range_ });
+    }
+    pub fn inputDimensionsAtBufferIndex(self_: *@This(), bufferIndex_: ns.Integer) ?*TensorExtents {
+        return objc.msgSend(self_, "inputDimensionsAtBufferIndex:", ?*TensorExtents, .{bufferIndex_});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn machineLearningFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "machineLearningFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setMachineLearningFunctionDescriptor(self_: *@This(), machineLearningFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setMachineLearningFunctionDescriptor:", void, .{machineLearningFunctionDescriptor_});
+    }
+};
+
+pub const MTL4MachineLearningPipelineReflection = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4MachineLearningPipelineReflection", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    }
+};
+
+pub const MTL4MeshRenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4MeshRenderPipelineDescriptor", @This(), MTL4PipelineDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn objectFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "objectFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setObjectFunctionDescriptor(self_: *@This(), objectFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setObjectFunctionDescriptor:", void, .{objectFunctionDescriptor_});
+    }
+    pub fn meshFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "meshFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setMeshFunctionDescriptor(self_: *@This(), meshFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setMeshFunctionDescriptor:", void, .{meshFunctionDescriptor_});
+    }
+    pub fn fragmentFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "fragmentFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setFragmentFunctionDescriptor(self_: *@This(), fragmentFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setFragmentFunctionDescriptor:", void, .{fragmentFunctionDescriptor_});
+    }
+    pub fn maxTotalThreadsPerObjectThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerObjectThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerObjectThreadgroup(self_: *@This(), maxTotalThreadsPerObjectThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerObjectThreadgroup:", void, .{maxTotalThreadsPerObjectThreadgroup_});
+    }
+    pub fn maxTotalThreadsPerMeshThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerMeshThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerMeshThreadgroup(self_: *@This(), maxTotalThreadsPerMeshThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerMeshThreadgroup:", void, .{maxTotalThreadsPerMeshThreadgroup_});
+    }
+    pub fn requiredThreadsPerObjectThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerObjectThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerObjectThreadgroup(self_: *@This(), requiredThreadsPerObjectThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerObjectThreadgroup:", void, .{requiredThreadsPerObjectThreadgroup_});
+    }
+    pub fn requiredThreadsPerMeshThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerMeshThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerMeshThreadgroup(self_: *@This(), requiredThreadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerMeshThreadgroup:", void, .{requiredThreadsPerMeshThreadgroup_});
+    }
+    pub fn objectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "objectThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn meshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "meshThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn payloadMemoryLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "payloadMemoryLength", ns.UInteger, .{});
+    }
+    pub fn setPayloadMemoryLength(self_: *@This(), payloadMemoryLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setPayloadMemoryLength:", void, .{payloadMemoryLength_});
+    }
+    pub fn maxTotalThreadgroupsPerMeshGrid(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadgroupsPerMeshGrid", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadgroupsPerMeshGrid(self_: *@This(), maxTotalThreadgroupsPerMeshGrid_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadgroupsPerMeshGrid:", void, .{maxTotalThreadgroupsPerMeshGrid_});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn alphaToCoverageState(self_: *@This()) MTL4AlphaToCoverageState {
+        return objc.msgSend(self_, "alphaToCoverageState", MTL4AlphaToCoverageState, .{});
+    }
+    pub fn setAlphaToCoverageState(self_: *@This(), alphaToCoverageState_: MTL4AlphaToCoverageState) void {
+        return objc.msgSend(self_, "setAlphaToCoverageState:", void, .{alphaToCoverageState_});
+    }
+    pub fn alphaToOneState(self_: *@This()) MTL4AlphaToOneState {
+        return objc.msgSend(self_, "alphaToOneState", MTL4AlphaToOneState, .{});
+    }
+    pub fn setAlphaToOneState(self_: *@This(), alphaToOneState_: MTL4AlphaToOneState) void {
+        return objc.msgSend(self_, "setAlphaToOneState:", void, .{alphaToOneState_});
+    }
+    pub fn isRasterizationEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
+    }
+    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
+        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
+    }
+    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *MTL4RenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *MTL4RenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn objectStaticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "objectStaticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setObjectStaticLinkingDescriptor(self_: *@This(), objectStaticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setObjectStaticLinkingDescriptor:", void, .{objectStaticLinkingDescriptor_});
+    }
+    pub fn meshStaticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "meshStaticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setMeshStaticLinkingDescriptor(self_: *@This(), meshStaticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setMeshStaticLinkingDescriptor:", void, .{meshStaticLinkingDescriptor_});
+    }
+    pub fn fragmentStaticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "fragmentStaticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setFragmentStaticLinkingDescriptor(self_: *@This(), fragmentStaticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setFragmentStaticLinkingDescriptor:", void, .{fragmentStaticLinkingDescriptor_});
+    }
+    pub fn supportObjectBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportObjectBinaryLinking", bool, .{});
+    }
+    pub fn setSupportObjectBinaryLinking(self_: *@This(), supportObjectBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportObjectBinaryLinking:", void, .{supportObjectBinaryLinking_});
+    }
+    pub fn supportMeshBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportMeshBinaryLinking", bool, .{});
+    }
+    pub fn setSupportMeshBinaryLinking(self_: *@This(), supportMeshBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportMeshBinaryLinking:", void, .{supportMeshBinaryLinking_});
+    }
+    pub fn supportFragmentBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportFragmentBinaryLinking", bool, .{});
+    }
+    pub fn setSupportFragmentBinaryLinking(self_: *@This(), supportFragmentBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportFragmentBinaryLinking:", void, .{supportFragmentBinaryLinking_});
+    }
+    pub fn colorAttachmentMappingState(self_: *@This()) MTL4LogicalToPhysicalColorAttachmentMappingState {
+        return objc.msgSend(self_, "colorAttachmentMappingState", MTL4LogicalToPhysicalColorAttachmentMappingState, .{});
+    }
+    pub fn setColorAttachmentMappingState(self_: *@This(), colorAttachmentMappingState_: MTL4LogicalToPhysicalColorAttachmentMappingState) void {
+        return objc.msgSend(self_, "setColorAttachmentMappingState:", void, .{colorAttachmentMappingState_});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) MTL4IndirectCommandBufferSupportState {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", MTL4IndirectCommandBufferSupportState, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: MTL4IndirectCommandBufferSupportState) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+};
+
+pub const MTL4PipelineDataSetSerializerDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4PipelineDataSetSerializerDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn configuration(self_: *@This()) MTL4PipelineDataSetSerializerConfiguration {
+        return objc.msgSend(self_, "configuration", MTL4PipelineDataSetSerializerConfiguration, .{});
+    }
+    pub fn setConfiguration(self_: *@This(), configuration_: MTL4PipelineDataSetSerializerConfiguration) void {
+        return objc.msgSend(self_, "setConfiguration:", void, .{configuration_});
+    }
+};
+
+pub const MTL4PipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4PipelineDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn options(self_: *@This()) ?*MTL4PipelineOptions {
+        return objc.msgSend(self_, "options", ?*MTL4PipelineOptions, .{});
+    }
+    pub fn setOptions(self_: *@This(), options_: ?*MTL4PipelineOptions) void {
+        return objc.msgSend(self_, "setOptions:", void, .{options_});
+    }
+};
+
+pub const MTL4PipelineOptions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4PipelineOptions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn setShaderValidation(self_: *@This(), shaderValidation_: ShaderValidation) void {
+        return objc.msgSend(self_, "setShaderValidation:", void, .{shaderValidation_});
+    }
+    pub fn shaderReflection(self_: *@This()) MTL4ShaderReflection {
+        return objc.msgSend(self_, "shaderReflection", MTL4ShaderReflection, .{});
+    }
+    pub fn setShaderReflection(self_: *@This(), shaderReflection_: MTL4ShaderReflection) void {
+        return objc.msgSend(self_, "setShaderReflection:", void, .{shaderReflection_});
+    }
+};
+
+pub const MTL4PipelineStageDynamicLinkingDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4PipelineStageDynamicLinkingDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn maxCallStackDepth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCallStackDepth", ns.UInteger, .{});
+    }
+    pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
+    }
+    pub fn binaryLinkedFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "binaryLinkedFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setBinaryLinkedFunctions(self_: *@This(), binaryLinkedFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setBinaryLinkedFunctions:", void, .{binaryLinkedFunctions_});
+    }
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
+    }
+};
+
+pub const MTL4PrimitiveAccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4PrimitiveAccelerationStructureDescriptor", @This(), MTL4AccelerationStructureDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor) {
+        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor), .{});
+    }
+    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor)) void {
+        return objc.msgSend(self_, "setGeometryDescriptors:", void, .{geometryDescriptors_});
+    }
+    pub fn motionStartBorderMode(self_: *@This()) MotionBorderMode {
+        return objc.msgSend(self_, "motionStartBorderMode", MotionBorderMode, .{});
+    }
+    pub fn setMotionStartBorderMode(self_: *@This(), motionStartBorderMode_: MotionBorderMode) void {
+        return objc.msgSend(self_, "setMotionStartBorderMode:", void, .{motionStartBorderMode_});
+    }
+    pub fn motionEndBorderMode(self_: *@This()) MotionBorderMode {
+        return objc.msgSend(self_, "motionEndBorderMode", MotionBorderMode, .{});
+    }
+    pub fn setMotionEndBorderMode(self_: *@This(), motionEndBorderMode_: MotionBorderMode) void {
+        return objc.msgSend(self_, "setMotionEndBorderMode:", void, .{motionEndBorderMode_});
+    }
+    pub fn motionStartTime(self_: *@This()) f32 {
+        return objc.msgSend(self_, "motionStartTime", f32, .{});
+    }
+    pub fn setMotionStartTime(self_: *@This(), motionStartTime_: f32) void {
+        return objc.msgSend(self_, "setMotionStartTime:", void, .{motionStartTime_});
+    }
+    pub fn motionEndTime(self_: *@This()) f32 {
+        return objc.msgSend(self_, "motionEndTime", f32, .{});
+    }
+    pub fn setMotionEndTime(self_: *@This(), motionEndTime_: f32) void {
+        return objc.msgSend(self_, "setMotionEndTime:", void, .{motionEndTime_});
+    }
+    pub fn motionKeyframeCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionKeyframeCount", ns.UInteger, .{});
+    }
+    pub fn setMotionKeyframeCount(self_: *@This(), motionKeyframeCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionKeyframeCount:", void, .{motionKeyframeCount_});
+    }
+};
+
+pub const MTL4RenderPassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn setSamplePositions_count(self_: *@This(), positions_: ?*const SamplePosition, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSamplePositions:count:", void, .{ positions_, count_ });
+    }
+    pub fn getSamplePositions_count(self_: *@This(), positions_: ?*SamplePosition, count_: ns.UInteger) ns.UInteger {
+        return objc.msgSend(self_, "getSamplePositions:count:", ns.UInteger, .{ positions_, count_ });
+    }
+    pub fn colorAttachments(self_: *@This()) *RenderPassColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *RenderPassColorAttachmentDescriptorArray, .{});
+    }
+    pub fn depthAttachment(self_: *@This()) *RenderPassDepthAttachmentDescriptor {
+        return objc.msgSend(self_, "depthAttachment", *RenderPassDepthAttachmentDescriptor, .{});
+    }
+    pub fn setDepthAttachment(self_: *@This(), depthAttachment_: ?*RenderPassDepthAttachmentDescriptor) void {
+        return objc.msgSend(self_, "setDepthAttachment:", void, .{depthAttachment_});
+    }
+    pub fn stencilAttachment(self_: *@This()) *RenderPassStencilAttachmentDescriptor {
+        return objc.msgSend(self_, "stencilAttachment", *RenderPassStencilAttachmentDescriptor, .{});
+    }
+    pub fn setStencilAttachment(self_: *@This(), stencilAttachment_: ?*RenderPassStencilAttachmentDescriptor) void {
+        return objc.msgSend(self_, "setStencilAttachment:", void, .{stencilAttachment_});
+    }
+    pub fn renderTargetArrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetArrayLength", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetArrayLength(self_: *@This(), renderTargetArrayLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetArrayLength:", void, .{renderTargetArrayLength_});
+    }
+    pub fn imageblockSampleLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "imageblockSampleLength", ns.UInteger, .{});
+    }
+    pub fn setImageblockSampleLength(self_: *@This(), imageblockSampleLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setImageblockSampleLength:", void, .{imageblockSampleLength_});
+    }
+    pub fn threadgroupMemoryLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryLength", ns.UInteger, .{});
+    }
+    pub fn setThreadgroupMemoryLength(self_: *@This(), threadgroupMemoryLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setThreadgroupMemoryLength:", void, .{threadgroupMemoryLength_});
+    }
+    pub fn tileWidth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileWidth", ns.UInteger, .{});
+    }
+    pub fn setTileWidth(self_: *@This(), tileWidth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTileWidth:", void, .{tileWidth_});
+    }
+    pub fn tileHeight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileHeight", ns.UInteger, .{});
+    }
+    pub fn setTileHeight(self_: *@This(), tileHeight_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTileHeight:", void, .{tileHeight_});
+    }
+    pub fn defaultRasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "defaultRasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setDefaultRasterSampleCount(self_: *@This(), defaultRasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setDefaultRasterSampleCount:", void, .{defaultRasterSampleCount_});
+    }
+    pub fn renderTargetWidth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetWidth", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetWidth(self_: *@This(), renderTargetWidth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetWidth:", void, .{renderTargetWidth_});
+    }
+    pub fn renderTargetHeight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetHeight", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetHeight(self_: *@This(), renderTargetHeight_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetHeight:", void, .{renderTargetHeight_});
+    }
+    pub fn rasterizationRateMap(self_: *@This()) ?*RasterizationRateMap {
+        return objc.msgSend(self_, "rasterizationRateMap", ?*RasterizationRateMap, .{});
+    }
+    pub fn setRasterizationRateMap(self_: *@This(), rasterizationRateMap_: ?*RasterizationRateMap) void {
+        return objc.msgSend(self_, "setRasterizationRateMap:", void, .{rasterizationRateMap_});
+    }
+    pub fn visibilityResultBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "visibilityResultBuffer", ?*Buffer, .{});
+    }
+    pub fn setVisibilityResultBuffer(self_: *@This(), visibilityResultBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setVisibilityResultBuffer:", void, .{visibilityResultBuffer_});
+    }
+    pub fn visibilityResultType(self_: *@This()) VisibilityResultType {
+        return objc.msgSend(self_, "visibilityResultType", VisibilityResultType, .{});
+    }
+    pub fn setVisibilityResultType(self_: *@This(), visibilityResultType_: VisibilityResultType) void {
+        return objc.msgSend(self_, "setVisibilityResultType:", void, .{visibilityResultType_});
+    }
+    pub fn supportColorAttachmentMapping(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportColorAttachmentMapping", bool, .{});
+    }
+    pub fn setSupportColorAttachmentMapping(self_: *@This(), supportColorAttachmentMapping_: bool) void {
+        return objc.msgSend(self_, "setSupportColorAttachmentMapping:", void, .{supportColorAttachmentMapping_});
+    }
+};
+
+pub const MTL4RenderPipelineBinaryFunctionsDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPipelineBinaryFunctionsDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setVertexAdditionalBinaryFunctions:", void, .{vertexAdditionalBinaryFunctions_});
+    }
+    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setFragmentAdditionalBinaryFunctions:", void, .{fragmentAdditionalBinaryFunctions_});
+    }
+    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setTileAdditionalBinaryFunctions:", void, .{tileAdditionalBinaryFunctions_});
+    }
+    pub fn objectAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "objectAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setObjectAdditionalBinaryFunctions(self_: *@This(), objectAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setObjectAdditionalBinaryFunctions:", void, .{objectAdditionalBinaryFunctions_});
+    }
+    pub fn meshAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "meshAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    }
+    pub fn setMeshAdditionalBinaryFunctions(self_: *@This(), meshAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+        return objc.msgSend(self_, "setMeshAdditionalBinaryFunctions:", void, .{meshAdditionalBinaryFunctions_});
+    }
+};
+
+pub const MTL4RenderPipelineColorAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPipelineColorAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn pixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    }
+    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    }
+    pub fn blendingState(self_: *@This()) MTL4BlendState {
+        return objc.msgSend(self_, "blendingState", MTL4BlendState, .{});
+    }
+    pub fn setBlendingState(self_: *@This(), blendingState_: MTL4BlendState) void {
+        return objc.msgSend(self_, "setBlendingState:", void, .{blendingState_});
+    }
+    pub fn sourceRGBBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "sourceRGBBlendFactor", BlendFactor, .{});
+    }
+    pub fn setSourceRGBBlendFactor(self_: *@This(), sourceRGBBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setSourceRGBBlendFactor:", void, .{sourceRGBBlendFactor_});
+    }
+    pub fn destinationRGBBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "destinationRGBBlendFactor", BlendFactor, .{});
+    }
+    pub fn setDestinationRGBBlendFactor(self_: *@This(), destinationRGBBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setDestinationRGBBlendFactor:", void, .{destinationRGBBlendFactor_});
+    }
+    pub fn rgbBlendOperation(self_: *@This()) BlendOperation {
+        return objc.msgSend(self_, "rgbBlendOperation", BlendOperation, .{});
+    }
+    pub fn setRgbBlendOperation(self_: *@This(), rgbBlendOperation_: BlendOperation) void {
+        return objc.msgSend(self_, "setRgbBlendOperation:", void, .{rgbBlendOperation_});
+    }
+    pub fn sourceAlphaBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "sourceAlphaBlendFactor", BlendFactor, .{});
+    }
+    pub fn setSourceAlphaBlendFactor(self_: *@This(), sourceAlphaBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setSourceAlphaBlendFactor:", void, .{sourceAlphaBlendFactor_});
+    }
+    pub fn destinationAlphaBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "destinationAlphaBlendFactor", BlendFactor, .{});
+    }
+    pub fn setDestinationAlphaBlendFactor(self_: *@This(), destinationAlphaBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setDestinationAlphaBlendFactor:", void, .{destinationAlphaBlendFactor_});
+    }
+    pub fn alphaBlendOperation(self_: *@This()) BlendOperation {
+        return objc.msgSend(self_, "alphaBlendOperation", BlendOperation, .{});
+    }
+    pub fn setAlphaBlendOperation(self_: *@This(), alphaBlendOperation_: BlendOperation) void {
+        return objc.msgSend(self_, "setAlphaBlendOperation:", void, .{alphaBlendOperation_});
+    }
+    pub fn writeMask(self_: *@This()) ColorWriteMask {
+        return objc.msgSend(self_, "writeMask", ColorWriteMask, .{});
+    }
+    pub fn setWriteMask(self_: *@This(), writeMask_: ColorWriteMask) void {
+        return objc.msgSend(self_, "setWriteMask:", void, .{writeMask_});
+    }
+};
+
+pub const MTL4RenderPipelineColorAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPipelineColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *MTL4RenderPipelineColorAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *MTL4RenderPipelineColorAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*MTL4RenderPipelineColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+};
+
+pub const MTL4RenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPipelineDescriptor", @This(), MTL4PipelineDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn vertexFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "vertexFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setVertexFunctionDescriptor(self_: *@This(), vertexFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setVertexFunctionDescriptor:", void, .{vertexFunctionDescriptor_});
+    }
+    pub fn fragmentFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "fragmentFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setFragmentFunctionDescriptor(self_: *@This(), fragmentFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setFragmentFunctionDescriptor:", void, .{fragmentFunctionDescriptor_});
+    }
+    pub fn vertexDescriptor(self_: *@This()) ?*VertexDescriptor {
+        return objc.msgSend(self_, "vertexDescriptor", ?*VertexDescriptor, .{});
+    }
+    pub fn setVertexDescriptor(self_: *@This(), vertexDescriptor_: ?*VertexDescriptor) void {
+        return objc.msgSend(self_, "setVertexDescriptor:", void, .{vertexDescriptor_});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn alphaToCoverageState(self_: *@This()) MTL4AlphaToCoverageState {
+        return objc.msgSend(self_, "alphaToCoverageState", MTL4AlphaToCoverageState, .{});
+    }
+    pub fn setAlphaToCoverageState(self_: *@This(), alphaToCoverageState_: MTL4AlphaToCoverageState) void {
+        return objc.msgSend(self_, "setAlphaToCoverageState:", void, .{alphaToCoverageState_});
+    }
+    pub fn alphaToOneState(self_: *@This()) MTL4AlphaToOneState {
+        return objc.msgSend(self_, "alphaToOneState", MTL4AlphaToOneState, .{});
+    }
+    pub fn setAlphaToOneState(self_: *@This(), alphaToOneState_: MTL4AlphaToOneState) void {
+        return objc.msgSend(self_, "setAlphaToOneState:", void, .{alphaToOneState_});
+    }
+    pub fn isRasterizationEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
+    }
+    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
+        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
+    }
+    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *MTL4RenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *MTL4RenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn inputPrimitiveTopology(self_: *@This()) PrimitiveTopologyClass {
+        return objc.msgSend(self_, "inputPrimitiveTopology", PrimitiveTopologyClass, .{});
+    }
+    pub fn setInputPrimitiveTopology(self_: *@This(), inputPrimitiveTopology_: PrimitiveTopologyClass) void {
+        return objc.msgSend(self_, "setInputPrimitiveTopology:", void, .{inputPrimitiveTopology_});
+    }
+    pub fn vertexStaticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "vertexStaticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setVertexStaticLinkingDescriptor(self_: *@This(), vertexStaticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setVertexStaticLinkingDescriptor:", void, .{vertexStaticLinkingDescriptor_});
+    }
+    pub fn fragmentStaticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "fragmentStaticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setFragmentStaticLinkingDescriptor(self_: *@This(), fragmentStaticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setFragmentStaticLinkingDescriptor:", void, .{fragmentStaticLinkingDescriptor_});
+    }
+    pub fn supportVertexBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportVertexBinaryLinking", bool, .{});
+    }
+    pub fn setSupportVertexBinaryLinking(self_: *@This(), supportVertexBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportVertexBinaryLinking:", void, .{supportVertexBinaryLinking_});
+    }
+    pub fn supportFragmentBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportFragmentBinaryLinking", bool, .{});
+    }
+    pub fn setSupportFragmentBinaryLinking(self_: *@This(), supportFragmentBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportFragmentBinaryLinking:", void, .{supportFragmentBinaryLinking_});
+    }
+    pub fn colorAttachmentMappingState(self_: *@This()) MTL4LogicalToPhysicalColorAttachmentMappingState {
+        return objc.msgSend(self_, "colorAttachmentMappingState", MTL4LogicalToPhysicalColorAttachmentMappingState, .{});
+    }
+    pub fn setColorAttachmentMappingState(self_: *@This(), colorAttachmentMappingState_: MTL4LogicalToPhysicalColorAttachmentMappingState) void {
+        return objc.msgSend(self_, "setColorAttachmentMappingState:", void, .{colorAttachmentMappingState_});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) MTL4IndirectCommandBufferSupportState {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", MTL4IndirectCommandBufferSupportState, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: MTL4IndirectCommandBufferSupportState) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+};
+
+pub const MTL4RenderPipelineDynamicLinkingDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4RenderPipelineDynamicLinkingDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexLinkingDescriptor(self_: *@This()) *MTL4PipelineStageDynamicLinkingDescriptor {
+        return objc.msgSend(self_, "vertexLinkingDescriptor", *MTL4PipelineStageDynamicLinkingDescriptor, .{});
+    }
+    pub fn fragmentLinkingDescriptor(self_: *@This()) *MTL4PipelineStageDynamicLinkingDescriptor {
+        return objc.msgSend(self_, "fragmentLinkingDescriptor", *MTL4PipelineStageDynamicLinkingDescriptor, .{});
+    }
+    pub fn tileLinkingDescriptor(self_: *@This()) *MTL4PipelineStageDynamicLinkingDescriptor {
+        return objc.msgSend(self_, "tileLinkingDescriptor", *MTL4PipelineStageDynamicLinkingDescriptor, .{});
+    }
+    pub fn objectLinkingDescriptor(self_: *@This()) *MTL4PipelineStageDynamicLinkingDescriptor {
+        return objc.msgSend(self_, "objectLinkingDescriptor", *MTL4PipelineStageDynamicLinkingDescriptor, .{});
+    }
+    pub fn meshLinkingDescriptor(self_: *@This()) *MTL4PipelineStageDynamicLinkingDescriptor {
+        return objc.msgSend(self_, "meshLinkingDescriptor", *MTL4PipelineStageDynamicLinkingDescriptor, .{});
+    }
+};
+
+pub const MTL4SpecializedFunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4SpecializedFunctionDescriptor", @This(), MTL4FunctionDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn functionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "functionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setFunctionDescriptor(self_: *@This(), functionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setFunctionDescriptor:", void, .{functionDescriptor_});
+    }
+    pub fn specializedName(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "specializedName", ?*ns.String, .{});
+    }
+    pub fn setSpecializedName(self_: *@This(), specializedName_: ?*ns.String) void {
+        return objc.msgSend(self_, "setSpecializedName:", void, .{specializedName_});
+    }
+    pub fn constantValues(self_: *@This()) ?*FunctionConstantValues {
+        return objc.msgSend(self_, "constantValues", ?*FunctionConstantValues, .{});
+    }
+    pub fn setConstantValues(self_: *@This(), constantValues_: ?*FunctionConstantValues) void {
+        return objc.msgSend(self_, "setConstantValues:", void, .{constantValues_});
+    }
+};
+
+pub const MTL4StaticLinkingDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4StaticLinkingDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    }
+    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+        return objc.msgSend(self_, "setFunctionDescriptors:", void, .{functionDescriptors_});
+    }
+    pub fn privateFunctionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "privateFunctionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    }
+    pub fn setPrivateFunctionDescriptors(self_: *@This(), privateFunctionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+        return objc.msgSend(self_, "setPrivateFunctionDescriptors:", void, .{privateFunctionDescriptors_});
+    }
+    pub fn groups(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor)) {
+        return objc.msgSend(self_, "groups", ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor)), .{});
+    }
+    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor))) void {
+        return objc.msgSend(self_, "setGroups:", void, .{groups_});
+    }
+};
+
+pub const MTL4StitchedFunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4StitchedFunctionDescriptor", @This(), MTL4FunctionDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn functionGraph(self_: *@This()) ?*FunctionStitchingGraph {
+        return objc.msgSend(self_, "functionGraph", ?*FunctionStitchingGraph, .{});
+    }
+    pub fn setFunctionGraph(self_: *@This(), functionGraph_: ?*FunctionStitchingGraph) void {
+        return objc.msgSend(self_, "setFunctionGraph:", void, .{functionGraph_});
+    }
+    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    }
+    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+        return objc.msgSend(self_, "setFunctionDescriptors:", void, .{functionDescriptors_});
+    }
+};
+
+pub const MTL4TileRenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTL4TileRenderPipelineDescriptor", @This(), MTL4PipelineDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn tileFunctionDescriptor(self_: *@This()) ?*MTL4FunctionDescriptor {
+        return objc.msgSend(self_, "tileFunctionDescriptor", ?*MTL4FunctionDescriptor, .{});
+    }
+    pub fn setTileFunctionDescriptor(self_: *@This(), tileFunctionDescriptor_: ?*MTL4FunctionDescriptor) void {
+        return objc.msgSend(self_, "setTileFunctionDescriptor:", void, .{tileFunctionDescriptor_});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *TileRenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *TileRenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn threadgroupSizeMatchesTileSize(self_: *@This()) bool {
+        return objc.msgSend(self_, "threadgroupSizeMatchesTileSize", bool, .{});
+    }
+    pub fn setThreadgroupSizeMatchesTileSize(self_: *@This(), threadgroupSizeMatchesTileSize_: bool) void {
+        return objc.msgSend(self_, "setThreadgroupSizeMatchesTileSize:", void, .{threadgroupSizeMatchesTileSize_});
+    }
+    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerThreadgroup(self_: *@This(), requiredThreadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerThreadgroup:", void, .{requiredThreadsPerThreadgroup_});
+    }
+    pub fn staticLinkingDescriptor(self_: *@This()) *MTL4StaticLinkingDescriptor {
+        return objc.msgSend(self_, "staticLinkingDescriptor", *MTL4StaticLinkingDescriptor, .{});
+    }
+    pub fn setStaticLinkingDescriptor(self_: *@This(), staticLinkingDescriptor_: ?*MTL4StaticLinkingDescriptor) void {
+        return objc.msgSend(self_, "setStaticLinkingDescriptor:", void, .{staticLinkingDescriptor_});
+    }
+    pub fn supportBinaryLinking(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportBinaryLinking", bool, .{});
+    }
+    pub fn setSupportBinaryLinking(self_: *@This(), supportBinaryLinking_: bool) void {
+        return objc.msgSend(self_, "setSupportBinaryLinking:", void, .{supportBinaryLinking_});
+    }
+};
+
+pub const AccelerationStructureBoundingBoxGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureBoundingBoxGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn descriptor() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
+    }
+    pub fn boundingBoxBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "boundingBoxBuffer", ?*Buffer, .{});
+    }
+    pub fn setBoundingBoxBuffer(self_: *@This(), boundingBoxBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setBoundingBoxBuffer:", void, .{boundingBoxBuffer_});
+    }
+    pub fn boundingBoxBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxBufferOffset(self_: *@This(), boundingBoxBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxBufferOffset:", void, .{boundingBoxBufferOffset_});
+    }
+    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
+    }
+    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
+    }
+    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
+    }
+};
+
+pub const AccelerationStructureCurveGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureCurveGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn descriptor() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
+    }
+    pub fn controlPointBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "controlPointBuffer", ?*Buffer, .{});
+    }
+    pub fn setControlPointBuffer(self_: *@This(), controlPointBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setControlPointBuffer:", void, .{controlPointBuffer_});
+    }
+    pub fn controlPointBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setControlPointBufferOffset(self_: *@This(), controlPointBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointBufferOffset:", void, .{controlPointBufferOffset_});
+    }
+    pub fn controlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointCount", ns.UInteger, .{});
+    }
+    pub fn setControlPointCount(self_: *@This(), controlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointCount:", void, .{controlPointCount_});
+    }
+    pub fn controlPointStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointStride", ns.UInteger, .{});
+    }
+    pub fn setControlPointStride(self_: *@This(), controlPointStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointStride:", void, .{controlPointStride_});
+    }
+    pub fn controlPointFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "controlPointFormat", AttributeFormat, .{});
+    }
+    pub fn setControlPointFormat(self_: *@This(), controlPointFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setControlPointFormat:", void, .{controlPointFormat_});
+    }
+    pub fn radiusBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "radiusBuffer", ?*Buffer, .{});
+    }
+    pub fn setRadiusBuffer(self_: *@This(), radiusBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setRadiusBuffer:", void, .{radiusBuffer_});
+    }
+    pub fn radiusBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "radiusBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setRadiusBufferOffset(self_: *@This(), radiusBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRadiusBufferOffset:", void, .{radiusBufferOffset_});
+    }
+    pub fn radiusFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "radiusFormat", AttributeFormat, .{});
+    }
+    pub fn setRadiusFormat(self_: *@This(), radiusFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setRadiusFormat:", void, .{radiusFormat_});
+    }
+    pub fn radiusStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "radiusStride", ns.UInteger, .{});
+    }
+    pub fn setRadiusStride(self_: *@This(), radiusStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRadiusStride:", void, .{radiusStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "indexBuffer", ?*Buffer, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "indexBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setIndexBufferOffset(self_: *@This(), indexBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIndexBufferOffset:", void, .{indexBufferOffset_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn segmentCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentCount(self_: *@This(), segmentCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentCount:", void, .{segmentCount_});
+    }
+    pub fn segmentControlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentControlPointCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentControlPointCount(self_: *@This(), segmentControlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentControlPointCount:", void, .{segmentControlPointCount_});
+    }
+    pub fn curveType(self_: *@This()) CurveType {
+        return objc.msgSend(self_, "curveType", CurveType, .{});
+    }
+    pub fn setCurveType(self_: *@This(), curveType_: CurveType) void {
+        return objc.msgSend(self_, "setCurveType:", void, .{curveType_});
+    }
+    pub fn curveBasis(self_: *@This()) CurveBasis {
+        return objc.msgSend(self_, "curveBasis", CurveBasis, .{});
+    }
+    pub fn setCurveBasis(self_: *@This(), curveBasis_: CurveBasis) void {
+        return objc.msgSend(self_, "setCurveBasis:", void, .{curveBasis_});
+    }
+    pub fn curveEndCaps(self_: *@This()) CurveEndCaps {
+        return objc.msgSend(self_, "curveEndCaps", CurveEndCaps, .{});
+    }
+    pub fn setCurveEndCaps(self_: *@This(), curveEndCaps_: CurveEndCaps) void {
+        return objc.msgSend(self_, "setCurveEndCaps:", void, .{curveEndCaps_});
+    }
+};
 
 pub const AccelerationStructureDescriptor = opaque {
     pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureDescriptor", @This(), ns.ObjectInterface, &.{});
@@ -1267,8 +3477,8 @@ pub const AccelerationStructureGeometryDescriptor = opaque {
     }
 };
 
-pub const PrimitiveAccelerationStructureDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLPrimitiveAccelerationStructureDescriptor", @This(), AccelerationStructureDescriptor, &.{});
+pub const AccelerationStructureMotionBoundingBoxGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureMotionBoundingBoxGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -1280,41 +3490,269 @@ pub const PrimitiveAccelerationStructureDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(*AccelerationStructureGeometryDescriptor) {
-        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(*AccelerationStructureGeometryDescriptor), .{});
+    pub fn boundingBoxBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
+        return objc.msgSend(self_, "boundingBoxBuffers", *ns.Array(*MotionKeyframeData), .{});
     }
-    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(*AccelerationStructureGeometryDescriptor)) void {
-        return objc.msgSend(self_, "setGeometryDescriptors:", void, .{geometryDescriptors_});
+    pub fn setBoundingBoxBuffers(self_: *@This(), boundingBoxBuffers_: *ns.Array(*MotionKeyframeData)) void {
+        return objc.msgSend(self_, "setBoundingBoxBuffers:", void, .{boundingBoxBuffers_});
     }
-    pub fn motionStartBorderMode(self_: *@This()) MotionBorderMode {
-        return objc.msgSend(self_, "motionStartBorderMode", MotionBorderMode, .{});
+    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
     }
-    pub fn setMotionStartBorderMode(self_: *@This(), motionStartBorderMode_: MotionBorderMode) void {
-        return objc.msgSend(self_, "setMotionStartBorderMode:", void, .{motionStartBorderMode_});
+    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
     }
-    pub fn motionEndBorderMode(self_: *@This()) MotionBorderMode {
-        return objc.msgSend(self_, "motionEndBorderMode", MotionBorderMode, .{});
+    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
     }
-    pub fn setMotionEndBorderMode(self_: *@This(), motionEndBorderMode_: MotionBorderMode) void {
-        return objc.msgSend(self_, "setMotionEndBorderMode:", void, .{motionEndBorderMode_});
+    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
     }
-    pub fn motionStartTime(self_: *@This()) f32 {
-        return objc.msgSend(self_, "motionStartTime", f32, .{});
+};
+
+pub const AccelerationStructureMotionCurveGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureMotionCurveGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn descriptor() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn setMotionStartTime(self_: *@This(), motionStartTime_: f32) void {
-        return objc.msgSend(self_, "setMotionStartTime:", void, .{motionStartTime_});
+    pub fn controlPointBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
+        return objc.msgSend(self_, "controlPointBuffers", *ns.Array(*MotionKeyframeData), .{});
     }
-    pub fn motionEndTime(self_: *@This()) f32 {
-        return objc.msgSend(self_, "motionEndTime", f32, .{});
+    pub fn setControlPointBuffers(self_: *@This(), controlPointBuffers_: *ns.Array(*MotionKeyframeData)) void {
+        return objc.msgSend(self_, "setControlPointBuffers:", void, .{controlPointBuffers_});
     }
-    pub fn setMotionEndTime(self_: *@This(), motionEndTime_: f32) void {
-        return objc.msgSend(self_, "setMotionEndTime:", void, .{motionEndTime_});
+    pub fn controlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointCount", ns.UInteger, .{});
     }
-    pub fn motionKeyframeCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "motionKeyframeCount", ns.UInteger, .{});
+    pub fn setControlPointCount(self_: *@This(), controlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointCount:", void, .{controlPointCount_});
     }
-    pub fn setMotionKeyframeCount(self_: *@This(), motionKeyframeCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMotionKeyframeCount:", void, .{motionKeyframeCount_});
+    pub fn controlPointStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "controlPointStride", ns.UInteger, .{});
+    }
+    pub fn setControlPointStride(self_: *@This(), controlPointStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setControlPointStride:", void, .{controlPointStride_});
+    }
+    pub fn controlPointFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "controlPointFormat", AttributeFormat, .{});
+    }
+    pub fn setControlPointFormat(self_: *@This(), controlPointFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setControlPointFormat:", void, .{controlPointFormat_});
+    }
+    pub fn radiusBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
+        return objc.msgSend(self_, "radiusBuffers", *ns.Array(*MotionKeyframeData), .{});
+    }
+    pub fn setRadiusBuffers(self_: *@This(), radiusBuffers_: *ns.Array(*MotionKeyframeData)) void {
+        return objc.msgSend(self_, "setRadiusBuffers:", void, .{radiusBuffers_});
+    }
+    pub fn radiusFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "radiusFormat", AttributeFormat, .{});
+    }
+    pub fn setRadiusFormat(self_: *@This(), radiusFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setRadiusFormat:", void, .{radiusFormat_});
+    }
+    pub fn radiusStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "radiusStride", ns.UInteger, .{});
+    }
+    pub fn setRadiusStride(self_: *@This(), radiusStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRadiusStride:", void, .{radiusStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "indexBuffer", ?*Buffer, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "indexBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setIndexBufferOffset(self_: *@This(), indexBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIndexBufferOffset:", void, .{indexBufferOffset_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn segmentCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentCount(self_: *@This(), segmentCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentCount:", void, .{segmentCount_});
+    }
+    pub fn segmentControlPointCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "segmentControlPointCount", ns.UInteger, .{});
+    }
+    pub fn setSegmentControlPointCount(self_: *@This(), segmentControlPointCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSegmentControlPointCount:", void, .{segmentControlPointCount_});
+    }
+    pub fn curveType(self_: *@This()) CurveType {
+        return objc.msgSend(self_, "curveType", CurveType, .{});
+    }
+    pub fn setCurveType(self_: *@This(), curveType_: CurveType) void {
+        return objc.msgSend(self_, "setCurveType:", void, .{curveType_});
+    }
+    pub fn curveBasis(self_: *@This()) CurveBasis {
+        return objc.msgSend(self_, "curveBasis", CurveBasis, .{});
+    }
+    pub fn setCurveBasis(self_: *@This(), curveBasis_: CurveBasis) void {
+        return objc.msgSend(self_, "setCurveBasis:", void, .{curveBasis_});
+    }
+    pub fn curveEndCaps(self_: *@This()) CurveEndCaps {
+        return objc.msgSend(self_, "curveEndCaps", CurveEndCaps, .{});
+    }
+    pub fn setCurveEndCaps(self_: *@This(), curveEndCaps_: CurveEndCaps) void {
+        return objc.msgSend(self_, "setCurveEndCaps:", void, .{curveEndCaps_});
+    }
+};
+
+pub const AccelerationStructureMotionTriangleGeometryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureMotionTriangleGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn descriptor() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
+    }
+    pub fn vertexBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
+        return objc.msgSend(self_, "vertexBuffers", *ns.Array(*MotionKeyframeData), .{});
+    }
+    pub fn setVertexBuffers(self_: *@This(), vertexBuffers_: *ns.Array(*MotionKeyframeData)) void {
+        return objc.msgSend(self_, "setVertexBuffers:", void, .{vertexBuffers_});
+    }
+    pub fn vertexFormat(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "vertexFormat", AttributeFormat, .{});
+    }
+    pub fn setVertexFormat(self_: *@This(), vertexFormat_: AttributeFormat) void {
+        return objc.msgSend(self_, "setVertexFormat:", void, .{vertexFormat_});
+    }
+    pub fn vertexStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "vertexStride", ns.UInteger, .{});
+    }
+    pub fn setVertexStride(self_: *@This(), vertexStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVertexStride:", void, .{vertexStride_});
+    }
+    pub fn indexBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "indexBuffer", ?*Buffer, .{});
+    }
+    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    }
+    pub fn indexBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "indexBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setIndexBufferOffset(self_: *@This(), indexBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIndexBufferOffset:", void, .{indexBufferOffset_});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn triangleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "triangleCount", ns.UInteger, .{});
+    }
+    pub fn setTriangleCount(self_: *@This(), triangleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTriangleCount:", void, .{triangleCount_});
+    }
+    pub fn transformationMatrixBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "transformationMatrixBuffer", ?*Buffer, .{});
+    }
+    pub fn setTransformationMatrixBuffer(self_: *@This(), transformationMatrixBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setTransformationMatrixBuffer:", void, .{transformationMatrixBuffer_});
+    }
+    pub fn transformationMatrixBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "transformationMatrixBufferOffset", ns.UInteger, .{});
+    }
+    pub fn setTransformationMatrixBufferOffset(self_: *@This(), transformationMatrixBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTransformationMatrixBufferOffset:", void, .{transformationMatrixBufferOffset_});
+    }
+    pub fn transformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "transformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setTransformationMatrixLayout(self_: *@This(), transformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setTransformationMatrixLayout:", void, .{transformationMatrixLayout_});
+    }
+};
+
+pub const AccelerationStructurePassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn accelerationStructurePassDescriptor() *AccelerationStructurePassDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "accelerationStructurePassDescriptor", *AccelerationStructurePassDescriptor, .{});
+    }
+    pub fn sampleBufferAttachments(self_: *@This()) *AccelerationStructurePassSampleBufferAttachmentDescriptorArray {
+        return objc.msgSend(self_, "sampleBufferAttachments", *AccelerationStructurePassSampleBufferAttachmentDescriptorArray, .{});
+    }
+};
+
+pub const AccelerationStructurePassSampleBufferAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
+        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    }
+    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
+        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    }
+    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
+    }
+    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
+    }
+};
+
+pub const AccelerationStructurePassSampleBufferAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *AccelerationStructurePassSampleBufferAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *AccelerationStructurePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*AccelerationStructurePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
     }
 };
 
@@ -1391,10 +3829,16 @@ pub const AccelerationStructureTriangleGeometryDescriptor = opaque {
     pub fn setTransformationMatrixBufferOffset(self_: *@This(), transformationMatrixBufferOffset_: ns.UInteger) void {
         return objc.msgSend(self_, "setTransformationMatrixBufferOffset:", void, .{transformationMatrixBufferOffset_});
     }
+    pub fn transformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "transformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setTransformationMatrixLayout(self_: *@This(), transformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setTransformationMatrixLayout:", void, .{transformationMatrixLayout_});
+    }
 };
 
-pub const AccelerationStructureBoundingBoxGeometryDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureBoundingBoxGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+pub const Architecture = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLArchitecture", @This(), ns.ObjectInterface, &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -1403,37 +3847,13 @@ pub const AccelerationStructureBoundingBoxGeometryDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn descriptor() *@This() {
-        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
-    }
-    pub fn boundingBoxBuffer(self_: *@This()) ?*Buffer {
-        return objc.msgSend(self_, "boundingBoxBuffer", ?*Buffer, .{});
-    }
-    pub fn setBoundingBoxBuffer(self_: *@This(), boundingBoxBuffer_: ?*Buffer) void {
-        return objc.msgSend(self_, "setBoundingBoxBuffer:", void, .{boundingBoxBuffer_});
-    }
-    pub fn boundingBoxBufferOffset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "boundingBoxBufferOffset", ns.UInteger, .{});
-    }
-    pub fn setBoundingBoxBufferOffset(self_: *@This(), boundingBoxBufferOffset_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBoundingBoxBufferOffset:", void, .{boundingBoxBufferOffset_});
-    }
-    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
-    }
-    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
-    }
-    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
-    }
-    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
     }
 };
 
-pub const MotionKeyframeData = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLMotionKeyframeData", @This(), ns.ObjectInterface, &.{});
+pub const Argument = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLArgument", @This(), ns.ObjectInterface, &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -1442,14 +3862,191 @@ pub const MotionKeyframeData = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn data() *@This() {
-        return objc.msgSend(@This().InternalInfo.class(), "data", *@This(), .{});
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
     }
-    pub fn buffer(self_: *@This()) ?*Buffer {
-        return objc.msgSend(self_, "buffer", ?*Buffer, .{});
+    pub fn @"type"(self_: *@This()) ArgumentType {
+        return objc.msgSend(self_, "type", ArgumentType, .{});
     }
-    pub fn setBuffer(self_: *@This(), buffer_: ?*Buffer) void {
-        return objc.msgSend(self_, "setBuffer:", void, .{buffer_});
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+    pub fn index(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "index", ns.UInteger, .{});
+    }
+    pub fn isActive(self_: *@This()) bool {
+        return objc.msgSend(self_, "isActive", bool, .{});
+    }
+    pub fn bufferAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferAlignment", ns.UInteger, .{});
+    }
+    pub fn bufferDataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferDataSize", ns.UInteger, .{});
+    }
+    pub fn bufferDataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "bufferDataType", DataType, .{});
+    }
+    pub fn bufferStructType(self_: *@This()) ?*StructType {
+        return objc.msgSend(self_, "bufferStructType", ?*StructType, .{});
+    }
+    pub fn bufferPointerType(self_: *@This()) ?*PointerType {
+        return objc.msgSend(self_, "bufferPointerType", ?*PointerType, .{});
+    }
+    pub fn threadgroupMemoryAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryAlignment", ns.UInteger, .{});
+    }
+    pub fn threadgroupMemoryDataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryDataSize", ns.UInteger, .{});
+    }
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
+    }
+    pub fn textureDataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "textureDataType", DataType, .{});
+    }
+    pub fn isDepthTexture(self_: *@This()) bool {
+        return objc.msgSend(self_, "isDepthTexture", bool, .{});
+    }
+    pub fn arrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
+    }
+};
+
+pub const ArgumentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLArgumentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn argumentDescriptor() *ArgumentDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "argumentDescriptor", *ArgumentDescriptor, .{});
+    }
+    pub fn dataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "dataType", DataType, .{});
+    }
+    pub fn setDataType(self_: *@This(), dataType_: DataType) void {
+        return objc.msgSend(self_, "setDataType:", void, .{dataType_});
+    }
+    pub fn index(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "index", ns.UInteger, .{});
+    }
+    pub fn setIndex(self_: *@This(), index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIndex:", void, .{index_});
+    }
+    pub fn arrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
+    }
+    pub fn setArrayLength(self_: *@This(), arrayLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setArrayLength:", void, .{arrayLength_});
+    }
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+    pub fn setAccess(self_: *@This(), access_: BindingAccess) void {
+        return objc.msgSend(self_, "setAccess:", void, .{access_});
+    }
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
+    }
+    pub fn setTextureType(self_: *@This(), textureType_: TextureType) void {
+        return objc.msgSend(self_, "setTextureType:", void, .{textureType_});
+    }
+    pub fn constantBlockAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "constantBlockAlignment", ns.UInteger, .{});
+    }
+    pub fn setConstantBlockAlignment(self_: *@This(), constantBlockAlignment_: ns.UInteger) void {
+        return objc.msgSend(self_, "setConstantBlockAlignment:", void, .{constantBlockAlignment_});
+    }
+};
+
+pub const ArrayType = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLArrayType", @This(), Type, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn elementStructType(self_: *@This()) ?*StructType {
+        return objc.msgSend(self_, "elementStructType", ?*StructType, .{});
+    }
+    pub fn elementArrayType(self_: *@This()) ?*ArrayType {
+        return objc.msgSend(self_, "elementArrayType", ?*ArrayType, .{});
+    }
+    pub fn elementTextureReferenceType(self_: *@This()) ?*TextureReferenceType {
+        return objc.msgSend(self_, "elementTextureReferenceType", ?*TextureReferenceType, .{});
+    }
+    pub fn elementPointerType(self_: *@This()) ?*PointerType {
+        return objc.msgSend(self_, "elementPointerType", ?*PointerType, .{});
+    }
+    pub fn elementTensorReferenceType(self_: *@This()) ?*TensorReferenceType {
+        return objc.msgSend(self_, "elementTensorReferenceType", ?*TensorReferenceType, .{});
+    }
+    pub fn elementType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "elementType", DataType, .{});
+    }
+    pub fn arrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
+    }
+    pub fn stride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "stride", ns.UInteger, .{});
+    }
+    pub fn argumentIndexStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "argumentIndexStride", ns.UInteger, .{});
+    }
+};
+
+pub const Attribute = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAttribute", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn attributeIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "attributeIndex", ns.UInteger, .{});
+    }
+    pub fn attributeType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "attributeType", DataType, .{});
+    }
+    pub fn isActive(self_: *@This()) bool {
+        return objc.msgSend(self_, "isActive", bool, .{});
+    }
+    pub fn isPatchData(self_: *@This()) bool {
+        return objc.msgSend(self_, "isPatchData", bool, .{});
+    }
+    pub fn isPatchControlPointData(self_: *@This()) bool {
+        return objc.msgSend(self_, "isPatchControlPointData", bool, .{});
+    }
+};
+
+pub const AttributeDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAttributeDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn format(self_: *@This()) AttributeFormat {
+        return objc.msgSend(self_, "format", AttributeFormat, .{});
+    }
+    pub fn setFormat(self_: *@This(), format_: AttributeFormat) void {
+        return objc.msgSend(self_, "setFormat:", void, .{format_});
     }
     pub fn offset(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "offset", ns.UInteger, .{});
@@ -1457,10 +4054,1116 @@ pub const MotionKeyframeData = opaque {
     pub fn setOffset(self_: *@This(), offset_: ns.UInteger) void {
         return objc.msgSend(self_, "setOffset:", void, .{offset_});
     }
+    pub fn bufferIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferIndex", ns.UInteger, .{});
+    }
+    pub fn setBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBufferIndex:", void, .{bufferIndex_});
+    }
 };
 
-pub const AccelerationStructureMotionTriangleGeometryDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureMotionTriangleGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
+pub const AttributeDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLAttributeDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *AttributeDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *AttributeDescriptor, .{index_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attributeDesc_: ?*AttributeDescriptor, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attributeDesc_, index_ });
+    }
+};
+
+pub const BinaryArchiveDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBinaryArchiveDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn url(self_: *@This()) ?*ns.URL {
+        return objc.msgSend(self_, "url", ?*ns.URL, .{});
+    }
+    pub fn setUrl(self_: *@This(), url_: ?*ns.URL) void {
+        return objc.msgSend(self_, "setUrl:", void, .{url_});
+    }
+};
+
+pub const BlitPassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBlitPassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn blitPassDescriptor() *BlitPassDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "blitPassDescriptor", *BlitPassDescriptor, .{});
+    }
+    pub fn sampleBufferAttachments(self_: *@This()) *BlitPassSampleBufferAttachmentDescriptorArray {
+        return objc.msgSend(self_, "sampleBufferAttachments", *BlitPassSampleBufferAttachmentDescriptorArray, .{});
+    }
+};
+
+pub const BlitPassSampleBufferAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBlitPassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
+        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    }
+    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
+        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    }
+    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
+    }
+    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
+    }
+};
+
+pub const BlitPassSampleBufferAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBlitPassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *BlitPassSampleBufferAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *BlitPassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*BlitPassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const BufferLayoutDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBufferLayoutDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn stride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "stride", ns.UInteger, .{});
+    }
+    pub fn setStride(self_: *@This(), stride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStride:", void, .{stride_});
+    }
+    pub fn stepFunction(self_: *@This()) StepFunction {
+        return objc.msgSend(self_, "stepFunction", StepFunction, .{});
+    }
+    pub fn setStepFunction(self_: *@This(), stepFunction_: StepFunction) void {
+        return objc.msgSend(self_, "setStepFunction:", void, .{stepFunction_});
+    }
+    pub fn stepRate(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "stepRate", ns.UInteger, .{});
+    }
+    pub fn setStepRate(self_: *@This(), stepRate_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStepRate:", void, .{stepRate_});
+    }
+};
+
+pub const BufferLayoutDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLBufferLayoutDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *BufferLayoutDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *BufferLayoutDescriptor, .{index_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), bufferDesc_: ?*BufferLayoutDescriptor, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ bufferDesc_, index_ });
+    }
+};
+
+pub const CaptureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCaptureDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn captureObject(self_: *@This()) ?*objc.Id {
+        return objc.msgSend(self_, "captureObject", ?*objc.Id, .{});
+    }
+    pub fn setCaptureObject(self_: *@This(), captureObject_: ?*objc.Id) void {
+        return objc.msgSend(self_, "setCaptureObject:", void, .{captureObject_});
+    }
+    pub fn destination(self_: *@This()) CaptureDestination {
+        return objc.msgSend(self_, "destination", CaptureDestination, .{});
+    }
+    pub fn setDestination(self_: *@This(), destination_: CaptureDestination) void {
+        return objc.msgSend(self_, "setDestination:", void, .{destination_});
+    }
+    pub fn outputURL(self_: *@This()) ?*ns.URL {
+        return objc.msgSend(self_, "outputURL", ?*ns.URL, .{});
+    }
+    pub fn setOutputURL(self_: *@This(), outputURL_: ?*ns.URL) void {
+        return objc.msgSend(self_, "setOutputURL:", void, .{outputURL_});
+    }
+};
+
+pub const CaptureManager = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCaptureManager", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sharedCaptureManager() *CaptureManager {
+        return objc.msgSend(@This().InternalInfo.class(), "sharedCaptureManager", *CaptureManager, .{});
+    }
+    pub fn newCaptureScopeWithDevice(self_: *@This(), device_: *Device) *CaptureScope {
+        return objc.msgSend(self_, "newCaptureScopeWithDevice:", *CaptureScope, .{device_});
+    }
+    pub fn newCaptureScopeWithCommandQueue(self_: *@This(), commandQueue_: *CommandQueue) *CaptureScope {
+        return objc.msgSend(self_, "newCaptureScopeWithCommandQueue:", *CaptureScope, .{commandQueue_});
+    }
+    pub fn newCaptureScopeWithMTL4CommandQueue(self_: *@This(), commandQueue_: *MTL4CommandQueue) *CaptureScope {
+        return objc.msgSend(self_, "newCaptureScopeWithMTL4CommandQueue:", *CaptureScope, .{commandQueue_});
+    }
+    pub fn supportsDestination(self_: *@This(), destination_: CaptureDestination) bool {
+        return objc.msgSend(self_, "supportsDestination:", bool, .{destination_});
+    }
+    pub fn startCaptureWithDescriptor_error(self_: *@This(), descriptor_: *CaptureDescriptor, error_: ?*?*ns.Error) bool {
+        return objc.msgSend(self_, "startCaptureWithDescriptor:error:", bool, .{ descriptor_, error_ });
+    }
+    pub fn startCaptureWithDevice(self_: *@This(), device_: *Device) void {
+        return objc.msgSend(self_, "startCaptureWithDevice:", void, .{device_});
+    }
+    pub fn startCaptureWithCommandQueue(self_: *@This(), commandQueue_: *CommandQueue) void {
+        return objc.msgSend(self_, "startCaptureWithCommandQueue:", void, .{commandQueue_});
+    }
+    pub fn startCaptureWithScope(self_: *@This(), captureScope_: *CaptureScope) void {
+        return objc.msgSend(self_, "startCaptureWithScope:", void, .{captureScope_});
+    }
+    pub fn stopCapture(self_: *@This()) void {
+        return objc.msgSend(self_, "stopCapture", void, .{});
+    }
+    pub fn defaultCaptureScope(self_: *@This()) ?*CaptureScope {
+        return objc.msgSend(self_, "defaultCaptureScope", ?*CaptureScope, .{});
+    }
+    pub fn setDefaultCaptureScope(self_: *@This(), defaultCaptureScope_: ?*CaptureScope) void {
+        return objc.msgSend(self_, "setDefaultCaptureScope:", void, .{defaultCaptureScope_});
+    }
+    pub fn isCapturing(self_: *@This()) bool {
+        return objc.msgSend(self_, "isCapturing", bool, .{});
+    }
+};
+
+pub const CommandBufferDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCommandBufferDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn retainedReferences(self_: *@This()) bool {
+        return objc.msgSend(self_, "retainedReferences", bool, .{});
+    }
+    pub fn setRetainedReferences(self_: *@This(), retainedReferences_: bool) void {
+        return objc.msgSend(self_, "setRetainedReferences:", void, .{retainedReferences_});
+    }
+    pub fn errorOptions(self_: *@This()) CommandBufferErrorOption {
+        return objc.msgSend(self_, "errorOptions", CommandBufferErrorOption, .{});
+    }
+    pub fn setErrorOptions(self_: *@This(), errorOptions_: CommandBufferErrorOption) void {
+        return objc.msgSend(self_, "setErrorOptions:", void, .{errorOptions_});
+    }
+    pub fn logState(self_: *@This()) ?*LogState {
+        return objc.msgSend(self_, "logState", ?*LogState, .{});
+    }
+    pub fn setLogState(self_: *@This(), logState_: ?*LogState) void {
+        return objc.msgSend(self_, "setLogState:", void, .{logState_});
+    }
+};
+
+pub const CommandQueueDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCommandQueueDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn maxCommandBufferCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCommandBufferCount", ns.UInteger, .{});
+    }
+    pub fn setMaxCommandBufferCount(self_: *@This(), maxCommandBufferCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCommandBufferCount:", void, .{maxCommandBufferCount_});
+    }
+    pub fn logState(self_: *@This()) ?*LogState {
+        return objc.msgSend(self_, "logState", ?*LogState, .{});
+    }
+    pub fn setLogState(self_: *@This(), logState_: ?*LogState) void {
+        return objc.msgSend(self_, "setLogState:", void, .{logState_});
+    }
+};
+
+pub const CompileOptions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCompileOptions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn preprocessorMacros(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol) {
+        return objc.msgSend(self_, "preprocessorMacros", ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol), .{});
+    }
+    pub fn setPreprocessorMacros(self_: *@This(), preprocessorMacros_: ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol)) void {
+        return objc.msgSend(self_, "setPreprocessorMacros:", void, .{preprocessorMacros_});
+    }
+    pub fn fastMathEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "fastMathEnabled", bool, .{});
+    }
+    pub fn setFastMathEnabled(self_: *@This(), fastMathEnabled_: bool) void {
+        return objc.msgSend(self_, "setFastMathEnabled:", void, .{fastMathEnabled_});
+    }
+    pub fn mathMode(self_: *@This()) MathMode {
+        return objc.msgSend(self_, "mathMode", MathMode, .{});
+    }
+    pub fn setMathMode(self_: *@This(), mathMode_: MathMode) void {
+        return objc.msgSend(self_, "setMathMode:", void, .{mathMode_});
+    }
+    pub fn mathFloatingPointFunctions(self_: *@This()) MathFloatingPointFunctions {
+        return objc.msgSend(self_, "mathFloatingPointFunctions", MathFloatingPointFunctions, .{});
+    }
+    pub fn setMathFloatingPointFunctions(self_: *@This(), mathFloatingPointFunctions_: MathFloatingPointFunctions) void {
+        return objc.msgSend(self_, "setMathFloatingPointFunctions:", void, .{mathFloatingPointFunctions_});
+    }
+    pub fn languageVersion(self_: *@This()) LanguageVersion {
+        return objc.msgSend(self_, "languageVersion", LanguageVersion, .{});
+    }
+    pub fn setLanguageVersion(self_: *@This(), languageVersion_: LanguageVersion) void {
+        return objc.msgSend(self_, "setLanguageVersion:", void, .{languageVersion_});
+    }
+    pub fn libraryType(self_: *@This()) LibraryType {
+        return objc.msgSend(self_, "libraryType", LibraryType, .{});
+    }
+    pub fn setLibraryType(self_: *@This(), libraryType_: LibraryType) void {
+        return objc.msgSend(self_, "setLibraryType:", void, .{libraryType_});
+    }
+    pub fn installName(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "installName", ?*ns.String, .{});
+    }
+    pub fn setInstallName(self_: *@This(), installName_: ?*ns.String) void {
+        return objc.msgSend(self_, "setInstallName:", void, .{installName_});
+    }
+    pub fn libraries(self_: *@This()) ?*ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "libraries", ?*ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setLibraries(self_: *@This(), libraries_: ?*ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setLibraries:", void, .{libraries_});
+    }
+    pub fn preserveInvariance(self_: *@This()) bool {
+        return objc.msgSend(self_, "preserveInvariance", bool, .{});
+    }
+    pub fn setPreserveInvariance(self_: *@This(), preserveInvariance_: bool) void {
+        return objc.msgSend(self_, "setPreserveInvariance:", void, .{preserveInvariance_});
+    }
+    pub fn optimizationLevel(self_: *@This()) LibraryOptimizationLevel {
+        return objc.msgSend(self_, "optimizationLevel", LibraryOptimizationLevel, .{});
+    }
+    pub fn setOptimizationLevel(self_: *@This(), optimizationLevel_: LibraryOptimizationLevel) void {
+        return objc.msgSend(self_, "setOptimizationLevel:", void, .{optimizationLevel_});
+    }
+    pub fn compileSymbolVisibility(self_: *@This()) CompileSymbolVisibility {
+        return objc.msgSend(self_, "compileSymbolVisibility", CompileSymbolVisibility, .{});
+    }
+    pub fn setCompileSymbolVisibility(self_: *@This(), compileSymbolVisibility_: CompileSymbolVisibility) void {
+        return objc.msgSend(self_, "setCompileSymbolVisibility:", void, .{compileSymbolVisibility_});
+    }
+    pub fn allowReferencingUndefinedSymbols(self_: *@This()) bool {
+        return objc.msgSend(self_, "allowReferencingUndefinedSymbols", bool, .{});
+    }
+    pub fn setAllowReferencingUndefinedSymbols(self_: *@This(), allowReferencingUndefinedSymbols_: bool) void {
+        return objc.msgSend(self_, "setAllowReferencingUndefinedSymbols:", void, .{allowReferencingUndefinedSymbols_});
+    }
+    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerThreadgroup(self_: *@This(), requiredThreadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerThreadgroup:", void, .{requiredThreadsPerThreadgroup_});
+    }
+    pub fn enableLogging(self_: *@This()) bool {
+        return objc.msgSend(self_, "enableLogging", bool, .{});
+    }
+    pub fn setEnableLogging(self_: *@This(), enableLogging_: bool) void {
+        return objc.msgSend(self_, "setEnableLogging:", void, .{enableLogging_});
+    }
+};
+
+pub const ComputePassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLComputePassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn computePassDescriptor() *ComputePassDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "computePassDescriptor", *ComputePassDescriptor, .{});
+    }
+    pub fn dispatchType(self_: *@This()) DispatchType {
+        return objc.msgSend(self_, "dispatchType", DispatchType, .{});
+    }
+    pub fn setDispatchType(self_: *@This(), dispatchType_: DispatchType) void {
+        return objc.msgSend(self_, "setDispatchType:", void, .{dispatchType_});
+    }
+    pub fn sampleBufferAttachments(self_: *@This()) *ComputePassSampleBufferAttachmentDescriptorArray {
+        return objc.msgSend(self_, "sampleBufferAttachments", *ComputePassSampleBufferAttachmentDescriptorArray, .{});
+    }
+};
+
+pub const ComputePassSampleBufferAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLComputePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
+        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    }
+    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
+        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    }
+    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
+    }
+    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
+    }
+};
+
+pub const ComputePassSampleBufferAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLComputePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *ComputePassSampleBufferAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ComputePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*ComputePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const ComputePipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLComputePipelineDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn computeFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "computeFunction", ?*Function, .{});
+    }
+    pub fn setComputeFunction(self_: *@This(), computeFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setComputeFunction:", void, .{computeFunction_});
+    }
+    pub fn threadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "threadGroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setThreadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), threadGroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setThreadGroupSizeIsMultipleOfThreadExecutionWidth:", void, .{threadGroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    }
+    pub fn stageInputDescriptor(self_: *@This()) ?*StageInputOutputDescriptor {
+        return objc.msgSend(self_, "stageInputDescriptor", ?*StageInputOutputDescriptor, .{});
+    }
+    pub fn setStageInputDescriptor(self_: *@This(), stageInputDescriptor_: ?*StageInputOutputDescriptor) void {
+        return objc.msgSend(self_, "setStageInputDescriptor:", void, .{stageInputDescriptor_});
+    }
+    pub fn buffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "buffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+    pub fn insertLibraries(self_: *@This()) ?*ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "insertLibraries", ?*ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setInsertLibraries(self_: *@This(), insertLibraries_: ?*ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setInsertLibraries:", void, .{insertLibraries_});
+    }
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
+    }
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+    pub fn linkedFunctions(self_: *@This()) ?*LinkedFunctions {
+        return objc.msgSend(self_, "linkedFunctions", ?*LinkedFunctions, .{});
+    }
+    pub fn setLinkedFunctions(self_: *@This(), linkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setLinkedFunctions:", void, .{linkedFunctions_});
+    }
+    pub fn supportAddingBinaryFunctions(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportAddingBinaryFunctions", bool, .{});
+    }
+    pub fn setSupportAddingBinaryFunctions(self_: *@This(), supportAddingBinaryFunctions_: bool) void {
+        return objc.msgSend(self_, "setSupportAddingBinaryFunctions:", void, .{supportAddingBinaryFunctions_});
+    }
+    pub fn maxCallStackDepth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCallStackDepth", ns.UInteger, .{});
+    }
+    pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
+    }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn setShaderValidation(self_: *@This(), shaderValidation_: ShaderValidation) void {
+        return objc.msgSend(self_, "setShaderValidation:", void, .{shaderValidation_});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerThreadgroup(self_: *@This(), requiredThreadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerThreadgroup:", void, .{requiredThreadsPerThreadgroup_});
+    }
+};
+
+pub const ComputePipelineReflection = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLComputePipelineReflection", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    }
+    pub fn arguments(self_: *@This()) *ns.Array(*Argument) {
+        return objc.msgSend(self_, "arguments", *ns.Array(*Argument), .{});
+    }
+};
+
+pub const CounterSampleBufferDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLCounterSampleBufferDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn counterSet(self_: *@This()) ?*CounterSet {
+        return objc.msgSend(self_, "counterSet", ?*CounterSet, .{});
+    }
+    pub fn setCounterSet(self_: *@This(), counterSet_: ?*CounterSet) void {
+        return objc.msgSend(self_, "setCounterSet:", void, .{counterSet_});
+    }
+    pub fn label(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "label", *ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: *ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn storageMode(self_: *@This()) StorageMode {
+        return objc.msgSend(self_, "storageMode", StorageMode, .{});
+    }
+    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
+        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
+    }
+    pub fn sampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
+    }
+    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
+    }
+};
+
+pub const DepthStencilDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLDepthStencilDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn depthCompareFunction(self_: *@This()) CompareFunction {
+        return objc.msgSend(self_, "depthCompareFunction", CompareFunction, .{});
+    }
+    pub fn setDepthCompareFunction(self_: *@This(), depthCompareFunction_: CompareFunction) void {
+        return objc.msgSend(self_, "setDepthCompareFunction:", void, .{depthCompareFunction_});
+    }
+    pub fn isDepthWriteEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isDepthWriteEnabled", bool, .{});
+    }
+    pub fn setDepthWriteEnabled(self_: *@This(), depthWriteEnabled_: bool) void {
+        return objc.msgSend(self_, "setDepthWriteEnabled:", void, .{depthWriteEnabled_});
+    }
+    pub fn frontFaceStencil(self_: *@This()) *StencilDescriptor {
+        return objc.msgSend(self_, "frontFaceStencil", *StencilDescriptor, .{});
+    }
+    pub fn setFrontFaceStencil(self_: *@This(), frontFaceStencil_: ?*StencilDescriptor) void {
+        return objc.msgSend(self_, "setFrontFaceStencil:", void, .{frontFaceStencil_});
+    }
+    pub fn backFaceStencil(self_: *@This()) *StencilDescriptor {
+        return objc.msgSend(self_, "backFaceStencil", *StencilDescriptor, .{});
+    }
+    pub fn setBackFaceStencil(self_: *@This(), backFaceStencil_: ?*StencilDescriptor) void {
+        return objc.msgSend(self_, "setBackFaceStencil:", void, .{backFaceStencil_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const FunctionConstant = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionConstant", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn @"type"(self_: *@This()) DataType {
+        return objc.msgSend(self_, "type", DataType, .{});
+    }
+    pub fn index(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "index", ns.UInteger, .{});
+    }
+    pub fn required(self_: *@This()) bool {
+        return objc.msgSend(self_, "required", bool, .{});
+    }
+};
+
+pub const FunctionConstantValues = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionConstantValues", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn setConstantValue_type_atIndex(self_: *@This(), value_: *const anyopaque, type_: DataType, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setConstantValue:type:atIndex:", void, .{ value_, type_, index_ });
+    }
+    pub fn setConstantValues_type_withRange(self_: *@This(), values_: *const anyopaque, type_: DataType, range_: ns.Range) void {
+        return objc.msgSend(self_, "setConstantValues:type:withRange:", void, .{ values_, type_, range_ });
+    }
+    pub fn setConstantValue_type_withName(self_: *@This(), value_: *const anyopaque, type_: DataType, name_: *ns.String) void {
+        return objc.msgSend(self_, "setConstantValue:type:withName:", void, .{ value_, type_, name_ });
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+};
+
+pub const FunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn functionDescriptor() *FunctionDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "functionDescriptor", *FunctionDescriptor, .{});
+    }
+    pub fn name(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "name", ?*ns.String, .{});
+    }
+    pub fn setName(self_: *@This(), name_: ?*ns.String) void {
+        return objc.msgSend(self_, "setName:", void, .{name_});
+    }
+    pub fn specializedName(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "specializedName", ?*ns.String, .{});
+    }
+    pub fn setSpecializedName(self_: *@This(), specializedName_: ?*ns.String) void {
+        return objc.msgSend(self_, "setSpecializedName:", void, .{specializedName_});
+    }
+    pub fn constantValues(self_: *@This()) ?*FunctionConstantValues {
+        return objc.msgSend(self_, "constantValues", ?*FunctionConstantValues, .{});
+    }
+    pub fn setConstantValues(self_: *@This(), constantValues_: ?*FunctionConstantValues) void {
+        return objc.msgSend(self_, "setConstantValues:", void, .{constantValues_});
+    }
+    pub fn options(self_: *@This()) FunctionOptions {
+        return objc.msgSend(self_, "options", FunctionOptions, .{});
+    }
+    pub fn setOptions(self_: *@This(), options_: FunctionOptions) void {
+        return objc.msgSend(self_, "setOptions:", void, .{options_});
+    }
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+};
+
+pub const FunctionReflection = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionReflection", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    }
+    pub fn userAnnotation(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "userAnnotation", ?*ns.String, .{});
+    }
+};
+
+pub const FunctionStitchingAttributeAlwaysInline = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingAttributeAlwaysInline", @This(), ns.ObjectInterface, &.{FunctionStitchingAttribute});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+};
+
+pub const FunctionStitchingFunctionNode = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingFunctionNode", @This(), ns.ObjectInterface, &.{FunctionStitchingNode});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithName_arguments_controlDependencies(self_: *@This(), name_: *ns.String, arguments_: *ns.Array(*FunctionStitchingNode), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) *@This() {
+        return objc.msgSend(self_, "initWithName:arguments:controlDependencies:", *@This(), .{ name_, arguments_, controlDependencies_ });
+    }
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn setName(self_: *@This(), name_: *ns.String) void {
+        return objc.msgSend(self_, "setName:", void, .{name_});
+    }
+    pub fn arguments(self_: *@This()) *ns.Array(*FunctionStitchingNode) {
+        return objc.msgSend(self_, "arguments", *ns.Array(*FunctionStitchingNode), .{});
+    }
+    pub fn setArguments(self_: *@This(), arguments_: *ns.Array(*FunctionStitchingNode)) void {
+        return objc.msgSend(self_, "setArguments:", void, .{arguments_});
+    }
+    pub fn controlDependencies(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
+        return objc.msgSend(self_, "controlDependencies", *ns.Array(*FunctionStitchingFunctionNode), .{});
+    }
+    pub fn setControlDependencies(self_: *@This(), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) void {
+        return objc.msgSend(self_, "setControlDependencies:", void, .{controlDependencies_});
+    }
+};
+
+pub const FunctionStitchingGraph = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingGraph", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithFunctionName_nodes_outputNode_attributes(self_: *@This(), functionName_: *ns.String, nodes_: *ns.Array(*FunctionStitchingFunctionNode), outputNode_: ?*FunctionStitchingFunctionNode, attributes_: *ns.Array(*FunctionStitchingAttribute)) *@This() {
+        return objc.msgSend(self_, "initWithFunctionName:nodes:outputNode:attributes:", *@This(), .{ functionName_, nodes_, outputNode_, attributes_ });
+    }
+    pub fn functionName(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "functionName", *ns.String, .{});
+    }
+    pub fn setFunctionName(self_: *@This(), functionName_: *ns.String) void {
+        return objc.msgSend(self_, "setFunctionName:", void, .{functionName_});
+    }
+    pub fn nodes(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
+        return objc.msgSend(self_, "nodes", *ns.Array(*FunctionStitchingFunctionNode), .{});
+    }
+    pub fn setNodes(self_: *@This(), nodes_: *ns.Array(*FunctionStitchingFunctionNode)) void {
+        return objc.msgSend(self_, "setNodes:", void, .{nodes_});
+    }
+    pub fn outputNode(self_: *@This()) ?*FunctionStitchingFunctionNode {
+        return objc.msgSend(self_, "outputNode", ?*FunctionStitchingFunctionNode, .{});
+    }
+    pub fn setOutputNode(self_: *@This(), outputNode_: ?*FunctionStitchingFunctionNode) void {
+        return objc.msgSend(self_, "setOutputNode:", void, .{outputNode_});
+    }
+    pub fn attributes(self_: *@This()) *ns.Array(*FunctionStitchingAttribute) {
+        return objc.msgSend(self_, "attributes", *ns.Array(*FunctionStitchingAttribute), .{});
+    }
+    pub fn setAttributes(self_: *@This(), attributes_: *ns.Array(*FunctionStitchingAttribute)) void {
+        return objc.msgSend(self_, "setAttributes:", void, .{attributes_});
+    }
+};
+
+pub const FunctionStitchingInputNode = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingInputNode", @This(), ns.ObjectInterface, &.{FunctionStitchingNode});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithArgumentIndex(self_: *@This(), argument_: ns.UInteger) *@This() {
+        return objc.msgSend(self_, "initWithArgumentIndex:", *@This(), .{argument_});
+    }
+    pub fn argumentIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "argumentIndex", ns.UInteger, .{});
+    }
+    pub fn setArgumentIndex(self_: *@This(), argumentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setArgumentIndex:", void, .{argumentIndex_});
+    }
+};
+
+pub const HeapDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLHeapDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn size(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "size", ns.UInteger, .{});
+    }
+    pub fn setSize(self_: *@This(), size_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSize:", void, .{size_});
+    }
+    pub fn storageMode(self_: *@This()) StorageMode {
+        return objc.msgSend(self_, "storageMode", StorageMode, .{});
+    }
+    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
+        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
+    }
+    pub fn cpuCacheMode(self_: *@This()) CPUCacheMode {
+        return objc.msgSend(self_, "cpuCacheMode", CPUCacheMode, .{});
+    }
+    pub fn setCpuCacheMode(self_: *@This(), cpuCacheMode_: CPUCacheMode) void {
+        return objc.msgSend(self_, "setCpuCacheMode:", void, .{cpuCacheMode_});
+    }
+    pub fn sparsePageSize(self_: *@This()) SparsePageSize {
+        return objc.msgSend(self_, "sparsePageSize", SparsePageSize, .{});
+    }
+    pub fn setSparsePageSize(self_: *@This(), sparsePageSize_: SparsePageSize) void {
+        return objc.msgSend(self_, "setSparsePageSize:", void, .{sparsePageSize_});
+    }
+    pub fn hazardTrackingMode(self_: *@This()) HazardTrackingMode {
+        return objc.msgSend(self_, "hazardTrackingMode", HazardTrackingMode, .{});
+    }
+    pub fn setHazardTrackingMode(self_: *@This(), hazardTrackingMode_: HazardTrackingMode) void {
+        return objc.msgSend(self_, "setHazardTrackingMode:", void, .{hazardTrackingMode_});
+    }
+    pub fn resourceOptions(self_: *@This()) ResourceOptions {
+        return objc.msgSend(self_, "resourceOptions", ResourceOptions, .{});
+    }
+    pub fn setResourceOptions(self_: *@This(), resourceOptions_: ResourceOptions) void {
+        return objc.msgSend(self_, "setResourceOptions:", void, .{resourceOptions_});
+    }
+    pub fn @"type"(self_: *@This()) HeapType {
+        return objc.msgSend(self_, "type", HeapType, .{});
+    }
+    pub fn setType(self_: *@This(), type_: HeapType) void {
+        return objc.msgSend(self_, "setType:", void, .{type_});
+    }
+    pub fn maxCompatiblePlacementSparsePageSize(self_: *@This()) SparsePageSize {
+        return objc.msgSend(self_, "maxCompatiblePlacementSparsePageSize", SparsePageSize, .{});
+    }
+    pub fn setMaxCompatiblePlacementSparsePageSize(self_: *@This(), maxCompatiblePlacementSparsePageSize_: SparsePageSize) void {
+        return objc.msgSend(self_, "setMaxCompatiblePlacementSparsePageSize:", void, .{maxCompatiblePlacementSparsePageSize_});
+    }
+};
+
+pub const IOCommandQueueDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLIOCommandQueueDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn maxCommandBufferCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCommandBufferCount", ns.UInteger, .{});
+    }
+    pub fn setMaxCommandBufferCount(self_: *@This(), maxCommandBufferCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCommandBufferCount:", void, .{maxCommandBufferCount_});
+    }
+    pub fn priority(self_: *@This()) IOPriority {
+        return objc.msgSend(self_, "priority", IOPriority, .{});
+    }
+    pub fn setPriority(self_: *@This(), priority_: IOPriority) void {
+        return objc.msgSend(self_, "setPriority:", void, .{priority_});
+    }
+    pub fn @"type"(self_: *@This()) IOCommandQueueType {
+        return objc.msgSend(self_, "type", IOCommandQueueType, .{});
+    }
+    pub fn setType(self_: *@This(), type_: IOCommandQueueType) void {
+        return objc.msgSend(self_, "setType:", void, .{type_});
+    }
+    pub fn maxCommandsInFlight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCommandsInFlight", ns.UInteger, .{});
+    }
+    pub fn setMaxCommandsInFlight(self_: *@This(), maxCommandsInFlight_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCommandsInFlight:", void, .{maxCommandsInFlight_});
+    }
+    pub fn scratchBufferAllocator(self_: *@This()) ?*IOScratchBufferAllocator {
+        return objc.msgSend(self_, "scratchBufferAllocator", ?*IOScratchBufferAllocator, .{});
+    }
+    pub fn setScratchBufferAllocator(self_: *@This(), scratchBufferAllocator_: ?*IOScratchBufferAllocator) void {
+        return objc.msgSend(self_, "setScratchBufferAllocator:", void, .{scratchBufferAllocator_});
+    }
+};
+
+pub const IndirectCommandBufferDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLIndirectCommandBufferDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn commandTypes(self_: *@This()) IndirectCommandType {
+        return objc.msgSend(self_, "commandTypes", IndirectCommandType, .{});
+    }
+    pub fn setCommandTypes(self_: *@This(), commandTypes_: IndirectCommandType) void {
+        return objc.msgSend(self_, "setCommandTypes:", void, .{commandTypes_});
+    }
+    pub fn inheritPipelineState(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritPipelineState", bool, .{});
+    }
+    pub fn setInheritPipelineState(self_: *@This(), inheritPipelineState_: bool) void {
+        return objc.msgSend(self_, "setInheritPipelineState:", void, .{inheritPipelineState_});
+    }
+    pub fn inheritBuffers(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritBuffers", bool, .{});
+    }
+    pub fn setInheritBuffers(self_: *@This(), inheritBuffers_: bool) void {
+        return objc.msgSend(self_, "setInheritBuffers:", void, .{inheritBuffers_});
+    }
+    pub fn inheritDepthStencilState(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritDepthStencilState", bool, .{});
+    }
+    pub fn setInheritDepthStencilState(self_: *@This(), inheritDepthStencilState_: bool) void {
+        return objc.msgSend(self_, "setInheritDepthStencilState:", void, .{inheritDepthStencilState_});
+    }
+    pub fn inheritDepthBias(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritDepthBias", bool, .{});
+    }
+    pub fn setInheritDepthBias(self_: *@This(), inheritDepthBias_: bool) void {
+        return objc.msgSend(self_, "setInheritDepthBias:", void, .{inheritDepthBias_});
+    }
+    pub fn inheritDepthClipMode(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritDepthClipMode", bool, .{});
+    }
+    pub fn setInheritDepthClipMode(self_: *@This(), inheritDepthClipMode_: bool) void {
+        return objc.msgSend(self_, "setInheritDepthClipMode:", void, .{inheritDepthClipMode_});
+    }
+    pub fn inheritCullMode(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritCullMode", bool, .{});
+    }
+    pub fn setInheritCullMode(self_: *@This(), inheritCullMode_: bool) void {
+        return objc.msgSend(self_, "setInheritCullMode:", void, .{inheritCullMode_});
+    }
+    pub fn inheritFrontFacingWinding(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritFrontFacingWinding", bool, .{});
+    }
+    pub fn setInheritFrontFacingWinding(self_: *@This(), inheritFrontFacingWinding_: bool) void {
+        return objc.msgSend(self_, "setInheritFrontFacingWinding:", void, .{inheritFrontFacingWinding_});
+    }
+    pub fn inheritTriangleFillMode(self_: *@This()) bool {
+        return objc.msgSend(self_, "inheritTriangleFillMode", bool, .{});
+    }
+    pub fn setInheritTriangleFillMode(self_: *@This(), inheritTriangleFillMode_: bool) void {
+        return objc.msgSend(self_, "setInheritTriangleFillMode:", void, .{inheritTriangleFillMode_});
+    }
+    pub fn maxVertexBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexBufferBindCount(self_: *@This(), maxVertexBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexBufferBindCount:", void, .{maxVertexBufferBindCount_});
+    }
+    pub fn maxFragmentBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxFragmentBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxFragmentBufferBindCount(self_: *@This(), maxFragmentBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxFragmentBufferBindCount:", void, .{maxFragmentBufferBindCount_});
+    }
+    pub fn maxKernelBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxKernelBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxKernelBufferBindCount(self_: *@This(), maxKernelBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxKernelBufferBindCount:", void, .{maxKernelBufferBindCount_});
+    }
+    pub fn maxKernelThreadgroupMemoryBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxKernelThreadgroupMemoryBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxKernelThreadgroupMemoryBindCount(self_: *@This(), maxKernelThreadgroupMemoryBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxKernelThreadgroupMemoryBindCount:", void, .{maxKernelThreadgroupMemoryBindCount_});
+    }
+    pub fn maxObjectBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxObjectBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxObjectBufferBindCount(self_: *@This(), maxObjectBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxObjectBufferBindCount:", void, .{maxObjectBufferBindCount_});
+    }
+    pub fn maxMeshBufferBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxMeshBufferBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxMeshBufferBindCount(self_: *@This(), maxMeshBufferBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxMeshBufferBindCount:", void, .{maxMeshBufferBindCount_});
+    }
+    pub fn maxObjectThreadgroupMemoryBindCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxObjectThreadgroupMemoryBindCount", ns.UInteger, .{});
+    }
+    pub fn setMaxObjectThreadgroupMemoryBindCount(self_: *@This(), maxObjectThreadgroupMemoryBindCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxObjectThreadgroupMemoryBindCount:", void, .{maxObjectThreadgroupMemoryBindCount_});
+    }
+    pub fn supportRayTracing(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportRayTracing", bool, .{});
+    }
+    pub fn setSupportRayTracing(self_: *@This(), supportRayTracing_: bool) void {
+        return objc.msgSend(self_, "setSupportRayTracing:", void, .{supportRayTracing_});
+    }
+    pub fn supportDynamicAttributeStride(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportDynamicAttributeStride", bool, .{});
+    }
+    pub fn setSupportDynamicAttributeStride(self_: *@This(), supportDynamicAttributeStride_: bool) void {
+        return objc.msgSend(self_, "setSupportDynamicAttributeStride:", void, .{supportDynamicAttributeStride_});
+    }
+    pub fn supportColorAttachmentMapping(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportColorAttachmentMapping", bool, .{});
+    }
+    pub fn setSupportColorAttachmentMapping(self_: *@This(), supportColorAttachmentMapping_: bool) void {
+        return objc.msgSend(self_, "setSupportColorAttachmentMapping:", void, .{supportColorAttachmentMapping_});
+    }
+};
+
+pub const IndirectInstanceAccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLIndirectInstanceAccelerationStructureDescriptor", @This(), AccelerationStructureDescriptor, &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -1472,92 +5175,95 @@ pub const AccelerationStructureMotionTriangleGeometryDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn vertexBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "vertexBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn instanceDescriptorBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "instanceDescriptorBuffer", ?*Buffer, .{});
     }
-    pub fn setVertexBuffers(self_: *@This(), vertexBuffers_: *ns.Array(*MotionKeyframeData)) void {
-        return objc.msgSend(self_, "setVertexBuffers:", void, .{vertexBuffers_});
+    pub fn setInstanceDescriptorBuffer(self_: *@This(), instanceDescriptorBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setInstanceDescriptorBuffer:", void, .{instanceDescriptorBuffer_});
     }
-    pub fn vertexFormat(self_: *@This()) AttributeFormat {
-        return objc.msgSend(self_, "vertexFormat", AttributeFormat, .{});
+    pub fn instanceDescriptorBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceDescriptorBufferOffset", ns.UInteger, .{});
     }
-    pub fn setVertexFormat(self_: *@This(), vertexFormat_: AttributeFormat) void {
-        return objc.msgSend(self_, "setVertexFormat:", void, .{vertexFormat_});
+    pub fn setInstanceDescriptorBufferOffset(self_: *@This(), instanceDescriptorBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceDescriptorBufferOffset:", void, .{instanceDescriptorBufferOffset_});
     }
-    pub fn vertexStride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "vertexStride", ns.UInteger, .{});
+    pub fn instanceDescriptorStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceDescriptorStride", ns.UInteger, .{});
     }
-    pub fn setVertexStride(self_: *@This(), vertexStride_: ns.UInteger) void {
-        return objc.msgSend(self_, "setVertexStride:", void, .{vertexStride_});
+    pub fn setInstanceDescriptorStride(self_: *@This(), instanceDescriptorStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceDescriptorStride:", void, .{instanceDescriptorStride_});
     }
-    pub fn indexBuffer(self_: *@This()) ?*Buffer {
-        return objc.msgSend(self_, "indexBuffer", ?*Buffer, .{});
+    pub fn maxInstanceCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxInstanceCount", ns.UInteger, .{});
     }
-    pub fn setIndexBuffer(self_: *@This(), indexBuffer_: ?*Buffer) void {
-        return objc.msgSend(self_, "setIndexBuffer:", void, .{indexBuffer_});
+    pub fn setMaxInstanceCount(self_: *@This(), maxInstanceCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxInstanceCount:", void, .{maxInstanceCount_});
     }
-    pub fn indexBufferOffset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "indexBufferOffset", ns.UInteger, .{});
+    pub fn instanceCountBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "instanceCountBuffer", ?*Buffer, .{});
     }
-    pub fn setIndexBufferOffset(self_: *@This(), indexBufferOffset_: ns.UInteger) void {
-        return objc.msgSend(self_, "setIndexBufferOffset:", void, .{indexBufferOffset_});
+    pub fn setInstanceCountBuffer(self_: *@This(), instanceCountBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setInstanceCountBuffer:", void, .{instanceCountBuffer_});
     }
-    pub fn indexType(self_: *@This()) IndexType {
-        return objc.msgSend(self_, "indexType", IndexType, .{});
+    pub fn instanceCountBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "instanceCountBufferOffset", ns.UInteger, .{});
     }
-    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
-        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    pub fn setInstanceCountBufferOffset(self_: *@This(), instanceCountBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInstanceCountBufferOffset:", void, .{instanceCountBufferOffset_});
     }
-    pub fn triangleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "triangleCount", ns.UInteger, .{});
+    pub fn instanceDescriptorType(self_: *@This()) AccelerationStructureInstanceDescriptorType {
+        return objc.msgSend(self_, "instanceDescriptorType", AccelerationStructureInstanceDescriptorType, .{});
     }
-    pub fn setTriangleCount(self_: *@This(), triangleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setTriangleCount:", void, .{triangleCount_});
+    pub fn setInstanceDescriptorType(self_: *@This(), instanceDescriptorType_: AccelerationStructureInstanceDescriptorType) void {
+        return objc.msgSend(self_, "setInstanceDescriptorType:", void, .{instanceDescriptorType_});
     }
-    pub fn transformationMatrixBuffer(self_: *@This()) ?*Buffer {
-        return objc.msgSend(self_, "transformationMatrixBuffer", ?*Buffer, .{});
+    pub fn motionTransformBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "motionTransformBuffer", ?*Buffer, .{});
     }
-    pub fn setTransformationMatrixBuffer(self_: *@This(), transformationMatrixBuffer_: ?*Buffer) void {
-        return objc.msgSend(self_, "setTransformationMatrixBuffer:", void, .{transformationMatrixBuffer_});
+    pub fn setMotionTransformBuffer(self_: *@This(), motionTransformBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setMotionTransformBuffer:", void, .{motionTransformBuffer_});
     }
-    pub fn transformationMatrixBufferOffset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "transformationMatrixBufferOffset", ns.UInteger, .{});
+    pub fn motionTransformBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformBufferOffset", ns.UInteger, .{});
     }
-    pub fn setTransformationMatrixBufferOffset(self_: *@This(), transformationMatrixBufferOffset_: ns.UInteger) void {
-        return objc.msgSend(self_, "setTransformationMatrixBufferOffset:", void, .{transformationMatrixBufferOffset_});
+    pub fn setMotionTransformBufferOffset(self_: *@This(), motionTransformBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformBufferOffset:", void, .{motionTransformBufferOffset_});
     }
-};
-
-pub const AccelerationStructureMotionBoundingBoxGeometryDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructureMotionBoundingBoxGeometryDescriptor", @This(), AccelerationStructureGeometryDescriptor, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn descriptor() *@This() {
-        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
+    pub fn maxMotionTransformCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxMotionTransformCount", ns.UInteger, .{});
     }
-    pub fn boundingBoxBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "boundingBoxBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn setMaxMotionTransformCount(self_: *@This(), maxMotionTransformCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxMotionTransformCount:", void, .{maxMotionTransformCount_});
     }
-    pub fn setBoundingBoxBuffers(self_: *@This(), boundingBoxBuffers_: *ns.Array(*MotionKeyframeData)) void {
-        return objc.msgSend(self_, "setBoundingBoxBuffers:", void, .{boundingBoxBuffers_});
+    pub fn motionTransformCountBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "motionTransformCountBuffer", ?*Buffer, .{});
     }
-    pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "boundingBoxStride", ns.UInteger, .{});
+    pub fn setMotionTransformCountBuffer(self_: *@This(), motionTransformCountBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setMotionTransformCountBuffer:", void, .{motionTransformCountBuffer_});
     }
-    pub fn setBoundingBoxStride(self_: *@This(), boundingBoxStride_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBoundingBoxStride:", void, .{boundingBoxStride_});
+    pub fn motionTransformCountBufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformCountBufferOffset", ns.UInteger, .{});
     }
-    pub fn boundingBoxCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "boundingBoxCount", ns.UInteger, .{});
+    pub fn setMotionTransformCountBufferOffset(self_: *@This(), motionTransformCountBufferOffset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformCountBufferOffset:", void, .{motionTransformCountBufferOffset_});
     }
-    pub fn setBoundingBoxCount(self_: *@This(), boundingBoxCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBoundingBoxCount:", void, .{boundingBoxCount_});
+    pub fn instanceTransformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "instanceTransformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setInstanceTransformationMatrixLayout(self_: *@This(), instanceTransformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setInstanceTransformationMatrixLayout:", void, .{instanceTransformationMatrixLayout_});
+    }
+    pub fn motionTransformType(self_: *@This()) TransformType {
+        return objc.msgSend(self_, "motionTransformType", TransformType, .{});
+    }
+    pub fn setMotionTransformType(self_: *@This(), motionTransformType_: TransformType) void {
+        return objc.msgSend(self_, "setMotionTransformType:", void, .{motionTransformType_});
+    }
+    pub fn motionTransformStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformStride", ns.UInteger, .{});
+    }
+    pub fn setMotionTransformStride(self_: *@This(), motionTransformStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformStride:", void, .{motionTransformStride_});
     }
 };
 
@@ -1628,6 +5334,3044 @@ pub const InstanceAccelerationStructureDescriptor = opaque {
     pub fn setMotionTransformCount(self_: *@This(), motionTransformCount_: ns.UInteger) void {
         return objc.msgSend(self_, "setMotionTransformCount:", void, .{motionTransformCount_});
     }
+    pub fn instanceTransformationMatrixLayout(self_: *@This()) MatrixLayout {
+        return objc.msgSend(self_, "instanceTransformationMatrixLayout", MatrixLayout, .{});
+    }
+    pub fn setInstanceTransformationMatrixLayout(self_: *@This(), instanceTransformationMatrixLayout_: MatrixLayout) void {
+        return objc.msgSend(self_, "setInstanceTransformationMatrixLayout:", void, .{instanceTransformationMatrixLayout_});
+    }
+    pub fn motionTransformType(self_: *@This()) TransformType {
+        return objc.msgSend(self_, "motionTransformType", TransformType, .{});
+    }
+    pub fn setMotionTransformType(self_: *@This(), motionTransformType_: TransformType) void {
+        return objc.msgSend(self_, "setMotionTransformType:", void, .{motionTransformType_});
+    }
+    pub fn motionTransformStride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionTransformStride", ns.UInteger, .{});
+    }
+    pub fn setMotionTransformStride(self_: *@This(), motionTransformStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionTransformStride:", void, .{motionTransformStride_});
+    }
+};
+
+pub const IntersectionFunctionDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLIntersectionFunctionDescriptor", @This(), FunctionDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+};
+
+pub const IntersectionFunctionTableDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLIntersectionFunctionTableDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn intersectionFunctionTableDescriptor() *IntersectionFunctionTableDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "intersectionFunctionTableDescriptor", *IntersectionFunctionTableDescriptor, .{});
+    }
+    pub fn functionCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "functionCount", ns.UInteger, .{});
+    }
+    pub fn setFunctionCount(self_: *@This(), functionCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setFunctionCount:", void, .{functionCount_});
+    }
+};
+
+pub const LinkedFunctions = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLLinkedFunctions", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn linkedFunctions() *LinkedFunctions {
+        return objc.msgSend(@This().InternalInfo.class(), "linkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn functions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "functions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setFunctions(self_: *@This(), functions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setFunctions:", void, .{functions_});
+    }
+    pub fn binaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "binaryFunctions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setBinaryFunctions(self_: *@This(), binaryFunctions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setBinaryFunctions:", void, .{binaryFunctions_});
+    }
+    pub fn groups(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.Array(*Function)) {
+        return objc.msgSend(self_, "groups", ?*ns.Dictionary(*ns.String, *ns.Array(*Function)), .{});
+    }
+    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(*ns.String, *ns.Array(*Function))) void {
+        return objc.msgSend(self_, "setGroups:", void, .{groups_});
+    }
+    pub fn privateFunctions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "privateFunctions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setPrivateFunctions(self_: *@This(), privateFunctions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setPrivateFunctions:", void, .{privateFunctions_});
+    }
+};
+
+pub const LogStateDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLLogStateDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn level(self_: *@This()) LogLevel {
+        return objc.msgSend(self_, "level", LogLevel, .{});
+    }
+    pub fn setLevel(self_: *@This(), level_: LogLevel) void {
+        return objc.msgSend(self_, "setLevel:", void, .{level_});
+    }
+    pub fn bufferSize(self_: *@This()) ns.Integer {
+        return objc.msgSend(self_, "bufferSize", ns.Integer, .{});
+    }
+    pub fn setBufferSize(self_: *@This(), bufferSize_: ns.Integer) void {
+        return objc.msgSend(self_, "setBufferSize:", void, .{bufferSize_});
+    }
+};
+
+pub const LogicalToPhysicalColorAttachmentMap = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLLogicalToPhysicalColorAttachmentMap", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn setPhysicalIndex_forLogicalIndex(self_: *@This(), physicalIndex_: ns.UInteger, logicalIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setPhysicalIndex:forLogicalIndex:", void, .{ physicalIndex_, logicalIndex_ });
+    }
+    pub fn getPhysicalIndexForLogicalIndex(self_: *@This(), logicalIndex_: ns.UInteger) ns.UInteger {
+        return objc.msgSend(self_, "getPhysicalIndexForLogicalIndex:", ns.UInteger, .{logicalIndex_});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+};
+
+pub const MeshRenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLMeshRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn objectFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "objectFunction", ?*Function, .{});
+    }
+    pub fn setObjectFunction(self_: *@This(), objectFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setObjectFunction:", void, .{objectFunction_});
+    }
+    pub fn meshFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "meshFunction", ?*Function, .{});
+    }
+    pub fn setMeshFunction(self_: *@This(), meshFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setMeshFunction:", void, .{meshFunction_});
+    }
+    pub fn fragmentFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "fragmentFunction", ?*Function, .{});
+    }
+    pub fn setFragmentFunction(self_: *@This(), fragmentFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setFragmentFunction:", void, .{fragmentFunction_});
+    }
+    pub fn maxTotalThreadsPerObjectThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerObjectThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerObjectThreadgroup(self_: *@This(), maxTotalThreadsPerObjectThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerObjectThreadgroup:", void, .{maxTotalThreadsPerObjectThreadgroup_});
+    }
+    pub fn maxTotalThreadsPerMeshThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerMeshThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerMeshThreadgroup(self_: *@This(), maxTotalThreadsPerMeshThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerMeshThreadgroup:", void, .{maxTotalThreadsPerMeshThreadgroup_});
+    }
+    pub fn objectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "objectThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn meshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
+        return objc.msgSend(self_, "meshThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
+    }
+    pub fn setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
+        return objc.msgSend(self_, "setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
+    }
+    pub fn payloadMemoryLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "payloadMemoryLength", ns.UInteger, .{});
+    }
+    pub fn setPayloadMemoryLength(self_: *@This(), payloadMemoryLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setPayloadMemoryLength:", void, .{payloadMemoryLength_});
+    }
+    pub fn maxTotalThreadgroupsPerMeshGrid(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadgroupsPerMeshGrid", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadgroupsPerMeshGrid(self_: *@This(), maxTotalThreadgroupsPerMeshGrid_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadgroupsPerMeshGrid:", void, .{maxTotalThreadgroupsPerMeshGrid_});
+    }
+    pub fn objectBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "objectBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn meshBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "meshBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn fragmentBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "fragmentBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn isAlphaToCoverageEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isAlphaToCoverageEnabled", bool, .{});
+    }
+    pub fn setAlphaToCoverageEnabled(self_: *@This(), alphaToCoverageEnabled_: bool) void {
+        return objc.msgSend(self_, "setAlphaToCoverageEnabled:", void, .{alphaToCoverageEnabled_});
+    }
+    pub fn isAlphaToOneEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isAlphaToOneEnabled", bool, .{});
+    }
+    pub fn setAlphaToOneEnabled(self_: *@This(), alphaToOneEnabled_: bool) void {
+        return objc.msgSend(self_, "setAlphaToOneEnabled:", void, .{alphaToOneEnabled_});
+    }
+    pub fn isRasterizationEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
+    }
+    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
+        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
+    }
+    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *RenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *RenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn depthAttachmentPixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "depthAttachmentPixelFormat", PixelFormat, .{});
+    }
+    pub fn setDepthAttachmentPixelFormat(self_: *@This(), depthAttachmentPixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setDepthAttachmentPixelFormat:", void, .{depthAttachmentPixelFormat_});
+    }
+    pub fn stencilAttachmentPixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "stencilAttachmentPixelFormat", PixelFormat, .{});
+    }
+    pub fn setStencilAttachmentPixelFormat(self_: *@This(), stencilAttachmentPixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setStencilAttachmentPixelFormat:", void, .{stencilAttachmentPixelFormat_});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+    pub fn objectLinkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "objectLinkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setObjectLinkedFunctions(self_: *@This(), objectLinkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setObjectLinkedFunctions:", void, .{objectLinkedFunctions_});
+    }
+    pub fn meshLinkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "meshLinkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setMeshLinkedFunctions(self_: *@This(), meshLinkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setMeshLinkedFunctions:", void, .{meshLinkedFunctions_});
+    }
+    pub fn fragmentLinkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "fragmentLinkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setFragmentLinkedFunctions(self_: *@This(), fragmentLinkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setFragmentLinkedFunctions:", void, .{fragmentLinkedFunctions_});
+    }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn setShaderValidation(self_: *@This(), shaderValidation_: ShaderValidation) void {
+        return objc.msgSend(self_, "setShaderValidation:", void, .{shaderValidation_});
+    }
+    pub fn requiredThreadsPerObjectThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerObjectThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerObjectThreadgroup(self_: *@This(), requiredThreadsPerObjectThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerObjectThreadgroup:", void, .{requiredThreadsPerObjectThreadgroup_});
+    }
+    pub fn requiredThreadsPerMeshThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerMeshThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerMeshThreadgroup(self_: *@This(), requiredThreadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerMeshThreadgroup:", void, .{requiredThreadsPerMeshThreadgroup_});
+    }
+};
+
+pub const MotionKeyframeData = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLMotionKeyframeData", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn data() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "data", *@This(), .{});
+    }
+    pub fn buffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "buffer", ?*Buffer, .{});
+    }
+    pub fn setBuffer(self_: *@This(), buffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setBuffer:", void, .{buffer_});
+    }
+    pub fn offset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "offset", ns.UInteger, .{});
+    }
+    pub fn setOffset(self_: *@This(), offset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setOffset:", void, .{offset_});
+    }
+};
+
+pub const PipelineBufferDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLPipelineBufferDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn mutability(self_: *@This()) Mutability {
+        return objc.msgSend(self_, "mutability", Mutability, .{});
+    }
+    pub fn setMutability(self_: *@This(), mutability_: Mutability) void {
+        return objc.msgSend(self_, "setMutability:", void, .{mutability_});
+    }
+};
+
+pub const PipelineBufferDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLPipelineBufferDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), bufferIndex_: ns.UInteger) *PipelineBufferDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *PipelineBufferDescriptor, .{bufferIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), buffer_: ?*PipelineBufferDescriptor, bufferIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ buffer_, bufferIndex_ });
+    }
+};
+
+pub const PointerType = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLPointerType", @This(), Type, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn elementStructType(self_: *@This()) ?*StructType {
+        return objc.msgSend(self_, "elementStructType", ?*StructType, .{});
+    }
+    pub fn elementArrayType(self_: *@This()) ?*ArrayType {
+        return objc.msgSend(self_, "elementArrayType", ?*ArrayType, .{});
+    }
+    pub fn elementType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "elementType", DataType, .{});
+    }
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+    pub fn alignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "alignment", ns.UInteger, .{});
+    }
+    pub fn dataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "dataSize", ns.UInteger, .{});
+    }
+    pub fn elementIsArgumentBuffer(self_: *@This()) bool {
+        return objc.msgSend(self_, "elementIsArgumentBuffer", bool, .{});
+    }
+};
+
+pub const PrimitiveAccelerationStructureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLPrimitiveAccelerationStructureDescriptor", @This(), AccelerationStructureDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn descriptor() *@This() {
+        return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
+    }
+    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(*AccelerationStructureGeometryDescriptor) {
+        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(*AccelerationStructureGeometryDescriptor), .{});
+    }
+    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(*AccelerationStructureGeometryDescriptor)) void {
+        return objc.msgSend(self_, "setGeometryDescriptors:", void, .{geometryDescriptors_});
+    }
+    pub fn motionStartBorderMode(self_: *@This()) MotionBorderMode {
+        return objc.msgSend(self_, "motionStartBorderMode", MotionBorderMode, .{});
+    }
+    pub fn setMotionStartBorderMode(self_: *@This(), motionStartBorderMode_: MotionBorderMode) void {
+        return objc.msgSend(self_, "setMotionStartBorderMode:", void, .{motionStartBorderMode_});
+    }
+    pub fn motionEndBorderMode(self_: *@This()) MotionBorderMode {
+        return objc.msgSend(self_, "motionEndBorderMode", MotionBorderMode, .{});
+    }
+    pub fn setMotionEndBorderMode(self_: *@This(), motionEndBorderMode_: MotionBorderMode) void {
+        return objc.msgSend(self_, "setMotionEndBorderMode:", void, .{motionEndBorderMode_});
+    }
+    pub fn motionStartTime(self_: *@This()) f32 {
+        return objc.msgSend(self_, "motionStartTime", f32, .{});
+    }
+    pub fn setMotionStartTime(self_: *@This(), motionStartTime_: f32) void {
+        return objc.msgSend(self_, "setMotionStartTime:", void, .{motionStartTime_});
+    }
+    pub fn motionEndTime(self_: *@This()) f32 {
+        return objc.msgSend(self_, "motionEndTime", f32, .{});
+    }
+    pub fn setMotionEndTime(self_: *@This(), motionEndTime_: f32) void {
+        return objc.msgSend(self_, "setMotionEndTime:", void, .{motionEndTime_});
+    }
+    pub fn motionKeyframeCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "motionKeyframeCount", ns.UInteger, .{});
+    }
+    pub fn setMotionKeyframeCount(self_: *@This(), motionKeyframeCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMotionKeyframeCount:", void, .{motionKeyframeCount_});
+    }
+};
+
+pub const RasterizationRateLayerArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateLayerArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), layerIndex_: ns.UInteger) ?*RasterizationRateLayerDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", ?*RasterizationRateLayerDescriptor, .{layerIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), layer_: ?*RasterizationRateLayerDescriptor, layerIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ layer_, layerIndex_ });
+    }
+};
+
+pub const RasterizationRateLayerDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateLayerDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithSampleCount(self_: *@This(), sampleCount_: Size) *@This() {
+        return objc.msgSend(self_, "initWithSampleCount:", *@This(), .{sampleCount_});
+    }
+    pub fn initWithSampleCount_horizontal_vertical(self_: *@This(), sampleCount_: Size, horizontal_: *const f32, vertical_: *const f32) *@This() {
+        return objc.msgSend(self_, "initWithSampleCount:horizontal:vertical:", *@This(), .{ sampleCount_, horizontal_, vertical_ });
+    }
+    pub fn sampleCount(self_: *@This()) Size {
+        return objc.msgSend(self_, "sampleCount", Size, .{});
+    }
+    pub fn maxSampleCount(self_: *@This()) Size {
+        return objc.msgSend(self_, "maxSampleCount", Size, .{});
+    }
+    pub fn horizontalSampleStorage(self_: *@This()) *f32 {
+        return objc.msgSend(self_, "horizontalSampleStorage", *f32, .{});
+    }
+    pub fn verticalSampleStorage(self_: *@This()) *f32 {
+        return objc.msgSend(self_, "verticalSampleStorage", *f32, .{});
+    }
+    pub fn horizontal(self_: *@This()) *RasterizationRateSampleArray {
+        return objc.msgSend(self_, "horizontal", *RasterizationRateSampleArray, .{});
+    }
+    pub fn vertical(self_: *@This()) *RasterizationRateSampleArray {
+        return objc.msgSend(self_, "vertical", *RasterizationRateSampleArray, .{});
+    }
+    pub fn setSampleCount(self_: *@This(), sampleCount_: Size) void {
+        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
+    }
+};
+
+pub const RasterizationRateMapDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateMapDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn rasterizationRateMapDescriptorWithScreenSize(screenSize_: Size) *RasterizationRateMapDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:", *RasterizationRateMapDescriptor, .{screenSize_});
+    }
+    pub fn rasterizationRateMapDescriptorWithScreenSize_layer(screenSize_: Size, layer_: *RasterizationRateLayerDescriptor) *RasterizationRateMapDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:layer:", *RasterizationRateMapDescriptor, .{ screenSize_, layer_ });
+    }
+    pub fn rasterizationRateMapDescriptorWithScreenSize_layerCount_layers(screenSize_: Size, layerCount_: ns.UInteger, layers_: **const RasterizationRateLayerDescriptor) *RasterizationRateMapDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:layerCount:layers:", *RasterizationRateMapDescriptor, .{ screenSize_, layerCount_, layers_ });
+    }
+    pub fn layerAtIndex(self_: *@This(), layerIndex_: ns.UInteger) ?*RasterizationRateLayerDescriptor {
+        return objc.msgSend(self_, "layerAtIndex:", ?*RasterizationRateLayerDescriptor, .{layerIndex_});
+    }
+    pub fn setLayer_atIndex(self_: *@This(), layer_: ?*RasterizationRateLayerDescriptor, layerIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setLayer:atIndex:", void, .{ layer_, layerIndex_ });
+    }
+    pub fn layers(self_: *@This()) *RasterizationRateLayerArray {
+        return objc.msgSend(self_, "layers", *RasterizationRateLayerArray, .{});
+    }
+    pub fn screenSize(self_: *@This()) Size {
+        return objc.msgSend(self_, "screenSize", Size, .{});
+    }
+    pub fn setScreenSize(self_: *@This(), screenSize_: Size) void {
+        return objc.msgSend(self_, "setScreenSize:", void, .{screenSize_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn layerCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "layerCount", ns.UInteger, .{});
+    }
+};
+
+pub const RasterizationRateSampleArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateSampleArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *ns.Number {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ns.Number, .{index_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), value_: *ns.Number, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ value_, index_ });
+    }
+};
+
+pub const RenderPassAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn texture(self_: *@This()) ?*Texture {
+        return objc.msgSend(self_, "texture", ?*Texture, .{});
+    }
+    pub fn setTexture(self_: *@This(), texture_: ?*Texture) void {
+        return objc.msgSend(self_, "setTexture:", void, .{texture_});
+    }
+    pub fn level(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "level", ns.UInteger, .{});
+    }
+    pub fn setLevel(self_: *@This(), level_: ns.UInteger) void {
+        return objc.msgSend(self_, "setLevel:", void, .{level_});
+    }
+    pub fn slice(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "slice", ns.UInteger, .{});
+    }
+    pub fn setSlice(self_: *@This(), slice_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSlice:", void, .{slice_});
+    }
+    pub fn depthPlane(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "depthPlane", ns.UInteger, .{});
+    }
+    pub fn setDepthPlane(self_: *@This(), depthPlane_: ns.UInteger) void {
+        return objc.msgSend(self_, "setDepthPlane:", void, .{depthPlane_});
+    }
+    pub fn resolveTexture(self_: *@This()) ?*Texture {
+        return objc.msgSend(self_, "resolveTexture", ?*Texture, .{});
+    }
+    pub fn setResolveTexture(self_: *@This(), resolveTexture_: ?*Texture) void {
+        return objc.msgSend(self_, "setResolveTexture:", void, .{resolveTexture_});
+    }
+    pub fn resolveLevel(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "resolveLevel", ns.UInteger, .{});
+    }
+    pub fn setResolveLevel(self_: *@This(), resolveLevel_: ns.UInteger) void {
+        return objc.msgSend(self_, "setResolveLevel:", void, .{resolveLevel_});
+    }
+    pub fn resolveSlice(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "resolveSlice", ns.UInteger, .{});
+    }
+    pub fn setResolveSlice(self_: *@This(), resolveSlice_: ns.UInteger) void {
+        return objc.msgSend(self_, "setResolveSlice:", void, .{resolveSlice_});
+    }
+    pub fn resolveDepthPlane(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "resolveDepthPlane", ns.UInteger, .{});
+    }
+    pub fn setResolveDepthPlane(self_: *@This(), resolveDepthPlane_: ns.UInteger) void {
+        return objc.msgSend(self_, "setResolveDepthPlane:", void, .{resolveDepthPlane_});
+    }
+    pub fn loadAction(self_: *@This()) LoadAction {
+        return objc.msgSend(self_, "loadAction", LoadAction, .{});
+    }
+    pub fn setLoadAction(self_: *@This(), loadAction_: LoadAction) void {
+        return objc.msgSend(self_, "setLoadAction:", void, .{loadAction_});
+    }
+    pub fn storeAction(self_: *@This()) StoreAction {
+        return objc.msgSend(self_, "storeAction", StoreAction, .{});
+    }
+    pub fn setStoreAction(self_: *@This(), storeAction_: StoreAction) void {
+        return objc.msgSend(self_, "setStoreAction:", void, .{storeAction_});
+    }
+    pub fn storeActionOptions(self_: *@This()) StoreActionOptions {
+        return objc.msgSend(self_, "storeActionOptions", StoreActionOptions, .{});
+    }
+    pub fn setStoreActionOptions(self_: *@This(), storeActionOptions_: StoreActionOptions) void {
+        return objc.msgSend(self_, "setStoreActionOptions:", void, .{storeActionOptions_});
+    }
+};
+
+pub const RenderPassColorAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassColorAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn clearColor(self_: *@This()) ClearColor {
+        return objc.msgSend(self_, "clearColor", ClearColor, .{});
+    }
+    pub fn setClearColor(self_: *@This(), clearColor_: ClearColor) void {
+        return objc.msgSend(self_, "setClearColor:", void, .{clearColor_});
+    }
+};
+
+pub const RenderPassColorAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPassColorAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPassColorAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPassColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const RenderPassDepthAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassDepthAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn clearDepth(self_: *@This()) f64 {
+        return objc.msgSend(self_, "clearDepth", f64, .{});
+    }
+    pub fn setClearDepth(self_: *@This(), clearDepth_: f64) void {
+        return objc.msgSend(self_, "setClearDepth:", void, .{clearDepth_});
+    }
+    pub fn depthResolveFilter(self_: *@This()) MultisampleDepthResolveFilter {
+        return objc.msgSend(self_, "depthResolveFilter", MultisampleDepthResolveFilter, .{});
+    }
+    pub fn setDepthResolveFilter(self_: *@This(), depthResolveFilter_: MultisampleDepthResolveFilter) void {
+        return objc.msgSend(self_, "setDepthResolveFilter:", void, .{depthResolveFilter_});
+    }
+};
+
+pub const RenderPassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn renderPassDescriptor() *RenderPassDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "renderPassDescriptor", *RenderPassDescriptor, .{});
+    }
+    pub fn setSamplePositions_count(self_: *@This(), positions_: ?*const SamplePosition, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSamplePositions:count:", void, .{ positions_, count_ });
+    }
+    pub fn getSamplePositions_count(self_: *@This(), positions_: ?*SamplePosition, count_: ns.UInteger) ns.UInteger {
+        return objc.msgSend(self_, "getSamplePositions:count:", ns.UInteger, .{ positions_, count_ });
+    }
+    pub fn colorAttachments(self_: *@This()) *RenderPassColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *RenderPassColorAttachmentDescriptorArray, .{});
+    }
+    pub fn depthAttachment(self_: *@This()) *RenderPassDepthAttachmentDescriptor {
+        return objc.msgSend(self_, "depthAttachment", *RenderPassDepthAttachmentDescriptor, .{});
+    }
+    pub fn setDepthAttachment(self_: *@This(), depthAttachment_: ?*RenderPassDepthAttachmentDescriptor) void {
+        return objc.msgSend(self_, "setDepthAttachment:", void, .{depthAttachment_});
+    }
+    pub fn stencilAttachment(self_: *@This()) *RenderPassStencilAttachmentDescriptor {
+        return objc.msgSend(self_, "stencilAttachment", *RenderPassStencilAttachmentDescriptor, .{});
+    }
+    pub fn setStencilAttachment(self_: *@This(), stencilAttachment_: ?*RenderPassStencilAttachmentDescriptor) void {
+        return objc.msgSend(self_, "setStencilAttachment:", void, .{stencilAttachment_});
+    }
+    pub fn visibilityResultBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "visibilityResultBuffer", ?*Buffer, .{});
+    }
+    pub fn setVisibilityResultBuffer(self_: *@This(), visibilityResultBuffer_: ?*Buffer) void {
+        return objc.msgSend(self_, "setVisibilityResultBuffer:", void, .{visibilityResultBuffer_});
+    }
+    pub fn renderTargetArrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetArrayLength", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetArrayLength(self_: *@This(), renderTargetArrayLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetArrayLength:", void, .{renderTargetArrayLength_});
+    }
+    pub fn imageblockSampleLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "imageblockSampleLength", ns.UInteger, .{});
+    }
+    pub fn setImageblockSampleLength(self_: *@This(), imageblockSampleLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setImageblockSampleLength:", void, .{imageblockSampleLength_});
+    }
+    pub fn threadgroupMemoryLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryLength", ns.UInteger, .{});
+    }
+    pub fn setThreadgroupMemoryLength(self_: *@This(), threadgroupMemoryLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setThreadgroupMemoryLength:", void, .{threadgroupMemoryLength_});
+    }
+    pub fn tileWidth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileWidth", ns.UInteger, .{});
+    }
+    pub fn setTileWidth(self_: *@This(), tileWidth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTileWidth:", void, .{tileWidth_});
+    }
+    pub fn tileHeight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileHeight", ns.UInteger, .{});
+    }
+    pub fn setTileHeight(self_: *@This(), tileHeight_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTileHeight:", void, .{tileHeight_});
+    }
+    pub fn defaultRasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "defaultRasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setDefaultRasterSampleCount(self_: *@This(), defaultRasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setDefaultRasterSampleCount:", void, .{defaultRasterSampleCount_});
+    }
+    pub fn renderTargetWidth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetWidth", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetWidth(self_: *@This(), renderTargetWidth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetWidth:", void, .{renderTargetWidth_});
+    }
+    pub fn renderTargetHeight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "renderTargetHeight", ns.UInteger, .{});
+    }
+    pub fn setRenderTargetHeight(self_: *@This(), renderTargetHeight_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRenderTargetHeight:", void, .{renderTargetHeight_});
+    }
+    pub fn rasterizationRateMap(self_: *@This()) ?*RasterizationRateMap {
+        return objc.msgSend(self_, "rasterizationRateMap", ?*RasterizationRateMap, .{});
+    }
+    pub fn setRasterizationRateMap(self_: *@This(), rasterizationRateMap_: ?*RasterizationRateMap) void {
+        return objc.msgSend(self_, "setRasterizationRateMap:", void, .{rasterizationRateMap_});
+    }
+    pub fn sampleBufferAttachments(self_: *@This()) *RenderPassSampleBufferAttachmentDescriptorArray {
+        return objc.msgSend(self_, "sampleBufferAttachments", *RenderPassSampleBufferAttachmentDescriptorArray, .{});
+    }
+    pub fn visibilityResultType(self_: *@This()) VisibilityResultType {
+        return objc.msgSend(self_, "visibilityResultType", VisibilityResultType, .{});
+    }
+    pub fn setVisibilityResultType(self_: *@This(), visibilityResultType_: VisibilityResultType) void {
+        return objc.msgSend(self_, "setVisibilityResultType:", void, .{visibilityResultType_});
+    }
+    pub fn supportColorAttachmentMapping(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportColorAttachmentMapping", bool, .{});
+    }
+    pub fn setSupportColorAttachmentMapping(self_: *@This(), supportColorAttachmentMapping_: bool) void {
+        return objc.msgSend(self_, "setSupportColorAttachmentMapping:", void, .{supportColorAttachmentMapping_});
+    }
+};
+
+pub const RenderPassSampleBufferAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
+        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    }
+    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
+        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    }
+    pub fn startOfVertexSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfVertexSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfVertexSampleIndex(self_: *@This(), startOfVertexSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfVertexSampleIndex:", void, .{startOfVertexSampleIndex_});
+    }
+    pub fn endOfVertexSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfVertexSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfVertexSampleIndex(self_: *@This(), endOfVertexSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfVertexSampleIndex:", void, .{endOfVertexSampleIndex_});
+    }
+    pub fn startOfFragmentSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfFragmentSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfFragmentSampleIndex(self_: *@This(), startOfFragmentSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfFragmentSampleIndex:", void, .{startOfFragmentSampleIndex_});
+    }
+    pub fn endOfFragmentSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfFragmentSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfFragmentSampleIndex(self_: *@This(), endOfFragmentSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfFragmentSampleIndex:", void, .{endOfFragmentSampleIndex_});
+    }
+};
+
+pub const RenderPassSampleBufferAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPassSampleBufferAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const RenderPassStencilAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPassStencilAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn clearStencil(self_: *@This()) u32 {
+        return objc.msgSend(self_, "clearStencil", u32, .{});
+    }
+    pub fn setClearStencil(self_: *@This(), clearStencil_: u32) void {
+        return objc.msgSend(self_, "setClearStencil:", void, .{clearStencil_});
+    }
+    pub fn stencilResolveFilter(self_: *@This()) MultisampleStencilResolveFilter {
+        return objc.msgSend(self_, "stencilResolveFilter", MultisampleStencilResolveFilter, .{});
+    }
+    pub fn setStencilResolveFilter(self_: *@This(), stencilResolveFilter_: MultisampleStencilResolveFilter) void {
+        return objc.msgSend(self_, "setStencilResolveFilter:", void, .{stencilResolveFilter_});
+    }
+};
+
+pub const RenderPipelineColorAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineColorAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn pixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    }
+    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    }
+    pub fn isBlendingEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isBlendingEnabled", bool, .{});
+    }
+    pub fn setBlendingEnabled(self_: *@This(), blendingEnabled_: bool) void {
+        return objc.msgSend(self_, "setBlendingEnabled:", void, .{blendingEnabled_});
+    }
+    pub fn sourceRGBBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "sourceRGBBlendFactor", BlendFactor, .{});
+    }
+    pub fn setSourceRGBBlendFactor(self_: *@This(), sourceRGBBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setSourceRGBBlendFactor:", void, .{sourceRGBBlendFactor_});
+    }
+    pub fn destinationRGBBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "destinationRGBBlendFactor", BlendFactor, .{});
+    }
+    pub fn setDestinationRGBBlendFactor(self_: *@This(), destinationRGBBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setDestinationRGBBlendFactor:", void, .{destinationRGBBlendFactor_});
+    }
+    pub fn rgbBlendOperation(self_: *@This()) BlendOperation {
+        return objc.msgSend(self_, "rgbBlendOperation", BlendOperation, .{});
+    }
+    pub fn setRgbBlendOperation(self_: *@This(), rgbBlendOperation_: BlendOperation) void {
+        return objc.msgSend(self_, "setRgbBlendOperation:", void, .{rgbBlendOperation_});
+    }
+    pub fn sourceAlphaBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "sourceAlphaBlendFactor", BlendFactor, .{});
+    }
+    pub fn setSourceAlphaBlendFactor(self_: *@This(), sourceAlphaBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setSourceAlphaBlendFactor:", void, .{sourceAlphaBlendFactor_});
+    }
+    pub fn destinationAlphaBlendFactor(self_: *@This()) BlendFactor {
+        return objc.msgSend(self_, "destinationAlphaBlendFactor", BlendFactor, .{});
+    }
+    pub fn setDestinationAlphaBlendFactor(self_: *@This(), destinationAlphaBlendFactor_: BlendFactor) void {
+        return objc.msgSend(self_, "setDestinationAlphaBlendFactor:", void, .{destinationAlphaBlendFactor_});
+    }
+    pub fn alphaBlendOperation(self_: *@This()) BlendOperation {
+        return objc.msgSend(self_, "alphaBlendOperation", BlendOperation, .{});
+    }
+    pub fn setAlphaBlendOperation(self_: *@This(), alphaBlendOperation_: BlendOperation) void {
+        return objc.msgSend(self_, "setAlphaBlendOperation:", void, .{alphaBlendOperation_});
+    }
+    pub fn writeMask(self_: *@This()) ColorWriteMask {
+        return objc.msgSend(self_, "writeMask", ColorWriteMask, .{});
+    }
+    pub fn setWriteMask(self_: *@This(), writeMask_: ColorWriteMask) void {
+        return objc.msgSend(self_, "setWriteMask:", void, .{writeMask_});
+    }
+};
+
+pub const RenderPipelineColorAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPipelineColorAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPipelineColorAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPipelineColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const RenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn vertexFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "vertexFunction", ?*Function, .{});
+    }
+    pub fn setVertexFunction(self_: *@This(), vertexFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setVertexFunction:", void, .{vertexFunction_});
+    }
+    pub fn fragmentFunction(self_: *@This()) ?*Function {
+        return objc.msgSend(self_, "fragmentFunction", ?*Function, .{});
+    }
+    pub fn setFragmentFunction(self_: *@This(), fragmentFunction_: ?*Function) void {
+        return objc.msgSend(self_, "setFragmentFunction:", void, .{fragmentFunction_});
+    }
+    pub fn vertexDescriptor(self_: *@This()) ?*VertexDescriptor {
+        return objc.msgSend(self_, "vertexDescriptor", ?*VertexDescriptor, .{});
+    }
+    pub fn setVertexDescriptor(self_: *@This(), vertexDescriptor_: ?*VertexDescriptor) void {
+        return objc.msgSend(self_, "setVertexDescriptor:", void, .{vertexDescriptor_});
+    }
+    pub fn sampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
+    }
+    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn isAlphaToCoverageEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isAlphaToCoverageEnabled", bool, .{});
+    }
+    pub fn setAlphaToCoverageEnabled(self_: *@This(), alphaToCoverageEnabled_: bool) void {
+        return objc.msgSend(self_, "setAlphaToCoverageEnabled:", void, .{alphaToCoverageEnabled_});
+    }
+    pub fn isAlphaToOneEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isAlphaToOneEnabled", bool, .{});
+    }
+    pub fn setAlphaToOneEnabled(self_: *@This(), alphaToOneEnabled_: bool) void {
+        return objc.msgSend(self_, "setAlphaToOneEnabled:", void, .{alphaToOneEnabled_});
+    }
+    pub fn isRasterizationEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
+    }
+    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
+        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
+    }
+    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *RenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *RenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn depthAttachmentPixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "depthAttachmentPixelFormat", PixelFormat, .{});
+    }
+    pub fn setDepthAttachmentPixelFormat(self_: *@This(), depthAttachmentPixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setDepthAttachmentPixelFormat:", void, .{depthAttachmentPixelFormat_});
+    }
+    pub fn stencilAttachmentPixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "stencilAttachmentPixelFormat", PixelFormat, .{});
+    }
+    pub fn setStencilAttachmentPixelFormat(self_: *@This(), stencilAttachmentPixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setStencilAttachmentPixelFormat:", void, .{stencilAttachmentPixelFormat_});
+    }
+    pub fn inputPrimitiveTopology(self_: *@This()) PrimitiveTopologyClass {
+        return objc.msgSend(self_, "inputPrimitiveTopology", PrimitiveTopologyClass, .{});
+    }
+    pub fn setInputPrimitiveTopology(self_: *@This(), inputPrimitiveTopology_: PrimitiveTopologyClass) void {
+        return objc.msgSend(self_, "setInputPrimitiveTopology:", void, .{inputPrimitiveTopology_});
+    }
+    pub fn tessellationPartitionMode(self_: *@This()) TessellationPartitionMode {
+        return objc.msgSend(self_, "tessellationPartitionMode", TessellationPartitionMode, .{});
+    }
+    pub fn setTessellationPartitionMode(self_: *@This(), tessellationPartitionMode_: TessellationPartitionMode) void {
+        return objc.msgSend(self_, "setTessellationPartitionMode:", void, .{tessellationPartitionMode_});
+    }
+    pub fn maxTessellationFactor(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTessellationFactor", ns.UInteger, .{});
+    }
+    pub fn setMaxTessellationFactor(self_: *@This(), maxTessellationFactor_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTessellationFactor:", void, .{maxTessellationFactor_});
+    }
+    pub fn isTessellationFactorScaleEnabled(self_: *@This()) bool {
+        return objc.msgSend(self_, "isTessellationFactorScaleEnabled", bool, .{});
+    }
+    pub fn setTessellationFactorScaleEnabled(self_: *@This(), tessellationFactorScaleEnabled_: bool) void {
+        return objc.msgSend(self_, "setTessellationFactorScaleEnabled:", void, .{tessellationFactorScaleEnabled_});
+    }
+    pub fn tessellationFactorFormat(self_: *@This()) TessellationFactorFormat {
+        return objc.msgSend(self_, "tessellationFactorFormat", TessellationFactorFormat, .{});
+    }
+    pub fn setTessellationFactorFormat(self_: *@This(), tessellationFactorFormat_: TessellationFactorFormat) void {
+        return objc.msgSend(self_, "setTessellationFactorFormat:", void, .{tessellationFactorFormat_});
+    }
+    pub fn tessellationControlPointIndexType(self_: *@This()) TessellationControlPointIndexType {
+        return objc.msgSend(self_, "tessellationControlPointIndexType", TessellationControlPointIndexType, .{});
+    }
+    pub fn setTessellationControlPointIndexType(self_: *@This(), tessellationControlPointIndexType_: TessellationControlPointIndexType) void {
+        return objc.msgSend(self_, "setTessellationControlPointIndexType:", void, .{tessellationControlPointIndexType_});
+    }
+    pub fn tessellationFactorStepFunction(self_: *@This()) TessellationFactorStepFunction {
+        return objc.msgSend(self_, "tessellationFactorStepFunction", TessellationFactorStepFunction, .{});
+    }
+    pub fn setTessellationFactorStepFunction(self_: *@This(), tessellationFactorStepFunction_: TessellationFactorStepFunction) void {
+        return objc.msgSend(self_, "setTessellationFactorStepFunction:", void, .{tessellationFactorStepFunction_});
+    }
+    pub fn tessellationOutputWindingOrder(self_: *@This()) Winding {
+        return objc.msgSend(self_, "tessellationOutputWindingOrder", Winding, .{});
+    }
+    pub fn setTessellationOutputWindingOrder(self_: *@This(), tessellationOutputWindingOrder_: Winding) void {
+        return objc.msgSend(self_, "setTessellationOutputWindingOrder:", void, .{tessellationOutputWindingOrder_});
+    }
+    pub fn vertexBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "vertexBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn fragmentBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "fragmentBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
+    }
+    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
+        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
+    }
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+    pub fn vertexPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "vertexPreloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setVertexPreloadedLibraries(self_: *@This(), vertexPreloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setVertexPreloadedLibraries:", void, .{vertexPreloadedLibraries_});
+    }
+    pub fn fragmentPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "fragmentPreloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setFragmentPreloadedLibraries(self_: *@This(), fragmentPreloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setFragmentPreloadedLibraries:", void, .{fragmentPreloadedLibraries_});
+    }
+    pub fn vertexLinkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "vertexLinkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setVertexLinkedFunctions(self_: *@This(), vertexLinkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setVertexLinkedFunctions:", void, .{vertexLinkedFunctions_});
+    }
+    pub fn fragmentLinkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "fragmentLinkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setFragmentLinkedFunctions(self_: *@This(), fragmentLinkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setFragmentLinkedFunctions:", void, .{fragmentLinkedFunctions_});
+    }
+    pub fn supportAddingVertexBinaryFunctions(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportAddingVertexBinaryFunctions", bool, .{});
+    }
+    pub fn setSupportAddingVertexBinaryFunctions(self_: *@This(), supportAddingVertexBinaryFunctions_: bool) void {
+        return objc.msgSend(self_, "setSupportAddingVertexBinaryFunctions:", void, .{supportAddingVertexBinaryFunctions_});
+    }
+    pub fn supportAddingFragmentBinaryFunctions(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportAddingFragmentBinaryFunctions", bool, .{});
+    }
+    pub fn setSupportAddingFragmentBinaryFunctions(self_: *@This(), supportAddingFragmentBinaryFunctions_: bool) void {
+        return objc.msgSend(self_, "setSupportAddingFragmentBinaryFunctions:", void, .{supportAddingFragmentBinaryFunctions_});
+    }
+    pub fn maxVertexCallStackDepth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxVertexCallStackDepth", ns.UInteger, .{});
+    }
+    pub fn setMaxVertexCallStackDepth(self_: *@This(), maxVertexCallStackDepth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxVertexCallStackDepth:", void, .{maxVertexCallStackDepth_});
+    }
+    pub fn maxFragmentCallStackDepth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxFragmentCallStackDepth", ns.UInteger, .{});
+    }
+    pub fn setMaxFragmentCallStackDepth(self_: *@This(), maxFragmentCallStackDepth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxFragmentCallStackDepth:", void, .{maxFragmentCallStackDepth_});
+    }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn setShaderValidation(self_: *@This(), shaderValidation_: ShaderValidation) void {
+        return objc.msgSend(self_, "setShaderValidation:", void, .{shaderValidation_});
+    }
+};
+
+pub const RenderPipelineFunctionsDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineFunctionsDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setVertexAdditionalBinaryFunctions:", void, .{vertexAdditionalBinaryFunctions_});
+    }
+    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setFragmentAdditionalBinaryFunctions:", void, .{fragmentAdditionalBinaryFunctions_});
+    }
+    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
+        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    }
+    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setTileAdditionalBinaryFunctions:", void, .{tileAdditionalBinaryFunctions_});
+    }
+};
+
+pub const RenderPipelineReflection = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineReflection", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexBindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "vertexBindings", *ns.Array(*Binding), .{});
+    }
+    pub fn fragmentBindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "fragmentBindings", *ns.Array(*Binding), .{});
+    }
+    pub fn tileBindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "tileBindings", *ns.Array(*Binding), .{});
+    }
+    pub fn objectBindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "objectBindings", *ns.Array(*Binding), .{});
+    }
+    pub fn meshBindings(self_: *@This()) *ns.Array(*Binding) {
+        return objc.msgSend(self_, "meshBindings", *ns.Array(*Binding), .{});
+    }
+    pub fn vertexArguments(self_: *@This()) ?*ns.Array(*Argument) {
+        return objc.msgSend(self_, "vertexArguments", ?*ns.Array(*Argument), .{});
+    }
+    pub fn fragmentArguments(self_: *@This()) ?*ns.Array(*Argument) {
+        return objc.msgSend(self_, "fragmentArguments", ?*ns.Array(*Argument), .{});
+    }
+    pub fn tileArguments(self_: *@This()) ?*ns.Array(*Argument) {
+        return objc.msgSend(self_, "tileArguments", ?*ns.Array(*Argument), .{});
+    }
+};
+
+pub const ResidencySetDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLResidencySetDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn initialCapacity(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "initialCapacity", ns.UInteger, .{});
+    }
+    pub fn setInitialCapacity(self_: *@This(), initialCapacity_: ns.UInteger) void {
+        return objc.msgSend(self_, "setInitialCapacity:", void, .{initialCapacity_});
+    }
+};
+
+pub const ResourceStatePassDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn resourceStatePassDescriptor() *ResourceStatePassDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "resourceStatePassDescriptor", *ResourceStatePassDescriptor, .{});
+    }
+    pub fn sampleBufferAttachments(self_: *@This()) *ResourceStatePassSampleBufferAttachmentDescriptorArray {
+        return objc.msgSend(self_, "sampleBufferAttachments", *ResourceStatePassSampleBufferAttachmentDescriptorArray, .{});
+    }
+};
+
+pub const ResourceStatePassSampleBufferAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
+        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    }
+    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
+        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    }
+    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
+    }
+    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
+    }
+    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
+    }
+};
+
+pub const ResourceStatePassSampleBufferAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *ResourceStatePassSampleBufferAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ResourceStatePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*ResourceStatePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const ResourceViewPoolDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLResourceViewPoolDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn resourceViewCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "resourceViewCount", ns.UInteger, .{});
+    }
+    pub fn setResourceViewCount(self_: *@This(), resourceViewCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setResourceViewCount:", void, .{resourceViewCount_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const SamplerDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLSamplerDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn minFilter(self_: *@This()) SamplerMinMagFilter {
+        return objc.msgSend(self_, "minFilter", SamplerMinMagFilter, .{});
+    }
+    pub fn setMinFilter(self_: *@This(), minFilter_: SamplerMinMagFilter) void {
+        return objc.msgSend(self_, "setMinFilter:", void, .{minFilter_});
+    }
+    pub fn magFilter(self_: *@This()) SamplerMinMagFilter {
+        return objc.msgSend(self_, "magFilter", SamplerMinMagFilter, .{});
+    }
+    pub fn setMagFilter(self_: *@This(), magFilter_: SamplerMinMagFilter) void {
+        return objc.msgSend(self_, "setMagFilter:", void, .{magFilter_});
+    }
+    pub fn mipFilter(self_: *@This()) SamplerMipFilter {
+        return objc.msgSend(self_, "mipFilter", SamplerMipFilter, .{});
+    }
+    pub fn setMipFilter(self_: *@This(), mipFilter_: SamplerMipFilter) void {
+        return objc.msgSend(self_, "setMipFilter:", void, .{mipFilter_});
+    }
+    pub fn maxAnisotropy(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxAnisotropy", ns.UInteger, .{});
+    }
+    pub fn setMaxAnisotropy(self_: *@This(), maxAnisotropy_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxAnisotropy:", void, .{maxAnisotropy_});
+    }
+    pub fn sAddressMode(self_: *@This()) SamplerAddressMode {
+        return objc.msgSend(self_, "sAddressMode", SamplerAddressMode, .{});
+    }
+    pub fn setSAddressMode(self_: *@This(), sAddressMode_: SamplerAddressMode) void {
+        return objc.msgSend(self_, "setSAddressMode:", void, .{sAddressMode_});
+    }
+    pub fn tAddressMode(self_: *@This()) SamplerAddressMode {
+        return objc.msgSend(self_, "tAddressMode", SamplerAddressMode, .{});
+    }
+    pub fn setTAddressMode(self_: *@This(), tAddressMode_: SamplerAddressMode) void {
+        return objc.msgSend(self_, "setTAddressMode:", void, .{tAddressMode_});
+    }
+    pub fn rAddressMode(self_: *@This()) SamplerAddressMode {
+        return objc.msgSend(self_, "rAddressMode", SamplerAddressMode, .{});
+    }
+    pub fn setRAddressMode(self_: *@This(), rAddressMode_: SamplerAddressMode) void {
+        return objc.msgSend(self_, "setRAddressMode:", void, .{rAddressMode_});
+    }
+    pub fn borderColor(self_: *@This()) SamplerBorderColor {
+        return objc.msgSend(self_, "borderColor", SamplerBorderColor, .{});
+    }
+    pub fn setBorderColor(self_: *@This(), borderColor_: SamplerBorderColor) void {
+        return objc.msgSend(self_, "setBorderColor:", void, .{borderColor_});
+    }
+    pub fn reductionMode(self_: *@This()) SamplerReductionMode {
+        return objc.msgSend(self_, "reductionMode", SamplerReductionMode, .{});
+    }
+    pub fn setReductionMode(self_: *@This(), reductionMode_: SamplerReductionMode) void {
+        return objc.msgSend(self_, "setReductionMode:", void, .{reductionMode_});
+    }
+    pub fn normalizedCoordinates(self_: *@This()) bool {
+        return objc.msgSend(self_, "normalizedCoordinates", bool, .{});
+    }
+    pub fn setNormalizedCoordinates(self_: *@This(), normalizedCoordinates_: bool) void {
+        return objc.msgSend(self_, "setNormalizedCoordinates:", void, .{normalizedCoordinates_});
+    }
+    pub fn lodMinClamp(self_: *@This()) f32 {
+        return objc.msgSend(self_, "lodMinClamp", f32, .{});
+    }
+    pub fn setLodMinClamp(self_: *@This(), lodMinClamp_: f32) void {
+        return objc.msgSend(self_, "setLodMinClamp:", void, .{lodMinClamp_});
+    }
+    pub fn lodMaxClamp(self_: *@This()) f32 {
+        return objc.msgSend(self_, "lodMaxClamp", f32, .{});
+    }
+    pub fn setLodMaxClamp(self_: *@This(), lodMaxClamp_: f32) void {
+        return objc.msgSend(self_, "setLodMaxClamp:", void, .{lodMaxClamp_});
+    }
+    pub fn lodAverage(self_: *@This()) bool {
+        return objc.msgSend(self_, "lodAverage", bool, .{});
+    }
+    pub fn setLodAverage(self_: *@This(), lodAverage_: bool) void {
+        return objc.msgSend(self_, "setLodAverage:", void, .{lodAverage_});
+    }
+    pub fn lodBias(self_: *@This()) f32 {
+        return objc.msgSend(self_, "lodBias", f32, .{});
+    }
+    pub fn setLodBias(self_: *@This(), lodBias_: f32) void {
+        return objc.msgSend(self_, "setLodBias:", void, .{lodBias_});
+    }
+    pub fn compareFunction(self_: *@This()) CompareFunction {
+        return objc.msgSend(self_, "compareFunction", CompareFunction, .{});
+    }
+    pub fn setCompareFunction(self_: *@This(), compareFunction_: CompareFunction) void {
+        return objc.msgSend(self_, "setCompareFunction:", void, .{compareFunction_});
+    }
+    pub fn supportArgumentBuffers(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportArgumentBuffers", bool, .{});
+    }
+    pub fn setSupportArgumentBuffers(self_: *@This(), supportArgumentBuffers_: bool) void {
+        return objc.msgSend(self_, "setSupportArgumentBuffers:", void, .{supportArgumentBuffers_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const SharedEventHandle = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLSharedEventHandle", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+};
+
+pub const SharedEventListener = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLSharedEventListener", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithDispatchQueue(self_: *@This(), dispatchQueue_: dispatch_queue_t) *@This() {
+        return objc.msgSend(self_, "initWithDispatchQueue:", *@This(), .{dispatchQueue_});
+    }
+    pub fn sharedListener() *SharedEventListener {
+        return objc.msgSend(@This().InternalInfo.class(), "sharedListener", *SharedEventListener, .{});
+    }
+    pub fn dispatchQueue(self_: *@This()) dispatch_queue_t {
+        return objc.msgSend(self_, "dispatchQueue", dispatch_queue_t, .{});
+    }
+};
+
+pub const SharedTextureHandle = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLSharedTextureHandle", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+};
+
+pub const StageInputOutputDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLStageInputOutputDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn stageInputOutputDescriptor() *StageInputOutputDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "stageInputOutputDescriptor", *StageInputOutputDescriptor, .{});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn layouts(self_: *@This()) *BufferLayoutDescriptorArray {
+        return objc.msgSend(self_, "layouts", *BufferLayoutDescriptorArray, .{});
+    }
+    pub fn attributes(self_: *@This()) *AttributeDescriptorArray {
+        return objc.msgSend(self_, "attributes", *AttributeDescriptorArray, .{});
+    }
+    pub fn indexType(self_: *@This()) IndexType {
+        return objc.msgSend(self_, "indexType", IndexType, .{});
+    }
+    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
+        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
+    }
+    pub fn indexBufferIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "indexBufferIndex", ns.UInteger, .{});
+    }
+    pub fn setIndexBufferIndex(self_: *@This(), indexBufferIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setIndexBufferIndex:", void, .{indexBufferIndex_});
+    }
+};
+
+pub const StencilDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLStencilDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn stencilCompareFunction(self_: *@This()) CompareFunction {
+        return objc.msgSend(self_, "stencilCompareFunction", CompareFunction, .{});
+    }
+    pub fn setStencilCompareFunction(self_: *@This(), stencilCompareFunction_: CompareFunction) void {
+        return objc.msgSend(self_, "setStencilCompareFunction:", void, .{stencilCompareFunction_});
+    }
+    pub fn stencilFailureOperation(self_: *@This()) StencilOperation {
+        return objc.msgSend(self_, "stencilFailureOperation", StencilOperation, .{});
+    }
+    pub fn setStencilFailureOperation(self_: *@This(), stencilFailureOperation_: StencilOperation) void {
+        return objc.msgSend(self_, "setStencilFailureOperation:", void, .{stencilFailureOperation_});
+    }
+    pub fn depthFailureOperation(self_: *@This()) StencilOperation {
+        return objc.msgSend(self_, "depthFailureOperation", StencilOperation, .{});
+    }
+    pub fn setDepthFailureOperation(self_: *@This(), depthFailureOperation_: StencilOperation) void {
+        return objc.msgSend(self_, "setDepthFailureOperation:", void, .{depthFailureOperation_});
+    }
+    pub fn depthStencilPassOperation(self_: *@This()) StencilOperation {
+        return objc.msgSend(self_, "depthStencilPassOperation", StencilOperation, .{});
+    }
+    pub fn setDepthStencilPassOperation(self_: *@This(), depthStencilPassOperation_: StencilOperation) void {
+        return objc.msgSend(self_, "setDepthStencilPassOperation:", void, .{depthStencilPassOperation_});
+    }
+    pub fn readMask(self_: *@This()) u32 {
+        return objc.msgSend(self_, "readMask", u32, .{});
+    }
+    pub fn setReadMask(self_: *@This(), readMask_: u32) void {
+        return objc.msgSend(self_, "setReadMask:", void, .{readMask_});
+    }
+    pub fn writeMask(self_: *@This()) u32 {
+        return objc.msgSend(self_, "writeMask", u32, .{});
+    }
+    pub fn setWriteMask(self_: *@This(), writeMask_: u32) void {
+        return objc.msgSend(self_, "setWriteMask:", void, .{writeMask_});
+    }
+};
+
+pub const StitchedLibraryDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLStitchedLibraryDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn functionGraphs(self_: *@This()) *ns.Array(*FunctionStitchingGraph) {
+        return objc.msgSend(self_, "functionGraphs", *ns.Array(*FunctionStitchingGraph), .{});
+    }
+    pub fn setFunctionGraphs(self_: *@This(), functionGraphs_: *ns.Array(*FunctionStitchingGraph)) void {
+        return objc.msgSend(self_, "setFunctionGraphs:", void, .{functionGraphs_});
+    }
+    pub fn functions(self_: *@This()) *ns.Array(*Function) {
+        return objc.msgSend(self_, "functions", *ns.Array(*Function), .{});
+    }
+    pub fn setFunctions(self_: *@This(), functions_: *ns.Array(*Function)) void {
+        return objc.msgSend(self_, "setFunctions:", void, .{functions_});
+    }
+    pub fn binaryArchives(self_: *@This()) *ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", *ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: *ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+    pub fn options(self_: *@This()) StitchedLibraryOptions {
+        return objc.msgSend(self_, "options", StitchedLibraryOptions, .{});
+    }
+    pub fn setOptions(self_: *@This(), options_: StitchedLibraryOptions) void {
+        return objc.msgSend(self_, "setOptions:", void, .{options_});
+    }
+};
+
+pub const StructMember = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLStructMember", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn structType(self_: *@This()) ?*StructType {
+        return objc.msgSend(self_, "structType", ?*StructType, .{});
+    }
+    pub fn arrayType(self_: *@This()) ?*ArrayType {
+        return objc.msgSend(self_, "arrayType", ?*ArrayType, .{});
+    }
+    pub fn textureReferenceType(self_: *@This()) ?*TextureReferenceType {
+        return objc.msgSend(self_, "textureReferenceType", ?*TextureReferenceType, .{});
+    }
+    pub fn pointerType(self_: *@This()) ?*PointerType {
+        return objc.msgSend(self_, "pointerType", ?*PointerType, .{});
+    }
+    pub fn tensorReferenceType(self_: *@This()) ?*TensorReferenceType {
+        return objc.msgSend(self_, "tensorReferenceType", ?*TensorReferenceType, .{});
+    }
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn offset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "offset", ns.UInteger, .{});
+    }
+    pub fn dataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "dataType", DataType, .{});
+    }
+    pub fn argumentIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "argumentIndex", ns.UInteger, .{});
+    }
+};
+
+pub const StructType = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLStructType", @This(), Type, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn memberByName(self_: *@This(), name_: *ns.String) ?*StructMember {
+        return objc.msgSend(self_, "memberByName:", ?*StructMember, .{name_});
+    }
+    pub fn members(self_: *@This()) *ns.Array(*StructMember) {
+        return objc.msgSend(self_, "members", *ns.Array(*StructMember), .{});
+    }
+};
+
+pub const TensorDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTensorDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn dimensions(self_: *@This()) *TensorExtents {
+        return objc.msgSend(self_, "dimensions", *TensorExtents, .{});
+    }
+    pub fn setDimensions(self_: *@This(), dimensions_: *TensorExtents) void {
+        return objc.msgSend(self_, "setDimensions:", void, .{dimensions_});
+    }
+    pub fn strides(self_: *@This()) ?*TensorExtents {
+        return objc.msgSend(self_, "strides", ?*TensorExtents, .{});
+    }
+    pub fn setStrides(self_: *@This(), strides_: ?*TensorExtents) void {
+        return objc.msgSend(self_, "setStrides:", void, .{strides_});
+    }
+    pub fn dataType(self_: *@This()) TensorDataType {
+        return objc.msgSend(self_, "dataType", TensorDataType, .{});
+    }
+    pub fn setDataType(self_: *@This(), dataType_: TensorDataType) void {
+        return objc.msgSend(self_, "setDataType:", void, .{dataType_});
+    }
+    pub fn usage(self_: *@This()) TensorUsage {
+        return objc.msgSend(self_, "usage", TensorUsage, .{});
+    }
+    pub fn setUsage(self_: *@This(), usage_: TensorUsage) void {
+        return objc.msgSend(self_, "setUsage:", void, .{usage_});
+    }
+    pub fn resourceOptions(self_: *@This()) ResourceOptions {
+        return objc.msgSend(self_, "resourceOptions", ResourceOptions, .{});
+    }
+    pub fn setResourceOptions(self_: *@This(), resourceOptions_: ResourceOptions) void {
+        return objc.msgSend(self_, "setResourceOptions:", void, .{resourceOptions_});
+    }
+    pub fn cpuCacheMode(self_: *@This()) CPUCacheMode {
+        return objc.msgSend(self_, "cpuCacheMode", CPUCacheMode, .{});
+    }
+    pub fn setCpuCacheMode(self_: *@This(), cpuCacheMode_: CPUCacheMode) void {
+        return objc.msgSend(self_, "setCpuCacheMode:", void, .{cpuCacheMode_});
+    }
+    pub fn storageMode(self_: *@This()) StorageMode {
+        return objc.msgSend(self_, "storageMode", StorageMode, .{});
+    }
+    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
+        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
+    }
+    pub fn hazardTrackingMode(self_: *@This()) HazardTrackingMode {
+        return objc.msgSend(self_, "hazardTrackingMode", HazardTrackingMode, .{});
+    }
+    pub fn setHazardTrackingMode(self_: *@This(), hazardTrackingMode_: HazardTrackingMode) void {
+        return objc.msgSend(self_, "setHazardTrackingMode:", void, .{hazardTrackingMode_});
+    }
+};
+
+pub const TensorExtents = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTensorExtents", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn initWithRank_values(self_: *@This(), rank_: ns.UInteger, values_: ?*const ns.Integer) *@This() {
+        return objc.msgSend(self_, "initWithRank:values:", *@This(), .{ rank_, values_ });
+    }
+    pub fn extentAtDimensionIndex(self_: *@This(), dimensionIndex_: ns.UInteger) ns.Integer {
+        return objc.msgSend(self_, "extentAtDimensionIndex:", ns.Integer, .{dimensionIndex_});
+    }
+    pub fn rank(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rank", ns.UInteger, .{});
+    }
+};
+
+pub const TensorReferenceType = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTensorReferenceType", @This(), Type, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn tensorDataType(self_: *@This()) TensorDataType {
+        return objc.msgSend(self_, "tensorDataType", TensorDataType, .{});
+    }
+    pub fn indexType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "indexType", DataType, .{});
+    }
+    pub fn dimensions(self_: *@This()) ?*TensorExtents {
+        return objc.msgSend(self_, "dimensions", ?*TensorExtents, .{});
+    }
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+};
+
+pub const TextureDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTextureDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn texture2DDescriptorWithPixelFormat_width_height_mipmapped(pixelFormat_: PixelFormat, width_: ns.UInteger, height_: ns.UInteger, mipmapped_: bool) *TextureDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "texture2DDescriptorWithPixelFormat:width:height:mipmapped:", *TextureDescriptor, .{ pixelFormat_, width_, height_, mipmapped_ });
+    }
+    pub fn textureCubeDescriptorWithPixelFormat_size_mipmapped(pixelFormat_: PixelFormat, size_: ns.UInteger, mipmapped_: bool) *TextureDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "textureCubeDescriptorWithPixelFormat:size:mipmapped:", *TextureDescriptor, .{ pixelFormat_, size_, mipmapped_ });
+    }
+    pub fn textureBufferDescriptorWithPixelFormat_width_resourceOptions_usage(pixelFormat_: PixelFormat, width_: ns.UInteger, resourceOptions_: ResourceOptions, usage_: TextureUsage) *TextureDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "textureBufferDescriptorWithPixelFormat:width:resourceOptions:usage:", *TextureDescriptor, .{ pixelFormat_, width_, resourceOptions_, usage_ });
+    }
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
+    }
+    pub fn setTextureType(self_: *@This(), textureType_: TextureType) void {
+        return objc.msgSend(self_, "setTextureType:", void, .{textureType_});
+    }
+    pub fn pixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    }
+    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    }
+    pub fn width(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "width", ns.UInteger, .{});
+    }
+    pub fn setWidth(self_: *@This(), width_: ns.UInteger) void {
+        return objc.msgSend(self_, "setWidth:", void, .{width_});
+    }
+    pub fn height(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "height", ns.UInteger, .{});
+    }
+    pub fn setHeight(self_: *@This(), height_: ns.UInteger) void {
+        return objc.msgSend(self_, "setHeight:", void, .{height_});
+    }
+    pub fn depth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "depth", ns.UInteger, .{});
+    }
+    pub fn setDepth(self_: *@This(), depth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setDepth:", void, .{depth_});
+    }
+    pub fn mipmapLevelCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "mipmapLevelCount", ns.UInteger, .{});
+    }
+    pub fn setMipmapLevelCount(self_: *@This(), mipmapLevelCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMipmapLevelCount:", void, .{mipmapLevelCount_});
+    }
+    pub fn sampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
+    }
+    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
+    }
+    pub fn arrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
+    }
+    pub fn setArrayLength(self_: *@This(), arrayLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "setArrayLength:", void, .{arrayLength_});
+    }
+    pub fn resourceOptions(self_: *@This()) ResourceOptions {
+        return objc.msgSend(self_, "resourceOptions", ResourceOptions, .{});
+    }
+    pub fn setResourceOptions(self_: *@This(), resourceOptions_: ResourceOptions) void {
+        return objc.msgSend(self_, "setResourceOptions:", void, .{resourceOptions_});
+    }
+    pub fn cpuCacheMode(self_: *@This()) CPUCacheMode {
+        return objc.msgSend(self_, "cpuCacheMode", CPUCacheMode, .{});
+    }
+    pub fn setCpuCacheMode(self_: *@This(), cpuCacheMode_: CPUCacheMode) void {
+        return objc.msgSend(self_, "setCpuCacheMode:", void, .{cpuCacheMode_});
+    }
+    pub fn storageMode(self_: *@This()) StorageMode {
+        return objc.msgSend(self_, "storageMode", StorageMode, .{});
+    }
+    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
+        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
+    }
+    pub fn hazardTrackingMode(self_: *@This()) HazardTrackingMode {
+        return objc.msgSend(self_, "hazardTrackingMode", HazardTrackingMode, .{});
+    }
+    pub fn setHazardTrackingMode(self_: *@This(), hazardTrackingMode_: HazardTrackingMode) void {
+        return objc.msgSend(self_, "setHazardTrackingMode:", void, .{hazardTrackingMode_});
+    }
+    pub fn usage(self_: *@This()) TextureUsage {
+        return objc.msgSend(self_, "usage", TextureUsage, .{});
+    }
+    pub fn setUsage(self_: *@This(), usage_: TextureUsage) void {
+        return objc.msgSend(self_, "setUsage:", void, .{usage_});
+    }
+    pub fn allowGPUOptimizedContents(self_: *@This()) bool {
+        return objc.msgSend(self_, "allowGPUOptimizedContents", bool, .{});
+    }
+    pub fn setAllowGPUOptimizedContents(self_: *@This(), allowGPUOptimizedContents_: bool) void {
+        return objc.msgSend(self_, "setAllowGPUOptimizedContents:", void, .{allowGPUOptimizedContents_});
+    }
+    pub fn compressionType(self_: *@This()) TextureCompressionType {
+        return objc.msgSend(self_, "compressionType", TextureCompressionType, .{});
+    }
+    pub fn setCompressionType(self_: *@This(), compressionType_: TextureCompressionType) void {
+        return objc.msgSend(self_, "setCompressionType:", void, .{compressionType_});
+    }
+    pub fn swizzle(self_: *@This()) TextureSwizzleChannels {
+        return objc.msgSend(self_, "swizzle", TextureSwizzleChannels, .{});
+    }
+    pub fn setSwizzle(self_: *@This(), swizzle_: TextureSwizzleChannels) void {
+        return objc.msgSend(self_, "setSwizzle:", void, .{swizzle_});
+    }
+    pub fn placementSparsePageSize(self_: *@This()) SparsePageSize {
+        return objc.msgSend(self_, "placementSparsePageSize", SparsePageSize, .{});
+    }
+    pub fn setPlacementSparsePageSize(self_: *@This(), placementSparsePageSize_: SparsePageSize) void {
+        return objc.msgSend(self_, "setPlacementSparsePageSize:", void, .{placementSparsePageSize_});
+    }
+};
+
+pub const TextureReferenceType = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTextureReferenceType", @This(), Type, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn textureDataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "textureDataType", DataType, .{});
+    }
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
+    }
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+    pub fn isDepthTexture(self_: *@This()) bool {
+        return objc.msgSend(self_, "isDepthTexture", bool, .{});
+    }
+};
+
+pub const TextureViewDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTextureViewDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn pixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    }
+    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    }
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
+    }
+    pub fn setTextureType(self_: *@This(), textureType_: TextureType) void {
+        return objc.msgSend(self_, "setTextureType:", void, .{textureType_});
+    }
+    pub fn levelRange(self_: *@This()) ns.Range {
+        return objc.msgSend(self_, "levelRange", ns.Range, .{});
+    }
+    pub fn setLevelRange(self_: *@This(), levelRange_: ns.Range) void {
+        return objc.msgSend(self_, "setLevelRange:", void, .{levelRange_});
+    }
+    pub fn sliceRange(self_: *@This()) ns.Range {
+        return objc.msgSend(self_, "sliceRange", ns.Range, .{});
+    }
+    pub fn setSliceRange(self_: *@This(), sliceRange_: ns.Range) void {
+        return objc.msgSend(self_, "setSliceRange:", void, .{sliceRange_});
+    }
+    pub fn swizzle(self_: *@This()) TextureSwizzleChannels {
+        return objc.msgSend(self_, "swizzle", TextureSwizzleChannels, .{});
+    }
+    pub fn setSwizzle(self_: *@This(), swizzle_: TextureSwizzleChannels) void {
+        return objc.msgSend(self_, "setSwizzle:", void, .{swizzle_});
+    }
+};
+
+pub const TileRenderPipelineColorAttachmentDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineColorAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn pixelFormat(self_: *@This()) PixelFormat {
+        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    }
+    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
+        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    }
+};
+
+pub const TileRenderPipelineColorAttachmentDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *TileRenderPipelineColorAttachmentDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *TileRenderPipelineColorAttachmentDescriptor, .{attachmentIndex_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: *TileRenderPipelineColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    }
+};
+
+pub const TileRenderPipelineDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn tileFunction(self_: *@This()) *Function {
+        return objc.msgSend(self_, "tileFunction", *Function, .{});
+    }
+    pub fn setTileFunction(self_: *@This(), tileFunction_: *Function) void {
+        return objc.msgSend(self_, "setTileFunction:", void, .{tileFunction_});
+    }
+    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
+    }
+    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
+    }
+    pub fn colorAttachments(self_: *@This()) *TileRenderPipelineColorAttachmentDescriptorArray {
+        return objc.msgSend(self_, "colorAttachments", *TileRenderPipelineColorAttachmentDescriptorArray, .{});
+    }
+    pub fn threadgroupSizeMatchesTileSize(self_: *@This()) bool {
+        return objc.msgSend(self_, "threadgroupSizeMatchesTileSize", bool, .{});
+    }
+    pub fn setThreadgroupSizeMatchesTileSize(self_: *@This(), threadgroupSizeMatchesTileSize_: bool) void {
+        return objc.msgSend(self_, "setThreadgroupSizeMatchesTileSize:", void, .{threadgroupSizeMatchesTileSize_});
+    }
+    pub fn tileBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
+        return objc.msgSend(self_, "tileBuffers", *PipelineBufferDescriptorArray, .{});
+    }
+    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
+    }
+    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    }
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    }
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
+    }
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    }
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+        return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
+    }
+    pub fn linkedFunctions(self_: *@This()) *LinkedFunctions {
+        return objc.msgSend(self_, "linkedFunctions", *LinkedFunctions, .{});
+    }
+    pub fn setLinkedFunctions(self_: *@This(), linkedFunctions_: ?*LinkedFunctions) void {
+        return objc.msgSend(self_, "setLinkedFunctions:", void, .{linkedFunctions_});
+    }
+    pub fn supportAddingBinaryFunctions(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportAddingBinaryFunctions", bool, .{});
+    }
+    pub fn setSupportAddingBinaryFunctions(self_: *@This(), supportAddingBinaryFunctions_: bool) void {
+        return objc.msgSend(self_, "setSupportAddingBinaryFunctions:", void, .{supportAddingBinaryFunctions_});
+    }
+    pub fn maxCallStackDepth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "maxCallStackDepth", ns.UInteger, .{});
+    }
+    pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
+    }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn setShaderValidation(self_: *@This(), shaderValidation_: ShaderValidation) void {
+        return objc.msgSend(self_, "setShaderValidation:", void, .{shaderValidation_});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
+    pub fn setRequiredThreadsPerThreadgroup(self_: *@This(), requiredThreadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "setRequiredThreadsPerThreadgroup:", void, .{requiredThreadsPerThreadgroup_});
+    }
+};
+
+pub const Type = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLType", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn dataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "dataType", DataType, .{});
+    }
+};
+
+pub const VertexAttribute = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexAttribute", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn attributeIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "attributeIndex", ns.UInteger, .{});
+    }
+    pub fn attributeType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "attributeType", DataType, .{});
+    }
+    pub fn isActive(self_: *@This()) bool {
+        return objc.msgSend(self_, "isActive", bool, .{});
+    }
+    pub fn isPatchData(self_: *@This()) bool {
+        return objc.msgSend(self_, "isPatchData", bool, .{});
+    }
+    pub fn isPatchControlPointData(self_: *@This()) bool {
+        return objc.msgSend(self_, "isPatchControlPointData", bool, .{});
+    }
+};
+
+pub const VertexAttributeDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexAttributeDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn format(self_: *@This()) VertexFormat {
+        return objc.msgSend(self_, "format", VertexFormat, .{});
+    }
+    pub fn setFormat(self_: *@This(), format_: VertexFormat) void {
+        return objc.msgSend(self_, "setFormat:", void, .{format_});
+    }
+    pub fn offset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "offset", ns.UInteger, .{});
+    }
+    pub fn setOffset(self_: *@This(), offset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setOffset:", void, .{offset_});
+    }
+    pub fn bufferIndex(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferIndex", ns.UInteger, .{});
+    }
+    pub fn setBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBufferIndex:", void, .{bufferIndex_});
+    }
+};
+
+pub const VertexAttributeDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexAttributeDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *VertexAttributeDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *VertexAttributeDescriptor, .{index_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), attributeDesc_: ?*VertexAttributeDescriptor, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attributeDesc_, index_ });
+    }
+};
+
+pub const VertexBufferLayoutDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexBufferLayoutDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn stride(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "stride", ns.UInteger, .{});
+    }
+    pub fn setStride(self_: *@This(), stride_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStride:", void, .{stride_});
+    }
+    pub fn stepFunction(self_: *@This()) VertexStepFunction {
+        return objc.msgSend(self_, "stepFunction", VertexStepFunction, .{});
+    }
+    pub fn setStepFunction(self_: *@This(), stepFunction_: VertexStepFunction) void {
+        return objc.msgSend(self_, "setStepFunction:", void, .{stepFunction_});
+    }
+    pub fn stepRate(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "stepRate", ns.UInteger, .{});
+    }
+    pub fn setStepRate(self_: *@This(), stepRate_: ns.UInteger) void {
+        return objc.msgSend(self_, "setStepRate:", void, .{stepRate_});
+    }
+};
+
+pub const VertexBufferLayoutDescriptorArray = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexBufferLayoutDescriptorArray", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *VertexBufferLayoutDescriptor {
+        return objc.msgSend(self_, "objectAtIndexedSubscript:", *VertexBufferLayoutDescriptor, .{index_});
+    }
+    pub fn setObject_atIndexedSubscript(self_: *@This(), bufferDesc_: ?*VertexBufferLayoutDescriptor, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ bufferDesc_, index_ });
+    }
+};
+
+pub const VertexDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVertexDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn vertexDescriptor() *VertexDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "vertexDescriptor", *VertexDescriptor, .{});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn layouts(self_: *@This()) *VertexBufferLayoutDescriptorArray {
+        return objc.msgSend(self_, "layouts", *VertexBufferLayoutDescriptorArray, .{});
+    }
+    pub fn attributes(self_: *@This()) *VertexAttributeDescriptorArray {
+        return objc.msgSend(self_, "attributes", *VertexAttributeDescriptorArray, .{});
+    }
+};
+
+pub const VisibleFunctionTableDescriptor = opaque {
+    pub const InternalInfo = objc.ExternClass("MTLVisibleFunctionTableDescriptor", @This(), ns.ObjectInterface, &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+    pub const new = InternalInfo.new;
+    pub const alloc = InternalInfo.alloc;
+    pub const allocInit = InternalInfo.allocInit;
+
+    pub fn visibleFunctionTableDescriptor() *VisibleFunctionTableDescriptor {
+        return objc.msgSend(@This().InternalInfo.class(), "visibleFunctionTableDescriptor", *VisibleFunctionTableDescriptor, .{});
+    }
+    pub fn functionCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "functionCount", ns.UInteger, .{});
+    }
+    pub fn setFunctionCount(self_: *@This(), functionCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "setFunctionCount:", void, .{functionCount_});
+    }
+};
+
+pub const MTL4Archive = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4Archive", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn newComputePipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, error_: ?*?*ns.Error) ?*ComputePipelineState {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:error:", ?*ComputePipelineState, .{ descriptor_, error_ });
+    }
+    pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: *MTL4PipelineStageDynamicLinkingDescriptor, error_: ?*?*ns.Error) ?*ComputePipelineState {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:error:", ?*ComputePipelineState, .{ descriptor_, dynamicLinkingDescriptor_, error_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:error:", ?*RenderPipelineState, .{ descriptor_, error_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: *MTL4RenderPipelineDynamicLinkingDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:error:", ?*RenderPipelineState, .{ descriptor_, dynamicLinkingDescriptor_, error_ });
+    }
+    pub fn newBinaryFunctionWithDescriptor_error(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, error_: ?*?*ns.Error) ?*MTL4BinaryFunctionProtocol {
+        return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:error:", ?*MTL4BinaryFunctionProtocol, .{ descriptor_, error_ });
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const MTL4ArgumentTable = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4ArgumentTable", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn setAddress_atIndex(self_: *@This(), gpuAddress_: GPUAddress, bindingIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setAddress:atIndex:", void, .{ gpuAddress_, bindingIndex_ });
+    }
+    pub fn setAddress_attributeStride_atIndex(self_: *@This(), gpuAddress_: GPUAddress, stride_: ns.UInteger, bindingIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setAddress:attributeStride:atIndex:", void, .{ gpuAddress_, stride_, bindingIndex_ });
+    }
+    pub fn setResource_atBufferIndex(self_: *@This(), resourceID_: ResourceID, bindingIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setResource:atBufferIndex:", void, .{ resourceID_, bindingIndex_ });
+    }
+    pub fn setTexture_atIndex(self_: *@This(), resourceID_: ResourceID, bindingIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setTexture:atIndex:", void, .{ resourceID_, bindingIndex_ });
+    }
+    pub fn setSamplerState_atIndex(self_: *@This(), resourceID_: ResourceID, bindingIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setSamplerState:atIndex:", void, .{ resourceID_, bindingIndex_ });
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+};
+
+pub const MTL4BinaryFunctionProtocol = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4BinaryFunction", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn name(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "name", ?*ns.String, .{});
+    }
+    pub fn functionType(self_: *@This()) FunctionType {
+        return objc.msgSend(self_, "functionType", FunctionType, .{});
+    }
+};
+
+pub const MTL4CommandAllocator = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CommandAllocator", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn allocatedSize(self_: *@This()) u64 {
+        return objc.msgSend(self_, "allocatedSize", u64, .{});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+};
+
+pub const MTL4CommandBuffer = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CommandBuffer", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn beginCommandBufferWithAllocator(self_: *@This(), allocator_: *MTL4CommandAllocator) void {
+        return objc.msgSend(self_, "beginCommandBufferWithAllocator:", void, .{allocator_});
+    }
+    pub fn beginCommandBufferWithAllocator_options(self_: *@This(), allocator_: *MTL4CommandAllocator, options_: *MTL4CommandBufferOptions) void {
+        return objc.msgSend(self_, "beginCommandBufferWithAllocator:options:", void, .{ allocator_, options_ });
+    }
+    pub fn endCommandBuffer(self_: *@This()) void {
+        return objc.msgSend(self_, "endCommandBuffer", void, .{});
+    }
+    pub fn renderCommandEncoderWithDescriptor(self_: *@This(), descriptor_: *MTL4RenderPassDescriptor) ?*MTL4RenderCommandEncoder {
+        return objc.msgSend(self_, "renderCommandEncoderWithDescriptor:", ?*MTL4RenderCommandEncoder, .{descriptor_});
+    }
+    pub fn renderCommandEncoderWithDescriptor_options(self_: *@This(), descriptor_: *MTL4RenderPassDescriptor, options_: MTL4RenderEncoderOptions) ?*MTL4RenderCommandEncoder {
+        return objc.msgSend(self_, "renderCommandEncoderWithDescriptor:options:", ?*MTL4RenderCommandEncoder, .{ descriptor_, options_ });
+    }
+    pub fn computeCommandEncoder(self_: *@This()) ?*MTL4ComputeCommandEncoder {
+        return objc.msgSend(self_, "computeCommandEncoder", ?*MTL4ComputeCommandEncoder, .{});
+    }
+    pub fn machineLearningCommandEncoder(self_: *@This()) ?*MTL4MachineLearningCommandEncoder {
+        return objc.msgSend(self_, "machineLearningCommandEncoder", ?*MTL4MachineLearningCommandEncoder, .{});
+    }
+    pub fn useResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "useResidencySet:", void, .{residencySet_});
+    }
+    pub fn useResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "useResidencySets:count:", void, .{ residencySets_, count_ });
+    }
+    pub fn pushDebugGroup(self_: *@This(), string_: *ns.String) void {
+        return objc.msgSend(self_, "pushDebugGroup:", void, .{string_});
+    }
+    pub fn popDebugGroup(self_: *@This()) void {
+        return objc.msgSend(self_, "popDebugGroup", void, .{});
+    }
+    pub fn writeTimestampIntoHeap_atIndex(self_: *@This(), counterHeap_: *MTL4CounterHeap, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "writeTimestampIntoHeap:atIndex:", void, .{ counterHeap_, index_ });
+    }
+    pub fn resolveCounterHeap_withRange_intoBuffer_waitFence_updateFence(self_: *@This(), counterHeap_: *MTL4CounterHeap, range_: ns.Range, bufferRange_: MTL4BufferRange, fenceToWait_: ?*Fence, fenceToUpdate_: ?*Fence) void {
+        return objc.msgSend(self_, "resolveCounterHeap:withRange:intoBuffer:waitFence:updateFence:", void, .{ counterHeap_, range_, bufferRange_, fenceToWait_, fenceToUpdate_ });
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
+pub const MTL4CommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CommandEncoder", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn barrierAfterQueueStages_beforeStages_visibilityOptions(self_: *@This(), afterQueueStages_: Stages, beforeStages_: Stages, visibilityOptions_: MTL4VisibilityOptions) void {
+        return objc.msgSend(self_, "barrierAfterQueueStages:beforeStages:visibilityOptions:", void, .{ afterQueueStages_, beforeStages_, visibilityOptions_ });
+    }
+    pub fn barrierAfterStages_beforeQueueStages_visibilityOptions(self_: *@This(), afterStages_: Stages, beforeQueueStages_: Stages, visibilityOptions_: MTL4VisibilityOptions) void {
+        return objc.msgSend(self_, "barrierAfterStages:beforeQueueStages:visibilityOptions:", void, .{ afterStages_, beforeQueueStages_, visibilityOptions_ });
+    }
+    pub fn barrierAfterEncoderStages_beforeEncoderStages_visibilityOptions(self_: *@This(), afterEncoderStages_: Stages, beforeEncoderStages_: Stages, visibilityOptions_: MTL4VisibilityOptions) void {
+        return objc.msgSend(self_, "barrierAfterEncoderStages:beforeEncoderStages:visibilityOptions:", void, .{ afterEncoderStages_, beforeEncoderStages_, visibilityOptions_ });
+    }
+    pub fn updateFence_afterEncoderStages(self_: *@This(), fence_: *Fence, afterEncoderStages_: Stages) void {
+        return objc.msgSend(self_, "updateFence:afterEncoderStages:", void, .{ fence_, afterEncoderStages_ });
+    }
+    pub fn waitForFence_beforeEncoderStages(self_: *@This(), fence_: *Fence, beforeEncoderStages_: Stages) void {
+        return objc.msgSend(self_, "waitForFence:beforeEncoderStages:", void, .{ fence_, beforeEncoderStages_ });
+    }
+    pub fn insertDebugSignpost(self_: *@This(), string_: *ns.String) void {
+        return objc.msgSend(self_, "insertDebugSignpost:", void, .{string_});
+    }
+    pub fn pushDebugGroup(self_: *@This(), string_: *ns.String) void {
+        return objc.msgSend(self_, "pushDebugGroup:", void, .{string_});
+    }
+    pub fn popDebugGroup(self_: *@This()) void {
+        return objc.msgSend(self_, "popDebugGroup", void, .{});
+    }
+    pub fn endEncoding(self_: *@This()) void {
+        return objc.msgSend(self_, "endEncoding", void, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn commandBuffer(self_: *@This()) ?*MTL4CommandBuffer {
+        return objc.msgSend(self_, "commandBuffer", ?*MTL4CommandBuffer, .{});
+    }
+};
+
+pub const MTL4CommandQueue = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CommandQueue", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn commit_count(self_: *@This(), commandBuffers_: **const MTL4CommandBuffer, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "commit:count:", void, .{ commandBuffers_, count_ });
+    }
+    pub fn commit_count_options(self_: *@This(), commandBuffers_: **const MTL4CommandBuffer, count_: ns.UInteger, options_: *MTL4CommitOptions) void {
+        return objc.msgSend(self_, "commit:count:options:", void, .{ commandBuffers_, count_, options_ });
+    }
+    pub fn signalEvent_value(self_: *@This(), event_: *Event, value_: u64) void {
+        return objc.msgSend(self_, "signalEvent:value:", void, .{ event_, value_ });
+    }
+    pub fn waitForEvent_value(self_: *@This(), event_: *Event, value_: u64) void {
+        return objc.msgSend(self_, "waitForEvent:value:", void, .{ event_, value_ });
+    }
+    pub fn signalDrawable(self_: *@This(), drawable_: *Drawable) void {
+        return objc.msgSend(self_, "signalDrawable:", void, .{drawable_});
+    }
+    pub fn waitForDrawable(self_: *@This(), drawable_: *Drawable) void {
+        return objc.msgSend(self_, "waitForDrawable:", void, .{drawable_});
+    }
+    pub fn addResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "addResidencySet:", void, .{residencySet_});
+    }
+    pub fn addResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "addResidencySets:count:", void, .{ residencySets_, count_ });
+    }
+    pub fn removeResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "removeResidencySet:", void, .{residencySet_});
+    }
+    pub fn removeResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "removeResidencySets:count:", void, .{ residencySets_, count_ });
+    }
+    pub fn updateTextureMappings_heap_operations_count(self_: *@This(), texture_: *Texture, heap_: ?*Heap, operations_: *const MTL4UpdateSparseTextureMappingOperation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "updateTextureMappings:heap:operations:count:", void, .{ texture_, heap_, operations_, count_ });
+    }
+    pub fn copyTextureMappingsFromTexture_toTexture_operations_count(self_: *@This(), sourceTexture_: *Texture, destinationTexture_: *Texture, operations_: *const MTL4CopySparseTextureMappingOperation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyTextureMappingsFromTexture:toTexture:operations:count:", void, .{ sourceTexture_, destinationTexture_, operations_, count_ });
+    }
+    pub fn updateBufferMappings_heap_operations_count(self_: *@This(), buffer_: *Buffer, heap_: ?*Heap, operations_: *const MTL4UpdateSparseBufferMappingOperation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "updateBufferMappings:heap:operations:count:", void, .{ buffer_, heap_, operations_, count_ });
+    }
+    pub fn copyBufferMappingsFromBuffer_toBuffer_operations_count(self_: *@This(), sourceBuffer_: *Buffer, destinationBuffer_: *Buffer, operations_: *const MTL4CopySparseBufferMappingOperation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyBufferMappingsFromBuffer:toBuffer:operations:count:", void, .{ sourceBuffer_, destinationBuffer_, operations_, count_ });
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+};
+
+pub const MTL4CommitFeedback = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CommitFeedback", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn @"error"(self_: *@This()) ?*ns.Error {
+        return objc.msgSend(self_, "error", ?*ns.Error, .{});
+    }
+    pub fn GPUStartTime(self_: *@This()) cf.TimeInterval {
+        return objc.msgSend(self_, "GPUStartTime", cf.TimeInterval, .{});
+    }
+    pub fn GPUEndTime(self_: *@This()) cf.TimeInterval {
+        return objc.msgSend(self_, "GPUEndTime", cf.TimeInterval, .{});
+    }
+};
+
+pub const MTL4Compiler = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4Compiler", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn newLibraryWithDescriptor_error(self_: *@This(), descriptor_: *MTL4LibraryDescriptor, error_: ?*?*ns.Error) ?*Library {
+        return objc.msgSend(self_, "newLibraryWithDescriptor:error:", ?*Library, .{ descriptor_, error_ });
+    }
+    pub fn newDynamicLibrary_error(self_: *@This(), library_: *Library, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
+        return objc.msgSend(self_, "newDynamicLibrary:error:", ?*DynamicLibraryProtocol, .{ library_, error_ });
+    }
+    pub fn newDynamicLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
+        return objc.msgSend(self_, "newDynamicLibraryWithURL:error:", ?*DynamicLibraryProtocol, .{ url_, error_ });
+    }
+    pub fn newComputePipelineStateWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*ComputePipelineState {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:compilerTaskOptions:error:", ?*ComputePipelineState, .{ descriptor_, compilerTaskOptions_, error_ });
+    }
+    pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4PipelineStageDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*ComputePipelineState {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:error:", ?*ComputePipelineState, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, error_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:compilerTaskOptions:error:", ?*RenderPipelineState, .{ descriptor_, compilerTaskOptions_, error_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4RenderPipelineDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:error:", ?*RenderPipelineState, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, error_ });
+    }
+    pub fn newRenderPipelineStateBySpecializationWithDescriptor_pipeline_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, pipeline_: *RenderPipelineState, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateBySpecializationWithDescriptor:pipeline:error:", ?*RenderPipelineState, .{ descriptor_, pipeline_, error_ });
+    }
+    pub fn newBinaryFunctionWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*MTL4BinaryFunctionProtocol {
+        return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:compilerTaskOptions:error:", ?*MTL4BinaryFunctionProtocol, .{ descriptor_, compilerTaskOptions_, error_ });
+    }
+    pub fn newLibraryWithDescriptor_completionHandler(self_: *@This(), descriptor_: *MTL4LibraryDescriptor, completionHandler_: *ns.Block(fn (?*Library, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newLibraryWithDescriptor:completionHandler:", *MTL4CompilerTask, .{ descriptor_, completionHandler_ });
+    }
+    pub fn newDynamicLibrary_completionHandler(self_: *@This(), library_: *Library, completionHandler_: *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newDynamicLibrary:completionHandler:", *MTL4CompilerTask, .{ library_, completionHandler_ });
+    }
+    pub fn newDynamicLibraryWithURL_completionHandler(self_: *@This(), url_: *ns.URL, completionHandler_: *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newDynamicLibraryWithURL:completionHandler:", *MTL4CompilerTask, .{ url_, completionHandler_ });
+    }
+    pub fn newComputePipelineStateWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
+    }
+    pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4PipelineStageDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, completionHandler_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
+    }
+    pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4RenderPipelineDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, completionHandler_ });
+    }
+    pub fn newRenderPipelineStateBySpecializationWithDescriptor_pipeline_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, pipeline_: *RenderPipelineState, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newRenderPipelineStateBySpecializationWithDescriptor:pipeline:completionHandler:", *MTL4CompilerTask, .{ descriptor_, pipeline_, completionHandler_ });
+    }
+    pub fn newBinaryFunctionWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*MTL4BinaryFunctionProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
+    }
+    pub fn newMachineLearningPipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4MachineLearningPipelineDescriptor, error_: ?*?*ns.Error) ?*MTL4MachineLearningPipelineState {
+        return objc.msgSend(self_, "newMachineLearningPipelineStateWithDescriptor:error:", ?*MTL4MachineLearningPipelineState, .{ descriptor_, error_ });
+    }
+    pub fn newMachineLearningPipelineStateWithDescriptor_completionHandler(self_: *@This(), descriptor_: *MTL4MachineLearningPipelineDescriptor, completionHandler_: *ns.Block(fn (?*MTL4MachineLearningPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
+        return objc.msgSend(self_, "newMachineLearningPipelineStateWithDescriptor:completionHandler:", *MTL4CompilerTask, .{ descriptor_, completionHandler_ });
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn pipelineDataSetSerializer(self_: *@This()) ?*MTL4PipelineDataSetSerializer {
+        return objc.msgSend(self_, "pipelineDataSetSerializer", ?*MTL4PipelineDataSetSerializer, .{});
+    }
+};
+
+pub const MTL4CompilerTask = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CompilerTask", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn waitUntilCompleted(self_: *@This()) void {
+        return objc.msgSend(self_, "waitUntilCompleted", void, .{});
+    }
+    pub fn compiler(self_: *@This()) *MTL4Compiler {
+        return objc.msgSend(self_, "compiler", *MTL4Compiler, .{});
+    }
+    pub fn status(self_: *@This()) MTL4CompilerTaskStatus {
+        return objc.msgSend(self_, "status", MTL4CompilerTaskStatus, .{});
+    }
+};
+
+pub const MTL4ComputeCommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4ComputeCommandEncoder", @This(), &.{MTL4CommandEncoder});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn stages(self_: *@This()) Stages {
+        return objc.msgSend(self_, "stages", Stages, .{});
+    }
+    pub fn setComputePipelineState(self_: *@This(), state_: *ComputePipelineState) void {
+        return objc.msgSend(self_, "setComputePipelineState:", void, .{state_});
+    }
+    pub fn setThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
+    }
+    pub fn setImageblockWidth_height(self_: *@This(), width_: ns.UInteger, height_: ns.UInteger) void {
+        return objc.msgSend(self_, "setImageblockWidth:height:", void, .{ width_, height_ });
+    }
+    pub fn dispatchThreads_threadsPerThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "dispatchThreads:threadsPerThreadgroup:", void, .{ threadsPerGrid_, threadsPerThreadgroup_ });
+    }
+    pub fn dispatchThreadgroups_threadsPerThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "dispatchThreadgroups:threadsPerThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerThreadgroup_ });
+    }
+    pub fn dispatchThreadgroupsWithIndirectBuffer_threadsPerThreadgroup(self_: *@This(), indirectBuffer_: GPUAddress, threadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "dispatchThreadgroupsWithIndirectBuffer:threadsPerThreadgroup:", void, .{ indirectBuffer_, threadsPerThreadgroup_ });
+    }
+    pub fn dispatchThreadsWithIndirectBuffer(self_: *@This(), indirectBuffer_: GPUAddress) void {
+        return objc.msgSend(self_, "dispatchThreadsWithIndirectBuffer:", void, .{indirectBuffer_});
+    }
+    pub fn executeCommandsInBuffer_withRange(self_: *@This(), indirectCommandBuffer_: *IndirectCommandBuffer, executionRange_: ns.Range) void {
+        return objc.msgSend(self_, "executeCommandsInBuffer:withRange:", void, .{ indirectCommandBuffer_, executionRange_ });
+    }
+    pub fn executeCommandsInBuffer_indirectBuffer(self_: *@This(), indirectCommandbuffer_: *IndirectCommandBuffer, indirectRangeBuffer_: GPUAddress) void {
+        return objc.msgSend(self_, "executeCommandsInBuffer:indirectBuffer:", void, .{ indirectCommandbuffer_, indirectRangeBuffer_ });
+    }
+    pub fn copyFromTexture_toTexture(self_: *@This(), sourceTexture_: *Texture, destinationTexture_: *Texture) void {
+        return objc.msgSend(self_, "copyFromTexture:toTexture:", void, .{ sourceTexture_, destinationTexture_ });
+    }
+    pub fn copyFromTexture_sourceSlice_sourceLevel_toTexture_destinationSlice_destinationLevel_sliceCount_levelCount(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, sliceCount_: ns.UInteger, levelCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:toTexture:destinationSlice:destinationLevel:sliceCount:levelCount:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, destinationTexture_, destinationSlice_, destinationLevel_, sliceCount_, levelCount_ });
+    }
+    pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
+        return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
+    }
+    pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_ });
+    }
+    pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage_options(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger, options_: BlitOption) void {
+        return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:options:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_, options_ });
+    }
+    pub fn copyFromBuffer_sourceOffset_toBuffer_destinationOffset_size(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, size_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size:", void, .{ sourceBuffer_, sourceOffset_, destinationBuffer_, destinationOffset_, size_ });
+    }
+    pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
+        return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
+    }
+    pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_options(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin, options_: BlitOption) void {
+        return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_, options_ });
+    }
+    pub fn copyFromTensor_sourceOrigin_sourceDimensions_toTensor_destinationOrigin_destinationDimensions(self_: *@This(), sourceTensor_: *Tensor, sourceOrigin_: *TensorExtents, sourceDimensions_: *TensorExtents, destinationTensor_: *Tensor, destinationOrigin_: *TensorExtents, destinationDimensions_: *TensorExtents) void {
+        return objc.msgSend(self_, "copyFromTensor:sourceOrigin:sourceDimensions:toTensor:destinationOrigin:destinationDimensions:", void, .{ sourceTensor_, sourceOrigin_, sourceDimensions_, destinationTensor_, destinationOrigin_, destinationDimensions_ });
+    }
+    pub fn generateMipmapsForTexture(self_: *@This(), texture_: *Texture) void {
+        return objc.msgSend(self_, "generateMipmapsForTexture:", void, .{texture_});
+    }
+    pub fn fillBuffer_range_value(self_: *@This(), buffer_: *Buffer, range_: ns.Range, value_: u8) void {
+        return objc.msgSend(self_, "fillBuffer:range:value:", void, .{ buffer_, range_, value_ });
+    }
+    pub fn optimizeContentsForGPUAccess(self_: *@This(), texture_: *Texture) void {
+        return objc.msgSend(self_, "optimizeContentsForGPUAccess:", void, .{texture_});
+    }
+    pub fn optimizeContentsForGPUAccess_slice_level(self_: *@This(), texture_: *Texture, slice_: ns.UInteger, level_: ns.UInteger) void {
+        return objc.msgSend(self_, "optimizeContentsForGPUAccess:slice:level:", void, .{ texture_, slice_, level_ });
+    }
+    pub fn optimizeContentsForCPUAccess(self_: *@This(), texture_: *Texture) void {
+        return objc.msgSend(self_, "optimizeContentsForCPUAccess:", void, .{texture_});
+    }
+    pub fn optimizeContentsForCPUAccess_slice_level(self_: *@This(), texture_: *Texture, slice_: ns.UInteger, level_: ns.UInteger) void {
+        return objc.msgSend(self_, "optimizeContentsForCPUAccess:slice:level:", void, .{ texture_, slice_, level_ });
+    }
+    pub fn resetCommandsInBuffer_withRange(self_: *@This(), buffer_: *IndirectCommandBuffer, range_: ns.Range) void {
+        return objc.msgSend(self_, "resetCommandsInBuffer:withRange:", void, .{ buffer_, range_ });
+    }
+    pub fn copyIndirectCommandBuffer_sourceRange_destination_destinationIndex(self_: *@This(), source_: *IndirectCommandBuffer, sourceRange_: ns.Range, destination_: *IndirectCommandBuffer, destinationIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "copyIndirectCommandBuffer:sourceRange:destination:destinationIndex:", void, .{ source_, sourceRange_, destination_, destinationIndex_ });
+    }
+    pub fn optimizeIndirectCommandBuffer_withRange(self_: *@This(), indirectCommandBuffer_: *IndirectCommandBuffer, range_: ns.Range) void {
+        return objc.msgSend(self_, "optimizeIndirectCommandBuffer:withRange:", void, .{ indirectCommandBuffer_, range_ });
+    }
+    pub fn setArgumentTable(self_: *@This(), argumentTable_: ?*MTL4ArgumentTable) void {
+        return objc.msgSend(self_, "setArgumentTable:", void, .{argumentTable_});
+    }
+    pub fn buildAccelerationStructure_descriptor_scratchBuffer(self_: *@This(), accelerationStructure_: *AccelerationStructure, descriptor_: *MTL4AccelerationStructureDescriptor, scratchBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "buildAccelerationStructure:descriptor:scratchBuffer:", void, .{ accelerationStructure_, descriptor_, scratchBuffer_ });
+    }
+    pub fn refitAccelerationStructure_descriptor_destination_scratchBuffer(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, descriptor_: *MTL4AccelerationStructureDescriptor, destinationAccelerationStructure_: ?*AccelerationStructure, scratchBuffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "refitAccelerationStructure:descriptor:destination:scratchBuffer:", void, .{ sourceAccelerationStructure_, descriptor_, destinationAccelerationStructure_, scratchBuffer_ });
+    }
+    pub fn refitAccelerationStructure_descriptor_destination_scratchBuffer_options(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, descriptor_: *MTL4AccelerationStructureDescriptor, destinationAccelerationStructure_: ?*AccelerationStructure, scratchBuffer_: MTL4BufferRange, options_: AccelerationStructureRefitOptions) void {
+        return objc.msgSend(self_, "refitAccelerationStructure:descriptor:destination:scratchBuffer:options:", void, .{ sourceAccelerationStructure_, descriptor_, destinationAccelerationStructure_, scratchBuffer_, options_ });
+    }
+    pub fn copyAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
+        return objc.msgSend(self_, "copyAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
+    }
+    pub fn writeCompactedAccelerationStructureSize_toBuffer(self_: *@This(), accelerationStructure_: *AccelerationStructure, buffer_: MTL4BufferRange) void {
+        return objc.msgSend(self_, "writeCompactedAccelerationStructureSize:toBuffer:", void, .{ accelerationStructure_, buffer_ });
+    }
+    pub fn copyAndCompactAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
+        return objc.msgSend(self_, "copyAndCompactAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
+    }
+    pub fn writeTimestampWithGranularity_intoHeap_atIndex(self_: *@This(), granularity_: MTL4TimestampGranularity, counterHeap_: *MTL4CounterHeap, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "writeTimestampWithGranularity:intoHeap:atIndex:", void, .{ granularity_, counterHeap_, index_ });
+    }
+};
+
+pub const MTL4CounterHeap = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4CounterHeap", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn resolveCounterRange(self_: *@This(), range_: ns.Range) ?*ns.Data {
+        return objc.msgSend(self_, "resolveCounterRange:", ?*ns.Data, .{range_});
+    }
+    pub fn invalidateCounterRange(self_: *@This(), range_: ns.Range) void {
+        return objc.msgSend(self_, "invalidateCounterRange:", void, .{range_});
+    }
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+    pub fn count(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "count", ns.UInteger, .{});
+    }
+    pub fn @"type"(self_: *@This()) MTL4CounterHeapType {
+        return objc.msgSend(self_, "type", MTL4CounterHeapType, .{});
+    }
+};
+
+pub const MTL4MachineLearningCommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4MachineLearningCommandEncoder", @This(), &.{MTL4CommandEncoder});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn setPipelineState(self_: *@This(), pipelineState_: *MTL4MachineLearningPipelineState) void {
+        return objc.msgSend(self_, "setPipelineState:", void, .{pipelineState_});
+    }
+    pub fn setArgumentTable(self_: *@This(), argumentTable_: ?*MTL4ArgumentTable) void {
+        return objc.msgSend(self_, "setArgumentTable:", void, .{argumentTable_});
+    }
+    pub fn dispatchNetworkWithIntermediatesHeap(self_: *@This(), heap_: *Heap) void {
+        return objc.msgSend(self_, "dispatchNetworkWithIntermediatesHeap:", void, .{heap_});
+    }
+};
+
+pub const MTL4MachineLearningPipelineState = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4MachineLearningPipelineState", @This(), &.{Allocation});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn reflection(self_: *@This()) ?*MTL4MachineLearningPipelineReflection {
+        return objc.msgSend(self_, "reflection", ?*MTL4MachineLearningPipelineReflection, .{});
+    }
+    pub fn intermediatesHeapSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "intermediatesHeapSize", ns.UInteger, .{});
+    }
+};
+
+pub const MTL4PipelineDataSetSerializer = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4PipelineDataSetSerializer", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn serializeAsArchiveAndFlushToURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) bool {
+        return objc.msgSend(self_, "serializeAsArchiveAndFlushToURL:error:", bool, .{ url_, error_ });
+    }
+    pub fn serializeAsPipelinesScriptWithError(self_: *@This(), error_: ?*?*ns.Error) ?*ns.Data {
+        return objc.msgSend(self_, "serializeAsPipelinesScriptWithError:", ?*ns.Data, .{error_});
+    }
+};
+
+pub const MTL4RenderCommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTL4RenderCommandEncoder", @This(), &.{MTL4CommandEncoder});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn setColorAttachmentMap(self_: *@This(), mapping_: ?*LogicalToPhysicalColorAttachmentMap) void {
+        return objc.msgSend(self_, "setColorAttachmentMap:", void, .{mapping_});
+    }
+    pub fn setRenderPipelineState(self_: *@This(), pipelineState_: *RenderPipelineState) void {
+        return objc.msgSend(self_, "setRenderPipelineState:", void, .{pipelineState_});
+    }
+    pub fn setViewport(self_: *@This(), viewport_: Viewport) void {
+        return objc.msgSend(self_, "setViewport:", void, .{viewport_});
+    }
+    pub fn setViewports_count(self_: *@This(), viewports_: *const Viewport, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "setViewports:count:", void, .{ viewports_, count_ });
+    }
+    pub fn setVertexAmplificationCount_viewMappings(self_: *@This(), count_: ns.UInteger, viewMappings_: ?*const VertexAmplificationViewMapping) void {
+        return objc.msgSend(self_, "setVertexAmplificationCount:viewMappings:", void, .{ count_, viewMappings_ });
+    }
+    pub fn setCullMode(self_: *@This(), cullMode_: CullMode) void {
+        return objc.msgSend(self_, "setCullMode:", void, .{cullMode_});
+    }
+    pub fn setDepthClipMode(self_: *@This(), depthClipMode_: DepthClipMode) void {
+        return objc.msgSend(self_, "setDepthClipMode:", void, .{depthClipMode_});
+    }
+    pub fn setDepthBias_slopeScale_clamp(self_: *@This(), depthBias_: f32, slopeScale_: f32, clamp_: f32) void {
+        return objc.msgSend(self_, "setDepthBias:slopeScale:clamp:", void, .{ depthBias_, slopeScale_, clamp_ });
+    }
+    pub fn setDepthTestMinBound_maxBound(self_: *@This(), minBound_: f32, maxBound_: f32) void {
+        return objc.msgSend(self_, "setDepthTestMinBound:maxBound:", void, .{ minBound_, maxBound_ });
+    }
+    pub fn setScissorRect(self_: *@This(), rect_: ScissorRect) void {
+        return objc.msgSend(self_, "setScissorRect:", void, .{rect_});
+    }
+    pub fn setScissorRects_count(self_: *@This(), scissorRects_: *const ScissorRect, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "setScissorRects:count:", void, .{ scissorRects_, count_ });
+    }
+    pub fn setTriangleFillMode(self_: *@This(), fillMode_: TriangleFillMode) void {
+        return objc.msgSend(self_, "setTriangleFillMode:", void, .{fillMode_});
+    }
+    pub fn setBlendColorRed_green_blue_alpha(self_: *@This(), red_: f32, green_: f32, blue_: f32, alpha_: f32) void {
+        return objc.msgSend(self_, "setBlendColorRed:green:blue:alpha:", void, .{ red_, green_, blue_, alpha_ });
+    }
+    pub fn setDepthStencilState(self_: *@This(), depthStencilState_: ?*DepthStencilState) void {
+        return objc.msgSend(self_, "setDepthStencilState:", void, .{depthStencilState_});
+    }
+    pub fn setStencilReferenceValue(self_: *@This(), referenceValue_: u32) void {
+        return objc.msgSend(self_, "setStencilReferenceValue:", void, .{referenceValue_});
+    }
+    pub fn setStencilFrontReferenceValue_backReferenceValue(self_: *@This(), frontReferenceValue_: u32, backReferenceValue_: u32) void {
+        return objc.msgSend(self_, "setStencilFrontReferenceValue:backReferenceValue:", void, .{ frontReferenceValue_, backReferenceValue_ });
+    }
+    pub fn setVisibilityResultMode_offset(self_: *@This(), mode_: VisibilityResultMode, offset_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVisibilityResultMode:offset:", void, .{ mode_, offset_ });
+    }
+    pub fn setColorStoreAction_atIndex(self_: *@This(), storeAction_: StoreAction, colorAttachmentIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setColorStoreAction:atIndex:", void, .{ storeAction_, colorAttachmentIndex_ });
+    }
+    pub fn setDepthStoreAction(self_: *@This(), storeAction_: StoreAction) void {
+        return objc.msgSend(self_, "setDepthStoreAction:", void, .{storeAction_});
+    }
+    pub fn setStencilStoreAction(self_: *@This(), storeAction_: StoreAction) void {
+        return objc.msgSend(self_, "setStencilStoreAction:", void, .{storeAction_});
+    }
+    pub fn drawPrimitives_vertexStart_vertexCount(self_: *@This(), primitiveType_: PrimitiveType, vertexStart_: ns.UInteger, vertexCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawPrimitives:vertexStart:vertexCount:", void, .{ primitiveType_, vertexStart_, vertexCount_ });
+    }
+    pub fn drawPrimitives_vertexStart_vertexCount_instanceCount(self_: *@This(), primitiveType_: PrimitiveType, vertexStart_: ns.UInteger, vertexCount_: ns.UInteger, instanceCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawPrimitives:vertexStart:vertexCount:instanceCount:", void, .{ primitiveType_, vertexStart_, vertexCount_, instanceCount_ });
+    }
+    pub fn drawPrimitives_vertexStart_vertexCount_instanceCount_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, vertexStart_: ns.UInteger, vertexCount_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawPrimitives:vertexStart:vertexCount:instanceCount:baseInstance:", void, .{ primitiveType_, vertexStart_, vertexCount_, instanceCount_, baseInstance_ });
+    }
+    pub fn drawIndexedPrimitives_indexCount_indexType_indexBuffer_indexBufferLength(self_: *@This(), primitiveType_: PrimitiveType, indexCount_: ns.UInteger, indexType_: IndexType, indexBuffer_: GPUAddress, indexBufferLength_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferLength:", void, .{ primitiveType_, indexCount_, indexType_, indexBuffer_, indexBufferLength_ });
+    }
+    pub fn drawIndexedPrimitives_indexCount_indexType_indexBuffer_indexBufferLength_instanceCount(self_: *@This(), primitiveType_: PrimitiveType, indexCount_: ns.UInteger, indexType_: IndexType, indexBuffer_: GPUAddress, indexBufferLength_: ns.UInteger, instanceCount_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferLength:instanceCount:", void, .{ primitiveType_, indexCount_, indexType_, indexBuffer_, indexBufferLength_, instanceCount_ });
+    }
+    pub fn drawIndexedPrimitives_indexCount_indexType_indexBuffer_indexBufferLength_instanceCount_baseVertex_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, indexCount_: ns.UInteger, indexType_: IndexType, indexBuffer_: GPUAddress, indexBufferLength_: ns.UInteger, instanceCount_: ns.UInteger, baseVertex_: ns.Integer, baseInstance_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferLength:instanceCount:baseVertex:baseInstance:", void, .{ primitiveType_, indexCount_, indexType_, indexBuffer_, indexBufferLength_, instanceCount_, baseVertex_, baseInstance_ });
+    }
+    pub fn drawPrimitives_indirectBuffer(self_: *@This(), primitiveType_: PrimitiveType, indirectBuffer_: GPUAddress) void {
+        return objc.msgSend(self_, "drawPrimitives:indirectBuffer:", void, .{ primitiveType_, indirectBuffer_ });
+    }
+    pub fn drawIndexedPrimitives_indexType_indexBuffer_indexBufferLength_indirectBuffer(self_: *@This(), primitiveType_: PrimitiveType, indexType_: IndexType, indexBuffer_: GPUAddress, indexBufferLength_: ns.UInteger, indirectBuffer_: GPUAddress) void {
+        return objc.msgSend(self_, "drawIndexedPrimitives:indexType:indexBuffer:indexBufferLength:indirectBuffer:", void, .{ primitiveType_, indexType_, indexBuffer_, indexBufferLength_, indirectBuffer_ });
+    }
+    pub fn executeCommandsInBuffer_withRange(self_: *@This(), indirectCommandBuffer_: *IndirectCommandBuffer, executionRange_: ns.Range) void {
+        return objc.msgSend(self_, "executeCommandsInBuffer:withRange:", void, .{ indirectCommandBuffer_, executionRange_ });
+    }
+    pub fn executeCommandsInBuffer_indirectBuffer(self_: *@This(), indirectCommandBuffer_: *IndirectCommandBuffer, indirectRangeBuffer_: GPUAddress) void {
+        return objc.msgSend(self_, "executeCommandsInBuffer:indirectBuffer:", void, .{ indirectCommandBuffer_, indirectRangeBuffer_ });
+    }
+    pub fn setObjectThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObjectThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
+    }
+    pub fn drawMeshThreadgroups_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "drawMeshThreadgroups:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
+    }
+    pub fn drawMeshThreads_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "drawMeshThreads:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
+    }
+    pub fn drawMeshThreadgroupsWithIndirectBuffer_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), indirectBuffer_: GPUAddress, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "drawMeshThreadgroupsWithIndirectBuffer:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ indirectBuffer_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
+    }
+    pub fn dispatchThreadsPerTile(self_: *@This(), threadsPerTile_: Size) void {
+        return objc.msgSend(self_, "dispatchThreadsPerTile:", void, .{threadsPerTile_});
+    }
+    pub fn setThreadgroupMemoryLength_offset_atIndex(self_: *@This(), length_: ns.UInteger, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setThreadgroupMemoryLength:offset:atIndex:", void, .{ length_, offset_, index_ });
+    }
+    pub fn setArgumentTable_atStages(self_: *@This(), argumentTable_: ?*MTL4ArgumentTable, stages_: RenderStages) void {
+        return objc.msgSend(self_, "setArgumentTable:atStages:", void, .{ argumentTable_, stages_ });
+    }
+    pub fn setFrontFacingWinding(self_: *@This(), frontFacingWinding_: Winding) void {
+        return objc.msgSend(self_, "setFrontFacingWinding:", void, .{frontFacingWinding_});
+    }
+    pub fn writeTimestampWithGranularity_afterStage_intoHeap_atIndex(self_: *@This(), granularity_: MTL4TimestampGranularity, stage_: RenderStages, counterHeap_: *MTL4CounterHeap, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "writeTimestampWithGranularity:afterStage:intoHeap:atIndex:", void, .{ granularity_, stage_, counterHeap_, index_ });
+    }
+    pub fn tileWidth(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileWidth", ns.UInteger, .{});
+    }
+    pub fn tileHeight(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "tileHeight", ns.UInteger, .{});
+    }
 };
 
 pub const AccelerationStructure = opaque {
@@ -1696,393 +8440,15 @@ pub const AccelerationStructureCommandEncoder = opaque {
     }
 };
 
-pub const AccelerationStructurePassSampleBufferAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
-        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
-    }
-    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
-        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
-    }
-    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
-    }
-    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
-    }
-};
-
-pub const AccelerationStructurePassSampleBufferAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *AccelerationStructurePassSampleBufferAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *AccelerationStructurePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*AccelerationStructurePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const AccelerationStructurePassDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAccelerationStructurePassDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn accelerationStructurePassDescriptor() *AccelerationStructurePassDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "accelerationStructurePassDescriptor", *AccelerationStructurePassDescriptor, .{});
-    }
-    pub fn sampleBufferAttachments(self_: *@This()) *AccelerationStructurePassSampleBufferAttachmentDescriptorArray {
-        return objc.msgSend(self_, "sampleBufferAttachments", *AccelerationStructurePassSampleBufferAttachmentDescriptorArray, .{});
-    }
-};
-
-pub const Type = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLType", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn dataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "dataType", DataType, .{});
-    }
-};
-
-pub const StructMember = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLStructMember", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn structType(self_: *@This()) ?*StructType {
-        return objc.msgSend(self_, "structType", ?*StructType, .{});
-    }
-    pub fn arrayType(self_: *@This()) ?*ArrayType {
-        return objc.msgSend(self_, "arrayType", ?*ArrayType, .{});
-    }
-    pub fn textureReferenceType(self_: *@This()) ?*TextureReferenceType {
-        return objc.msgSend(self_, "textureReferenceType", ?*TextureReferenceType, .{});
-    }
-    pub fn pointerType(self_: *@This()) ?*PointerType {
-        return objc.msgSend(self_, "pointerType", ?*PointerType, .{});
-    }
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn offset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "offset", ns.UInteger, .{});
-    }
-    pub fn dataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "dataType", DataType, .{});
-    }
-    pub fn argumentIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "argumentIndex", ns.UInteger, .{});
-    }
-};
-
-pub const StructType = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLStructType", @This(), Type, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn memberByName(self_: *@This(), name_: *ns.String) ?*StructMember {
-        return objc.msgSend(self_, "memberByName:", ?*StructMember, .{name_});
-    }
-    pub fn members(self_: *@This()) *ns.Array(*StructMember) {
-        return objc.msgSend(self_, "members", *ns.Array(*StructMember), .{});
-    }
-};
-
-pub const ArrayType = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLArrayType", @This(), Type, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn elementStructType(self_: *@This()) ?*StructType {
-        return objc.msgSend(self_, "elementStructType", ?*StructType, .{});
-    }
-    pub fn elementArrayType(self_: *@This()) ?*ArrayType {
-        return objc.msgSend(self_, "elementArrayType", ?*ArrayType, .{});
-    }
-    pub fn elementTextureReferenceType(self_: *@This()) ?*TextureReferenceType {
-        return objc.msgSend(self_, "elementTextureReferenceType", ?*TextureReferenceType, .{});
-    }
-    pub fn elementPointerType(self_: *@This()) ?*PointerType {
-        return objc.msgSend(self_, "elementPointerType", ?*PointerType, .{});
-    }
-    pub fn elementType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "elementType", DataType, .{});
-    }
-    pub fn arrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
-    }
-    pub fn stride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "stride", ns.UInteger, .{});
-    }
-    pub fn argumentIndexStride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "argumentIndexStride", ns.UInteger, .{});
-    }
-};
-
-pub const PointerType = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLPointerType", @This(), Type, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn elementStructType(self_: *@This()) ?*StructType {
-        return objc.msgSend(self_, "elementStructType", ?*StructType, .{});
-    }
-    pub fn elementArrayType(self_: *@This()) ?*ArrayType {
-        return objc.msgSend(self_, "elementArrayType", ?*ArrayType, .{});
-    }
-    pub fn elementType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "elementType", DataType, .{});
-    }
-    pub fn access(self_: *@This()) BindingAccess {
-        return objc.msgSend(self_, "access", BindingAccess, .{});
-    }
-    pub fn alignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "alignment", ns.UInteger, .{});
-    }
-    pub fn dataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "dataSize", ns.UInteger, .{});
-    }
-    pub fn elementIsArgumentBuffer(self_: *@This()) bool {
-        return objc.msgSend(self_, "elementIsArgumentBuffer", bool, .{});
-    }
-};
-
-pub const TextureReferenceType = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLTextureReferenceType", @This(), Type, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn textureDataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "textureDataType", DataType, .{});
-    }
-    pub fn textureType(self_: *@This()) TextureType {
-        return objc.msgSend(self_, "textureType", TextureType, .{});
-    }
-    pub fn access(self_: *@This()) BindingAccess {
-        return objc.msgSend(self_, "access", BindingAccess, .{});
-    }
-    pub fn isDepthTexture(self_: *@This()) bool {
-        return objc.msgSend(self_, "isDepthTexture", bool, .{});
-    }
-};
-
-pub const Argument = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLArgument", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn @"type"(self_: *@This()) ArgumentType {
-        return objc.msgSend(self_, "type", ArgumentType, .{});
-    }
-    pub fn access(self_: *@This()) BindingAccess {
-        return objc.msgSend(self_, "access", BindingAccess, .{});
-    }
-    pub fn index(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "index", ns.UInteger, .{});
-    }
-    pub fn isActive(self_: *@This()) bool {
-        return objc.msgSend(self_, "isActive", bool, .{});
-    }
-    pub fn bufferAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferAlignment", ns.UInteger, .{});
-    }
-    pub fn bufferDataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferDataSize", ns.UInteger, .{});
-    }
-    pub fn bufferDataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "bufferDataType", DataType, .{});
-    }
-    pub fn bufferStructType(self_: *@This()) ?*StructType {
-        return objc.msgSend(self_, "bufferStructType", ?*StructType, .{});
-    }
-    pub fn bufferPointerType(self_: *@This()) ?*PointerType {
-        return objc.msgSend(self_, "bufferPointerType", ?*PointerType, .{});
-    }
-    pub fn threadgroupMemoryAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "threadgroupMemoryAlignment", ns.UInteger, .{});
-    }
-    pub fn threadgroupMemoryDataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "threadgroupMemoryDataSize", ns.UInteger, .{});
-    }
-    pub fn textureType(self_: *@This()) TextureType {
-        return objc.msgSend(self_, "textureType", TextureType, .{});
-    }
-    pub fn textureDataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "textureDataType", DataType, .{});
-    }
-    pub fn isDepthTexture(self_: *@This()) bool {
-        return objc.msgSend(self_, "isDepthTexture", bool, .{});
-    }
-    pub fn arrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
-    }
-};
-
-pub const Binding = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLBinding", @This(), &.{});
+pub const Allocation = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLAllocation", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn @"type"(self_: *@This()) BindingType {
-        return objc.msgSend(self_, "type", BindingType, .{});
-    }
-    pub fn access(self_: *@This()) BindingAccess {
-        return objc.msgSend(self_, "access", BindingAccess, .{});
-    }
-    pub fn index(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "index", ns.UInteger, .{});
-    }
-    pub fn isUsed(self_: *@This()) bool {
-        return objc.msgSend(self_, "isUsed", bool, .{});
-    }
-    pub fn isArgument(self_: *@This()) bool {
-        return objc.msgSend(self_, "isArgument", bool, .{});
-    }
-};
-
-pub const BufferBinding = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLBufferBinding", @This(), &.{Binding});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn bufferAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferAlignment", ns.UInteger, .{});
-    }
-    pub fn bufferDataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferDataSize", ns.UInteger, .{});
-    }
-    pub fn bufferDataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "bufferDataType", DataType, .{});
-    }
-    pub fn bufferStructType(self_: *@This()) ?*StructType {
-        return objc.msgSend(self_, "bufferStructType", ?*StructType, .{});
-    }
-    pub fn bufferPointerType(self_: *@This()) ?*PointerType {
-        return objc.msgSend(self_, "bufferPointerType", ?*PointerType, .{});
-    }
-};
-
-pub const ThreadgroupBinding = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLThreadgroupBinding", @This(), &.{Binding});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn threadgroupMemoryAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "threadgroupMemoryAlignment", ns.UInteger, .{});
-    }
-    pub fn threadgroupMemoryDataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "threadgroupMemoryDataSize", ns.UInteger, .{});
-    }
-};
-
-pub const TextureBinding = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLTextureBinding", @This(), &.{Binding});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn textureType(self_: *@This()) TextureType {
-        return objc.msgSend(self_, "textureType", TextureType, .{});
-    }
-    pub fn textureDataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "textureDataType", DataType, .{});
-    }
-    pub fn isDepthTexture(self_: *@This()) bool {
-        return objc.msgSend(self_, "isDepthTexture", bool, .{});
-    }
-    pub fn arrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
-    }
-};
-
-pub const ObjectPayloadBinding = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLObjectPayloadBinding", @This(), &.{Binding});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn objectPayloadAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "objectPayloadAlignment", ns.UInteger, .{});
-    }
-    pub fn objectPayloadDataSize(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "objectPayloadDataSize", ns.UInteger, .{});
+    pub fn allocatedSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "allocatedSize", ns.UInteger, .{});
     }
 };
 
@@ -2156,6 +8522,12 @@ pub const ArgumentEncoder = opaque {
     pub fn setIntersectionFunctionTables_withRange(self_: *@This(), intersectionFunctionTables_: *?*const IntersectionFunctionTable, range_: ns.Range) void {
         return objc.msgSend(self_, "setIntersectionFunctionTables:withRange:", void, .{ intersectionFunctionTables_, range_ });
     }
+    pub fn setDepthStencilState_atIndex(self_: *@This(), depthStencilState_: ?*DepthStencilState, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setDepthStencilState:atIndex:", void, .{ depthStencilState_, index_ });
+    }
+    pub fn setDepthStencilStates_withRange(self_: *@This(), depthStencilStates_: *?*const DepthStencilState, range_: ns.Range) void {
+        return objc.msgSend(self_, "setDepthStencilStates:withRange:", void, .{ depthStencilStates_, range_ });
+    }
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
     }
@@ -2170,24 +8542,6 @@ pub const ArgumentEncoder = opaque {
     }
     pub fn alignment(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "alignment", ns.UInteger, .{});
-    }
-};
-
-pub const BinaryArchiveDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBinaryArchiveDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn url(self_: *@This()) ?*ns.URL {
-        return objc.msgSend(self_, "url", ?*ns.URL, .{});
-    }
-    pub fn setUrl(self_: *@This(), url_: ?*ns.URL) void {
-        return objc.msgSend(self_, "setUrl:", void, .{url_});
     }
 };
 
@@ -2207,6 +8561,12 @@ pub const BinaryArchive = opaque {
     pub fn addTileRenderPipelineFunctionsWithDescriptor_error(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, error_: ?*?*ns.Error) bool {
         return objc.msgSend(self_, "addTileRenderPipelineFunctionsWithDescriptor:error:", bool, .{ descriptor_, error_ });
     }
+    pub fn addMeshRenderPipelineFunctionsWithDescriptor_error(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, error_: ?*?*ns.Error) bool {
+        return objc.msgSend(self_, "addMeshRenderPipelineFunctionsWithDescriptor:error:", bool, .{ descriptor_, error_ });
+    }
+    pub fn addLibraryWithDescriptor_error(self_: *@This(), descriptor_: *StitchedLibraryDescriptor, error_: ?*?*ns.Error) bool {
+        return objc.msgSend(self_, "addLibraryWithDescriptor:error:", bool, .{ descriptor_, error_ });
+    }
     pub fn serializeToURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) bool {
         return objc.msgSend(self_, "serializeToURL:error:", bool, .{ url_, error_ });
     }
@@ -2221,6 +8581,33 @@ pub const BinaryArchive = opaque {
     }
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
+    }
+};
+
+pub const Binding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLBinding", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn @"type"(self_: *@This()) BindingType {
+        return objc.msgSend(self_, "type", BindingType, .{});
+    }
+    pub fn access(self_: *@This()) BindingAccess {
+        return objc.msgSend(self_, "access", BindingAccess, .{});
+    }
+    pub fn index(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "index", ns.UInteger, .{});
+    }
+    pub fn isUsed(self_: *@This()) bool {
+        return objc.msgSend(self_, "isUsed", bool, .{});
+    }
+    pub fn isArgument(self_: *@This()) bool {
+        return objc.msgSend(self_, "isArgument", bool, .{});
     }
 };
 
@@ -2306,71 +8693,8 @@ pub const BlitCommandEncoder = opaque {
     pub fn resolveCounters_inRange_destinationBuffer_destinationOffset(self_: *@This(), sampleBuffer_: *CounterSampleBuffer, range_: ns.Range, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger) void {
         return objc.msgSend(self_, "resolveCounters:inRange:destinationBuffer:destinationOffset:", void, .{ sampleBuffer_, range_, destinationBuffer_, destinationOffset_ });
     }
-};
-
-pub const BlitPassSampleBufferAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBlitPassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
-        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
-    }
-    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
-        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
-    }
-    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
-    }
-    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
-    }
-};
-
-pub const BlitPassSampleBufferAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBlitPassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *BlitPassSampleBufferAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *BlitPassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*BlitPassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const BlitPassDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBlitPassDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn blitPassDescriptor() *BlitPassDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "blitPassDescriptor", *BlitPassDescriptor, .{});
-    }
-    pub fn sampleBufferAttachments(self_: *@This()) *BlitPassSampleBufferAttachmentDescriptorArray {
-        return objc.msgSend(self_, "sampleBufferAttachments", *BlitPassSampleBufferAttachmentDescriptorArray, .{});
+    pub fn copyFromTensor_sourceOrigin_sourceDimensions_toTensor_destinationOrigin_destinationDimensions(self_: *@This(), sourceTensor_: *Tensor, sourceOrigin_: *TensorExtents, sourceDimensions_: *TensorExtents, destinationTensor_: *Tensor, destinationOrigin_: *TensorExtents, destinationDimensions_: *TensorExtents) void {
+        return objc.msgSend(self_, "copyFromTensor:sourceOrigin:sourceDimensions:toTensor:destinationOrigin:destinationDimensions:", void, .{ sourceTensor_, sourceOrigin_, sourceDimensions_, destinationTensor_, destinationOrigin_, destinationDimensions_ });
     }
 };
 
@@ -2390,6 +8714,9 @@ pub const Buffer = opaque {
     pub fn newTextureWithDescriptor_offset_bytesPerRow(self_: *@This(), descriptor_: *TextureDescriptor, offset_: ns.UInteger, bytesPerRow_: ns.UInteger) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:offset:bytesPerRow:", ?*Texture, .{ descriptor_, offset_, bytesPerRow_ });
     }
+    pub fn newTensorWithDescriptor_offset_error(self_: *@This(), descriptor_: *TensorDescriptor, offset_: ns.UInteger, error_: ?*?*ns.Error) ?*Tensor {
+        return objc.msgSend(self_, "newTensorWithDescriptor:offset:error:", ?*Tensor, .{ descriptor_, offset_, error_ });
+    }
     pub fn addDebugMarker_range(self_: *@This(), marker_: *ns.String, range_: ns.Range) void {
         return objc.msgSend(self_, "addDebugMarker:range:", void, .{ marker_, range_ });
     }
@@ -2405,86 +8732,35 @@ pub const Buffer = opaque {
     pub fn remoteStorageBuffer(self_: *@This()) *Buffer {
         return objc.msgSend(self_, "remoteStorageBuffer", *Buffer, .{});
     }
-    pub fn gpuAddress(self_: *@This()) u64 {
-        return objc.msgSend(self_, "gpuAddress", u64, .{});
+    pub fn gpuAddress(self_: *@This()) GPUAddress {
+        return objc.msgSend(self_, "gpuAddress", GPUAddress, .{});
+    }
+    pub fn sparseBufferTier(self_: *@This()) BufferSparseTier {
+        return objc.msgSend(self_, "sparseBufferTier", BufferSparseTier, .{});
     }
 };
 
-pub const CaptureDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLCaptureDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const BufferBinding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLBufferBinding", @This(), &.{Binding});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn captureObject(self_: *@This()) ?*objc.Id {
-        return objc.msgSend(self_, "captureObject", ?*objc.Id, .{});
+    pub fn bufferAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferAlignment", ns.UInteger, .{});
     }
-    pub fn setCaptureObject(self_: *@This(), captureObject_: ?*objc.Id) void {
-        return objc.msgSend(self_, "setCaptureObject:", void, .{captureObject_});
+    pub fn bufferDataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferDataSize", ns.UInteger, .{});
     }
-    pub fn destination(self_: *@This()) CaptureDestination {
-        return objc.msgSend(self_, "destination", CaptureDestination, .{});
+    pub fn bufferDataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "bufferDataType", DataType, .{});
     }
-    pub fn setDestination(self_: *@This(), destination_: CaptureDestination) void {
-        return objc.msgSend(self_, "setDestination:", void, .{destination_});
+    pub fn bufferStructType(self_: *@This()) ?*StructType {
+        return objc.msgSend(self_, "bufferStructType", ?*StructType, .{});
     }
-    pub fn outputURL(self_: *@This()) ?*ns.URL {
-        return objc.msgSend(self_, "outputURL", ?*ns.URL, .{});
-    }
-    pub fn setOutputURL(self_: *@This(), outputURL_: ?*ns.URL) void {
-        return objc.msgSend(self_, "setOutputURL:", void, .{outputURL_});
-    }
-};
-
-pub const CaptureManager = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLCaptureManager", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn sharedCaptureManager() *CaptureManager {
-        return objc.msgSend(@This().InternalInfo.class(), "sharedCaptureManager", *CaptureManager, .{});
-    }
-    pub fn newCaptureScopeWithDevice(self_: *@This(), device_: *Device) *CaptureScope {
-        return objc.msgSend(self_, "newCaptureScopeWithDevice:", *CaptureScope, .{device_});
-    }
-    pub fn newCaptureScopeWithCommandQueue(self_: *@This(), commandQueue_: *CommandQueue) *CaptureScope {
-        return objc.msgSend(self_, "newCaptureScopeWithCommandQueue:", *CaptureScope, .{commandQueue_});
-    }
-    pub fn supportsDestination(self_: *@This(), destination_: CaptureDestination) bool {
-        return objc.msgSend(self_, "supportsDestination:", bool, .{destination_});
-    }
-    pub fn startCaptureWithDescriptor_error(self_: *@This(), descriptor_: *CaptureDescriptor, error_: ?*?*ns.Error) bool {
-        return objc.msgSend(self_, "startCaptureWithDescriptor:error:", bool, .{ descriptor_, error_ });
-    }
-    pub fn startCaptureWithDevice(self_: *@This(), device_: *Device) void {
-        return objc.msgSend(self_, "startCaptureWithDevice:", void, .{device_});
-    }
-    pub fn startCaptureWithCommandQueue(self_: *@This(), commandQueue_: *CommandQueue) void {
-        return objc.msgSend(self_, "startCaptureWithCommandQueue:", void, .{commandQueue_});
-    }
-    pub fn startCaptureWithScope(self_: *@This(), captureScope_: *CaptureScope) void {
-        return objc.msgSend(self_, "startCaptureWithScope:", void, .{captureScope_});
-    }
-    pub fn stopCapture(self_: *@This()) void {
-        return objc.msgSend(self_, "stopCapture", void, .{});
-    }
-    pub fn defaultCaptureScope(self_: *@This()) ?*CaptureScope {
-        return objc.msgSend(self_, "defaultCaptureScope", ?*CaptureScope, .{});
-    }
-    pub fn setDefaultCaptureScope(self_: *@This(), defaultCaptureScope_: ?*CaptureScope) void {
-        return objc.msgSend(self_, "setDefaultCaptureScope:", void, .{defaultCaptureScope_});
-    }
-    pub fn isCapturing(self_: *@This()) bool {
-        return objc.msgSend(self_, "isCapturing", bool, .{});
+    pub fn bufferPointerType(self_: *@This()) ?*PointerType {
+        return objc.msgSend(self_, "bufferPointerType", ?*PointerType, .{});
     }
 };
 
@@ -2513,47 +8789,8 @@ pub const CaptureScope = opaque {
     pub fn commandQueue(self_: *@This()) ?*CommandQueue {
         return objc.msgSend(self_, "commandQueue", ?*CommandQueue, .{});
     }
-};
-
-pub const CommandBufferDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLCommandBufferDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn retainedReferences(self_: *@This()) bool {
-        return objc.msgSend(self_, "retainedReferences", bool, .{});
-    }
-    pub fn setRetainedReferences(self_: *@This(), retainedReferences_: bool) void {
-        return objc.msgSend(self_, "setRetainedReferences:", void, .{retainedReferences_});
-    }
-    pub fn errorOptions(self_: *@This()) CommandBufferErrorOption {
-        return objc.msgSend(self_, "errorOptions", CommandBufferErrorOption, .{});
-    }
-    pub fn setErrorOptions(self_: *@This(), errorOptions_: CommandBufferErrorOption) void {
-        return objc.msgSend(self_, "setErrorOptions:", void, .{errorOptions_});
-    }
-};
-
-pub const CommandBufferEncoderInfo = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLCommandBufferEncoderInfo", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn label(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "label", *ns.String, .{});
-    }
-    pub fn debugSignposts(self_: *@This()) *ns.Array(*ns.String) {
-        return objc.msgSend(self_, "debugSignposts", *ns.Array(*ns.String), .{});
-    }
-    pub fn errorState(self_: *@This()) CommandEncoderErrorState {
-        return objc.msgSend(self_, "errorState", CommandEncoderErrorState, .{});
+    pub fn mtl4CommandQueue(self_: *@This()) ?*MTL4CommandQueue {
+        return objc.msgSend(self_, "mtl4CommandQueue", ?*MTL4CommandQueue, .{});
     }
 };
 
@@ -2636,6 +8873,12 @@ pub const CommandBuffer = opaque {
     pub fn popDebugGroup(self_: *@This()) void {
         return objc.msgSend(self_, "popDebugGroup", void, .{});
     }
+    pub fn useResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "useResidencySet:", void, .{residencySet_});
+    }
+    pub fn useResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "useResidencySets:count:", void, .{ residencySets_, count_ });
+    }
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
     }
@@ -2677,6 +8920,24 @@ pub const CommandBuffer = opaque {
     }
 };
 
+pub const CommandBufferEncoderInfo = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLCommandBufferEncoderInfo", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn label(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "label", *ns.String, .{});
+    }
+    pub fn debugSignposts(self_: *@This()) *ns.Array(*ns.String) {
+        return objc.msgSend(self_, "debugSignposts", *ns.Array(*ns.String), .{});
+    }
+    pub fn errorState(self_: *@This()) CommandEncoderErrorState {
+        return objc.msgSend(self_, "errorState", CommandEncoderErrorState, .{});
+    }
+};
+
 pub const CommandEncoder = opaque {
     pub const InternalInfo = objc.ExternProtocol("MTLCommandEncoder", @This(), &.{});
     pub const as = InternalInfo.as;
@@ -2686,6 +8947,9 @@ pub const CommandEncoder = opaque {
 
     pub fn endEncoding(self_: *@This()) void {
         return objc.msgSend(self_, "endEncoding", void, .{});
+    }
+    pub fn barrierAfterQueueStages_beforeStages(self_: *@This(), afterQueueStages_: Stages, beforeStages_: Stages) void {
+        return objc.msgSend(self_, "barrierAfterQueueStages:beforeStages:", void, .{ afterQueueStages_, beforeStages_ });
     }
     pub fn insertDebugSignpost(self_: *@This(), string_: *ns.String) void {
         return objc.msgSend(self_, "insertDebugSignpost:", void, .{string_});
@@ -2725,6 +8989,18 @@ pub const CommandQueue = opaque {
     }
     pub fn insertDebugCaptureBoundary(self_: *@This()) void {
         return objc.msgSend(self_, "insertDebugCaptureBoundary", void, .{});
+    }
+    pub fn addResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "addResidencySet:", void, .{residencySet_});
+    }
+    pub fn addResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "addResidencySets:count:", void, .{ residencySets_, count_ });
+    }
+    pub fn removeResidencySet(self_: *@This(), residencySet_: *ResidencySet) void {
+        return objc.msgSend(self_, "removeResidencySet:", void, .{residencySet_});
+    }
+    pub fn removeResidencySets_count(self_: *@This(), residencySets_: **const ResidencySet, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "removeResidencySets:count:", void, .{ residencySets_, count_ });
     }
     pub fn label(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "label", ?*ns.String, .{});
@@ -2863,193 +9139,22 @@ pub const ComputeCommandEncoder = opaque {
     }
 };
 
-pub const ComputePassSampleBufferAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLComputePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
-        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
-    }
-    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
-        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
-    }
-    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
-    }
-    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
-    }
-};
-
-pub const ComputePassSampleBufferAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLComputePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *ComputePassSampleBufferAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ComputePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*ComputePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const ComputePassDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLComputePassDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn computePassDescriptor() *ComputePassDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "computePassDescriptor", *ComputePassDescriptor, .{});
-    }
-    pub fn dispatchType(self_: *@This()) DispatchType {
-        return objc.msgSend(self_, "dispatchType", DispatchType, .{});
-    }
-    pub fn setDispatchType(self_: *@This(), dispatchType_: DispatchType) void {
-        return objc.msgSend(self_, "setDispatchType:", void, .{dispatchType_});
-    }
-    pub fn sampleBufferAttachments(self_: *@This()) *ComputePassSampleBufferAttachmentDescriptorArray {
-        return objc.msgSend(self_, "sampleBufferAttachments", *ComputePassSampleBufferAttachmentDescriptorArray, .{});
-    }
-};
-
-pub const ComputePipelineReflection = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLComputePipelineReflection", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
-    }
-    pub fn arguments(self_: *@This()) *ns.Array(*Argument) {
-        return objc.msgSend(self_, "arguments", *ns.Array(*Argument), .{});
-    }
-};
-
-pub const ComputePipelineDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLComputePipelineDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
-    }
-    pub fn computeFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "computeFunction", ?*Function, .{});
-    }
-    pub fn setComputeFunction(self_: *@This(), computeFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setComputeFunction:", void, .{computeFunction_});
-    }
-    pub fn threadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
-        return objc.msgSend(self_, "threadGroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
-    }
-    pub fn setThreadGroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), threadGroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
-        return objc.msgSend(self_, "setThreadGroupSizeIsMultipleOfThreadExecutionWidth:", void, .{threadGroupSizeIsMultipleOfThreadExecutionWidth_});
-    }
-    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
-    }
-    pub fn stageInputDescriptor(self_: *@This()) ?*StageInputOutputDescriptor {
-        return objc.msgSend(self_, "stageInputDescriptor", ?*StageInputOutputDescriptor, .{});
-    }
-    pub fn setStageInputDescriptor(self_: *@This(), stageInputDescriptor_: ?*StageInputOutputDescriptor) void {
-        return objc.msgSend(self_, "setStageInputDescriptor:", void, .{stageInputDescriptor_});
-    }
-    pub fn buffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "buffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
-    }
-    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
-        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
-    }
-    pub fn insertLibraries(self_: *@This()) ?*ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "insertLibraries", ?*ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setInsertLibraries(self_: *@This(), insertLibraries_: ?*ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setInsertLibraries:", void, .{insertLibraries_});
-    }
-    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
-    }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
-    }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
-        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
-    }
-    pub fn linkedFunctions(self_: *@This()) ?*LinkedFunctions {
-        return objc.msgSend(self_, "linkedFunctions", ?*LinkedFunctions, .{});
-    }
-    pub fn setLinkedFunctions(self_: *@This(), linkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setLinkedFunctions:", void, .{linkedFunctions_});
-    }
-    pub fn supportAddingBinaryFunctions(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportAddingBinaryFunctions", bool, .{});
-    }
-    pub fn setSupportAddingBinaryFunctions(self_: *@This(), supportAddingBinaryFunctions_: bool) void {
-        return objc.msgSend(self_, "setSupportAddingBinaryFunctions:", void, .{supportAddingBinaryFunctions_});
-    }
-    pub fn maxCallStackDepth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxCallStackDepth", ns.UInteger, .{});
-    }
-    pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
-    }
-};
-
 pub const ComputePipelineState = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLComputePipelineState", @This(), &.{});
+    pub const InternalInfo = objc.ExternProtocol("MTLComputePipelineState", @This(), &.{Allocation});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    pub fn functionHandleWithName(self_: *@This(), name_: *ns.String) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithName:", ?*FunctionHandle, .{name_});
+    }
+    pub fn functionHandleWithBinaryFunction(self_: *@This(), function_: *MTL4BinaryFunctionProtocol) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithBinaryFunction:", ?*FunctionHandle, .{function_});
+    }
+    pub fn newComputePipelineStateWithBinaryFunctions_error(self_: *@This(), additionalBinaryFunctions_: *ns.Array(*MTL4BinaryFunctionProtocol), error_: ?*?*ns.Error) ?*ComputePipelineState {
+        return objc.msgSend(self_, "newComputePipelineStateWithBinaryFunctions:error:", ?*ComputePipelineState, .{ additionalBinaryFunctions_, error_ });
+    }
     pub fn imageblockMemoryLengthForDimensions(self_: *@This(), imageblockDimensions_: Size) ns.UInteger {
         return objc.msgSend(self_, "imageblockMemoryLengthForDimensions:", ns.UInteger, .{imageblockDimensions_});
     }
@@ -3067,6 +9172,9 @@ pub const ComputePipelineState = opaque {
     }
     pub fn label(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn reflection(self_: *@This()) ?*ComputePipelineReflection {
+        return objc.msgSend(self_, "reflection", ?*ComputePipelineReflection, .{});
     }
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
@@ -3086,6 +9194,12 @@ pub const ComputePipelineState = opaque {
     pub fn gpuResourceID(self_: *@This()) ResourceID {
         return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn requiredThreadsPerThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerThreadgroup", Size, .{});
+    }
 };
 
 pub const Counter = opaque {
@@ -3097,57 +9211,6 @@ pub const Counter = opaque {
 
     pub fn name(self_: *@This()) *ns.String {
         return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-};
-
-pub const CounterSet = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLCounterSet", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn counters(self_: *@This()) *ns.Array(*Counter) {
-        return objc.msgSend(self_, "counters", *ns.Array(*Counter), .{});
-    }
-};
-
-pub const CounterSampleBufferDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLCounterSampleBufferDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn counterSet(self_: *@This()) ?*CounterSet {
-        return objc.msgSend(self_, "counterSet", ?*CounterSet, .{});
-    }
-    pub fn setCounterSet(self_: *@This(), counterSet_: ?*CounterSet) void {
-        return objc.msgSend(self_, "setCounterSet:", void, .{counterSet_});
-    }
-    pub fn label(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "label", *ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: *ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
-    }
-    pub fn storageMode(self_: *@This()) StorageMode {
-        return objc.msgSend(self_, "storageMode", StorageMode, .{});
-    }
-    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
-        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
-    }
-    pub fn sampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
-    }
-    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
     }
 };
 
@@ -3172,93 +9235,18 @@ pub const CounterSampleBuffer = opaque {
     }
 };
 
-pub const StencilDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLStencilDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const CounterSet = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLCounterSet", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn stencilCompareFunction(self_: *@This()) CompareFunction {
-        return objc.msgSend(self_, "stencilCompareFunction", CompareFunction, .{});
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
     }
-    pub fn setStencilCompareFunction(self_: *@This(), stencilCompareFunction_: CompareFunction) void {
-        return objc.msgSend(self_, "setStencilCompareFunction:", void, .{stencilCompareFunction_});
-    }
-    pub fn stencilFailureOperation(self_: *@This()) StencilOperation {
-        return objc.msgSend(self_, "stencilFailureOperation", StencilOperation, .{});
-    }
-    pub fn setStencilFailureOperation(self_: *@This(), stencilFailureOperation_: StencilOperation) void {
-        return objc.msgSend(self_, "setStencilFailureOperation:", void, .{stencilFailureOperation_});
-    }
-    pub fn depthFailureOperation(self_: *@This()) StencilOperation {
-        return objc.msgSend(self_, "depthFailureOperation", StencilOperation, .{});
-    }
-    pub fn setDepthFailureOperation(self_: *@This(), depthFailureOperation_: StencilOperation) void {
-        return objc.msgSend(self_, "setDepthFailureOperation:", void, .{depthFailureOperation_});
-    }
-    pub fn depthStencilPassOperation(self_: *@This()) StencilOperation {
-        return objc.msgSend(self_, "depthStencilPassOperation", StencilOperation, .{});
-    }
-    pub fn setDepthStencilPassOperation(self_: *@This(), depthStencilPassOperation_: StencilOperation) void {
-        return objc.msgSend(self_, "setDepthStencilPassOperation:", void, .{depthStencilPassOperation_});
-    }
-    pub fn readMask(self_: *@This()) u32 {
-        return objc.msgSend(self_, "readMask", u32, .{});
-    }
-    pub fn setReadMask(self_: *@This(), readMask_: u32) void {
-        return objc.msgSend(self_, "setReadMask:", void, .{readMask_});
-    }
-    pub fn writeMask(self_: *@This()) u32 {
-        return objc.msgSend(self_, "writeMask", u32, .{});
-    }
-    pub fn setWriteMask(self_: *@This(), writeMask_: u32) void {
-        return objc.msgSend(self_, "setWriteMask:", void, .{writeMask_});
-    }
-};
-
-pub const DepthStencilDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLDepthStencilDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn depthCompareFunction(self_: *@This()) CompareFunction {
-        return objc.msgSend(self_, "depthCompareFunction", CompareFunction, .{});
-    }
-    pub fn setDepthCompareFunction(self_: *@This(), depthCompareFunction_: CompareFunction) void {
-        return objc.msgSend(self_, "setDepthCompareFunction:", void, .{depthCompareFunction_});
-    }
-    pub fn isDepthWriteEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isDepthWriteEnabled", bool, .{});
-    }
-    pub fn setDepthWriteEnabled(self_: *@This(), depthWriteEnabled_: bool) void {
-        return objc.msgSend(self_, "setDepthWriteEnabled:", void, .{depthWriteEnabled_});
-    }
-    pub fn frontFaceStencil(self_: *@This()) *StencilDescriptor {
-        return objc.msgSend(self_, "frontFaceStencil", *StencilDescriptor, .{});
-    }
-    pub fn setFrontFaceStencil(self_: *@This(), frontFaceStencil_: ?*StencilDescriptor) void {
-        return objc.msgSend(self_, "setFrontFaceStencil:", void, .{frontFaceStencil_});
-    }
-    pub fn backFaceStencil(self_: *@This()) *StencilDescriptor {
-        return objc.msgSend(self_, "backFaceStencil", *StencilDescriptor, .{});
-    }
-    pub fn setBackFaceStencil(self_: *@This(), backFaceStencil_: ?*StencilDescriptor) void {
-        return objc.msgSend(self_, "setBackFaceStencil:", void, .{backFaceStencil_});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    pub fn counters(self_: *@This()) *ns.Array(*Counter) {
+        return objc.msgSend(self_, "counters", *ns.Array(*Counter), .{});
     }
 };
 
@@ -3275,71 +9263,8 @@ pub const DepthStencilState = opaque {
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
     }
-};
-
-pub const Architecture = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLArchitecture", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-};
-
-pub const ArgumentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLArgumentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn argumentDescriptor() *ArgumentDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "argumentDescriptor", *ArgumentDescriptor, .{});
-    }
-    pub fn dataType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "dataType", DataType, .{});
-    }
-    pub fn setDataType(self_: *@This(), dataType_: DataType) void {
-        return objc.msgSend(self_, "setDataType:", void, .{dataType_});
-    }
-    pub fn index(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "index", ns.UInteger, .{});
-    }
-    pub fn setIndex(self_: *@This(), index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setIndex:", void, .{index_});
-    }
-    pub fn arrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
-    }
-    pub fn setArrayLength(self_: *@This(), arrayLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setArrayLength:", void, .{arrayLength_});
-    }
-    pub fn access(self_: *@This()) BindingAccess {
-        return objc.msgSend(self_, "access", BindingAccess, .{});
-    }
-    pub fn setAccess(self_: *@This(), access_: BindingAccess) void {
-        return objc.msgSend(self_, "setAccess:", void, .{access_});
-    }
-    pub fn textureType(self_: *@This()) TextureType {
-        return objc.msgSend(self_, "textureType", TextureType, .{});
-    }
-    pub fn setTextureType(self_: *@This(), textureType_: TextureType) void {
-        return objc.msgSend(self_, "setTextureType:", void, .{textureType_});
-    }
-    pub fn constantBlockAlignment(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "constantBlockAlignment", ns.UInteger, .{});
-    }
-    pub fn setConstantBlockAlignment(self_: *@This(), constantBlockAlignment_: ns.UInteger) void {
-        return objc.msgSend(self_, "setConstantBlockAlignment:", void, .{constantBlockAlignment_});
+    pub fn gpuResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
 
@@ -3350,11 +9275,17 @@ pub const Device = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    pub fn newLogStateWithDescriptor_error(self_: *@This(), descriptor_: *LogStateDescriptor, error_: ?*?*ns.Error) ?*LogState {
+        return objc.msgSend(self_, "newLogStateWithDescriptor:error:", ?*LogState, .{ descriptor_, error_ });
+    }
     pub fn newCommandQueue(self_: *@This()) ?*CommandQueue {
         return objc.msgSend(self_, "newCommandQueue", ?*CommandQueue, .{});
     }
     pub fn newCommandQueueWithMaxCommandBufferCount(self_: *@This(), maxCommandBufferCount_: ns.UInteger) ?*CommandQueue {
         return objc.msgSend(self_, "newCommandQueueWithMaxCommandBufferCount:", ?*CommandQueue, .{maxCommandBufferCount_});
+    }
+    pub fn newCommandQueueWithDescriptor(self_: *@This(), descriptor_: *CommandQueueDescriptor) ?*CommandQueue {
+        return objc.msgSend(self_, "newCommandQueueWithDescriptor:", ?*CommandQueue, .{descriptor_});
     }
     pub fn heapTextureSizeAndAlignWithDescriptor(self_: *@This(), desc_: *TextureDescriptor) SizeAndAlign {
         return objc.msgSend(self_, "heapTextureSizeAndAlignWithDescriptor:", SizeAndAlign, .{desc_});
@@ -3548,11 +9479,11 @@ pub const Device = opaque {
     pub fn supportsVertexAmplificationCount(self_: *@This(), count_: ns.UInteger) bool {
         return objc.msgSend(self_, "supportsVertexAmplificationCount:", bool, .{count_});
     }
-    pub fn newDynamicLibrary_error(self_: *@This(), library_: *Library, error_: ?*?*ns.Error) ?*DynamicLibrary {
-        return objc.msgSend(self_, "newDynamicLibrary:error:", ?*DynamicLibrary, .{ library_, error_ });
+    pub fn newDynamicLibrary_error(self_: *@This(), library_: *Library, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
+        return objc.msgSend(self_, "newDynamicLibrary:error:", ?*DynamicLibraryProtocol, .{ library_, error_ });
     }
-    pub fn newDynamicLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*DynamicLibrary {
-        return objc.msgSend(self_, "newDynamicLibraryWithURL:error:", ?*DynamicLibrary, .{ url_, error_ });
+    pub fn newDynamicLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
+        return objc.msgSend(self_, "newDynamicLibraryWithURL:error:", ?*DynamicLibraryProtocol, .{ url_, error_ });
     }
     pub fn newBinaryArchiveWithDescriptor_error(self_: *@This(), descriptor_: *BinaryArchiveDescriptor, error_: ?*?*ns.Error) ?*BinaryArchive {
         return objc.msgSend(self_, "newBinaryArchiveWithDescriptor:error:", ?*BinaryArchive, .{ descriptor_, error_ });
@@ -3571,6 +9502,63 @@ pub const Device = opaque {
     }
     pub fn heapAccelerationStructureSizeAndAlignWithDescriptor(self_: *@This(), descriptor_: *AccelerationStructureDescriptor) SizeAndAlign {
         return objc.msgSend(self_, "heapAccelerationStructureSizeAndAlignWithDescriptor:", SizeAndAlign, .{descriptor_});
+    }
+    pub fn newResidencySetWithDescriptor_error(self_: *@This(), desc_: *ResidencySetDescriptor, error_: ?*?*ns.Error) ?*ResidencySet {
+        return objc.msgSend(self_, "newResidencySetWithDescriptor:error:", ?*ResidencySet, .{ desc_, error_ });
+    }
+    pub fn tensorSizeAndAlignWithDescriptor(self_: *@This(), descriptor_: *TensorDescriptor) SizeAndAlign {
+        return objc.msgSend(self_, "tensorSizeAndAlignWithDescriptor:", SizeAndAlign, .{descriptor_});
+    }
+    pub fn newTensorWithDescriptor_error(self_: *@This(), descriptor_: *TensorDescriptor, error_: ?*?*ns.Error) ?*Tensor {
+        return objc.msgSend(self_, "newTensorWithDescriptor:error:", ?*Tensor, .{ descriptor_, error_ });
+    }
+    pub fn functionHandleWithFunction(self_: *@This(), function_: *Function) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithFunction:", ?*FunctionHandle, .{function_});
+    }
+    pub fn newCommandAllocator(self_: *@This()) ?*MTL4CommandAllocator {
+        return objc.msgSend(self_, "newCommandAllocator", ?*MTL4CommandAllocator, .{});
+    }
+    pub fn newCommandAllocatorWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CommandAllocatorDescriptor, error_: ?*?*ns.Error) ?*MTL4CommandAllocator {
+        return objc.msgSend(self_, "newCommandAllocatorWithDescriptor:error:", ?*MTL4CommandAllocator, .{ descriptor_, error_ });
+    }
+    pub fn newMTL4CommandQueue(self_: *@This()) ?*MTL4CommandQueue {
+        return objc.msgSend(self_, "newMTL4CommandQueue", ?*MTL4CommandQueue, .{});
+    }
+    pub fn newMTL4CommandQueueWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CommandQueueDescriptor, error_: ?*?*ns.Error) ?*MTL4CommandQueue {
+        return objc.msgSend(self_, "newMTL4CommandQueueWithDescriptor:error:", ?*MTL4CommandQueue, .{ descriptor_, error_ });
+    }
+    pub fn newCommandBuffer(self_: *@This()) ?*MTL4CommandBuffer {
+        return objc.msgSend(self_, "newCommandBuffer", ?*MTL4CommandBuffer, .{});
+    }
+    pub fn newArgumentTableWithDescriptor_error(self_: *@This(), descriptor_: *MTL4ArgumentTableDescriptor, error_: ?*?*ns.Error) ?*MTL4ArgumentTable {
+        return objc.msgSend(self_, "newArgumentTableWithDescriptor:error:", ?*MTL4ArgumentTable, .{ descriptor_, error_ });
+    }
+    pub fn newTextureViewPoolWithDescriptor_error(self_: *@This(), descriptor_: *ResourceViewPoolDescriptor, error_: ?*?*ns.Error) ?*TextureViewPool {
+        return objc.msgSend(self_, "newTextureViewPoolWithDescriptor:error:", ?*TextureViewPool, .{ descriptor_, error_ });
+    }
+    pub fn newCompilerWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CompilerDescriptor, error_: ?*?*ns.Error) ?*MTL4Compiler {
+        return objc.msgSend(self_, "newCompilerWithDescriptor:error:", ?*MTL4Compiler, .{ descriptor_, error_ });
+    }
+    pub fn newArchiveWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*MTL4Archive {
+        return objc.msgSend(self_, "newArchiveWithURL:error:", ?*MTL4Archive, .{ url_, error_ });
+    }
+    pub fn newPipelineDataSetSerializerWithDescriptor(self_: *@This(), descriptor_: *MTL4PipelineDataSetSerializerDescriptor) *MTL4PipelineDataSetSerializer {
+        return objc.msgSend(self_, "newPipelineDataSetSerializerWithDescriptor:", *MTL4PipelineDataSetSerializer, .{descriptor_});
+    }
+    pub fn newBufferWithLength_options_placementSparsePageSize(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions, placementSparsePageSize_: SparsePageSize) ?*Buffer {
+        return objc.msgSend(self_, "newBufferWithLength:options:placementSparsePageSize:", ?*Buffer, .{ length_, options_, placementSparsePageSize_ });
+    }
+    pub fn newCounterHeapWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CounterHeapDescriptor, error_: ?*?*ns.Error) ?*MTL4CounterHeap {
+        return objc.msgSend(self_, "newCounterHeapWithDescriptor:error:", ?*MTL4CounterHeap, .{ descriptor_, error_ });
+    }
+    pub fn sizeOfCounterHeapEntry(self_: *@This(), type_: MTL4CounterHeapType) ns.UInteger {
+        return objc.msgSend(self_, "sizeOfCounterHeapEntry:", ns.UInteger, .{type_});
+    }
+    pub fn queryTimestampFrequency(self_: *@This()) u64 {
+        return objc.msgSend(self_, "queryTimestampFrequency", u64, .{});
+    }
+    pub fn functionHandleWithBinaryFunction(self_: *@This(), function_: *MTL4BinaryFunctionProtocol) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithBinaryFunction:", ?*FunctionHandle, .{function_});
     }
     pub fn name(self_: *@This()) *ns.String {
         return objc.msgSend(self_, "name", *ns.String, .{});
@@ -3677,6 +9665,9 @@ pub const Device = opaque {
     pub fn supportsRenderDynamicLibraries(self_: *@This()) bool {
         return objc.msgSend(self_, "supportsRenderDynamicLibraries", bool, .{});
     }
+    pub fn supportsPlacementSparse(self_: *@This()) bool {
+        return objc.msgSend(self_, "supportsPlacementSparse", bool, .{});
+    }
     pub fn supportsRaytracing(self_: *@This()) bool {
         return objc.msgSend(self_, "supportsRaytracing", bool, .{});
     }
@@ -3730,7 +9721,7 @@ pub const Drawable = opaque {
     }
 };
 
-pub const DynamicLibrary = opaque {
+pub const DynamicLibraryProtocol = opaque {
     pub const InternalInfo = objc.ExternProtocol("MTLDynamicLibrary", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
@@ -3772,60 +9763,6 @@ pub const Event = opaque {
     }
 };
 
-pub const SharedEventListener = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLSharedEventListener", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn initWithDispatchQueue(self_: *@This(), dispatchQueue_: dispatch_queue_t) *@This() {
-        return objc.msgSend(self_, "initWithDispatchQueue:", *@This(), .{dispatchQueue_});
-    }
-    pub fn dispatchQueue(self_: *@This()) dispatch_queue_t {
-        return objc.msgSend(self_, "dispatchQueue", dispatch_queue_t, .{});
-    }
-};
-
-pub const SharedEvent = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLSharedEvent", @This(), &.{Event});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn notifyListener_atValue_block(self_: *@This(), listener_: *SharedEventListener, value_: u64, block_: *ns.Block(fn (*SharedEvent, u64) void)) void {
-        return objc.msgSend(self_, "notifyListener:atValue:block:", void, .{ listener_, value_, block_ });
-    }
-    pub fn newSharedEventHandle(self_: *@This()) *SharedEventHandle {
-        return objc.msgSend(self_, "newSharedEventHandle", *SharedEventHandle, .{});
-    }
-    pub fn signaledValue(self_: *@This()) u64 {
-        return objc.msgSend(self_, "signaledValue", u64, .{});
-    }
-    pub fn setSignaledValue(self_: *@This(), signaledValue_: u64) void {
-        return objc.msgSend(self_, "setSignaledValue:", void, .{signaledValue_});
-    }
-};
-
-pub const SharedEventHandle = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLSharedEventHandle", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-};
-
 pub const Fence = opaque {
     pub const InternalInfo = objc.ExternProtocol("MTLFence", @This(), &.{});
     pub const as = InternalInfo.as;
@@ -3844,84 +9781,52 @@ pub const Fence = opaque {
     }
 };
 
-pub const FunctionConstantValues = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionConstantValues", @This(), ns.ObjectInterface, &.{});
+pub const Function = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLFunction", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn setConstantValue_type_atIndex(self_: *@This(), value_: *const anyopaque, type_: DataType, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setConstantValue:type:atIndex:", void, .{ value_, type_, index_ });
+    pub fn newArgumentEncoderWithBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) *ArgumentEncoder {
+        return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:", *ArgumentEncoder, .{bufferIndex_});
     }
-    pub fn setConstantValues_type_withRange(self_: *@This(), values_: *const anyopaque, type_: DataType, range_: ns.Range) void {
-        return objc.msgSend(self_, "setConstantValues:type:withRange:", void, .{ values_, type_, range_ });
+    pub fn newArgumentEncoderWithBufferIndex_reflection(self_: *@This(), bufferIndex_: ns.UInteger, reflection_: ?*AutoreleasedArgument) *ArgumentEncoder {
+        return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:reflection:", *ArgumentEncoder, .{ bufferIndex_, reflection_ });
     }
-    pub fn setConstantValue_type_withName(self_: *@This(), value_: *const anyopaque, type_: DataType, name_: *ns.String) void {
-        return objc.msgSend(self_, "setConstantValue:type:withName:", void, .{ value_, type_, name_ });
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
     }
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
     }
-};
-
-pub const FunctionDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn functionDescriptor() *FunctionDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "functionDescriptor", *FunctionDescriptor, .{});
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
     }
-    pub fn name(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "name", ?*ns.String, .{});
+    pub fn functionType(self_: *@This()) FunctionType {
+        return objc.msgSend(self_, "functionType", FunctionType, .{});
     }
-    pub fn setName(self_: *@This(), name_: ?*ns.String) void {
-        return objc.msgSend(self_, "setName:", void, .{name_});
+    pub fn patchType(self_: *@This()) PatchType {
+        return objc.msgSend(self_, "patchType", PatchType, .{});
     }
-    pub fn specializedName(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "specializedName", ?*ns.String, .{});
+    pub fn patchControlPointCount(self_: *@This()) ns.Integer {
+        return objc.msgSend(self_, "patchControlPointCount", ns.Integer, .{});
     }
-    pub fn setSpecializedName(self_: *@This(), specializedName_: ?*ns.String) void {
-        return objc.msgSend(self_, "setSpecializedName:", void, .{specializedName_});
+    pub fn vertexAttributes(self_: *@This()) ?*ns.Array(*VertexAttribute) {
+        return objc.msgSend(self_, "vertexAttributes", ?*ns.Array(*VertexAttribute), .{});
     }
-    pub fn constantValues(self_: *@This()) ?*FunctionConstantValues {
-        return objc.msgSend(self_, "constantValues", ?*FunctionConstantValues, .{});
+    pub fn stageInputAttributes(self_: *@This()) ?*ns.Array(*Attribute) {
+        return objc.msgSend(self_, "stageInputAttributes", ?*ns.Array(*Attribute), .{});
     }
-    pub fn setConstantValues(self_: *@This(), constantValues_: ?*FunctionConstantValues) void {
-        return objc.msgSend(self_, "setConstantValues:", void, .{constantValues_});
+    pub fn name(self_: *@This()) *ns.String {
+        return objc.msgSend(self_, "name", *ns.String, .{});
+    }
+    pub fn functionConstantsDictionary(self_: *@This()) *ns.Dictionary(*ns.String, *FunctionConstant) {
+        return objc.msgSend(self_, "functionConstantsDictionary", *ns.Dictionary(*ns.String, *FunctionConstant), .{});
     }
     pub fn options(self_: *@This()) FunctionOptions {
         return objc.msgSend(self_, "options", FunctionOptions, .{});
     }
-    pub fn setOptions(self_: *@This(), options_: FunctionOptions) void {
-        return objc.msgSend(self_, "setOptions:", void, .{options_});
-    }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
-    }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
-        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
-    }
-};
-
-pub const IntersectionFunctionDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLIntersectionFunctionDescriptor", @This(), FunctionDescriptor, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 };
 
 pub const FunctionHandle = opaque {
@@ -3940,34 +9845,8 @@ pub const FunctionHandle = opaque {
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
     }
-};
-
-pub const LogContainer = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLLogContainer", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-};
-
-pub const FunctionLogDebugLocation = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLFunctionLogDebugLocation", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn functionName(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "functionName", ?*ns.String, .{});
-    }
-    pub fn URL(self_: *@This()) ?*ns.URL {
-        return objc.msgSend(self_, "URL", ?*ns.URL, .{});
-    }
-    pub fn line(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "line", ns.UInteger, .{});
-    }
-    pub fn column(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "column", ns.UInteger, .{});
+    pub fn gpuResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
 
@@ -3992,23 +9871,33 @@ pub const FunctionLog = opaque {
     }
 };
 
+pub const FunctionLogDebugLocation = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLFunctionLogDebugLocation", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn functionName(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "functionName", ?*ns.String, .{});
+    }
+    pub fn URL(self_: *@This()) ?*ns.URL {
+        return objc.msgSend(self_, "URL", ?*ns.URL, .{});
+    }
+    pub fn line(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "line", ns.UInteger, .{});
+    }
+    pub fn column(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "column", ns.UInteger, .{});
+    }
+};
+
 pub const FunctionStitchingAttribute = opaque {
     pub const InternalInfo = objc.ExternProtocol("MTLFunctionStitchingAttribute", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-};
-
-pub const FunctionStitchingAttributeAlwaysInline = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingAttributeAlwaysInline", @This(), ns.ObjectInterface, &.{FunctionStitchingAttribute});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 };
 
 pub const FunctionStitchingNode = opaque {
@@ -4019,179 +9908,8 @@ pub const FunctionStitchingNode = opaque {
     pub const autorelease = InternalInfo.autorelease;
 };
 
-pub const FunctionStitchingInputNode = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingInputNode", @This(), ns.ObjectInterface, &.{FunctionStitchingNode});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn initWithArgumentIndex(self_: *@This(), argument_: ns.UInteger) *@This() {
-        return objc.msgSend(self_, "initWithArgumentIndex:", *@This(), .{argument_});
-    }
-    pub fn argumentIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "argumentIndex", ns.UInteger, .{});
-    }
-    pub fn setArgumentIndex(self_: *@This(), argumentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setArgumentIndex:", void, .{argumentIndex_});
-    }
-};
-
-pub const FunctionStitchingFunctionNode = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingFunctionNode", @This(), ns.ObjectInterface, &.{FunctionStitchingNode});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn initWithName_arguments_controlDependencies(self_: *@This(), name_: *ns.String, arguments_: *ns.Array(*FunctionStitchingNode), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) *@This() {
-        return objc.msgSend(self_, "initWithName:arguments:controlDependencies:", *@This(), .{ name_, arguments_, controlDependencies_ });
-    }
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn setName(self_: *@This(), name_: *ns.String) void {
-        return objc.msgSend(self_, "setName:", void, .{name_});
-    }
-    pub fn arguments(self_: *@This()) *ns.Array(*FunctionStitchingNode) {
-        return objc.msgSend(self_, "arguments", *ns.Array(*FunctionStitchingNode), .{});
-    }
-    pub fn setArguments(self_: *@This(), arguments_: *ns.Array(*FunctionStitchingNode)) void {
-        return objc.msgSend(self_, "setArguments:", void, .{arguments_});
-    }
-    pub fn controlDependencies(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
-        return objc.msgSend(self_, "controlDependencies", *ns.Array(*FunctionStitchingFunctionNode), .{});
-    }
-    pub fn setControlDependencies(self_: *@This(), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) void {
-        return objc.msgSend(self_, "setControlDependencies:", void, .{controlDependencies_});
-    }
-};
-
-pub const FunctionStitchingGraph = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionStitchingGraph", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn initWithFunctionName_nodes_outputNode_attributes(self_: *@This(), functionName_: *ns.String, nodes_: *ns.Array(*FunctionStitchingFunctionNode), outputNode_: ?*FunctionStitchingFunctionNode, attributes_: *ns.Array(*FunctionStitchingAttribute)) *@This() {
-        return objc.msgSend(self_, "initWithFunctionName:nodes:outputNode:attributes:", *@This(), .{ functionName_, nodes_, outputNode_, attributes_ });
-    }
-    pub fn functionName(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "functionName", *ns.String, .{});
-    }
-    pub fn setFunctionName(self_: *@This(), functionName_: *ns.String) void {
-        return objc.msgSend(self_, "setFunctionName:", void, .{functionName_});
-    }
-    pub fn nodes(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
-        return objc.msgSend(self_, "nodes", *ns.Array(*FunctionStitchingFunctionNode), .{});
-    }
-    pub fn setNodes(self_: *@This(), nodes_: *ns.Array(*FunctionStitchingFunctionNode)) void {
-        return objc.msgSend(self_, "setNodes:", void, .{nodes_});
-    }
-    pub fn outputNode(self_: *@This()) ?*FunctionStitchingFunctionNode {
-        return objc.msgSend(self_, "outputNode", ?*FunctionStitchingFunctionNode, .{});
-    }
-    pub fn setOutputNode(self_: *@This(), outputNode_: ?*FunctionStitchingFunctionNode) void {
-        return objc.msgSend(self_, "setOutputNode:", void, .{outputNode_});
-    }
-    pub fn attributes(self_: *@This()) *ns.Array(*FunctionStitchingAttribute) {
-        return objc.msgSend(self_, "attributes", *ns.Array(*FunctionStitchingAttribute), .{});
-    }
-    pub fn setAttributes(self_: *@This(), attributes_: *ns.Array(*FunctionStitchingAttribute)) void {
-        return objc.msgSend(self_, "setAttributes:", void, .{attributes_});
-    }
-};
-
-pub const StitchedLibraryDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLStitchedLibraryDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn functionGraphs(self_: *@This()) *ns.Array(*FunctionStitchingGraph) {
-        return objc.msgSend(self_, "functionGraphs", *ns.Array(*FunctionStitchingGraph), .{});
-    }
-    pub fn setFunctionGraphs(self_: *@This(), functionGraphs_: *ns.Array(*FunctionStitchingGraph)) void {
-        return objc.msgSend(self_, "setFunctionGraphs:", void, .{functionGraphs_});
-    }
-    pub fn functions(self_: *@This()) *ns.Array(*Function) {
-        return objc.msgSend(self_, "functions", *ns.Array(*Function), .{});
-    }
-    pub fn setFunctions(self_: *@This(), functions_: *ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setFunctions:", void, .{functions_});
-    }
-};
-
-pub const HeapDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLHeapDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn size(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "size", ns.UInteger, .{});
-    }
-    pub fn setSize(self_: *@This(), size_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSize:", void, .{size_});
-    }
-    pub fn storageMode(self_: *@This()) StorageMode {
-        return objc.msgSend(self_, "storageMode", StorageMode, .{});
-    }
-    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
-        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
-    }
-    pub fn cpuCacheMode(self_: *@This()) CPUCacheMode {
-        return objc.msgSend(self_, "cpuCacheMode", CPUCacheMode, .{});
-    }
-    pub fn setCpuCacheMode(self_: *@This(), cpuCacheMode_: CPUCacheMode) void {
-        return objc.msgSend(self_, "setCpuCacheMode:", void, .{cpuCacheMode_});
-    }
-    pub fn sparsePageSize(self_: *@This()) SparsePageSize {
-        return objc.msgSend(self_, "sparsePageSize", SparsePageSize, .{});
-    }
-    pub fn setSparsePageSize(self_: *@This(), sparsePageSize_: SparsePageSize) void {
-        return objc.msgSend(self_, "setSparsePageSize:", void, .{sparsePageSize_});
-    }
-    pub fn hazardTrackingMode(self_: *@This()) HazardTrackingMode {
-        return objc.msgSend(self_, "hazardTrackingMode", HazardTrackingMode, .{});
-    }
-    pub fn setHazardTrackingMode(self_: *@This(), hazardTrackingMode_: HazardTrackingMode) void {
-        return objc.msgSend(self_, "setHazardTrackingMode:", void, .{hazardTrackingMode_});
-    }
-    pub fn resourceOptions(self_: *@This()) ResourceOptions {
-        return objc.msgSend(self_, "resourceOptions", ResourceOptions, .{});
-    }
-    pub fn setResourceOptions(self_: *@This(), resourceOptions_: ResourceOptions) void {
-        return objc.msgSend(self_, "setResourceOptions:", void, .{resourceOptions_});
-    }
-    pub fn @"type"(self_: *@This()) HeapType {
-        return objc.msgSend(self_, "type", HeapType, .{});
-    }
-    pub fn setType(self_: *@This(), type_: HeapType) void {
-        return objc.msgSend(self_, "setType:", void, .{type_});
-    }
-};
-
 pub const Heap = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLHeap", @This(), &.{});
+    pub const InternalInfo = objc.ExternProtocol("MTLHeap", @This(), &.{Allocation});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -4259,276 +9977,6 @@ pub const Heap = opaque {
     }
     pub fn @"type"(self_: *@This()) HeapType {
         return objc.msgSend(self_, "type", HeapType, .{});
-    }
-};
-
-pub const IndirectCommandBufferDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLIndirectCommandBufferDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn commandTypes(self_: *@This()) IndirectCommandType {
-        return objc.msgSend(self_, "commandTypes", IndirectCommandType, .{});
-    }
-    pub fn setCommandTypes(self_: *@This(), commandTypes_: IndirectCommandType) void {
-        return objc.msgSend(self_, "setCommandTypes:", void, .{commandTypes_});
-    }
-    pub fn inheritPipelineState(self_: *@This()) bool {
-        return objc.msgSend(self_, "inheritPipelineState", bool, .{});
-    }
-    pub fn setInheritPipelineState(self_: *@This(), inheritPipelineState_: bool) void {
-        return objc.msgSend(self_, "setInheritPipelineState:", void, .{inheritPipelineState_});
-    }
-    pub fn inheritBuffers(self_: *@This()) bool {
-        return objc.msgSend(self_, "inheritBuffers", bool, .{});
-    }
-    pub fn setInheritBuffers(self_: *@This(), inheritBuffers_: bool) void {
-        return objc.msgSend(self_, "setInheritBuffers:", void, .{inheritBuffers_});
-    }
-    pub fn maxVertexBufferBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxVertexBufferBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxVertexBufferBindCount(self_: *@This(), maxVertexBufferBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxVertexBufferBindCount:", void, .{maxVertexBufferBindCount_});
-    }
-    pub fn maxFragmentBufferBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxFragmentBufferBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxFragmentBufferBindCount(self_: *@This(), maxFragmentBufferBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxFragmentBufferBindCount:", void, .{maxFragmentBufferBindCount_});
-    }
-    pub fn maxKernelBufferBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxKernelBufferBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxKernelBufferBindCount(self_: *@This(), maxKernelBufferBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxKernelBufferBindCount:", void, .{maxKernelBufferBindCount_});
-    }
-    pub fn maxKernelThreadgroupMemoryBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxKernelThreadgroupMemoryBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxKernelThreadgroupMemoryBindCount(self_: *@This(), maxKernelThreadgroupMemoryBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxKernelThreadgroupMemoryBindCount:", void, .{maxKernelThreadgroupMemoryBindCount_});
-    }
-    pub fn maxObjectBufferBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxObjectBufferBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxObjectBufferBindCount(self_: *@This(), maxObjectBufferBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxObjectBufferBindCount:", void, .{maxObjectBufferBindCount_});
-    }
-    pub fn maxMeshBufferBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxMeshBufferBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxMeshBufferBindCount(self_: *@This(), maxMeshBufferBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxMeshBufferBindCount:", void, .{maxMeshBufferBindCount_});
-    }
-    pub fn maxObjectThreadgroupMemoryBindCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxObjectThreadgroupMemoryBindCount", ns.UInteger, .{});
-    }
-    pub fn setMaxObjectThreadgroupMemoryBindCount(self_: *@This(), maxObjectThreadgroupMemoryBindCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxObjectThreadgroupMemoryBindCount:", void, .{maxObjectThreadgroupMemoryBindCount_});
-    }
-    pub fn supportRayTracing(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportRayTracing", bool, .{});
-    }
-    pub fn setSupportRayTracing(self_: *@This(), supportRayTracing_: bool) void {
-        return objc.msgSend(self_, "setSupportRayTracing:", void, .{supportRayTracing_});
-    }
-    pub fn supportDynamicAttributeStride(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportDynamicAttributeStride", bool, .{});
-    }
-    pub fn setSupportDynamicAttributeStride(self_: *@This(), supportDynamicAttributeStride_: bool) void {
-        return objc.msgSend(self_, "setSupportDynamicAttributeStride:", void, .{supportDynamicAttributeStride_});
-    }
-};
-
-pub const IndirectCommandBuffer = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLIndirectCommandBuffer", @This(), &.{Resource});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn resetWithRange(self_: *@This(), range_: ns.Range) void {
-        return objc.msgSend(self_, "resetWithRange:", void, .{range_});
-    }
-    pub fn indirectRenderCommandAtIndex(self_: *@This(), commandIndex_: ns.UInteger) *IndirectRenderCommand {
-        return objc.msgSend(self_, "indirectRenderCommandAtIndex:", *IndirectRenderCommand, .{commandIndex_});
-    }
-    pub fn indirectComputeCommandAtIndex(self_: *@This(), commandIndex_: ns.UInteger) *IndirectComputeCommand {
-        return objc.msgSend(self_, "indirectComputeCommandAtIndex:", *IndirectComputeCommand, .{commandIndex_});
-    }
-    pub fn size(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "size", ns.UInteger, .{});
-    }
-    pub fn gpuResourceID(self_: *@This()) ResourceID {
-        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
-    }
-};
-
-pub const IndirectRenderCommand = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLIndirectRenderCommand", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn setRenderPipelineState(self_: *@This(), pipelineState_: *RenderPipelineState) void {
-        return objc.msgSend(self_, "setRenderPipelineState:", void, .{pipelineState_});
-    }
-    pub fn setVertexBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setVertexBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn setFragmentBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setFragmentBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn setVertexBuffer_offset_attributeStride_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, stride_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setVertexBuffer:offset:attributeStride:atIndex:", void, .{ buffer_, offset_, stride_, index_ });
-    }
-    pub fn drawPatches_patchStart_patchCount_patchIndexBuffer_patchIndexBufferOffset_instanceCount_baseInstance_tessellationFactorBuffer_tessellationFactorBufferOffset_tessellationFactorBufferInstanceStride(self_: *@This(), numberOfPatchControlPoints_: ns.UInteger, patchStart_: ns.UInteger, patchCount_: ns.UInteger, patchIndexBuffer_: ?*Buffer, patchIndexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger, buffer_: *Buffer, offset_: ns.UInteger, instanceStride_: ns.UInteger) void {
-        return objc.msgSend(self_, "drawPatches:patchStart:patchCount:patchIndexBuffer:patchIndexBufferOffset:instanceCount:baseInstance:tessellationFactorBuffer:tessellationFactorBufferOffset:tessellationFactorBufferInstanceStride:", void, .{ numberOfPatchControlPoints_, patchStart_, patchCount_, patchIndexBuffer_, patchIndexBufferOffset_, instanceCount_, baseInstance_, buffer_, offset_, instanceStride_ });
-    }
-    pub fn drawIndexedPatches_patchStart_patchCount_patchIndexBuffer_patchIndexBufferOffset_controlPointIndexBuffer_controlPointIndexBufferOffset_instanceCount_baseInstance_tessellationFactorBuffer_tessellationFactorBufferOffset_tessellationFactorBufferInstanceStride(self_: *@This(), numberOfPatchControlPoints_: ns.UInteger, patchStart_: ns.UInteger, patchCount_: ns.UInteger, patchIndexBuffer_: ?*Buffer, patchIndexBufferOffset_: ns.UInteger, controlPointIndexBuffer_: *Buffer, controlPointIndexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger, buffer_: *Buffer, offset_: ns.UInteger, instanceStride_: ns.UInteger) void {
-        return objc.msgSend(self_, "drawIndexedPatches:patchStart:patchCount:patchIndexBuffer:patchIndexBufferOffset:controlPointIndexBuffer:controlPointIndexBufferOffset:instanceCount:baseInstance:tessellationFactorBuffer:tessellationFactorBufferOffset:tessellationFactorBufferInstanceStride:", void, .{ numberOfPatchControlPoints_, patchStart_, patchCount_, patchIndexBuffer_, patchIndexBufferOffset_, controlPointIndexBuffer_, controlPointIndexBufferOffset_, instanceCount_, baseInstance_, buffer_, offset_, instanceStride_ });
-    }
-    pub fn drawPrimitives_vertexStart_vertexCount_instanceCount_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, vertexStart_: ns.UInteger, vertexCount_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger) void {
-        return objc.msgSend(self_, "drawPrimitives:vertexStart:vertexCount:instanceCount:baseInstance:", void, .{ primitiveType_, vertexStart_, vertexCount_, instanceCount_, baseInstance_ });
-    }
-    pub fn drawIndexedPrimitives_indexCount_indexType_indexBuffer_indexBufferOffset_instanceCount_baseVertex_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, indexCount_: ns.UInteger, indexType_: IndexType, indexBuffer_: *Buffer, indexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseVertex_: ns.Integer, baseInstance_: ns.UInteger) void {
-        return objc.msgSend(self_, "drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:baseVertex:baseInstance:", void, .{ primitiveType_, indexCount_, indexType_, indexBuffer_, indexBufferOffset_, instanceCount_, baseVertex_, baseInstance_ });
-    }
-    pub fn setObjectThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObjectThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
-    }
-    pub fn setObjectBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObjectBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn setMeshBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMeshBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn drawMeshThreadgroups_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
-        return objc.msgSend(self_, "drawMeshThreadgroups:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
-    }
-    pub fn drawMeshThreads_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
-        return objc.msgSend(self_, "drawMeshThreads:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
-    }
-    pub fn setBarrier(self_: *@This()) void {
-        return objc.msgSend(self_, "setBarrier", void, .{});
-    }
-    pub fn clearBarrier(self_: *@This()) void {
-        return objc.msgSend(self_, "clearBarrier", void, .{});
-    }
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-};
-
-pub const IndirectComputeCommand = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLIndirectComputeCommand", @This(), &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn setComputePipelineState(self_: *@This(), pipelineState_: *ComputePipelineState) void {
-        return objc.msgSend(self_, "setComputePipelineState:", void, .{pipelineState_});
-    }
-    pub fn setKernelBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setKernelBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn setKernelBuffer_offset_attributeStride_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, stride_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setKernelBuffer:offset:attributeStride:atIndex:", void, .{ buffer_, offset_, stride_, index_ });
-    }
-    pub fn concurrentDispatchThreadgroups_threadsPerThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
-        return objc.msgSend(self_, "concurrentDispatchThreadgroups:threadsPerThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerThreadgroup_ });
-    }
-    pub fn concurrentDispatchThreads_threadsPerThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
-        return objc.msgSend(self_, "concurrentDispatchThreads:threadsPerThreadgroup:", void, .{ threadsPerGrid_, threadsPerThreadgroup_ });
-    }
-    pub fn setBarrier(self_: *@This()) void {
-        return objc.msgSend(self_, "setBarrier", void, .{});
-    }
-    pub fn clearBarrier(self_: *@This()) void {
-        return objc.msgSend(self_, "clearBarrier", void, .{});
-    }
-    pub fn setImageblockWidth_height(self_: *@This(), width_: ns.UInteger, height_: ns.UInteger) void {
-        return objc.msgSend(self_, "setImageblockWidth:height:", void, .{ width_, height_ });
-    }
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn setThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
-    }
-    pub fn setStageInRegion(self_: *@This(), region_: Region) void {
-        return objc.msgSend(self_, "setStageInRegion:", void, .{region_});
-    }
-};
-
-pub const IntersectionFunctionTableDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLIntersectionFunctionTableDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn intersectionFunctionTableDescriptor() *IntersectionFunctionTableDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "intersectionFunctionTableDescriptor", *IntersectionFunctionTableDescriptor, .{});
-    }
-    pub fn functionCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "functionCount", ns.UInteger, .{});
-    }
-    pub fn setFunctionCount(self_: *@This(), functionCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setFunctionCount:", void, .{functionCount_});
-    }
-};
-
-pub const IntersectionFunctionTable = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLIntersectionFunctionTable", @This(), &.{Resource});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-
-    pub fn setBuffer_offset_atIndex(self_: *@This(), buffer_: ?*Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
-    }
-    pub fn setBuffers_offsets_withRange(self_: *@This(), buffers_: *?*const Buffer, offsets_: *const ns.UInteger, range_: ns.Range) void {
-        return objc.msgSend(self_, "setBuffers:offsets:withRange:", void, .{ buffers_, offsets_, range_ });
-    }
-    pub fn setFunction_atIndex(self_: *@This(), function_: ?*FunctionHandle, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setFunction:atIndex:", void, .{ function_, index_ });
-    }
-    pub fn setFunctions_withRange(self_: *@This(), functions_: *?*const FunctionHandle, range_: ns.Range) void {
-        return objc.msgSend(self_, "setFunctions:withRange:", void, .{ functions_, range_ });
-    }
-    pub fn setOpaqueTriangleIntersectionFunctionWithSignature_atIndex(self_: *@This(), signature_: IntersectionFunctionSignature, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setOpaqueTriangleIntersectionFunctionWithSignature:atIndex:", void, .{ signature_, index_ });
-    }
-    pub fn setOpaqueTriangleIntersectionFunctionWithSignature_withRange(self_: *@This(), signature_: IntersectionFunctionSignature, range_: ns.Range) void {
-        return objc.msgSend(self_, "setOpaqueTriangleIntersectionFunctionWithSignature:withRange:", void, .{ signature_, range_ });
-    }
-    pub fn setOpaqueCurveIntersectionFunctionWithSignature_atIndex(self_: *@This(), signature_: IntersectionFunctionSignature, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setOpaqueCurveIntersectionFunctionWithSignature:atIndex:", void, .{ signature_, index_ });
-    }
-    pub fn setOpaqueCurveIntersectionFunctionWithSignature_withRange(self_: *@This(), signature_: IntersectionFunctionSignature, range_: ns.Range) void {
-        return objc.msgSend(self_, "setOpaqueCurveIntersectionFunctionWithSignature:withRange:", void, .{ signature_, range_ });
-    }
-    pub fn setVisibleFunctionTable_atBufferIndex(self_: *@This(), functionTable_: ?*VisibleFunctionTable, bufferIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setVisibleFunctionTable:atBufferIndex:", void, .{ functionTable_, bufferIndex_ });
-    }
-    pub fn setVisibleFunctionTables_withBufferRange(self_: *@This(), functionTables_: *?*const VisibleFunctionTable, bufferRange_: ns.Range) void {
-        return objc.msgSend(self_, "setVisibleFunctionTables:withBufferRange:", void, .{ functionTables_, bufferRange_ });
-    }
-    pub fn gpuResourceID(self_: *@This()) ResourceID {
-        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
 
@@ -4619,6 +10067,21 @@ pub const IOCommandQueue = opaque {
     }
 };
 
+pub const IOFileHandle = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIOFileHandle", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn label(self_: *@This()) ?*ns.String {
+        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    }
+    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
+        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    }
+};
+
 pub const IOScratchBuffer = opaque {
     pub const InternalInfo = objc.ExternProtocol("MTLIOScratchBuffer", @This(), &.{});
     pub const as = InternalInfo.as;
@@ -4643,270 +10106,202 @@ pub const IOScratchBufferAllocator = opaque {
     }
 };
 
-pub const IOCommandQueueDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLIOCommandQueueDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const IndirectCommandBuffer = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIndirectCommandBuffer", @This(), &.{Resource});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn maxCommandBufferCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxCommandBufferCount", ns.UInteger, .{});
+    pub fn resetWithRange(self_: *@This(), range_: ns.Range) void {
+        return objc.msgSend(self_, "resetWithRange:", void, .{range_});
     }
-    pub fn setMaxCommandBufferCount(self_: *@This(), maxCommandBufferCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxCommandBufferCount:", void, .{maxCommandBufferCount_});
+    pub fn indirectRenderCommandAtIndex(self_: *@This(), commandIndex_: ns.UInteger) *IndirectRenderCommand {
+        return objc.msgSend(self_, "indirectRenderCommandAtIndex:", *IndirectRenderCommand, .{commandIndex_});
     }
-    pub fn priority(self_: *@This()) IOPriority {
-        return objc.msgSend(self_, "priority", IOPriority, .{});
+    pub fn indirectComputeCommandAtIndex(self_: *@This(), commandIndex_: ns.UInteger) *IndirectComputeCommand {
+        return objc.msgSend(self_, "indirectComputeCommandAtIndex:", *IndirectComputeCommand, .{commandIndex_});
     }
-    pub fn setPriority(self_: *@This(), priority_: IOPriority) void {
-        return objc.msgSend(self_, "setPriority:", void, .{priority_});
+    pub fn size(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "size", ns.UInteger, .{});
     }
-    pub fn @"type"(self_: *@This()) IOCommandQueueType {
-        return objc.msgSend(self_, "type", IOCommandQueueType, .{});
-    }
-    pub fn setType(self_: *@This(), type_: IOCommandQueueType) void {
-        return objc.msgSend(self_, "setType:", void, .{type_});
-    }
-    pub fn maxCommandsInFlight(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxCommandsInFlight", ns.UInteger, .{});
-    }
-    pub fn setMaxCommandsInFlight(self_: *@This(), maxCommandsInFlight_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxCommandsInFlight:", void, .{maxCommandsInFlight_});
-    }
-    pub fn scratchBufferAllocator(self_: *@This()) ?*IOScratchBufferAllocator {
-        return objc.msgSend(self_, "scratchBufferAllocator", ?*IOScratchBufferAllocator, .{});
-    }
-    pub fn setScratchBufferAllocator(self_: *@This(), scratchBufferAllocator_: ?*IOScratchBufferAllocator) void {
-        return objc.msgSend(self_, "setScratchBufferAllocator:", void, .{scratchBufferAllocator_});
+    pub fn gpuResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
 
-pub const IOFileHandle = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLIOFileHandle", @This(), &.{});
+pub const IndirectComputeCommand = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIndirectComputeCommand", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    pub fn setComputePipelineState(self_: *@This(), pipelineState_: *ComputePipelineState) void {
+        return objc.msgSend(self_, "setComputePipelineState:", void, .{pipelineState_});
     }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    pub fn setKernelBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setKernelBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
+    }
+    pub fn setKernelBuffer_offset_attributeStride_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, stride_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setKernelBuffer:offset:attributeStride:atIndex:", void, .{ buffer_, offset_, stride_, index_ });
+    }
+    pub fn concurrentDispatchThreadgroups_threadsPerThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "concurrentDispatchThreadgroups:threadsPerThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerThreadgroup_ });
+    }
+    pub fn concurrentDispatchThreads_threadsPerThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerThreadgroup_: Size) void {
+        return objc.msgSend(self_, "concurrentDispatchThreads:threadsPerThreadgroup:", void, .{ threadsPerGrid_, threadsPerThreadgroup_ });
+    }
+    pub fn setBarrier(self_: *@This()) void {
+        return objc.msgSend(self_, "setBarrier", void, .{});
+    }
+    pub fn clearBarrier(self_: *@This()) void {
+        return objc.msgSend(self_, "clearBarrier", void, .{});
+    }
+    pub fn setImageblockWidth_height(self_: *@This(), width_: ns.UInteger, height_: ns.UInteger) void {
+        return objc.msgSend(self_, "setImageblockWidth:height:", void, .{ width_, height_ });
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
+    }
+    pub fn setThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
+    }
+    pub fn setStageInRegion(self_: *@This(), region_: Region) void {
+        return objc.msgSend(self_, "setStageInRegion:", void, .{region_});
     }
 };
 
-pub const VertexAttribute = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexAttribute", @This(), ns.ObjectInterface, &.{});
+pub const IndirectComputeCommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIndirectComputeCommandEncoder", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
+};
 
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
+pub const IndirectRenderCommand = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIndirectRenderCommand", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn setRenderPipelineState(self_: *@This(), pipelineState_: *RenderPipelineState) void {
+        return objc.msgSend(self_, "setRenderPipelineState:", void, .{pipelineState_});
     }
-    pub fn attributeIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "attributeIndex", ns.UInteger, .{});
+    pub fn setVertexBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVertexBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
     }
-    pub fn attributeType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "attributeType", DataType, .{});
+    pub fn setFragmentBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setFragmentBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
     }
-    pub fn isActive(self_: *@This()) bool {
-        return objc.msgSend(self_, "isActive", bool, .{});
+    pub fn setVertexBuffer_offset_attributeStride_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, stride_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVertexBuffer:offset:attributeStride:atIndex:", void, .{ buffer_, offset_, stride_, index_ });
     }
-    pub fn isPatchData(self_: *@This()) bool {
-        return objc.msgSend(self_, "isPatchData", bool, .{});
+    pub fn drawPatches_patchStart_patchCount_patchIndexBuffer_patchIndexBufferOffset_instanceCount_baseInstance_tessellationFactorBuffer_tessellationFactorBufferOffset_tessellationFactorBufferInstanceStride(self_: *@This(), numberOfPatchControlPoints_: ns.UInteger, patchStart_: ns.UInteger, patchCount_: ns.UInteger, patchIndexBuffer_: ?*Buffer, patchIndexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger, buffer_: *Buffer, offset_: ns.UInteger, instanceStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawPatches:patchStart:patchCount:patchIndexBuffer:patchIndexBufferOffset:instanceCount:baseInstance:tessellationFactorBuffer:tessellationFactorBufferOffset:tessellationFactorBufferInstanceStride:", void, .{ numberOfPatchControlPoints_, patchStart_, patchCount_, patchIndexBuffer_, patchIndexBufferOffset_, instanceCount_, baseInstance_, buffer_, offset_, instanceStride_ });
     }
-    pub fn isPatchControlPointData(self_: *@This()) bool {
-        return objc.msgSend(self_, "isPatchControlPointData", bool, .{});
+    pub fn drawIndexedPatches_patchStart_patchCount_patchIndexBuffer_patchIndexBufferOffset_controlPointIndexBuffer_controlPointIndexBufferOffset_instanceCount_baseInstance_tessellationFactorBuffer_tessellationFactorBufferOffset_tessellationFactorBufferInstanceStride(self_: *@This(), numberOfPatchControlPoints_: ns.UInteger, patchStart_: ns.UInteger, patchCount_: ns.UInteger, patchIndexBuffer_: ?*Buffer, patchIndexBufferOffset_: ns.UInteger, controlPointIndexBuffer_: *Buffer, controlPointIndexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger, buffer_: *Buffer, offset_: ns.UInteger, instanceStride_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawIndexedPatches:patchStart:patchCount:patchIndexBuffer:patchIndexBufferOffset:controlPointIndexBuffer:controlPointIndexBufferOffset:instanceCount:baseInstance:tessellationFactorBuffer:tessellationFactorBufferOffset:tessellationFactorBufferInstanceStride:", void, .{ numberOfPatchControlPoints_, patchStart_, patchCount_, patchIndexBuffer_, patchIndexBufferOffset_, controlPointIndexBuffer_, controlPointIndexBufferOffset_, instanceCount_, baseInstance_, buffer_, offset_, instanceStride_ });
+    }
+    pub fn drawPrimitives_vertexStart_vertexCount_instanceCount_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, vertexStart_: ns.UInteger, vertexCount_: ns.UInteger, instanceCount_: ns.UInteger, baseInstance_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawPrimitives:vertexStart:vertexCount:instanceCount:baseInstance:", void, .{ primitiveType_, vertexStart_, vertexCount_, instanceCount_, baseInstance_ });
+    }
+    pub fn drawIndexedPrimitives_indexCount_indexType_indexBuffer_indexBufferOffset_instanceCount_baseVertex_baseInstance(self_: *@This(), primitiveType_: PrimitiveType, indexCount_: ns.UInteger, indexType_: IndexType, indexBuffer_: *Buffer, indexBufferOffset_: ns.UInteger, instanceCount_: ns.UInteger, baseVertex_: ns.Integer, baseInstance_: ns.UInteger) void {
+        return objc.msgSend(self_, "drawIndexedPrimitives:indexCount:indexType:indexBuffer:indexBufferOffset:instanceCount:baseVertex:baseInstance:", void, .{ primitiveType_, indexCount_, indexType_, indexBuffer_, indexBufferOffset_, instanceCount_, baseVertex_, baseInstance_ });
+    }
+    pub fn setObjectThreadgroupMemoryLength_atIndex(self_: *@This(), length_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObjectThreadgroupMemoryLength:atIndex:", void, .{ length_, index_ });
+    }
+    pub fn setObjectBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setObjectBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
+    }
+    pub fn setMeshBuffer_offset_atIndex(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setMeshBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
+    }
+    pub fn drawMeshThreadgroups_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadgroupsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "drawMeshThreadgroups:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadgroupsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
+    }
+    pub fn drawMeshThreads_threadsPerObjectThreadgroup_threadsPerMeshThreadgroup(self_: *@This(), threadsPerGrid_: Size, threadsPerObjectThreadgroup_: Size, threadsPerMeshThreadgroup_: Size) void {
+        return objc.msgSend(self_, "drawMeshThreads:threadsPerObjectThreadgroup:threadsPerMeshThreadgroup:", void, .{ threadsPerGrid_, threadsPerObjectThreadgroup_, threadsPerMeshThreadgroup_ });
+    }
+    pub fn setBarrier(self_: *@This()) void {
+        return objc.msgSend(self_, "setBarrier", void, .{});
+    }
+    pub fn clearBarrier(self_: *@This()) void {
+        return objc.msgSend(self_, "clearBarrier", void, .{});
+    }
+    pub fn setDepthStencilState(self_: *@This(), depthStencilState_: ?*DepthStencilState) void {
+        return objc.msgSend(self_, "setDepthStencilState:", void, .{depthStencilState_});
+    }
+    pub fn setDepthBias_slopeScale_clamp(self_: *@This(), depthBias_: f32, slopeScale_: f32, clamp_: f32) void {
+        return objc.msgSend(self_, "setDepthBias:slopeScale:clamp:", void, .{ depthBias_, slopeScale_, clamp_ });
+    }
+    pub fn setDepthClipMode(self_: *@This(), depthClipMode_: DepthClipMode) void {
+        return objc.msgSend(self_, "setDepthClipMode:", void, .{depthClipMode_});
+    }
+    pub fn setCullMode(self_: *@This(), cullMode_: CullMode) void {
+        return objc.msgSend(self_, "setCullMode:", void, .{cullMode_});
+    }
+    pub fn setFrontFacingWinding(self_: *@This(), frontFacingWindning_: Winding) void {
+        return objc.msgSend(self_, "setFrontFacingWinding:", void, .{frontFacingWindning_});
+    }
+    pub fn setTriangleFillMode(self_: *@This(), fillMode_: TriangleFillMode) void {
+        return objc.msgSend(self_, "setTriangleFillMode:", void, .{fillMode_});
+    }
+    pub fn reset(self_: *@This()) void {
+        return objc.msgSend(self_, "reset", void, .{});
     }
 };
 
-pub const Attribute = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAttribute", @This(), ns.ObjectInterface, &.{});
+pub const IndirectRenderCommandEncoder = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIndirectRenderCommandEncoder", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn attributeIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "attributeIndex", ns.UInteger, .{});
-    }
-    pub fn attributeType(self_: *@This()) DataType {
-        return objc.msgSend(self_, "attributeType", DataType, .{});
-    }
-    pub fn isActive(self_: *@This()) bool {
-        return objc.msgSend(self_, "isActive", bool, .{});
-    }
-    pub fn isPatchData(self_: *@This()) bool {
-        return objc.msgSend(self_, "isPatchData", bool, .{});
-    }
-    pub fn isPatchControlPointData(self_: *@This()) bool {
-        return objc.msgSend(self_, "isPatchControlPointData", bool, .{});
-    }
 };
 
-pub const FunctionConstant = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLFunctionConstant", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn @"type"(self_: *@This()) DataType {
-        return objc.msgSend(self_, "type", DataType, .{});
-    }
-    pub fn index(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "index", ns.UInteger, .{});
-    }
-    pub fn required(self_: *@This()) bool {
-        return objc.msgSend(self_, "required", bool, .{});
-    }
-};
-
-pub const Function = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLFunction", @This(), &.{});
+pub const IntersectionFunctionTable = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLIntersectionFunctionTable", @This(), &.{Resource});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
-    pub fn newArgumentEncoderWithBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) *ArgumentEncoder {
-        return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:", *ArgumentEncoder, .{bufferIndex_});
+    pub fn setBuffer_offset_atIndex(self_: *@This(), buffer_: ?*Buffer, offset_: ns.UInteger, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setBuffer:offset:atIndex:", void, .{ buffer_, offset_, index_ });
     }
-    pub fn newArgumentEncoderWithBufferIndex_reflection(self_: *@This(), bufferIndex_: ns.UInteger, reflection_: ?*AutoreleasedArgument) *ArgumentEncoder {
-        return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:reflection:", *ArgumentEncoder, .{ bufferIndex_, reflection_ });
+    pub fn setBuffers_offsets_withRange(self_: *@This(), buffers_: *?*const Buffer, offsets_: *const ns.UInteger, range_: ns.Range) void {
+        return objc.msgSend(self_, "setBuffers:offsets:withRange:", void, .{ buffers_, offsets_, range_ });
     }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
+    pub fn setFunction_atIndex(self_: *@This(), function_: ?*FunctionHandle, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setFunction:atIndex:", void, .{ function_, index_ });
     }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    pub fn setFunctions_withRange(self_: *@This(), functions_: *?*const FunctionHandle, range_: ns.Range) void {
+        return objc.msgSend(self_, "setFunctions:withRange:", void, .{ functions_, range_ });
     }
-    pub fn device(self_: *@This()) *Device {
-        return objc.msgSend(self_, "device", *Device, .{});
+    pub fn setOpaqueTriangleIntersectionFunctionWithSignature_atIndex(self_: *@This(), signature_: IntersectionFunctionSignature, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setOpaqueTriangleIntersectionFunctionWithSignature:atIndex:", void, .{ signature_, index_ });
     }
-    pub fn functionType(self_: *@This()) FunctionType {
-        return objc.msgSend(self_, "functionType", FunctionType, .{});
+    pub fn setOpaqueTriangleIntersectionFunctionWithSignature_withRange(self_: *@This(), signature_: IntersectionFunctionSignature, range_: ns.Range) void {
+        return objc.msgSend(self_, "setOpaqueTriangleIntersectionFunctionWithSignature:withRange:", void, .{ signature_, range_ });
     }
-    pub fn patchType(self_: *@This()) PatchType {
-        return objc.msgSend(self_, "patchType", PatchType, .{});
+    pub fn setOpaqueCurveIntersectionFunctionWithSignature_atIndex(self_: *@This(), signature_: IntersectionFunctionSignature, index_: ns.UInteger) void {
+        return objc.msgSend(self_, "setOpaqueCurveIntersectionFunctionWithSignature:atIndex:", void, .{ signature_, index_ });
     }
-    pub fn patchControlPointCount(self_: *@This()) ns.Integer {
-        return objc.msgSend(self_, "patchControlPointCount", ns.Integer, .{});
+    pub fn setOpaqueCurveIntersectionFunctionWithSignature_withRange(self_: *@This(), signature_: IntersectionFunctionSignature, range_: ns.Range) void {
+        return objc.msgSend(self_, "setOpaqueCurveIntersectionFunctionWithSignature:withRange:", void, .{ signature_, range_ });
     }
-    pub fn vertexAttributes(self_: *@This()) ?*ns.Array(*VertexAttribute) {
-        return objc.msgSend(self_, "vertexAttributes", ?*ns.Array(*VertexAttribute), .{});
+    pub fn setVisibleFunctionTable_atBufferIndex(self_: *@This(), functionTable_: ?*VisibleFunctionTable, bufferIndex_: ns.UInteger) void {
+        return objc.msgSend(self_, "setVisibleFunctionTable:atBufferIndex:", void, .{ functionTable_, bufferIndex_ });
     }
-    pub fn stageInputAttributes(self_: *@This()) ?*ns.Array(*Attribute) {
-        return objc.msgSend(self_, "stageInputAttributes", ?*ns.Array(*Attribute), .{});
+    pub fn setVisibleFunctionTables_withBufferRange(self_: *@This(), functionTables_: *?*const VisibleFunctionTable, bufferRange_: ns.Range) void {
+        return objc.msgSend(self_, "setVisibleFunctionTables:withBufferRange:", void, .{ functionTables_, bufferRange_ });
     }
-    pub fn name(self_: *@This()) *ns.String {
-        return objc.msgSend(self_, "name", *ns.String, .{});
-    }
-    pub fn functionConstantsDictionary(self_: *@This()) *ns.Dictionary(*ns.String, *FunctionConstant) {
-        return objc.msgSend(self_, "functionConstantsDictionary", *ns.Dictionary(*ns.String, *FunctionConstant), .{});
-    }
-    pub fn options(self_: *@This()) FunctionOptions {
-        return objc.msgSend(self_, "options", FunctionOptions, .{});
-    }
-};
-
-pub const CompileOptions = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLCompileOptions", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn preprocessorMacros(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol) {
-        return objc.msgSend(self_, "preprocessorMacros", ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol), .{});
-    }
-    pub fn setPreprocessorMacros(self_: *@This(), preprocessorMacros_: ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol)) void {
-        return objc.msgSend(self_, "setPreprocessorMacros:", void, .{preprocessorMacros_});
-    }
-    pub fn fastMathEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "fastMathEnabled", bool, .{});
-    }
-    pub fn setFastMathEnabled(self_: *@This(), fastMathEnabled_: bool) void {
-        return objc.msgSend(self_, "setFastMathEnabled:", void, .{fastMathEnabled_});
-    }
-    pub fn languageVersion(self_: *@This()) LanguageVersion {
-        return objc.msgSend(self_, "languageVersion", LanguageVersion, .{});
-    }
-    pub fn setLanguageVersion(self_: *@This(), languageVersion_: LanguageVersion) void {
-        return objc.msgSend(self_, "setLanguageVersion:", void, .{languageVersion_});
-    }
-    pub fn libraryType(self_: *@This()) LibraryType {
-        return objc.msgSend(self_, "libraryType", LibraryType, .{});
-    }
-    pub fn setLibraryType(self_: *@This(), libraryType_: LibraryType) void {
-        return objc.msgSend(self_, "setLibraryType:", void, .{libraryType_});
-    }
-    pub fn installName(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "installName", ?*ns.String, .{});
-    }
-    pub fn setInstallName(self_: *@This(), installName_: ?*ns.String) void {
-        return objc.msgSend(self_, "setInstallName:", void, .{installName_});
-    }
-    pub fn libraries(self_: *@This()) ?*ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "libraries", ?*ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setLibraries(self_: *@This(), libraries_: ?*ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setLibraries:", void, .{libraries_});
-    }
-    pub fn preserveInvariance(self_: *@This()) bool {
-        return objc.msgSend(self_, "preserveInvariance", bool, .{});
-    }
-    pub fn setPreserveInvariance(self_: *@This(), preserveInvariance_: bool) void {
-        return objc.msgSend(self_, "setPreserveInvariance:", void, .{preserveInvariance_});
-    }
-    pub fn optimizationLevel(self_: *@This()) LibraryOptimizationLevel {
-        return objc.msgSend(self_, "optimizationLevel", LibraryOptimizationLevel, .{});
-    }
-    pub fn setOptimizationLevel(self_: *@This(), optimizationLevel_: LibraryOptimizationLevel) void {
-        return objc.msgSend(self_, "setOptimizationLevel:", void, .{optimizationLevel_});
-    }
-    pub fn compileSymbolVisibility(self_: *@This()) CompileSymbolVisibility {
-        return objc.msgSend(self_, "compileSymbolVisibility", CompileSymbolVisibility, .{});
-    }
-    pub fn setCompileSymbolVisibility(self_: *@This(), compileSymbolVisibility_: CompileSymbolVisibility) void {
-        return objc.msgSend(self_, "setCompileSymbolVisibility:", void, .{compileSymbolVisibility_});
-    }
-    pub fn allowReferencingUndefinedSymbols(self_: *@This()) bool {
-        return objc.msgSend(self_, "allowReferencingUndefinedSymbols", bool, .{});
-    }
-    pub fn setAllowReferencingUndefinedSymbols(self_: *@This(), allowReferencingUndefinedSymbols_: bool) void {
-        return objc.msgSend(self_, "setAllowReferencingUndefinedSymbols:", void, .{allowReferencingUndefinedSymbols_});
-    }
-    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
+    pub fn gpuResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
 
@@ -4925,6 +10320,9 @@ pub const Library = opaque {
     }
     pub fn newFunctionWithName_constantValues_completionHandler(self_: *@This(), name_: *ns.String, constantValues_: *FunctionConstantValues, completionHandler_: *ns.Block(fn (?*Function, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newFunctionWithName:constantValues:completionHandler:", void, .{ name_, constantValues_, completionHandler_ });
+    }
+    pub fn reflectionForFunctionWithName(self_: *@This(), functionName_: *ns.String) ?*FunctionReflection {
+        return objc.msgSend(self_, "reflectionForFunctionWithName:", ?*FunctionReflection, .{functionName_});
     }
     pub fn newFunctionWithDescriptor_completionHandler(self_: *@This(), descriptor_: *FunctionDescriptor, completionHandler_: *ns.Block(fn (?*Function, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newFunctionWithDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
@@ -4958,42 +10356,38 @@ pub const Library = opaque {
     }
 };
 
-pub const LinkedFunctions = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLLinkedFunctions", @This(), ns.ObjectInterface, &.{});
+pub const LogContainer = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLLogContainer", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
+};
 
-    pub fn linkedFunctions() *LinkedFunctions {
-        return objc.msgSend(@This().InternalInfo.class(), "linkedFunctions", *LinkedFunctions, .{});
+pub const LogState = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLLogState", @This(), &.{});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn addLogHandler(self_: *@This(), block_: *ns.Block(fn (?*ns.String, ?*ns.String, LogLevel, *ns.String) void)) void {
+        return objc.msgSend(self_, "addLogHandler:", void, .{block_});
     }
-    pub fn functions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "functions", ?*ns.Array(*Function), .{});
+};
+
+pub const ObjectPayloadBinding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLObjectPayloadBinding", @This(), &.{Binding});
+    pub const as = InternalInfo.as;
+    pub const retain = InternalInfo.retain;
+    pub const release = InternalInfo.release;
+    pub const autorelease = InternalInfo.autorelease;
+
+    pub fn objectPayloadAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "objectPayloadAlignment", ns.UInteger, .{});
     }
-    pub fn setFunctions(self_: *@This(), functions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setFunctions:", void, .{functions_});
-    }
-    pub fn binaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "binaryFunctions", ?*ns.Array(*Function), .{});
-    }
-    pub fn setBinaryFunctions(self_: *@This(), binaryFunctions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setBinaryFunctions:", void, .{binaryFunctions_});
-    }
-    pub fn groups(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.Array(*Function)) {
-        return objc.msgSend(self_, "groups", ?*ns.Dictionary(*ns.String, *ns.Array(*Function)), .{});
-    }
-    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(*ns.String, *ns.Array(*Function))) void {
-        return objc.msgSend(self_, "setGroups:", void, .{groups_});
-    }
-    pub fn privateFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "privateFunctions", ?*ns.Array(*Function), .{});
-    }
-    pub fn setPrivateFunctions(self_: *@This(), privateFunctions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setPrivateFunctions:", void, .{privateFunctions_});
+    pub fn objectPayloadDataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "objectPayloadDataSize", ns.UInteger, .{});
     }
 };
 
@@ -5024,162 +10418,6 @@ pub const ParallelRenderCommandEncoder = opaque {
     }
     pub fn setStencilStoreActionOptions(self_: *@This(), storeActionOptions_: StoreActionOptions) void {
         return objc.msgSend(self_, "setStencilStoreActionOptions:", void, .{storeActionOptions_});
-    }
-};
-
-pub const PipelineBufferDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLPipelineBufferDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn mutability(self_: *@This()) Mutability {
-        return objc.msgSend(self_, "mutability", Mutability, .{});
-    }
-    pub fn setMutability(self_: *@This(), mutability_: Mutability) void {
-        return objc.msgSend(self_, "setMutability:", void, .{mutability_});
-    }
-};
-
-pub const PipelineBufferDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLPipelineBufferDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), bufferIndex_: ns.UInteger) *PipelineBufferDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *PipelineBufferDescriptor, .{bufferIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), buffer_: ?*PipelineBufferDescriptor, bufferIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ buffer_, bufferIndex_ });
-    }
-};
-
-pub const RasterizationRateSampleArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateSampleArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *ns.Number {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ns.Number, .{index_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), value_: *ns.Number, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ value_, index_ });
-    }
-};
-
-pub const RasterizationRateLayerDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateLayerDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn initWithSampleCount(self_: *@This(), sampleCount_: Size) *@This() {
-        return objc.msgSend(self_, "initWithSampleCount:", *@This(), .{sampleCount_});
-    }
-    pub fn initWithSampleCount_horizontal_vertical(self_: *@This(), sampleCount_: Size, horizontal_: *const f32, vertical_: *const f32) *@This() {
-        return objc.msgSend(self_, "initWithSampleCount:horizontal:vertical:", *@This(), .{ sampleCount_, horizontal_, vertical_ });
-    }
-    pub fn sampleCount(self_: *@This()) Size {
-        return objc.msgSend(self_, "sampleCount", Size, .{});
-    }
-    pub fn maxSampleCount(self_: *@This()) Size {
-        return objc.msgSend(self_, "maxSampleCount", Size, .{});
-    }
-    pub fn horizontalSampleStorage(self_: *@This()) *f32 {
-        return objc.msgSend(self_, "horizontalSampleStorage", *f32, .{});
-    }
-    pub fn verticalSampleStorage(self_: *@This()) *f32 {
-        return objc.msgSend(self_, "verticalSampleStorage", *f32, .{});
-    }
-    pub fn horizontal(self_: *@This()) *RasterizationRateSampleArray {
-        return objc.msgSend(self_, "horizontal", *RasterizationRateSampleArray, .{});
-    }
-    pub fn vertical(self_: *@This()) *RasterizationRateSampleArray {
-        return objc.msgSend(self_, "vertical", *RasterizationRateSampleArray, .{});
-    }
-    pub fn setSampleCount(self_: *@This(), sampleCount_: Size) void {
-        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
-    }
-};
-
-pub const RasterizationRateLayerArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateLayerArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), layerIndex_: ns.UInteger) ?*RasterizationRateLayerDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", ?*RasterizationRateLayerDescriptor, .{layerIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), layer_: ?*RasterizationRateLayerDescriptor, layerIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ layer_, layerIndex_ });
-    }
-};
-
-pub const RasterizationRateMapDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRasterizationRateMapDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn rasterizationRateMapDescriptorWithScreenSize(screenSize_: Size) *RasterizationRateMapDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:", *RasterizationRateMapDescriptor, .{screenSize_});
-    }
-    pub fn rasterizationRateMapDescriptorWithScreenSize_layer(screenSize_: Size, layer_: *RasterizationRateLayerDescriptor) *RasterizationRateMapDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:layer:", *RasterizationRateMapDescriptor, .{ screenSize_, layer_ });
-    }
-    pub fn rasterizationRateMapDescriptorWithScreenSize_layerCount_layers(screenSize_: Size, layerCount_: ns.UInteger, layers_: **const RasterizationRateLayerDescriptor) *RasterizationRateMapDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "rasterizationRateMapDescriptorWithScreenSize:layerCount:layers:", *RasterizationRateMapDescriptor, .{ screenSize_, layerCount_, layers_ });
-    }
-    pub fn layerAtIndex(self_: *@This(), layerIndex_: ns.UInteger) ?*RasterizationRateLayerDescriptor {
-        return objc.msgSend(self_, "layerAtIndex:", ?*RasterizationRateLayerDescriptor, .{layerIndex_});
-    }
-    pub fn setLayer_atIndex(self_: *@This(), layer_: ?*RasterizationRateLayerDescriptor, layerIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setLayer:atIndex:", void, .{ layer_, layerIndex_ });
-    }
-    pub fn layers(self_: *@This()) *RasterizationRateLayerArray {
-        return objc.msgSend(self_, "layers", *RasterizationRateLayerArray, .{});
-    }
-    pub fn screenSize(self_: *@This()) Size {
-        return objc.msgSend(self_, "screenSize", Size, .{});
-    }
-    pub fn setScreenSize(self_: *@This(), screenSize_: Size) void {
-        return objc.msgSend(self_, "setScreenSize:", void, .{screenSize_});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
-    }
-    pub fn layerCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "layerCount", ns.UInteger, .{});
     }
 };
 
@@ -5309,6 +10547,9 @@ pub const RenderCommandEncoder = opaque {
     }
     pub fn setDepthBias_slopeScale_clamp(self_: *@This(), depthBias_: f32, slopeScale_: f32, clamp_: f32) void {
         return objc.msgSend(self_, "setDepthBias:slopeScale:clamp:", void, .{ depthBias_, slopeScale_, clamp_ });
+    }
+    pub fn setDepthTestMinBound_maxBound(self_: *@This(), minBound_: f32, maxBound_: f32) void {
+        return objc.msgSend(self_, "setDepthTestMinBound:maxBound:", void, .{ minBound_, maxBound_ });
     }
     pub fn setScissorRect(self_: *@This(), rect_: ScissorRect) void {
         return objc.msgSend(self_, "setScissorRect:", void, .{rect_});
@@ -5610,678 +10851,36 @@ pub const RenderCommandEncoder = opaque {
     pub fn sampleCountersInBuffer_atSampleIndex_withBarrier(self_: *@This(), sampleBuffer_: *CounterSampleBuffer, sampleIndex_: ns.UInteger, barrier_: bool) void {
         return objc.msgSend(self_, "sampleCountersInBuffer:atSampleIndex:withBarrier:", void, .{ sampleBuffer_, sampleIndex_, barrier_ });
     }
+    pub fn setColorAttachmentMap(self_: *@This(), mapping_: ?*LogicalToPhysicalColorAttachmentMap) void {
+        return objc.msgSend(self_, "setColorAttachmentMap:", void, .{mapping_});
+    }
     pub fn tileWidth(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "tileWidth", ns.UInteger, .{});
     }
     pub fn tileHeight(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "tileHeight", ns.UInteger, .{});
-    }
-};
-
-pub const RenderPassAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn texture(self_: *@This()) ?*Texture {
-        return objc.msgSend(self_, "texture", ?*Texture, .{});
-    }
-    pub fn setTexture(self_: *@This(), texture_: ?*Texture) void {
-        return objc.msgSend(self_, "setTexture:", void, .{texture_});
-    }
-    pub fn level(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "level", ns.UInteger, .{});
-    }
-    pub fn setLevel(self_: *@This(), level_: ns.UInteger) void {
-        return objc.msgSend(self_, "setLevel:", void, .{level_});
-    }
-    pub fn slice(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "slice", ns.UInteger, .{});
-    }
-    pub fn setSlice(self_: *@This(), slice_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSlice:", void, .{slice_});
-    }
-    pub fn depthPlane(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "depthPlane", ns.UInteger, .{});
-    }
-    pub fn setDepthPlane(self_: *@This(), depthPlane_: ns.UInteger) void {
-        return objc.msgSend(self_, "setDepthPlane:", void, .{depthPlane_});
-    }
-    pub fn resolveTexture(self_: *@This()) ?*Texture {
-        return objc.msgSend(self_, "resolveTexture", ?*Texture, .{});
-    }
-    pub fn setResolveTexture(self_: *@This(), resolveTexture_: ?*Texture) void {
-        return objc.msgSend(self_, "setResolveTexture:", void, .{resolveTexture_});
-    }
-    pub fn resolveLevel(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "resolveLevel", ns.UInteger, .{});
-    }
-    pub fn setResolveLevel(self_: *@This(), resolveLevel_: ns.UInteger) void {
-        return objc.msgSend(self_, "setResolveLevel:", void, .{resolveLevel_});
-    }
-    pub fn resolveSlice(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "resolveSlice", ns.UInteger, .{});
-    }
-    pub fn setResolveSlice(self_: *@This(), resolveSlice_: ns.UInteger) void {
-        return objc.msgSend(self_, "setResolveSlice:", void, .{resolveSlice_});
-    }
-    pub fn resolveDepthPlane(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "resolveDepthPlane", ns.UInteger, .{});
-    }
-    pub fn setResolveDepthPlane(self_: *@This(), resolveDepthPlane_: ns.UInteger) void {
-        return objc.msgSend(self_, "setResolveDepthPlane:", void, .{resolveDepthPlane_});
-    }
-    pub fn loadAction(self_: *@This()) LoadAction {
-        return objc.msgSend(self_, "loadAction", LoadAction, .{});
-    }
-    pub fn setLoadAction(self_: *@This(), loadAction_: LoadAction) void {
-        return objc.msgSend(self_, "setLoadAction:", void, .{loadAction_});
-    }
-    pub fn storeAction(self_: *@This()) StoreAction {
-        return objc.msgSend(self_, "storeAction", StoreAction, .{});
-    }
-    pub fn setStoreAction(self_: *@This(), storeAction_: StoreAction) void {
-        return objc.msgSend(self_, "setStoreAction:", void, .{storeAction_});
-    }
-    pub fn storeActionOptions(self_: *@This()) StoreActionOptions {
-        return objc.msgSend(self_, "storeActionOptions", StoreActionOptions, .{});
-    }
-    pub fn setStoreActionOptions(self_: *@This(), storeActionOptions_: StoreActionOptions) void {
-        return objc.msgSend(self_, "setStoreActionOptions:", void, .{storeActionOptions_});
-    }
-};
-
-pub const RenderPassColorAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassColorAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn clearColor(self_: *@This()) ClearColor {
-        return objc.msgSend(self_, "clearColor", ClearColor, .{});
-    }
-    pub fn setClearColor(self_: *@This(), clearColor_: ClearColor) void {
-        return objc.msgSend(self_, "setClearColor:", void, .{clearColor_});
-    }
-};
-
-pub const RenderPassDepthAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassDepthAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn clearDepth(self_: *@This()) f64 {
-        return objc.msgSend(self_, "clearDepth", f64, .{});
-    }
-    pub fn setClearDepth(self_: *@This(), clearDepth_: f64) void {
-        return objc.msgSend(self_, "setClearDepth:", void, .{clearDepth_});
-    }
-    pub fn depthResolveFilter(self_: *@This()) MultisampleDepthResolveFilter {
-        return objc.msgSend(self_, "depthResolveFilter", MultisampleDepthResolveFilter, .{});
-    }
-    pub fn setDepthResolveFilter(self_: *@This(), depthResolveFilter_: MultisampleDepthResolveFilter) void {
-        return objc.msgSend(self_, "setDepthResolveFilter:", void, .{depthResolveFilter_});
-    }
-};
-
-pub const RenderPassStencilAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassStencilAttachmentDescriptor", @This(), RenderPassAttachmentDescriptor, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn clearStencil(self_: *@This()) u32 {
-        return objc.msgSend(self_, "clearStencil", u32, .{});
-    }
-    pub fn setClearStencil(self_: *@This(), clearStencil_: u32) void {
-        return objc.msgSend(self_, "setClearStencil:", void, .{clearStencil_});
-    }
-    pub fn stencilResolveFilter(self_: *@This()) MultisampleStencilResolveFilter {
-        return objc.msgSend(self_, "stencilResolveFilter", MultisampleStencilResolveFilter, .{});
-    }
-    pub fn setStencilResolveFilter(self_: *@This(), stencilResolveFilter_: MultisampleStencilResolveFilter) void {
-        return objc.msgSend(self_, "setStencilResolveFilter:", void, .{stencilResolveFilter_});
-    }
-};
-
-pub const RenderPassColorAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPassColorAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPassColorAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPassColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const RenderPassSampleBufferAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
-        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
-    }
-    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
-        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
-    }
-    pub fn startOfVertexSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfVertexSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setStartOfVertexSampleIndex(self_: *@This(), startOfVertexSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfVertexSampleIndex:", void, .{startOfVertexSampleIndex_});
-    }
-    pub fn endOfVertexSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfVertexSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfVertexSampleIndex(self_: *@This(), endOfVertexSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfVertexSampleIndex:", void, .{endOfVertexSampleIndex_});
-    }
-    pub fn startOfFragmentSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfFragmentSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setStartOfFragmentSampleIndex(self_: *@This(), startOfFragmentSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfFragmentSampleIndex:", void, .{startOfFragmentSampleIndex_});
-    }
-    pub fn endOfFragmentSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfFragmentSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfFragmentSampleIndex(self_: *@This(), endOfFragmentSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfFragmentSampleIndex:", void, .{endOfFragmentSampleIndex_});
-    }
-};
-
-pub const RenderPassSampleBufferAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPassSampleBufferAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const RenderPassDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPassDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn renderPassDescriptor() *RenderPassDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "renderPassDescriptor", *RenderPassDescriptor, .{});
-    }
-    pub fn setSamplePositions_count(self_: *@This(), positions_: ?*const SamplePosition, count_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSamplePositions:count:", void, .{ positions_, count_ });
-    }
-    pub fn getSamplePositions_count(self_: *@This(), positions_: ?*SamplePosition, count_: ns.UInteger) ns.UInteger {
-        return objc.msgSend(self_, "getSamplePositions:count:", ns.UInteger, .{ positions_, count_ });
-    }
-    pub fn colorAttachments(self_: *@This()) *RenderPassColorAttachmentDescriptorArray {
-        return objc.msgSend(self_, "colorAttachments", *RenderPassColorAttachmentDescriptorArray, .{});
-    }
-    pub fn depthAttachment(self_: *@This()) *RenderPassDepthAttachmentDescriptor {
-        return objc.msgSend(self_, "depthAttachment", *RenderPassDepthAttachmentDescriptor, .{});
-    }
-    pub fn setDepthAttachment(self_: *@This(), depthAttachment_: ?*RenderPassDepthAttachmentDescriptor) void {
-        return objc.msgSend(self_, "setDepthAttachment:", void, .{depthAttachment_});
-    }
-    pub fn stencilAttachment(self_: *@This()) *RenderPassStencilAttachmentDescriptor {
-        return objc.msgSend(self_, "stencilAttachment", *RenderPassStencilAttachmentDescriptor, .{});
-    }
-    pub fn setStencilAttachment(self_: *@This(), stencilAttachment_: ?*RenderPassStencilAttachmentDescriptor) void {
-        return objc.msgSend(self_, "setStencilAttachment:", void, .{stencilAttachment_});
-    }
-    pub fn visibilityResultBuffer(self_: *@This()) ?*Buffer {
-        return objc.msgSend(self_, "visibilityResultBuffer", ?*Buffer, .{});
-    }
-    pub fn setVisibilityResultBuffer(self_: *@This(), visibilityResultBuffer_: ?*Buffer) void {
-        return objc.msgSend(self_, "setVisibilityResultBuffer:", void, .{visibilityResultBuffer_});
-    }
-    pub fn renderTargetArrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "renderTargetArrayLength", ns.UInteger, .{});
-    }
-    pub fn setRenderTargetArrayLength(self_: *@This(), renderTargetArrayLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRenderTargetArrayLength:", void, .{renderTargetArrayLength_});
-    }
-    pub fn imageblockSampleLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "imageblockSampleLength", ns.UInteger, .{});
-    }
-    pub fn setImageblockSampleLength(self_: *@This(), imageblockSampleLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setImageblockSampleLength:", void, .{imageblockSampleLength_});
-    }
-    pub fn threadgroupMemoryLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "threadgroupMemoryLength", ns.UInteger, .{});
-    }
-    pub fn setThreadgroupMemoryLength(self_: *@This(), threadgroupMemoryLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setThreadgroupMemoryLength:", void, .{threadgroupMemoryLength_});
-    }
-    pub fn tileWidth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "tileWidth", ns.UInteger, .{});
-    }
-    pub fn setTileWidth(self_: *@This(), tileWidth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setTileWidth:", void, .{tileWidth_});
-    }
-    pub fn tileHeight(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "tileHeight", ns.UInteger, .{});
-    }
-    pub fn setTileHeight(self_: *@This(), tileHeight_: ns.UInteger) void {
-        return objc.msgSend(self_, "setTileHeight:", void, .{tileHeight_});
-    }
-    pub fn defaultRasterSampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "defaultRasterSampleCount", ns.UInteger, .{});
-    }
-    pub fn setDefaultRasterSampleCount(self_: *@This(), defaultRasterSampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setDefaultRasterSampleCount:", void, .{defaultRasterSampleCount_});
-    }
-    pub fn renderTargetWidth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "renderTargetWidth", ns.UInteger, .{});
-    }
-    pub fn setRenderTargetWidth(self_: *@This(), renderTargetWidth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRenderTargetWidth:", void, .{renderTargetWidth_});
-    }
-    pub fn renderTargetHeight(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "renderTargetHeight", ns.UInteger, .{});
-    }
-    pub fn setRenderTargetHeight(self_: *@This(), renderTargetHeight_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRenderTargetHeight:", void, .{renderTargetHeight_});
-    }
-    pub fn rasterizationRateMap(self_: *@This()) ?*RasterizationRateMap {
-        return objc.msgSend(self_, "rasterizationRateMap", ?*RasterizationRateMap, .{});
-    }
-    pub fn setRasterizationRateMap(self_: *@This(), rasterizationRateMap_: ?*RasterizationRateMap) void {
-        return objc.msgSend(self_, "setRasterizationRateMap:", void, .{rasterizationRateMap_});
-    }
-    pub fn sampleBufferAttachments(self_: *@This()) *RenderPassSampleBufferAttachmentDescriptorArray {
-        return objc.msgSend(self_, "sampleBufferAttachments", *RenderPassSampleBufferAttachmentDescriptorArray, .{});
-    }
-};
-
-pub const RenderPipelineColorAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineColorAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn pixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
-    }
-    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
-    }
-    pub fn isBlendingEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isBlendingEnabled", bool, .{});
-    }
-    pub fn setBlendingEnabled(self_: *@This(), blendingEnabled_: bool) void {
-        return objc.msgSend(self_, "setBlendingEnabled:", void, .{blendingEnabled_});
-    }
-    pub fn sourceRGBBlendFactor(self_: *@This()) BlendFactor {
-        return objc.msgSend(self_, "sourceRGBBlendFactor", BlendFactor, .{});
-    }
-    pub fn setSourceRGBBlendFactor(self_: *@This(), sourceRGBBlendFactor_: BlendFactor) void {
-        return objc.msgSend(self_, "setSourceRGBBlendFactor:", void, .{sourceRGBBlendFactor_});
-    }
-    pub fn destinationRGBBlendFactor(self_: *@This()) BlendFactor {
-        return objc.msgSend(self_, "destinationRGBBlendFactor", BlendFactor, .{});
-    }
-    pub fn setDestinationRGBBlendFactor(self_: *@This(), destinationRGBBlendFactor_: BlendFactor) void {
-        return objc.msgSend(self_, "setDestinationRGBBlendFactor:", void, .{destinationRGBBlendFactor_});
-    }
-    pub fn rgbBlendOperation(self_: *@This()) BlendOperation {
-        return objc.msgSend(self_, "rgbBlendOperation", BlendOperation, .{});
-    }
-    pub fn setRgbBlendOperation(self_: *@This(), rgbBlendOperation_: BlendOperation) void {
-        return objc.msgSend(self_, "setRgbBlendOperation:", void, .{rgbBlendOperation_});
-    }
-    pub fn sourceAlphaBlendFactor(self_: *@This()) BlendFactor {
-        return objc.msgSend(self_, "sourceAlphaBlendFactor", BlendFactor, .{});
-    }
-    pub fn setSourceAlphaBlendFactor(self_: *@This(), sourceAlphaBlendFactor_: BlendFactor) void {
-        return objc.msgSend(self_, "setSourceAlphaBlendFactor:", void, .{sourceAlphaBlendFactor_});
-    }
-    pub fn destinationAlphaBlendFactor(self_: *@This()) BlendFactor {
-        return objc.msgSend(self_, "destinationAlphaBlendFactor", BlendFactor, .{});
-    }
-    pub fn setDestinationAlphaBlendFactor(self_: *@This(), destinationAlphaBlendFactor_: BlendFactor) void {
-        return objc.msgSend(self_, "setDestinationAlphaBlendFactor:", void, .{destinationAlphaBlendFactor_});
-    }
-    pub fn alphaBlendOperation(self_: *@This()) BlendOperation {
-        return objc.msgSend(self_, "alphaBlendOperation", BlendOperation, .{});
-    }
-    pub fn setAlphaBlendOperation(self_: *@This(), alphaBlendOperation_: BlendOperation) void {
-        return objc.msgSend(self_, "setAlphaBlendOperation:", void, .{alphaBlendOperation_});
-    }
-    pub fn writeMask(self_: *@This()) ColorWriteMask {
-        return objc.msgSend(self_, "writeMask", ColorWriteMask, .{});
-    }
-    pub fn setWriteMask(self_: *@This(), writeMask_: ColorWriteMask) void {
-        return objc.msgSend(self_, "setWriteMask:", void, .{writeMask_});
-    }
-};
-
-pub const RenderPipelineReflection = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineReflection", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn vertexBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "vertexBindings", *ns.Array(*Binding), .{});
-    }
-    pub fn fragmentBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "fragmentBindings", *ns.Array(*Binding), .{});
-    }
-    pub fn tileBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "tileBindings", *ns.Array(*Binding), .{});
-    }
-    pub fn objectBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "objectBindings", *ns.Array(*Binding), .{});
-    }
-    pub fn meshBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "meshBindings", *ns.Array(*Binding), .{});
-    }
-    pub fn vertexArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "vertexArguments", ?*ns.Array(*Argument), .{});
-    }
-    pub fn fragmentArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "fragmentArguments", ?*ns.Array(*Argument), .{});
-    }
-    pub fn tileArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "tileArguments", ?*ns.Array(*Argument), .{});
-    }
-};
-
-pub const RenderPipelineDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
-    }
-    pub fn vertexFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "vertexFunction", ?*Function, .{});
-    }
-    pub fn setVertexFunction(self_: *@This(), vertexFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setVertexFunction:", void, .{vertexFunction_});
-    }
-    pub fn fragmentFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "fragmentFunction", ?*Function, .{});
-    }
-    pub fn setFragmentFunction(self_: *@This(), fragmentFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setFragmentFunction:", void, .{fragmentFunction_});
-    }
-    pub fn vertexDescriptor(self_: *@This()) ?*VertexDescriptor {
-        return objc.msgSend(self_, "vertexDescriptor", ?*VertexDescriptor, .{});
-    }
-    pub fn setVertexDescriptor(self_: *@This(), vertexDescriptor_: ?*VertexDescriptor) void {
-        return objc.msgSend(self_, "setVertexDescriptor:", void, .{vertexDescriptor_});
-    }
-    pub fn sampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
-    }
-    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
-    }
-    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
-    }
-    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
-    }
-    pub fn isAlphaToCoverageEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isAlphaToCoverageEnabled", bool, .{});
-    }
-    pub fn setAlphaToCoverageEnabled(self_: *@This(), alphaToCoverageEnabled_: bool) void {
-        return objc.msgSend(self_, "setAlphaToCoverageEnabled:", void, .{alphaToCoverageEnabled_});
-    }
-    pub fn isAlphaToOneEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isAlphaToOneEnabled", bool, .{});
-    }
-    pub fn setAlphaToOneEnabled(self_: *@This(), alphaToOneEnabled_: bool) void {
-        return objc.msgSend(self_, "setAlphaToOneEnabled:", void, .{alphaToOneEnabled_});
-    }
-    pub fn isRasterizationEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
-    }
-    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
-        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
-    }
-    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
-    }
-    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
-    }
-    pub fn colorAttachments(self_: *@This()) *RenderPipelineColorAttachmentDescriptorArray {
-        return objc.msgSend(self_, "colorAttachments", *RenderPipelineColorAttachmentDescriptorArray, .{});
-    }
-    pub fn depthAttachmentPixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "depthAttachmentPixelFormat", PixelFormat, .{});
-    }
-    pub fn setDepthAttachmentPixelFormat(self_: *@This(), depthAttachmentPixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setDepthAttachmentPixelFormat:", void, .{depthAttachmentPixelFormat_});
-    }
-    pub fn stencilAttachmentPixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "stencilAttachmentPixelFormat", PixelFormat, .{});
-    }
-    pub fn setStencilAttachmentPixelFormat(self_: *@This(), stencilAttachmentPixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setStencilAttachmentPixelFormat:", void, .{stencilAttachmentPixelFormat_});
-    }
-    pub fn inputPrimitiveTopology(self_: *@This()) PrimitiveTopologyClass {
-        return objc.msgSend(self_, "inputPrimitiveTopology", PrimitiveTopologyClass, .{});
-    }
-    pub fn setInputPrimitiveTopology(self_: *@This(), inputPrimitiveTopology_: PrimitiveTopologyClass) void {
-        return objc.msgSend(self_, "setInputPrimitiveTopology:", void, .{inputPrimitiveTopology_});
-    }
-    pub fn tessellationPartitionMode(self_: *@This()) TessellationPartitionMode {
-        return objc.msgSend(self_, "tessellationPartitionMode", TessellationPartitionMode, .{});
-    }
-    pub fn setTessellationPartitionMode(self_: *@This(), tessellationPartitionMode_: TessellationPartitionMode) void {
-        return objc.msgSend(self_, "setTessellationPartitionMode:", void, .{tessellationPartitionMode_});
-    }
-    pub fn maxTessellationFactor(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTessellationFactor", ns.UInteger, .{});
-    }
-    pub fn setMaxTessellationFactor(self_: *@This(), maxTessellationFactor_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTessellationFactor:", void, .{maxTessellationFactor_});
-    }
-    pub fn isTessellationFactorScaleEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isTessellationFactorScaleEnabled", bool, .{});
-    }
-    pub fn setTessellationFactorScaleEnabled(self_: *@This(), tessellationFactorScaleEnabled_: bool) void {
-        return objc.msgSend(self_, "setTessellationFactorScaleEnabled:", void, .{tessellationFactorScaleEnabled_});
-    }
-    pub fn tessellationFactorFormat(self_: *@This()) TessellationFactorFormat {
-        return objc.msgSend(self_, "tessellationFactorFormat", TessellationFactorFormat, .{});
-    }
-    pub fn setTessellationFactorFormat(self_: *@This(), tessellationFactorFormat_: TessellationFactorFormat) void {
-        return objc.msgSend(self_, "setTessellationFactorFormat:", void, .{tessellationFactorFormat_});
-    }
-    pub fn tessellationControlPointIndexType(self_: *@This()) TessellationControlPointIndexType {
-        return objc.msgSend(self_, "tessellationControlPointIndexType", TessellationControlPointIndexType, .{});
-    }
-    pub fn setTessellationControlPointIndexType(self_: *@This(), tessellationControlPointIndexType_: TessellationControlPointIndexType) void {
-        return objc.msgSend(self_, "setTessellationControlPointIndexType:", void, .{tessellationControlPointIndexType_});
-    }
-    pub fn tessellationFactorStepFunction(self_: *@This()) TessellationFactorStepFunction {
-        return objc.msgSend(self_, "tessellationFactorStepFunction", TessellationFactorStepFunction, .{});
-    }
-    pub fn setTessellationFactorStepFunction(self_: *@This(), tessellationFactorStepFunction_: TessellationFactorStepFunction) void {
-        return objc.msgSend(self_, "setTessellationFactorStepFunction:", void, .{tessellationFactorStepFunction_});
-    }
-    pub fn tessellationOutputWindingOrder(self_: *@This()) Winding {
-        return objc.msgSend(self_, "tessellationOutputWindingOrder", Winding, .{});
-    }
-    pub fn setTessellationOutputWindingOrder(self_: *@This(), tessellationOutputWindingOrder_: Winding) void {
-        return objc.msgSend(self_, "setTessellationOutputWindingOrder:", void, .{tessellationOutputWindingOrder_});
-    }
-    pub fn vertexBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "vertexBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn fragmentBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "fragmentBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
-    }
-    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
-        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
-    }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
-    }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
-        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
-    }
-    pub fn vertexPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "vertexPreloadedLibraries", *ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setVertexPreloadedLibraries(self_: *@This(), vertexPreloadedLibraries_: *ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setVertexPreloadedLibraries:", void, .{vertexPreloadedLibraries_});
-    }
-    pub fn fragmentPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "fragmentPreloadedLibraries", *ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setFragmentPreloadedLibraries(self_: *@This(), fragmentPreloadedLibraries_: *ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setFragmentPreloadedLibraries:", void, .{fragmentPreloadedLibraries_});
-    }
-    pub fn vertexLinkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "vertexLinkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setVertexLinkedFunctions(self_: *@This(), vertexLinkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setVertexLinkedFunctions:", void, .{vertexLinkedFunctions_});
-    }
-    pub fn fragmentLinkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "fragmentLinkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setFragmentLinkedFunctions(self_: *@This(), fragmentLinkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setFragmentLinkedFunctions:", void, .{fragmentLinkedFunctions_});
-    }
-    pub fn supportAddingVertexBinaryFunctions(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportAddingVertexBinaryFunctions", bool, .{});
-    }
-    pub fn setSupportAddingVertexBinaryFunctions(self_: *@This(), supportAddingVertexBinaryFunctions_: bool) void {
-        return objc.msgSend(self_, "setSupportAddingVertexBinaryFunctions:", void, .{supportAddingVertexBinaryFunctions_});
-    }
-    pub fn supportAddingFragmentBinaryFunctions(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportAddingFragmentBinaryFunctions", bool, .{});
-    }
-    pub fn setSupportAddingFragmentBinaryFunctions(self_: *@This(), supportAddingFragmentBinaryFunctions_: bool) void {
-        return objc.msgSend(self_, "setSupportAddingFragmentBinaryFunctions:", void, .{supportAddingFragmentBinaryFunctions_});
-    }
-    pub fn maxVertexCallStackDepth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxVertexCallStackDepth", ns.UInteger, .{});
-    }
-    pub fn setMaxVertexCallStackDepth(self_: *@This(), maxVertexCallStackDepth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxVertexCallStackDepth:", void, .{maxVertexCallStackDepth_});
-    }
-    pub fn maxFragmentCallStackDepth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxFragmentCallStackDepth", ns.UInteger, .{});
-    }
-    pub fn setMaxFragmentCallStackDepth(self_: *@This(), maxFragmentCallStackDepth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxFragmentCallStackDepth:", void, .{maxFragmentCallStackDepth_});
-    }
-};
-
-pub const RenderPipelineFunctionsDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineFunctionsDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
-    }
-    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setVertexAdditionalBinaryFunctions:", void, .{vertexAdditionalBinaryFunctions_});
-    }
-    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
-    }
-    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setFragmentAdditionalBinaryFunctions:", void, .{fragmentAdditionalBinaryFunctions_});
-    }
-    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
-    }
-    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
-        return objc.msgSend(self_, "setTileAdditionalBinaryFunctions:", void, .{tileAdditionalBinaryFunctions_});
     }
 };
 
 pub const RenderPipelineState = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLRenderPipelineState", @This(), &.{});
+    pub const InternalInfo = objc.ExternProtocol("MTLRenderPipelineState", @This(), &.{Allocation});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    pub fn functionHandleWithName_stage(self_: *@This(), name_: *ns.String, stage_: RenderStages) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithName:stage:", ?*FunctionHandle, .{ name_, stage_ });
+    }
+    pub fn functionHandleWithBinaryFunction_stage(self_: *@This(), function_: *MTL4BinaryFunctionProtocol, stage_: RenderStages) ?*FunctionHandle {
+        return objc.msgSend(self_, "functionHandleWithBinaryFunction:stage:", ?*FunctionHandle, .{ function_, stage_ });
+    }
+    pub fn newRenderPipelineStateWithBinaryFunctions_error(self_: *@This(), binaryFunctionsDescriptor_: *MTL4RenderPipelineBinaryFunctionsDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
+        return objc.msgSend(self_, "newRenderPipelineStateWithBinaryFunctions:error:", ?*RenderPipelineState, .{ binaryFunctionsDescriptor_, error_ });
+    }
+    pub fn newRenderPipelineDescriptorForSpecialization(self_: *@This()) *MTL4PipelineDescriptor {
+        return objc.msgSend(self_, "newRenderPipelineDescriptorForSpecialization", *MTL4PipelineDescriptor, .{});
+    }
     pub fn imageblockMemoryLengthForDimensions(self_: *@This(), imageblockDimensions_: Size) ns.UInteger {
         return objc.msgSend(self_, "imageblockMemoryLengthForDimensions:", ns.UInteger, .{imageblockDimensions_});
     }
@@ -6302,6 +10901,9 @@ pub const RenderPipelineState = opaque {
     }
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
+    }
+    pub fn reflection(self_: *@This()) ?*RenderPipelineReflection {
+        return objc.msgSend(self_, "reflection", ?*RenderPipelineReflection, .{});
     }
     pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
@@ -6333,298 +10935,73 @@ pub const RenderPipelineState = opaque {
     pub fn gpuResourceID(self_: *@This()) ResourceID {
         return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
+    pub fn shaderValidation(self_: *@This()) ShaderValidation {
+        return objc.msgSend(self_, "shaderValidation", ShaderValidation, .{});
+    }
+    pub fn requiredThreadsPerTileThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerTileThreadgroup", Size, .{});
+    }
+    pub fn requiredThreadsPerObjectThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerObjectThreadgroup", Size, .{});
+    }
+    pub fn requiredThreadsPerMeshThreadgroup(self_: *@This()) Size {
+        return objc.msgSend(self_, "requiredThreadsPerMeshThreadgroup", Size, .{});
+    }
 };
 
-pub const RenderPipelineColorAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLRenderPipelineColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
+pub const ResidencySet = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLResidencySet", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *RenderPipelineColorAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *RenderPipelineColorAttachmentDescriptor, .{attachmentIndex_});
+    pub fn requestResidency(self_: *@This()) void {
+        return objc.msgSend(self_, "requestResidency", void, .{});
     }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*RenderPipelineColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    pub fn endResidency(self_: *@This()) void {
+        return objc.msgSend(self_, "endResidency", void, .{});
     }
-};
-
-pub const TileRenderPipelineColorAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineColorAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn pixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
+    pub fn addAllocation(self_: *@This(), allocation_: *Allocation) void {
+        return objc.msgSend(self_, "addAllocation:", void, .{allocation_});
     }
-    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
+    pub fn addAllocations_count(self_: *@This(), allocations_: **const Allocation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "addAllocations:count:", void, .{ allocations_, count_ });
     }
-};
-
-pub const TileRenderPipelineColorAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineColorAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *TileRenderPipelineColorAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *TileRenderPipelineColorAttachmentDescriptor, .{attachmentIndex_});
+    pub fn removeAllocation(self_: *@This(), allocation_: *Allocation) void {
+        return objc.msgSend(self_, "removeAllocation:", void, .{allocation_});
     }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: *TileRenderPipelineColorAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
+    pub fn removeAllocations_count(self_: *@This(), allocations_: **const Allocation, count_: ns.UInteger) void {
+        return objc.msgSend(self_, "removeAllocations:count:", void, .{ allocations_, count_ });
     }
-};
-
-pub const TileRenderPipelineDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLTileRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
+    pub fn removeAllAllocations(self_: *@This()) void {
+        return objc.msgSend(self_, "removeAllAllocations", void, .{});
+    }
+    pub fn containsAllocation(self_: *@This(), anAllocation_: *Allocation) bool {
+        return objc.msgSend(self_, "containsAllocation:", bool, .{anAllocation_});
+    }
+    pub fn commit(self_: *@This()) void {
+        return objc.msgSend(self_, "commit", void, .{});
+    }
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
     }
     pub fn label(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "label", ?*ns.String, .{});
     }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
+    pub fn allocatedSize(self_: *@This()) u64 {
+        return objc.msgSend(self_, "allocatedSize", u64, .{});
     }
-    pub fn tileFunction(self_: *@This()) *Function {
-        return objc.msgSend(self_, "tileFunction", *Function, .{});
+    pub fn allAllocations(self_: *@This()) *ns.Array(*Allocation) {
+        return objc.msgSend(self_, "allAllocations", *ns.Array(*Allocation), .{});
     }
-    pub fn setTileFunction(self_: *@This(), tileFunction_: *Function) void {
-        return objc.msgSend(self_, "setTileFunction:", void, .{tileFunction_});
-    }
-    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
-    }
-    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
-    }
-    pub fn colorAttachments(self_: *@This()) *TileRenderPipelineColorAttachmentDescriptorArray {
-        return objc.msgSend(self_, "colorAttachments", *TileRenderPipelineColorAttachmentDescriptorArray, .{});
-    }
-    pub fn threadgroupSizeMatchesTileSize(self_: *@This()) bool {
-        return objc.msgSend(self_, "threadgroupSizeMatchesTileSize", bool, .{});
-    }
-    pub fn setThreadgroupSizeMatchesTileSize(self_: *@This(), threadgroupSizeMatchesTileSize_: bool) void {
-        return objc.msgSend(self_, "setThreadgroupSizeMatchesTileSize:", void, .{threadgroupSizeMatchesTileSize_});
-    }
-    pub fn tileBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "tileBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn maxTotalThreadsPerThreadgroup(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadsPerThreadgroup", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
-    }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
-    }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
-        return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
-    }
-    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibrary) {
-        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibrary), .{});
-    }
-    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibrary)) void {
-        return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
-    }
-    pub fn linkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "linkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setLinkedFunctions(self_: *@This(), linkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setLinkedFunctions:", void, .{linkedFunctions_});
-    }
-    pub fn supportAddingBinaryFunctions(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportAddingBinaryFunctions", bool, .{});
-    }
-    pub fn setSupportAddingBinaryFunctions(self_: *@This(), supportAddingBinaryFunctions_: bool) void {
-        return objc.msgSend(self_, "setSupportAddingBinaryFunctions:", void, .{supportAddingBinaryFunctions_});
-    }
-    pub fn maxCallStackDepth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxCallStackDepth", ns.UInteger, .{});
-    }
-    pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
-    }
-};
-
-pub const MeshRenderPipelineDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLMeshRenderPipelineDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
-    }
-    pub fn objectFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "objectFunction", ?*Function, .{});
-    }
-    pub fn setObjectFunction(self_: *@This(), objectFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setObjectFunction:", void, .{objectFunction_});
-    }
-    pub fn meshFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "meshFunction", ?*Function, .{});
-    }
-    pub fn setMeshFunction(self_: *@This(), meshFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setMeshFunction:", void, .{meshFunction_});
-    }
-    pub fn fragmentFunction(self_: *@This()) ?*Function {
-        return objc.msgSend(self_, "fragmentFunction", ?*Function, .{});
-    }
-    pub fn setFragmentFunction(self_: *@This(), fragmentFunction_: ?*Function) void {
-        return objc.msgSend(self_, "setFragmentFunction:", void, .{fragmentFunction_});
-    }
-    pub fn maxTotalThreadsPerObjectThreadgroup(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadsPerObjectThreadgroup", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadsPerObjectThreadgroup(self_: *@This(), maxTotalThreadsPerObjectThreadgroup_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadsPerObjectThreadgroup:", void, .{maxTotalThreadsPerObjectThreadgroup_});
-    }
-    pub fn maxTotalThreadsPerMeshThreadgroup(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadsPerMeshThreadgroup", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadsPerMeshThreadgroup(self_: *@This(), maxTotalThreadsPerMeshThreadgroup_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadsPerMeshThreadgroup:", void, .{maxTotalThreadsPerMeshThreadgroup_});
-    }
-    pub fn objectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
-        return objc.msgSend(self_, "objectThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
-    }
-    pub fn setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
-        return objc.msgSend(self_, "setObjectThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{objectThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
-    }
-    pub fn meshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This()) bool {
-        return objc.msgSend(self_, "meshThreadgroupSizeIsMultipleOfThreadExecutionWidth", bool, .{});
-    }
-    pub fn setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth(self_: *@This(), meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_: bool) void {
-        return objc.msgSend(self_, "setMeshThreadgroupSizeIsMultipleOfThreadExecutionWidth:", void, .{meshThreadgroupSizeIsMultipleOfThreadExecutionWidth_});
-    }
-    pub fn payloadMemoryLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "payloadMemoryLength", ns.UInteger, .{});
-    }
-    pub fn setPayloadMemoryLength(self_: *@This(), payloadMemoryLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setPayloadMemoryLength:", void, .{payloadMemoryLength_});
-    }
-    pub fn maxTotalThreadgroupsPerMeshGrid(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxTotalThreadgroupsPerMeshGrid", ns.UInteger, .{});
-    }
-    pub fn setMaxTotalThreadgroupsPerMeshGrid(self_: *@This(), maxTotalThreadgroupsPerMeshGrid_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxTotalThreadgroupsPerMeshGrid:", void, .{maxTotalThreadgroupsPerMeshGrid_});
-    }
-    pub fn objectBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "objectBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn meshBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "meshBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn fragmentBuffers(self_: *@This()) *PipelineBufferDescriptorArray {
-        return objc.msgSend(self_, "fragmentBuffers", *PipelineBufferDescriptorArray, .{});
-    }
-    pub fn rasterSampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "rasterSampleCount", ns.UInteger, .{});
-    }
-    pub fn setRasterSampleCount(self_: *@This(), rasterSampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setRasterSampleCount:", void, .{rasterSampleCount_});
-    }
-    pub fn isAlphaToCoverageEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isAlphaToCoverageEnabled", bool, .{});
-    }
-    pub fn setAlphaToCoverageEnabled(self_: *@This(), alphaToCoverageEnabled_: bool) void {
-        return objc.msgSend(self_, "setAlphaToCoverageEnabled:", void, .{alphaToCoverageEnabled_});
-    }
-    pub fn isAlphaToOneEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isAlphaToOneEnabled", bool, .{});
-    }
-    pub fn setAlphaToOneEnabled(self_: *@This(), alphaToOneEnabled_: bool) void {
-        return objc.msgSend(self_, "setAlphaToOneEnabled:", void, .{alphaToOneEnabled_});
-    }
-    pub fn isRasterizationEnabled(self_: *@This()) bool {
-        return objc.msgSend(self_, "isRasterizationEnabled", bool, .{});
-    }
-    pub fn setRasterizationEnabled(self_: *@This(), rasterizationEnabled_: bool) void {
-        return objc.msgSend(self_, "setRasterizationEnabled:", void, .{rasterizationEnabled_});
-    }
-    pub fn maxVertexAmplificationCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxVertexAmplificationCount", ns.UInteger, .{});
-    }
-    pub fn setMaxVertexAmplificationCount(self_: *@This(), maxVertexAmplificationCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxVertexAmplificationCount:", void, .{maxVertexAmplificationCount_});
-    }
-    pub fn colorAttachments(self_: *@This()) *RenderPipelineColorAttachmentDescriptorArray {
-        return objc.msgSend(self_, "colorAttachments", *RenderPipelineColorAttachmentDescriptorArray, .{});
-    }
-    pub fn depthAttachmentPixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "depthAttachmentPixelFormat", PixelFormat, .{});
-    }
-    pub fn setDepthAttachmentPixelFormat(self_: *@This(), depthAttachmentPixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setDepthAttachmentPixelFormat:", void, .{depthAttachmentPixelFormat_});
-    }
-    pub fn stencilAttachmentPixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "stencilAttachmentPixelFormat", PixelFormat, .{});
-    }
-    pub fn setStencilAttachmentPixelFormat(self_: *@This(), stencilAttachmentPixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setStencilAttachmentPixelFormat:", void, .{stencilAttachmentPixelFormat_});
-    }
-    pub fn supportIndirectCommandBuffers(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportIndirectCommandBuffers", bool, .{});
-    }
-    pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
-        return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
-    }
-    pub fn objectLinkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "objectLinkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setObjectLinkedFunctions(self_: *@This(), objectLinkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setObjectLinkedFunctions:", void, .{objectLinkedFunctions_});
-    }
-    pub fn meshLinkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "meshLinkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setMeshLinkedFunctions(self_: *@This(), meshLinkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setMeshLinkedFunctions:", void, .{meshLinkedFunctions_});
-    }
-    pub fn fragmentLinkedFunctions(self_: *@This()) *LinkedFunctions {
-        return objc.msgSend(self_, "fragmentLinkedFunctions", *LinkedFunctions, .{});
-    }
-    pub fn setFragmentLinkedFunctions(self_: *@This(), fragmentLinkedFunctions_: ?*LinkedFunctions) void {
-        return objc.msgSend(self_, "setFragmentLinkedFunctions:", void, .{fragmentLinkedFunctions_});
+    pub fn allocationCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "allocationCount", ns.UInteger, .{});
     }
 };
 
 pub const Resource = opaque {
-    pub const InternalInfo = objc.ExternProtocol("MTLResource", @This(), &.{});
+    pub const InternalInfo = objc.ExternProtocol("MTLResource", @This(), &.{Allocation});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
@@ -6638,6 +11015,9 @@ pub const Resource = opaque {
     }
     pub fn isAliasable(self_: *@This()) bool {
         return objc.msgSend(self_, "isAliasable", bool, .{});
+    }
+    pub fn setOwnerWithIdentity(self_: *@This(), task_id_token_: task_id_token_t) kern_return_t {
+        return objc.msgSend(self_, "setOwnerWithIdentity:", kern_return_t, .{task_id_token_});
     }
     pub fn label(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "label", ?*ns.String, .{});
@@ -6698,171 +11078,27 @@ pub const ResourceStateCommandEncoder = opaque {
     }
 };
 
-pub const ResourceStatePassSampleBufferAttachmentDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassSampleBufferAttachmentDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const ResourceViewPool = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLResourceViewPool", @This(), &.{});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn sampleBuffer(self_: *@This()) ?*CounterSampleBuffer {
-        return objc.msgSend(self_, "sampleBuffer", ?*CounterSampleBuffer, .{});
+    pub fn copyResourceViewsFromPool_sourceRange_destinationIndex(self_: *@This(), sourcePool_: *ResourceViewPool, sourceRange_: ns.Range, destinationIndex_: ns.UInteger) ResourceID {
+        return objc.msgSend(self_, "copyResourceViewsFromPool:sourceRange:destinationIndex:", ResourceID, .{ sourcePool_, sourceRange_, destinationIndex_ });
     }
-    pub fn setSampleBuffer(self_: *@This(), sampleBuffer_: ?*CounterSampleBuffer) void {
-        return objc.msgSend(self_, "setSampleBuffer:", void, .{sampleBuffer_});
+    pub fn baseResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "baseResourceID", ResourceID, .{});
     }
-    pub fn startOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "startOfEncoderSampleIndex", ns.UInteger, .{});
+    pub fn resourceViewCount(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "resourceViewCount", ns.UInteger, .{});
     }
-    pub fn setStartOfEncoderSampleIndex(self_: *@This(), startOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStartOfEncoderSampleIndex:", void, .{startOfEncoderSampleIndex_});
-    }
-    pub fn endOfEncoderSampleIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "endOfEncoderSampleIndex", ns.UInteger, .{});
-    }
-    pub fn setEndOfEncoderSampleIndex(self_: *@This(), endOfEncoderSampleIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setEndOfEncoderSampleIndex:", void, .{endOfEncoderSampleIndex_});
-    }
-};
-
-pub const ResourceStatePassSampleBufferAttachmentDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassSampleBufferAttachmentDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), attachmentIndex_: ns.UInteger) *ResourceStatePassSampleBufferAttachmentDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *ResourceStatePassSampleBufferAttachmentDescriptor, .{attachmentIndex_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attachment_: ?*ResourceStatePassSampleBufferAttachmentDescriptor, attachmentIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attachment_, attachmentIndex_ });
-    }
-};
-
-pub const ResourceStatePassDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLResourceStatePassDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn resourceStatePassDescriptor() *ResourceStatePassDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "resourceStatePassDescriptor", *ResourceStatePassDescriptor, .{});
-    }
-    pub fn sampleBufferAttachments(self_: *@This()) *ResourceStatePassSampleBufferAttachmentDescriptorArray {
-        return objc.msgSend(self_, "sampleBufferAttachments", *ResourceStatePassSampleBufferAttachmentDescriptorArray, .{});
-    }
-};
-
-pub const SamplerDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLSamplerDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn minFilter(self_: *@This()) SamplerMinMagFilter {
-        return objc.msgSend(self_, "minFilter", SamplerMinMagFilter, .{});
-    }
-    pub fn setMinFilter(self_: *@This(), minFilter_: SamplerMinMagFilter) void {
-        return objc.msgSend(self_, "setMinFilter:", void, .{minFilter_});
-    }
-    pub fn magFilter(self_: *@This()) SamplerMinMagFilter {
-        return objc.msgSend(self_, "magFilter", SamplerMinMagFilter, .{});
-    }
-    pub fn setMagFilter(self_: *@This(), magFilter_: SamplerMinMagFilter) void {
-        return objc.msgSend(self_, "setMagFilter:", void, .{magFilter_});
-    }
-    pub fn mipFilter(self_: *@This()) SamplerMipFilter {
-        return objc.msgSend(self_, "mipFilter", SamplerMipFilter, .{});
-    }
-    pub fn setMipFilter(self_: *@This(), mipFilter_: SamplerMipFilter) void {
-        return objc.msgSend(self_, "setMipFilter:", void, .{mipFilter_});
-    }
-    pub fn maxAnisotropy(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "maxAnisotropy", ns.UInteger, .{});
-    }
-    pub fn setMaxAnisotropy(self_: *@This(), maxAnisotropy_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMaxAnisotropy:", void, .{maxAnisotropy_});
-    }
-    pub fn sAddressMode(self_: *@This()) SamplerAddressMode {
-        return objc.msgSend(self_, "sAddressMode", SamplerAddressMode, .{});
-    }
-    pub fn setSAddressMode(self_: *@This(), sAddressMode_: SamplerAddressMode) void {
-        return objc.msgSend(self_, "setSAddressMode:", void, .{sAddressMode_});
-    }
-    pub fn tAddressMode(self_: *@This()) SamplerAddressMode {
-        return objc.msgSend(self_, "tAddressMode", SamplerAddressMode, .{});
-    }
-    pub fn setTAddressMode(self_: *@This(), tAddressMode_: SamplerAddressMode) void {
-        return objc.msgSend(self_, "setTAddressMode:", void, .{tAddressMode_});
-    }
-    pub fn rAddressMode(self_: *@This()) SamplerAddressMode {
-        return objc.msgSend(self_, "rAddressMode", SamplerAddressMode, .{});
-    }
-    pub fn setRAddressMode(self_: *@This(), rAddressMode_: SamplerAddressMode) void {
-        return objc.msgSend(self_, "setRAddressMode:", void, .{rAddressMode_});
-    }
-    pub fn borderColor(self_: *@This()) SamplerBorderColor {
-        return objc.msgSend(self_, "borderColor", SamplerBorderColor, .{});
-    }
-    pub fn setBorderColor(self_: *@This(), borderColor_: SamplerBorderColor) void {
-        return objc.msgSend(self_, "setBorderColor:", void, .{borderColor_});
-    }
-    pub fn normalizedCoordinates(self_: *@This()) bool {
-        return objc.msgSend(self_, "normalizedCoordinates", bool, .{});
-    }
-    pub fn setNormalizedCoordinates(self_: *@This(), normalizedCoordinates_: bool) void {
-        return objc.msgSend(self_, "setNormalizedCoordinates:", void, .{normalizedCoordinates_});
-    }
-    pub fn lodMinClamp(self_: *@This()) f32 {
-        return objc.msgSend(self_, "lodMinClamp", f32, .{});
-    }
-    pub fn setLodMinClamp(self_: *@This(), lodMinClamp_: f32) void {
-        return objc.msgSend(self_, "setLodMinClamp:", void, .{lodMinClamp_});
-    }
-    pub fn lodMaxClamp(self_: *@This()) f32 {
-        return objc.msgSend(self_, "lodMaxClamp", f32, .{});
-    }
-    pub fn setLodMaxClamp(self_: *@This(), lodMaxClamp_: f32) void {
-        return objc.msgSend(self_, "setLodMaxClamp:", void, .{lodMaxClamp_});
-    }
-    pub fn lodAverage(self_: *@This()) bool {
-        return objc.msgSend(self_, "lodAverage", bool, .{});
-    }
-    pub fn setLodAverage(self_: *@This(), lodAverage_: bool) void {
-        return objc.msgSend(self_, "setLodAverage:", void, .{lodAverage_});
-    }
-    pub fn compareFunction(self_: *@This()) CompareFunction {
-        return objc.msgSend(self_, "compareFunction", CompareFunction, .{});
-    }
-    pub fn setCompareFunction(self_: *@This(), compareFunction_: CompareFunction) void {
-        return objc.msgSend(self_, "setCompareFunction:", void, .{compareFunction_});
-    }
-    pub fn supportArgumentBuffers(self_: *@This()) bool {
-        return objc.msgSend(self_, "supportArgumentBuffers", bool, .{});
-    }
-    pub fn setSupportArgumentBuffers(self_: *@This(), supportArgumentBuffers_: bool) void {
-        return objc.msgSend(self_, "setSupportArgumentBuffers:", void, .{supportArgumentBuffers_});
+    pub fn device(self_: *@This()) *Device {
+        return objc.msgSend(self_, "device", *Device, .{});
     }
     pub fn label(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-    pub fn setLabel(self_: *@This(), label_: ?*ns.String) void {
-        return objc.msgSend(self_, "setLabel:", void, .{label_});
     }
 };
 
@@ -6884,270 +11120,81 @@ pub const SamplerState = opaque {
     }
 };
 
-pub const BufferLayoutDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBufferLayoutDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const SharedEvent = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLSharedEvent", @This(), &.{Event});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn stride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "stride", ns.UInteger, .{});
+    pub fn notifyListener_atValue_block(self_: *@This(), listener_: *SharedEventListener, value_: u64, block_: *ns.Block(fn (*SharedEvent, u64) void)) void {
+        return objc.msgSend(self_, "notifyListener:atValue:block:", void, .{ listener_, value_, block_ });
     }
-    pub fn setStride(self_: *@This(), stride_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStride:", void, .{stride_});
+    pub fn newSharedEventHandle(self_: *@This()) *SharedEventHandle {
+        return objc.msgSend(self_, "newSharedEventHandle", *SharedEventHandle, .{});
     }
-    pub fn stepFunction(self_: *@This()) StepFunction {
-        return objc.msgSend(self_, "stepFunction", StepFunction, .{});
+    pub fn waitUntilSignaledValue_timeoutMS(self_: *@This(), value_: u64, milliseconds_: u64) bool {
+        return objc.msgSend(self_, "waitUntilSignaledValue:timeoutMS:", bool, .{ value_, milliseconds_ });
     }
-    pub fn setStepFunction(self_: *@This(), stepFunction_: StepFunction) void {
-        return objc.msgSend(self_, "setStepFunction:", void, .{stepFunction_});
+    pub fn signaledValue(self_: *@This()) u64 {
+        return objc.msgSend(self_, "signaledValue", u64, .{});
     }
-    pub fn stepRate(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "stepRate", ns.UInteger, .{});
-    }
-    pub fn setStepRate(self_: *@This(), stepRate_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStepRate:", void, .{stepRate_});
+    pub fn setSignaledValue(self_: *@This(), signaledValue_: u64) void {
+        return objc.msgSend(self_, "setSignaledValue:", void, .{signaledValue_});
     }
 };
 
-pub const BufferLayoutDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLBufferLayoutDescriptorArray", @This(), ns.ObjectInterface, &.{});
+pub const Tensor = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLTensor", @This(), &.{Resource});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *BufferLayoutDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *BufferLayoutDescriptor, .{index_});
+    pub fn replaceSliceOrigin_sliceDimensions_withBytes_strides(self_: *@This(), sliceOrigin_: *TensorExtents, sliceDimensions_: *TensorExtents, bytes_: *const anyopaque, strides_: *TensorExtents) void {
+        return objc.msgSend(self_, "replaceSliceOrigin:sliceDimensions:withBytes:strides:", void, .{ sliceOrigin_, sliceDimensions_, bytes_, strides_ });
     }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), bufferDesc_: ?*BufferLayoutDescriptor, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ bufferDesc_, index_ });
+    pub fn getBytes_strides_fromSliceOrigin_sliceDimensions(self_: *@This(), bytes_: *anyopaque, strides_: *TensorExtents, sliceOrigin_: *TensorExtents, sliceDimensions_: *TensorExtents) void {
+        return objc.msgSend(self_, "getBytes:strides:fromSliceOrigin:sliceDimensions:", void, .{ bytes_, strides_, sliceOrigin_, sliceDimensions_ });
+    }
+    pub fn gpuResourceID(self_: *@This()) ResourceID {
+        return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
+    }
+    pub fn buffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "buffer", ?*Buffer, .{});
+    }
+    pub fn bufferOffset(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "bufferOffset", ns.UInteger, .{});
+    }
+    pub fn strides(self_: *@This()) ?*TensorExtents {
+        return objc.msgSend(self_, "strides", ?*TensorExtents, .{});
+    }
+    pub fn dimensions(self_: *@This()) *TensorExtents {
+        return objc.msgSend(self_, "dimensions", *TensorExtents, .{});
+    }
+    pub fn dataType(self_: *@This()) TensorDataType {
+        return objc.msgSend(self_, "dataType", TensorDataType, .{});
+    }
+    pub fn usage(self_: *@This()) TensorUsage {
+        return objc.msgSend(self_, "usage", TensorUsage, .{});
     }
 };
 
-pub const AttributeDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAttributeDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const TensorBinding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLTensorBinding", @This(), &.{Binding});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn format(self_: *@This()) AttributeFormat {
-        return objc.msgSend(self_, "format", AttributeFormat, .{});
+    pub fn tensorDataType(self_: *@This()) TensorDataType {
+        return objc.msgSend(self_, "tensorDataType", TensorDataType, .{});
     }
-    pub fn setFormat(self_: *@This(), format_: AttributeFormat) void {
-        return objc.msgSend(self_, "setFormat:", void, .{format_});
+    pub fn indexType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "indexType", DataType, .{});
     }
-    pub fn offset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "offset", ns.UInteger, .{});
-    }
-    pub fn setOffset(self_: *@This(), offset_: ns.UInteger) void {
-        return objc.msgSend(self_, "setOffset:", void, .{offset_});
-    }
-    pub fn bufferIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferIndex", ns.UInteger, .{});
-    }
-    pub fn setBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBufferIndex:", void, .{bufferIndex_});
-    }
-};
-
-pub const AttributeDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLAttributeDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *AttributeDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *AttributeDescriptor, .{index_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attributeDesc_: ?*AttributeDescriptor, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attributeDesc_, index_ });
-    }
-};
-
-pub const StageInputOutputDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLStageInputOutputDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn stageInputOutputDescriptor() *StageInputOutputDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "stageInputOutputDescriptor", *StageInputOutputDescriptor, .{});
-    }
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn layouts(self_: *@This()) *BufferLayoutDescriptorArray {
-        return objc.msgSend(self_, "layouts", *BufferLayoutDescriptorArray, .{});
-    }
-    pub fn attributes(self_: *@This()) *AttributeDescriptorArray {
-        return objc.msgSend(self_, "attributes", *AttributeDescriptorArray, .{});
-    }
-    pub fn indexType(self_: *@This()) IndexType {
-        return objc.msgSend(self_, "indexType", IndexType, .{});
-    }
-    pub fn setIndexType(self_: *@This(), indexType_: IndexType) void {
-        return objc.msgSend(self_, "setIndexType:", void, .{indexType_});
-    }
-    pub fn indexBufferIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "indexBufferIndex", ns.UInteger, .{});
-    }
-    pub fn setIndexBufferIndex(self_: *@This(), indexBufferIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setIndexBufferIndex:", void, .{indexBufferIndex_});
-    }
-};
-
-pub const SharedTextureHandle = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLSharedTextureHandle", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn device(self_: *@This()) *Device {
-        return objc.msgSend(self_, "device", *Device, .{});
-    }
-    pub fn label(self_: *@This()) ?*ns.String {
-        return objc.msgSend(self_, "label", ?*ns.String, .{});
-    }
-};
-
-pub const TextureDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLTextureDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn texture2DDescriptorWithPixelFormat_width_height_mipmapped(pixelFormat_: PixelFormat, width_: ns.UInteger, height_: ns.UInteger, mipmapped_: bool) *TextureDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "texture2DDescriptorWithPixelFormat:width:height:mipmapped:", *TextureDescriptor, .{ pixelFormat_, width_, height_, mipmapped_ });
-    }
-    pub fn textureCubeDescriptorWithPixelFormat_size_mipmapped(pixelFormat_: PixelFormat, size_: ns.UInteger, mipmapped_: bool) *TextureDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "textureCubeDescriptorWithPixelFormat:size:mipmapped:", *TextureDescriptor, .{ pixelFormat_, size_, mipmapped_ });
-    }
-    pub fn textureBufferDescriptorWithPixelFormat_width_resourceOptions_usage(pixelFormat_: PixelFormat, width_: ns.UInteger, resourceOptions_: ResourceOptions, usage_: TextureUsage) *TextureDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "textureBufferDescriptorWithPixelFormat:width:resourceOptions:usage:", *TextureDescriptor, .{ pixelFormat_, width_, resourceOptions_, usage_ });
-    }
-    pub fn textureType(self_: *@This()) TextureType {
-        return objc.msgSend(self_, "textureType", TextureType, .{});
-    }
-    pub fn setTextureType(self_: *@This(), textureType_: TextureType) void {
-        return objc.msgSend(self_, "setTextureType:", void, .{textureType_});
-    }
-    pub fn pixelFormat(self_: *@This()) PixelFormat {
-        return objc.msgSend(self_, "pixelFormat", PixelFormat, .{});
-    }
-    pub fn setPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) void {
-        return objc.msgSend(self_, "setPixelFormat:", void, .{pixelFormat_});
-    }
-    pub fn width(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "width", ns.UInteger, .{});
-    }
-    pub fn setWidth(self_: *@This(), width_: ns.UInteger) void {
-        return objc.msgSend(self_, "setWidth:", void, .{width_});
-    }
-    pub fn height(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "height", ns.UInteger, .{});
-    }
-    pub fn setHeight(self_: *@This(), height_: ns.UInteger) void {
-        return objc.msgSend(self_, "setHeight:", void, .{height_});
-    }
-    pub fn depth(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "depth", ns.UInteger, .{});
-    }
-    pub fn setDepth(self_: *@This(), depth_: ns.UInteger) void {
-        return objc.msgSend(self_, "setDepth:", void, .{depth_});
-    }
-    pub fn mipmapLevelCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "mipmapLevelCount", ns.UInteger, .{});
-    }
-    pub fn setMipmapLevelCount(self_: *@This(), mipmapLevelCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setMipmapLevelCount:", void, .{mipmapLevelCount_});
-    }
-    pub fn sampleCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "sampleCount", ns.UInteger, .{});
-    }
-    pub fn setSampleCount(self_: *@This(), sampleCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setSampleCount:", void, .{sampleCount_});
-    }
-    pub fn arrayLength(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
-    }
-    pub fn setArrayLength(self_: *@This(), arrayLength_: ns.UInteger) void {
-        return objc.msgSend(self_, "setArrayLength:", void, .{arrayLength_});
-    }
-    pub fn resourceOptions(self_: *@This()) ResourceOptions {
-        return objc.msgSend(self_, "resourceOptions", ResourceOptions, .{});
-    }
-    pub fn setResourceOptions(self_: *@This(), resourceOptions_: ResourceOptions) void {
-        return objc.msgSend(self_, "setResourceOptions:", void, .{resourceOptions_});
-    }
-    pub fn cpuCacheMode(self_: *@This()) CPUCacheMode {
-        return objc.msgSend(self_, "cpuCacheMode", CPUCacheMode, .{});
-    }
-    pub fn setCpuCacheMode(self_: *@This(), cpuCacheMode_: CPUCacheMode) void {
-        return objc.msgSend(self_, "setCpuCacheMode:", void, .{cpuCacheMode_});
-    }
-    pub fn storageMode(self_: *@This()) StorageMode {
-        return objc.msgSend(self_, "storageMode", StorageMode, .{});
-    }
-    pub fn setStorageMode(self_: *@This(), storageMode_: StorageMode) void {
-        return objc.msgSend(self_, "setStorageMode:", void, .{storageMode_});
-    }
-    pub fn hazardTrackingMode(self_: *@This()) HazardTrackingMode {
-        return objc.msgSend(self_, "hazardTrackingMode", HazardTrackingMode, .{});
-    }
-    pub fn setHazardTrackingMode(self_: *@This(), hazardTrackingMode_: HazardTrackingMode) void {
-        return objc.msgSend(self_, "setHazardTrackingMode:", void, .{hazardTrackingMode_});
-    }
-    pub fn usage(self_: *@This()) TextureUsage {
-        return objc.msgSend(self_, "usage", TextureUsage, .{});
-    }
-    pub fn setUsage(self_: *@This(), usage_: TextureUsage) void {
-        return objc.msgSend(self_, "setUsage:", void, .{usage_});
-    }
-    pub fn allowGPUOptimizedContents(self_: *@This()) bool {
-        return objc.msgSend(self_, "allowGPUOptimizedContents", bool, .{});
-    }
-    pub fn setAllowGPUOptimizedContents(self_: *@This(), allowGPUOptimizedContents_: bool) void {
-        return objc.msgSend(self_, "setAllowGPUOptimizedContents:", void, .{allowGPUOptimizedContents_});
-    }
-    pub fn compressionType(self_: *@This()) TextureCompressionType {
-        return objc.msgSend(self_, "compressionType", TextureCompressionType, .{});
-    }
-    pub fn setCompressionType(self_: *@This(), compressionType_: TextureCompressionType) void {
-        return objc.msgSend(self_, "setCompressionType:", void, .{compressionType_});
-    }
-    pub fn swizzle(self_: *@This()) TextureSwizzleChannels {
-        return objc.msgSend(self_, "swizzle", TextureSwizzleChannels, .{});
-    }
-    pub fn setSwizzle(self_: *@This(), swizzle_: TextureSwizzleChannels) void {
-        return objc.msgSend(self_, "setSwizzle:", void, .{swizzle_});
+    pub fn dimensions(self_: *@This()) ?*TensorExtents {
+        return objc.msgSend(self_, "dimensions", ?*TensorExtents, .{});
     }
 };
 
@@ -7178,6 +11225,9 @@ pub const Texture = opaque {
     }
     pub fn newSharedTextureHandle(self_: *@This()) ?*SharedTextureHandle {
         return objc.msgSend(self_, "newSharedTextureHandle", ?*SharedTextureHandle, .{});
+    }
+    pub fn newTextureViewWithDescriptor(self_: *@This(), descriptor_: *TextureViewDescriptor) ?*Texture {
+        return objc.msgSend(self_, "newTextureViewWithDescriptor:", ?*Texture, .{descriptor_});
     }
     pub fn newRemoteTextureViewForDevice(self_: *@This(), device_: *Device) ?*Texture {
         return objc.msgSend(self_, "newRemoteTextureViewForDevice:", ?*Texture, .{device_});
@@ -7269,146 +11319,62 @@ pub const Texture = opaque {
     pub fn swizzle(self_: *@This()) TextureSwizzleChannels {
         return objc.msgSend(self_, "swizzle", TextureSwizzleChannels, .{});
     }
+    pub fn sparseTextureTier(self_: *@This()) TextureSparseTier {
+        return objc.msgSend(self_, "sparseTextureTier", TextureSparseTier, .{});
+    }
 };
 
-pub const VertexBufferLayoutDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexBufferLayoutDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const TextureBinding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLTextureBinding", @This(), &.{Binding});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn stride(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "stride", ns.UInteger, .{});
+    pub fn textureType(self_: *@This()) TextureType {
+        return objc.msgSend(self_, "textureType", TextureType, .{});
     }
-    pub fn setStride(self_: *@This(), stride_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStride:", void, .{stride_});
+    pub fn textureDataType(self_: *@This()) DataType {
+        return objc.msgSend(self_, "textureDataType", DataType, .{});
     }
-    pub fn stepFunction(self_: *@This()) VertexStepFunction {
-        return objc.msgSend(self_, "stepFunction", VertexStepFunction, .{});
+    pub fn isDepthTexture(self_: *@This()) bool {
+        return objc.msgSend(self_, "isDepthTexture", bool, .{});
     }
-    pub fn setStepFunction(self_: *@This(), stepFunction_: VertexStepFunction) void {
-        return objc.msgSend(self_, "setStepFunction:", void, .{stepFunction_});
-    }
-    pub fn stepRate(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "stepRate", ns.UInteger, .{});
-    }
-    pub fn setStepRate(self_: *@This(), stepRate_: ns.UInteger) void {
-        return objc.msgSend(self_, "setStepRate:", void, .{stepRate_});
+    pub fn arrayLength(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "arrayLength", ns.UInteger, .{});
     }
 };
 
-pub const VertexBufferLayoutDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexBufferLayoutDescriptorArray", @This(), ns.ObjectInterface, &.{});
+pub const TextureViewPool = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLTextureViewPool", @This(), &.{ResourceViewPool});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *VertexBufferLayoutDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *VertexBufferLayoutDescriptor, .{index_});
+    pub fn setTextureView_atIndex(self_: *@This(), texture_: *Texture, index_: ns.UInteger) ResourceID {
+        return objc.msgSend(self_, "setTextureView:atIndex:", ResourceID, .{ texture_, index_ });
     }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), bufferDesc_: ?*VertexBufferLayoutDescriptor, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ bufferDesc_, index_ });
+    pub fn setTextureView_descriptor_atIndex(self_: *@This(), texture_: *Texture, descriptor_: *TextureViewDescriptor, index_: ns.UInteger) ResourceID {
+        return objc.msgSend(self_, "setTextureView:descriptor:atIndex:", ResourceID, .{ texture_, descriptor_, index_ });
+    }
+    pub fn setTextureViewFromBuffer_descriptor_offset_bytesPerRow_atIndex(self_: *@This(), buffer_: *Buffer, descriptor_: *TextureDescriptor, offset_: ns.UInteger, bytesPerRow_: ns.UInteger, index_: ns.UInteger) ResourceID {
+        return objc.msgSend(self_, "setTextureViewFromBuffer:descriptor:offset:bytesPerRow:atIndex:", ResourceID, .{ buffer_, descriptor_, offset_, bytesPerRow_, index_ });
     }
 };
 
-pub const VertexAttributeDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexAttributeDescriptor", @This(), ns.ObjectInterface, &.{});
+pub const ThreadgroupBinding = opaque {
+    pub const InternalInfo = objc.ExternProtocol("MTLThreadgroupBinding", @This(), &.{Binding});
     pub const as = InternalInfo.as;
     pub const retain = InternalInfo.retain;
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
 
-    pub fn format(self_: *@This()) VertexFormat {
-        return objc.msgSend(self_, "format", VertexFormat, .{});
+    pub fn threadgroupMemoryAlignment(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryAlignment", ns.UInteger, .{});
     }
-    pub fn setFormat(self_: *@This(), format_: VertexFormat) void {
-        return objc.msgSend(self_, "setFormat:", void, .{format_});
-    }
-    pub fn offset(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "offset", ns.UInteger, .{});
-    }
-    pub fn setOffset(self_: *@This(), offset_: ns.UInteger) void {
-        return objc.msgSend(self_, "setOffset:", void, .{offset_});
-    }
-    pub fn bufferIndex(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "bufferIndex", ns.UInteger, .{});
-    }
-    pub fn setBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) void {
-        return objc.msgSend(self_, "setBufferIndex:", void, .{bufferIndex_});
-    }
-};
-
-pub const VertexAttributeDescriptorArray = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexAttributeDescriptorArray", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn objectAtIndexedSubscript(self_: *@This(), index_: ns.UInteger) *VertexAttributeDescriptor {
-        return objc.msgSend(self_, "objectAtIndexedSubscript:", *VertexAttributeDescriptor, .{index_});
-    }
-    pub fn setObject_atIndexedSubscript(self_: *@This(), attributeDesc_: ?*VertexAttributeDescriptor, index_: ns.UInteger) void {
-        return objc.msgSend(self_, "setObject:atIndexedSubscript:", void, .{ attributeDesc_, index_ });
-    }
-};
-
-pub const VertexDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVertexDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn vertexDescriptor() *VertexDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "vertexDescriptor", *VertexDescriptor, .{});
-    }
-    pub fn reset(self_: *@This()) void {
-        return objc.msgSend(self_, "reset", void, .{});
-    }
-    pub fn layouts(self_: *@This()) *VertexBufferLayoutDescriptorArray {
-        return objc.msgSend(self_, "layouts", *VertexBufferLayoutDescriptorArray, .{});
-    }
-    pub fn attributes(self_: *@This()) *VertexAttributeDescriptorArray {
-        return objc.msgSend(self_, "attributes", *VertexAttributeDescriptorArray, .{});
-    }
-};
-
-pub const VisibleFunctionTableDescriptor = opaque {
-    pub const InternalInfo = objc.ExternClass("MTLVisibleFunctionTableDescriptor", @This(), ns.ObjectInterface, &.{});
-    pub const as = InternalInfo.as;
-    pub const retain = InternalInfo.retain;
-    pub const release = InternalInfo.release;
-    pub const autorelease = InternalInfo.autorelease;
-    pub const new = InternalInfo.new;
-    pub const alloc = InternalInfo.alloc;
-    pub const allocInit = InternalInfo.allocInit;
-
-    pub fn visibleFunctionTableDescriptor() *VisibleFunctionTableDescriptor {
-        return objc.msgSend(@This().InternalInfo.class(), "visibleFunctionTableDescriptor", *VisibleFunctionTableDescriptor, .{});
-    }
-    pub fn functionCount(self_: *@This()) ns.UInteger {
-        return objc.msgSend(self_, "functionCount", ns.UInteger, .{});
-    }
-    pub fn setFunctionCount(self_: *@This(), functionCount_: ns.UInteger) void {
-        return objc.msgSend(self_, "setFunctionCount:", void, .{functionCount_});
+    pub fn threadgroupMemoryDataSize(self_: *@This()) ns.UInteger {
+        return objc.msgSend(self_, "threadgroupMemoryDataSize", ns.UInteger, .{});
     }
 };
 
