@@ -39,9 +39,9 @@ test "POD helpers match metal-c" {
     try std.testing.expectEqual(@as(usize, 6), box.size.depth);
 }
 
-test "metal-cpp style methods are present" {
+test "member functions are present" {
     comptime {
-        _ = slag.Device.newBuffer;
+        _ = slag.Device.createBuffer;
         _ = slag.Buffer.contents;
         _ = slag.TextureDescriptor.setUsage;
         _ = slag.CommandBuffer.computeCommandEncoder;
@@ -53,7 +53,6 @@ test "metal-cpp style methods are present" {
 // Exporting this function forces Zig's lazy semantic analysis to compile the
 // forwarding bodies without executing calls on fabricated Metal objects.
 export fn compileWrapperMethodBodies() void {
-    var pool: slag.AutoreleasePool = undefined;
     var device: slag.Device = undefined;
     var buffer: slag.Buffer = undefined;
     var texture_descriptor: slag.TextureDescriptor = undefined;
@@ -82,21 +81,20 @@ export fn compileWrapperMethodBodies() void {
     var drawable: slag.Drawable = undefined;
     var slag_error: ?slag.Error = null;
 
-    _ = slag.AutoreleasePool.create();
     _ = slag.createSystemDefaultDevice();
     _ = device.name();
-    _ = device.newBuffer(16, slag.ResourceStorageModeShared);
-    _ = device.newBufferWithBytes(@ptrCast(&device), @sizeOf(slag.Device), slag.ResourceStorageModeShared);
-    _ = device.newTexture(texture_descriptor);
-    _ = device.newCommandAllocator();
-    _ = device.newCommandBuffer();
-    _ = device.newCommandQueue();
-    _ = device.newCompiler(compiler_descriptor, &slag_error);
-    _ = device.newArgumentTable(argument_descriptor, &slag_error);
+    _ = device.createBuffer(16, slag.ResourceStorageModeShared);
+    _ = device.createBufferWithBytes(@ptrCast(&device), @sizeOf(slag.Device), slag.ResourceStorageModeShared);
+    _ = device.createTexture(texture_descriptor);
+    _ = device.createCommandAllocator();
+    _ = device.createCommandBuffer();
+    _ = device.createCommandQueue();
+    _ = device.createCompiler(compiler_descriptor, &slag_error);
+    _ = device.createArgumentTable(argument_descriptor, &slag_error);
     _ = device.accelerationStructureSizes(primitive_descriptor.asAccelerationStructureDescriptor());
-    _ = device.newAccelerationStructure(16);
-    _ = device.newResidencySet(residency_descriptor, &slag_error);
-    _ = device.newSharedEvent();
+    _ = device.createAccelerationStructure(16);
+    _ = device.createResidencySet(residency_descriptor, &slag_error);
+    _ = device.createSharedEvent();
 
     _ = buffer.contents();
     _ = buffer.length();
@@ -107,8 +105,8 @@ export fn compileWrapperMethodBodies() void {
     _ = buffer.asResource();
     _ = buffer.asAllocation();
 
-    _ = slag.TextureDescriptor.create();
-    _ = slag.TextureDescriptor.create2D(slag.PixelFormatRGBA8Unorm, 1, 1, false);
+    _ = slag.TextureDescriptor.init();
+    _ = slag.TextureDescriptor.init2D(slag.PixelFormatRGBA8Unorm, 1, 1, false);
     texture_descriptor.setTextureType(slag.TextureType2D);
     texture_descriptor.setPixelFormat(slag.PixelFormatRGBA8Unorm);
     texture_descriptor.setWidth(1);
@@ -143,7 +141,7 @@ export fn compileWrapperMethodBodies() void {
     _ = event.signaledValue();
     _ = event.waitUntilSignaledValue(1, 1);
 
-    _ = slag.ArgumentTableDescriptor.create();
+    _ = slag.ArgumentTableDescriptor.init();
     argument_descriptor.setMaxBufferBindCount(1);
     argument_descriptor.setMaxTextureBindCount(1);
     argument_descriptor.setInitializeBindings(true);
@@ -152,18 +150,18 @@ export fn compileWrapperMethodBodies() void {
     argument_table.setTexture(texture, 0);
     argument_table.setAccelerationStructure(acceleration_structure, 0);
 
-    _ = slag.LibraryDescriptor.create();
+    _ = slag.LibraryDescriptor.init();
     library_descriptor.setName("library");
     library_descriptor.setSource("");
-    _ = slag.LibraryFunctionDescriptor.create();
+    _ = slag.LibraryFunctionDescriptor.init();
     function_descriptor.setLibrary(library);
     function_descriptor.setName("main");
-    _ = slag.ComputePipelineDescriptor.create();
+    _ = slag.ComputePipelineDescriptor.init();
     pipeline_descriptor.setComputeFunctionDescriptor(function_descriptor);
     pipeline_descriptor.setMaxTotalThreadsPerThreadgroup(64);
-    _ = slag.CompilerDescriptor.create();
-    _ = compiler.newLibrary(library_descriptor, &slag_error);
-    _ = compiler.newComputePipelineState(pipeline_descriptor, &slag_error);
+    _ = slag.CompilerDescriptor.init();
+    _ = compiler.createLibrary(library_descriptor);
+    _ = compiler.createComputePipelineState(pipeline_descriptor);
     _ = pipeline.threadExecutionWidth();
     _ = pipeline.maxTotalThreadsPerThreadgroup();
 
@@ -193,11 +191,11 @@ export fn compileWrapperMethodBodies() void {
     triangle_descriptor.setIndexType(slag.IndexTypeUInt32);
     triangle_descriptor.setTriangleCount(1);
     triangle_descriptor.setOpaque(true);
-    _ = slag.PrimitiveAccelerationStructureDescriptor.create();
+    _ = slag.PrimitiveAccelerationStructureDescriptor.init();
     primitive_descriptor.setGeometryDescriptors(&.{triangle_descriptor});
     primitive_descriptor.setUsage(slag.AccelerationStructureUsagePreferFastIntersection);
     _ = primitive_descriptor.asAccelerationStructureDescriptor();
-    _ = slag.InstanceAccelerationStructureDescriptor.create();
+    _ = slag.InstanceAccelerationStructureDescriptor.init();
     instance_descriptor.setInstanceDescriptorBuffer(buffer_range);
     instance_descriptor.setInstanceDescriptorStride(@sizeOf(slag.AccelerationStructureInstanceDescriptor));
     instance_descriptor.setInstanceDescriptorType(slag.AccelerationStructureInstanceDescriptorTypeDefault);
@@ -205,7 +203,7 @@ export fn compileWrapperMethodBodies() void {
     instance_descriptor.setUsage(slag.AccelerationStructureUsageRefit);
     _ = instance_descriptor.asAccelerationStructureDescriptor();
 
-    _ = slag.ResidencySetDescriptor.create();
+    _ = slag.ResidencySetDescriptor.init();
     residency_descriptor.setInitialCapacity(3);
     residency_set.addAllocation(buffer.asAllocation());
     residency_set.removeAllocation(buffer.asAllocation());
@@ -217,7 +215,6 @@ export fn compileWrapperMethodBodies() void {
     drawable.present();
     _ = drawable.texture();
 
-    pool.deinit();
     device.deinit();
     buffer.deinit();
     texture.deinit();
@@ -244,5 +241,4 @@ export fn compileWrapperMethodBodies() void {
     residency_set.deinit();
     drawable.deinit();
     texture_descriptor.deinit();
-    if (slag_error) |*value| value.deinit();
 }

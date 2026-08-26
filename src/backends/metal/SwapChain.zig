@@ -6,8 +6,8 @@ const PixelFormat = @import("PixelFormat.zig").PixelFormat;
 
 pub const SwapChain = extern struct {
     ptr: *c.CAMetalLayer,
-    pub fn init(metal_layer: *c.CAMetalLayer) SwapChain {
-        return .{ .ptr = object.retain(metal_layer) };
+    pub fn fromLayer(layer: *c.CAMetalLayer) SwapChain {
+        return .{ .ptr = object.retain(layer) };
     }
     pub fn setDevice(self: SwapChain, device: Device) void {
         c.CAMetalLayerSetDevice(self.ptr, device.ptr);

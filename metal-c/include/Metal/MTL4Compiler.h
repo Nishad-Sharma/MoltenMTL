@@ -10,8 +10,8 @@ extern "C" {
 typedef struct MTL4Compiler MTL4Compiler;
 typedef struct MTL4CompilerDescriptor MTL4CompilerDescriptor;
 METAL_C_EXPORT MTL4CompilerDescriptor* MTL4CompilerDescriptorCreate(void);
-METAL_C_EXPORT MTLLibrary* MTL4CompilerNewLibrary(MTL4Compiler* compiler, const MTL4LibraryDescriptor* descriptor, MTLError** error);
-METAL_C_EXPORT MTLComputePipelineState* MTL4CompilerNewComputePipelineState(MTL4Compiler* compiler, const MTL4ComputePipelineDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTLLibrary* MTL4CompilerCreateLibrary(MTL4Compiler* compiler, const MTL4LibraryDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTLComputePipelineState* MTL4CompilerCreateComputePipelineState(MTL4Compiler* compiler, const MTL4ComputePipelineDescriptor* descriptor, MTLError** error);
 #ifdef __cplusplus
 }
 #endif

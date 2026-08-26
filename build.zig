@@ -4,57 +4,6 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    if (target.result.os.tag != .macos) {
-        @panic("only the Metal 4 backend is implemented; Vulkan support is the next backend slice");
-    }
-    if (!(target.result.os.isAtLeast(.macos, .{ .major = 26, .minor = 0, .patch = 0 }) orelse false)) {
-        @panic("the Metal 4 backend requires a macOS 26.0 or newer deployment target");
-    }
-
-    const metal_cpp = b.dependency("metal_cpp", .{});
-
-    const metal_c_module = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libc = true,
-        .link_libcpp = true,
-    });
-    metal_c_module.addIncludePath(b.path("metal-c/include"));
-    metal_c_module.addSystemIncludePath(metal_cpp.path(""));
-    metal_c_module.addCSourceFiles(.{
-        .files = &.{
-            "metal-c/src/Metal/MetalCppImplementation.cpp",
-            "metal-c/src/Metal/MTLObject.cpp",
-            "metal-c/src/Metal/MTLError.cpp",
-            "metal-c/src/Metal/MTLDevice.cpp",
-            "metal-c/src/Metal/MTLResource.cpp",
-            "metal-c/src/Metal/MTLResidencySet.cpp",
-            "metal-c/src/Metal/MTL4ArgumentTable.cpp",
-            "metal-c/src/Metal/MTL4Command.cpp",
-            "metal-c/src/Metal/MTL4Compiler.cpp",
-            "metal-c/src/Metal/MTL4ComputeCommandEncoder.cpp",
-            "metal-c/src/Metal/MTL4AccelerationStructure.cpp",
-            "metal-c/src/QuartzCore/CAMetalLayer.cpp",
-        },
-        .flags = &.{
-            "-std=c++17",
-            "-fvisibility=hidden",
-            "-Wall",
-            "-Wextra",
-            "-Wpedantic",
-            "-Werror",
-        },
-    });
-    metal_c_module.linkFramework("Foundation", .{});
-    metal_c_module.linkFramework("Metal", .{});
-    metal_c_module.linkFramework("QuartzCore", .{});
-
-    const metal_c_library = b.addLibrary(.{
-        .name = "metal-c",
-        .linkage = .static,
-        .root_module = metal_c_module,
-    });
-
     const Backend = enum {
         metal,
         vulkan,
@@ -84,12 +33,13 @@ pub fn build(b: *std.Build) void {
         },
     });
 
-    slag_module.addIncludePath(b.path("metal-c/include"));
-    slag_module.linkLibrary(metal_c_library);
+    const slag_library = b.addLibrary(.{
+        .name = "slag",
+        .linkage = .static,
+        .root_module = slag_module,
+    });
 
-    metal_c_library.installHeadersDirectory(b.path("metal-c/include/Metal"), "Metal", .{});
-    metal_c_library.installHeadersDirectory(b.path("metal-c/include/QuartzCore"), "QuartzCore", .{});
-    b.installArtifact(metal_c_library);
+    b.installArtifact(slag_library);
 
     const wrapper_tests = b.addTest(.{
         .root_module = b.createModule(.{
@@ -105,12 +55,49 @@ pub fn build(b: *std.Build) void {
 }
 
 fn createMetalBackend(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Module {
+    if (target.result.os.tag != .macos) {
+        @panic("only the Metal 4 backend is implemented; Vulkan support is the next backend slice");
+    }
+    if (!(target.result.os.isAtLeast(.macos, .{ .major = 26, .minor = 0, .patch = 0 }) orelse false)) {
+        @panic("the Metal 4 backend requires a macOS 26.0 or newer deployment target");
+    }
+    const metal_cpp = b.dependency("metal_cpp", .{});
     const backend_module = b.addModule("slag_backend", .{
         .root_source_file = b.path("src/backends/metal.zig"),
         .target = target,
         .optimize = optimize,
         .link_libc = true,
+        .link_libcpp = true,
     });
     backend_module.addIncludePath(b.path("metal-c/include"));
+    backend_module.addSystemIncludePath(metal_cpp.path(""));
+    backend_module.addCSourceFiles(.{
+        .root = b.path("metal-c/src"),
+        .files = &.{
+            "Metal/MetalCppImplementation.cpp",
+            "Metal/MTLObject.cpp",
+            "Metal/MTLError.cpp",
+            "Metal/MTLDevice.cpp",
+            "Metal/MTLResource.cpp",
+            "Metal/MTLResidencySet.cpp",
+            "Metal/MTL4ArgumentTable.cpp",
+            "Metal/MTL4Command.cpp",
+            "Metal/MTL4Compiler.cpp",
+            "Metal/MTL4ComputeCommandEncoder.cpp",
+            "Metal/MTL4AccelerationStructure.cpp",
+            "QuartzCore/CAMetalLayer.cpp",
+        },
+        .flags = &.{
+            "-std=c++17",
+            "-fvisibility=hidden",
+            "-Wall",
+            "-Wextra",
+            "-Wpedantic",
+            "-Werror",
+        },
+    });
+    backend_module.linkFramework("Foundation", .{});
+    backend_module.linkFramework("Metal", .{});
+    backend_module.linkFramework("QuartzCore", .{});
     return backend_module;
 }

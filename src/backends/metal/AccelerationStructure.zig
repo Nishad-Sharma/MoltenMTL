@@ -46,7 +46,7 @@ pub const AccelerationStructureDescriptor = extern struct { ptr: *c.MTL4Accelera
 pub const AccelerationStructureTriangleGeometryDescriptor = extern struct {
     ptr: *c.MTL4AccelerationStructureTriangleGeometryDescriptor,
     pub fn init() ?AccelerationStructureTriangleGeometryDescriptor {
-        return object.wrap(AccelerationStructureTriangleGeometryDescriptor, c.MTL4AccelerationStructureTriangleGeometryDescriptorCreate());
+        return .{ .ptr = c.MTL4AccelerationStructureTriangleGeometryDescriptorCreate() };
     }
     pub fn setVertexBuffer(self: AccelerationStructureTriangleGeometryDescriptor, buffer: types.BufferRange) void {
         c.MTL4AccelerationStructureTriangleGeometryDescriptorSetVertexBuffer(self.ptr, buffer.raw());
@@ -77,8 +77,8 @@ pub const AccelerationStructureTriangleGeometryDescriptor = extern struct {
 
 pub const PrimitiveAccelerationStructureDescriptor = extern struct {
     ptr: *c.MTL4PrimitiveAccelerationStructureDescriptor,
-    pub fn create() ?PrimitiveAccelerationStructureDescriptor {
-        return object.wrap(PrimitiveAccelerationStructureDescriptor, c.MTL4PrimitiveAccelerationStructureDescriptorCreate());
+    pub fn init() ?PrimitiveAccelerationStructureDescriptor {
+        return .{ .ptr = c.MTL4PrimitiveAccelerationStructureDescriptorCreate() };
     }
     pub fn setGeometryDescriptors(self: PrimitiveAccelerationStructureDescriptor, descriptors: []const AccelerationStructureTriangleGeometryDescriptor) void {
         c.MTL4PrimitiveAccelerationStructureDescriptorSetGeometryDescriptors(self.ptr, @ptrCast(descriptors.ptr), descriptors.len);
@@ -97,8 +97,8 @@ pub const PrimitiveAccelerationStructureDescriptor = extern struct {
 
 pub const InstanceAccelerationStructureDescriptor = extern struct {
     ptr: *c.MTL4InstanceAccelerationStructureDescriptor,
-    pub fn create() ?InstanceAccelerationStructureDescriptor {
-        return object.wrap(InstanceAccelerationStructureDescriptor, c.MTL4InstanceAccelerationStructureDescriptorCreate());
+    pub fn init() ?InstanceAccelerationStructureDescriptor {
+        return .{ .ptr = c.MTL4InstanceAccelerationStructureDescriptorCreate() };
     }
     pub fn setInstanceDescriptorBuffer(self: InstanceAccelerationStructureDescriptor, buffer: types.BufferRange) void {
         c.MTL4InstanceAccelerationStructureDescriptorSetInstanceDescriptorBuffer(self.ptr, buffer.raw());

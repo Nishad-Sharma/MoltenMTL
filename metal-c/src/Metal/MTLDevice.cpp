@@ -18,40 +18,40 @@ bool MTLDeviceSupportsMetal4(const MTLDevice* device)
     return device != nullptr && const_cast<MTL::Device*>(native<MTL::Device>(device))->supportsFamily(MTL::GPUFamilyMetal4);
 }
 
-MTLBuffer* MTLDeviceNewBuffer(MTLDevice* device, size_t length, MTLResourceOptions options)
+MTLBuffer* MTLDeviceCreateBuffer(MTLDevice* device, size_t length, MTLResourceOptions options)
 {
     if (device == nullptr) return nullptr;
     return cobject<MTLBuffer>(native<MTL::Device>(device)->newBuffer(length, static_cast<MTL::ResourceOptions>(options)));
 }
 
-MTLBuffer* MTLDeviceNewBufferWithBytes(MTLDevice* device, const void* bytes, size_t length, MTLResourceOptions options)
+MTLBuffer* MTLDeviceCreateBufferWithBytes(MTLDevice* device, const void* bytes, size_t length, MTLResourceOptions options)
 {
     if (device == nullptr || (bytes == nullptr && length != 0)) return nullptr;
     return cobject<MTLBuffer>(native<MTL::Device>(device)->newBuffer(bytes, length, static_cast<MTL::ResourceOptions>(options)));
 }
 
-MTLTexture* MTLDeviceNewTexture(MTLDevice* device, const MTLTextureDescriptor* descriptor)
+MTLTexture* MTLDeviceCreateTexture(MTLDevice* device, const MTLTextureDescriptor* descriptor)
 {
     if (device == nullptr || descriptor == nullptr) return nullptr;
     return cobject<MTLTexture>(native<MTL::Device>(device)->newTexture(native<MTL::TextureDescriptor>(descriptor)));
 }
 
-MTL4CommandAllocator* MTLDeviceNewCommandAllocator(MTLDevice* device)
+MTL4CommandAllocator* MTLDeviceCreateCommandAllocator(MTLDevice* device)
 {
     return device == nullptr ? nullptr : cobject<MTL4CommandAllocator>(native<MTL::Device>(device)->newCommandAllocator());
 }
 
-MTL4CommandBuffer* MTLDeviceNewCommandBuffer(MTLDevice* device)
+MTL4CommandBuffer* MTLDeviceCreateCommandBuffer(MTLDevice* device)
 {
     return device == nullptr ? nullptr : cobject<MTL4CommandBuffer>(native<MTL::Device>(device)->newCommandBuffer());
 }
 
-MTL4CommandQueue* MTLDeviceNewMTL4CommandQueue(MTLDevice* device)
+MTL4CommandQueue* MTLDeviceCreateMTL4CommandQueue(MTLDevice* device)
 {
     return device == nullptr ? nullptr : cobject<MTL4CommandQueue>(native<MTL::Device>(device)->newMTL4CommandQueue());
 }
 
-MTL4Compiler* MTLDeviceNewCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error)
+MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;
@@ -61,7 +61,7 @@ MTL4Compiler* MTLDeviceNewCompiler(MTLDevice* device, const MTL4CompilerDescript
     return cobject<MTL4Compiler>(compiler);
 }
 
-MTL4ArgumentTable* MTLDeviceNewArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error)
+MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;
@@ -78,12 +78,12 @@ MTLAccelerationStructureSizes MTLDeviceGetAccelerationStructureSizes(MTLDevice* 
     return MTLAccelerationStructureSizes{sizes.accelerationStructureSize, sizes.buildScratchBufferSize, sizes.refitScratchBufferSize};
 }
 
-MTLAccelerationStructure* MTLDeviceNewAccelerationStructure(MTLDevice* device, size_t size)
+MTLAccelerationStructure* MTLDeviceCreateAccelerationStructure(MTLDevice* device, size_t size)
 {
     return device == nullptr ? nullptr : cobject<MTLAccelerationStructure>(native<MTL::Device>(device)->newAccelerationStructure(size));
 }
 
-MTLResidencySet* MTLDeviceNewResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error)
+MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error)
 {
     if (error != nullptr) *error = nullptr;
     if (device == nullptr || descriptor == nullptr) return nullptr;
@@ -93,7 +93,7 @@ MTLResidencySet* MTLDeviceNewResidencySet(MTLDevice* device, const MTLResidencyS
     return cobject<MTLResidencySet>(set);
 }
 
-MTLSharedEvent* MTLDeviceNewSharedEvent(MTLDevice* device)
+MTLSharedEvent* MTLDeviceCreateSharedEvent(MTLDevice* device)
 {
     return device == nullptr ? nullptr : cobject<MTLSharedEvent>(native<MTL::Device>(device)->newSharedEvent());
 }

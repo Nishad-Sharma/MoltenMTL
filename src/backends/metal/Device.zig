@@ -26,50 +26,61 @@ pub const Device = extern struct {
     pub fn supportsMetal4(self: Device) bool {
         return c.MTLDeviceSupportsMetal4(self.ptr);
     }
-    pub fn newBuffer(self: Device, length: usize, options: resource.ResourceOptions) ?Buffer {
-        return object.wrap(Buffer, c.MTLDeviceNewBuffer(self.ptr, length, options));
+    pub fn createBuffer(self: Device, length: usize, options: resource.ResourceOptions) ?Buffer {
+        const ptr = c.MTLDeviceCreateBuffer(self.ptr, length, options) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newBufferWithBytes(self: Device, bytes: *const anyopaque, length: usize, options: resource.ResourceOptions) ?Buffer {
-        return object.wrap(Buffer, c.MTLDeviceNewBufferWithBytes(self.ptr, bytes, length, options));
+    pub fn createBufferWithBytes(self: Device, bytes: *const anyopaque, length: usize, options: resource.ResourceOptions) ?Buffer {
+        const ptr = c.MTLDeviceCreateBufferWithBytes(self.ptr, bytes, length, options) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newTexture(self: Device, descriptor: texture.TextureDescriptor) ?texture.Texture {
-        return object.wrap(texture.Texture, c.MTLDeviceNewTexture(self.ptr, descriptor.ptr));
+    pub fn createTexture(self: Device, descriptor: texture.TextureDescriptor) ?texture.Texture {
+        const ptr = c.MTLDeviceCreateTexture(self.ptr, descriptor.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newCommandAllocator(self: Device) ?CommandAllocator {
-        return object.wrap(CommandAllocator, c.MTLDeviceNewCommandAllocator(self.ptr));
+    pub fn createCommandAllocator(self: Device) ?CommandAllocator {
+        const ptr = c.MTLDeviceCreateCommandAllocator(self.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newCommandBuffer(self: Device) ?CommandBuffer {
-        return object.wrap(CommandBuffer, c.MTLDeviceNewCommandBuffer(self.ptr));
+    pub fn createCommandBuffer(self: Device) ?CommandBuffer {
+        const ptr = c.MTLDeviceCreateCommandBuffer(self.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newCommandQueue(self: Device) ?CommandQueue {
-        return object.wrap(CommandQueue, c.MTLDeviceNewMTL4CommandQueue(self.ptr));
+    pub fn createCommandQueue(self: Device) ?CommandQueue {
+        const ptr = c.MTLDeviceCreateMTL4CommandQueue(self.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newCompiler(self: Device, descriptor: compiler.CompilerDescriptor, error_out: ?*?errors.Error) ?compiler.Compiler {
+    pub fn createCompiler(self: Device, descriptor: compiler.CompilerDescriptor, error_out: ?*?errors.Error) ?compiler.Compiler {
         var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceNewCompiler(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        errors.write(error_out, raw_error);
-        return object.wrap(compiler.Compiler, result);
+        const result = c.MTLDeviceCreateCompiler(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
+        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
+        const ptr = result orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newArgumentTable(self: Device, descriptor: arguments.ArgumentTableDescriptor, error_out: ?*?errors.Error) ?arguments.ArgumentTable {
+    pub fn createArgumentTable(self: Device, descriptor: arguments.ArgumentTableDescriptor, error_out: ?*?errors.Error) ?arguments.ArgumentTable {
         var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceNewArgumentTable(self.ptr, @ptrCast(descriptor.ptr), if (error_out != null) &raw_error else null);
-        errors.write(error_out, raw_error);
-        return object.wrap(arguments.ArgumentTable, result);
+        const result = c.MTLDeviceCreateArgumentTable(self.ptr, @ptrCast(descriptor.ptr), if (error_out != null) &raw_error else null);
+        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
+        const ptr = result orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn accelerationStructureSizes(self: Device, descriptor: acceleration.AccelerationStructureDescriptor) acceleration.AccelerationStructureSizes {
         return c.MTLDeviceGetAccelerationStructureSizes(self.ptr, descriptor.ptr);
     }
-    pub fn newAccelerationStructure(self: Device, byte_size: usize) ?acceleration.AccelerationStructure {
-        return object.wrap(acceleration.AccelerationStructure, c.MTLDeviceNewAccelerationStructure(self.ptr, byte_size));
+    pub fn createAccelerationStructure(self: Device, byte_size: usize) ?acceleration.AccelerationStructure {
+        const ptr = c.MTLDeviceCreateAccelerationStructure(self.ptr, byte_size) orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newResidencySet(self: Device, descriptor: residency.ResidencySetDescriptor, error_out: ?*?errors.Error) ?residency.ResidencySet {
+    pub fn createResidencySet(self: Device, descriptor: residency.ResidencySetDescriptor, error_out: ?*?errors.Error) ?residency.ResidencySet {
         var raw_error: ?*c.MTLError = null;
-        const result = c.MTLDeviceNewResidencySet(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        errors.write(error_out, raw_error);
-        return object.wrap(residency.ResidencySet, result);
+        const result = c.MTLDeviceCreateResidencySet(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
+        if (error_out) |out| out.* = if (raw_error) |ptr| .{ .ptr = ptr } else null;
+        const ptr = result orelse return null;
+        return .{ .ptr = ptr };
     }
-    pub fn newSharedEvent(self: Device) ?SharedEvent {
-        return object.wrap(SharedEvent, c.MTLDeviceNewSharedEvent(self.ptr));
+    pub fn createSharedEvent(self: Device) ?SharedEvent {
+        const ptr = c.MTLDeviceCreateSharedEvent(self.ptr) orelse return null;
+        return .{ .ptr = ptr };
     }
     pub fn deinit(self: *Device) void {
         object.deinit(self.ptr);

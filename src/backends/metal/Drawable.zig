@@ -8,7 +8,7 @@ pub const Drawable = extern struct {
         c.MTLDrawablePresent(self.ptr);
     }
     pub fn texture(self: Drawable) ?Texture {
-        return object.wrap(Texture, c.CAMetalDrawableGetTexture(@ptrCast(self.ptr)));
+        return Texture{ .ptr = c.CAMetalDrawableGetTexture(@ptrCast(self.ptr)) };
     }
     pub fn deinit(self: *Drawable) void {
         object.deinit(self.ptr);

@@ -62,7 +62,6 @@ pub const AttributeFormatFloat2 = types.AttributeFormatFloat2;
 pub const AttributeFormatFloat3 = types.AttributeFormatFloat3;
 pub const AttributeFormatFloat4 = types.AttributeFormatFloat4;
 
-pub const AutoreleasePool = object.AutoreleasePool;
 pub const Error = errors.Error;
 pub const ResourceOptions = resources.ResourceOptions;
 pub const Resource = resources.Resource;

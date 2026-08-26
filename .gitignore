@@ -5,7 +5,7 @@ zig-pkg/
 zig-out/
 *.exe
 *.pdb
-Examples/*/Shaders/*.spv
+.clangd
 
 # Local environment
 .envrc

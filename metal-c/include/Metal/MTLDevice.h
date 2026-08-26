@@ -25,18 +25,18 @@ typedef struct MTLAccelerationStructureSizes { size_t accelerationStructureSize,
 METAL_C_EXPORT MTLDevice* MTLCreateSystemDefaultDevice(void);
 METAL_C_EXPORT const char* MTLDeviceGetName(const MTLDevice* device);
 METAL_C_EXPORT bool MTLDeviceSupportsMetal4(const MTLDevice* device);
-METAL_C_EXPORT MTLBuffer* MTLDeviceNewBuffer(MTLDevice* device, size_t length, MTLResourceOptions options);
-METAL_C_EXPORT MTLBuffer* MTLDeviceNewBufferWithBytes(MTLDevice* device, const void* bytes, size_t length, MTLResourceOptions options);
-METAL_C_EXPORT MTLTexture* MTLDeviceNewTexture(MTLDevice* device, const MTLTextureDescriptor* descriptor);
-METAL_C_EXPORT MTL4CommandAllocator* MTLDeviceNewCommandAllocator(MTLDevice* device);
-METAL_C_EXPORT MTL4CommandBuffer* MTLDeviceNewCommandBuffer(MTLDevice* device);
-METAL_C_EXPORT MTL4CommandQueue* MTLDeviceNewMTL4CommandQueue(MTLDevice* device);
-METAL_C_EXPORT MTL4Compiler* MTLDeviceNewCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error);
-METAL_C_EXPORT MTL4ArgumentTable* MTLDeviceNewArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTLBuffer* MTLDeviceCreateBuffer(MTLDevice* device, size_t length, MTLResourceOptions options);
+METAL_C_EXPORT MTLBuffer* MTLDeviceCreateBufferWithBytes(MTLDevice* device, const void* bytes, size_t length, MTLResourceOptions options);
+METAL_C_EXPORT MTLTexture* MTLDeviceCreateTexture(MTLDevice* device, const MTLTextureDescriptor* descriptor);
+METAL_C_EXPORT MTL4CommandAllocator* MTLDeviceCreateCommandAllocator(MTLDevice* device);
+METAL_C_EXPORT MTL4CommandBuffer* MTLDeviceCreateCommandBuffer(MTLDevice* device);
+METAL_C_EXPORT MTL4CommandQueue* MTLDeviceCreateMTL4CommandQueue(MTLDevice* device);
+METAL_C_EXPORT MTL4Compiler* MTLDeviceCreateCompiler(MTLDevice* device, const MTL4CompilerDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTL4ArgumentTable* MTLDeviceCreateArgumentTable(MTLDevice* device, const MTL4ArgumentTableDescriptor* descriptor, MTLError** error);
 METAL_C_EXPORT MTLAccelerationStructureSizes MTLDeviceGetAccelerationStructureSizes(MTLDevice* device, const MTL4AccelerationStructureDescriptor* descriptor);
-METAL_C_EXPORT MTLAccelerationStructure* MTLDeviceNewAccelerationStructure(MTLDevice* device, size_t size);
-METAL_C_EXPORT MTLResidencySet* MTLDeviceNewResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error);
-METAL_C_EXPORT MTLSharedEvent* MTLDeviceNewSharedEvent(MTLDevice* device);
+METAL_C_EXPORT MTLAccelerationStructure* MTLDeviceCreateAccelerationStructure(MTLDevice* device, size_t size);
+METAL_C_EXPORT MTLResidencySet* MTLDeviceCreateResidencySet(MTLDevice* device, const MTLResidencySetDescriptor* descriptor, MTLError** error);
+METAL_C_EXPORT MTLSharedEvent* MTLDeviceCreateSharedEvent(MTLDevice* device);
 #ifdef __cplusplus
 }
 #endif

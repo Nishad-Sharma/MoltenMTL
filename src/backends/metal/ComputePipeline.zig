@@ -4,8 +4,8 @@ const LibraryFunctionDescriptor = @import("LibraryFunctionDescriptor.zig").Libra
 
 pub const ComputePipelineDescriptor = extern struct {
     ptr: *c.MTL4ComputePipelineDescriptor,
-    pub fn create() ?ComputePipelineDescriptor {
-        return object.wrap(ComputePipelineDescriptor, c.MTL4ComputePipelineDescriptorCreate());
+    pub fn init() ?ComputePipelineDescriptor {
+        return .{ .ptr = c.MTL4ComputePipelineDescriptorCreate() };
     }
     pub fn setComputeFunctionDescriptor(self: ComputePipelineDescriptor, descriptor: LibraryFunctionDescriptor) void {
         c.MTL4ComputePipelineDescriptorSetComputeFunctionDescriptor(self.ptr, descriptor.ptr);
@@ -21,6 +21,9 @@ pub const ComputePipelineDescriptor = extern struct {
 
 pub const ComputePipelineState = extern struct {
     ptr: *c.MTLComputePipelineState,
+    pub fn init() ?ComputePipelineState {
+        return .{ .ptr = c.MTLComputePipelineStateCreate() };
+    }
     pub fn threadExecutionWidth(self: ComputePipelineState) usize {
         return c.MTLComputePipelineStateGetThreadExecutionWidth(self.ptr);
     }

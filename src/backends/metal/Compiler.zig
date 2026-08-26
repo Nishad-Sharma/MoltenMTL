@@ -8,8 +8,8 @@ const ComputePipelineState = @import("ComputePipeline.zig").ComputePipelineState
 
 pub const CompilerDescriptor = extern struct {
     ptr: *c.MTL4CompilerDescriptor,
-    pub fn create() ?CompilerDescriptor {
-        return object.wrap(CompilerDescriptor, c.MTL4CompilerDescriptorCreate());
+    pub fn init() ?CompilerDescriptor {
+        return .{ .ptr = c.MTL4CompilerDescriptorCreate() };
     }
     pub fn deinit(self: *CompilerDescriptor) void {
         object.deinit(self.ptr);
@@ -19,17 +19,15 @@ pub const CompilerDescriptor = extern struct {
 
 pub const Compiler = extern struct {
     ptr: *c.MTL4Compiler,
-    pub fn newLibrary(self: Compiler, descriptor: LibraryDescriptor, error_out: ?*?errors.Error) ?Library {
-        var raw_error: ?*c.MTLError = null;
-        const result = c.MTL4CompilerNewLibrary(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        errors.write(error_out, raw_error);
-        return object.wrap(Library, result);
+    pub fn createLibrary(self: Compiler, descriptor: LibraryDescriptor) ?Library {
+        var raw_error: *c.MTLError = undefined;
+        const result = c.MTL4CompilerCreateLibrary(self.ptr, descriptor.ptr, &raw_error);
+        return Library{ .ptr = result };
     }
-    pub fn newComputePipelineState(self: Compiler, descriptor: ComputePipelineDescriptor, error_out: ?*?errors.Error) ?ComputePipelineState {
-        var raw_error: ?*c.MTLError = null;
-        const result = c.MTL4CompilerNewComputePipelineState(self.ptr, descriptor.ptr, if (error_out != null) &raw_error else null);
-        errors.write(error_out, raw_error);
-        return object.wrap(ComputePipelineState, result);
+    pub fn createComputePipelineState(self: Compiler, descriptor: ComputePipelineDescriptor) ?ComputePipelineState {
+        var raw_error: *c.MTLError = undefined;
+        const result = c.MTL4CompilerCreateComputePipelineState(self.ptr, &raw_error, descriptor.ptr);
+        return ComputePipelineState{ .ptr = result };
     }
     pub fn deinit(self: *Compiler) void {
         object.deinit(self.ptr);

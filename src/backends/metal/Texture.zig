@@ -22,11 +22,11 @@ pub const TextureUsagePixelFormatView: TextureUsage = c.MTLTextureUsagePixelForm
 pub const TextureDescriptor = extern struct {
     ptr: *c.MTLTextureDescriptor,
 
-    pub fn create() ?TextureDescriptor {
-        return object.wrap(TextureDescriptor, c.MTLTextureDescriptorCreate());
+    pub fn init() ?TextureDescriptor {
+        return .{ .ptr = c.MTLTextureDescriptorCreate() };
     }
-    pub fn create2D(format: pixel.PixelFormat, width: usize, height: usize, mipmapped: bool) ?TextureDescriptor {
-        return object.wrap(TextureDescriptor, c.MTLTextureDescriptorCreate2D(format, width, height, mipmapped));
+    pub fn init2D(format: pixel.PixelFormat, width: usize, height: usize, mipmapped: bool) ?TextureDescriptor {
+        return .{ .ptr = c.MTLTextureDescriptorCreate2D(format, width, height, mipmapped) };
     }
     pub fn setTextureType(self: TextureDescriptor, texture_type: TextureType) void {
         c.MTLTextureDescriptorSetTextureType(self.ptr, texture_type);

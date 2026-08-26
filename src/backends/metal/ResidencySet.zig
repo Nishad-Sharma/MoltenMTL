@@ -7,8 +7,8 @@ const AccelerationStructure = @import("AccelerationStructure.zig").AccelerationS
 
 pub const ResidencySetDescriptor = extern struct {
     ptr: *c.MTLResidencySetDescriptor,
-    pub fn create() ?ResidencySetDescriptor {
-        return object.wrap(ResidencySetDescriptor, c.MTLResidencySetDescriptorCreate());
+    pub fn init() ?ResidencySetDescriptor {
+        return .{ .ptr = c.MTLResidencySetDescriptorCreate() };
     }
     pub fn setInitialCapacity(self: ResidencySetDescriptor, capacity: usize) void {
         c.MTLResidencySetDescriptorSetInitialCapacity(self.ptr, capacity);
