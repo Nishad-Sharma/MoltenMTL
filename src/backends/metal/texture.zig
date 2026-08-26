@@ -1,8 +1,8 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const pixel = @import("PixelFormat.zig");
-const resource = @import("Resource.zig");
-const types = @import("Types.zig");
+const pixel = @import("pixel_format.zig");
+const resource = @import("resource.zig");
+const types = @import("types.zig");
 
 pub const TextureType = c.MTLTextureType;
 pub const TextureUsage = c.MTLTextureUsage;

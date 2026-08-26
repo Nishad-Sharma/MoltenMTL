@@ -1,9 +1,9 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const types = @import("Types.zig");
+const types = @import("types.zig");
 const Buffer = @import("Buffer.zig").Buffer;
-const Texture = @import("Texture.zig").Texture;
-const AccelerationStructure = @import("AccelerationStructure.zig").AccelerationStructure;
+const Texture = @import("texture.zig").Texture;
+const AccelerationStructure = @import("acceleration_structure.zig").AccelerationStructure;
 
 pub const ArgumentTableDescriptor = extern struct {
     ptr: *c.MTL4ArgumentTableDescriptor,

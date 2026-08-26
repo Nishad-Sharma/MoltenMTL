@@ -1,6 +1,6 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const Texture = @import("Texture.zig").Texture;
+const Texture = @import("texture.zig").Texture;
 
 pub const Drawable = extern struct {
     ptr: *c.MTLDrawable,

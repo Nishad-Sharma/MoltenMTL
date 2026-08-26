@@ -1,16 +1,16 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const metal_error = @import("Error.zig");
-const resource = @import("Resource.zig");
+const errors = @import("Error.zig");
+const resource = @import("resource.zig");
 const Buffer = @import("Buffer.zig").Buffer;
-const texture = @import("Texture.zig");
+const texture = @import("texture.zig");
 const CommandAllocator = @import("CommandAllocator.zig").CommandAllocator;
 const CommandBuffer = @import("CommandBuffer.zig").CommandBuffer;
 const CommandQueue = @import("CommandQueue.zig").CommandQueue;
 const compiler = @import("Compiler.zig");
-const arguments = @import("ArgumentTable.zig");
-const acceleration = @import("AccelerationStructure.zig");
-const residency = @import("ResidencySet.zig");
+const arguments = @import("argument_table.zig");
+const acceleration = @import("acceleration_structure.zig");
+const residency = @import("residency_set.zig");
 const SharedEvent = @import("Event.zig").SharedEvent;
 
 pub fn createSystemDefaultDevice() ?Device {
@@ -54,7 +54,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateCompiler(self.ptr, descriptor.ptr, &raw_error);
         if (raw_error) |ptr| {
-            return metal_error.fromMetalError(ptr);
+            return errors.fromMTLError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
@@ -66,7 +66,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateArgumentTable(self.ptr, @ptrCast(descriptor.ptr), &raw_error);
         if (raw_error) |ptr| {
-            return metal_error.fromMetalError(ptr);
+            return errors.fromMTLError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };
@@ -82,7 +82,7 @@ pub const Device = extern struct {
         var raw_error: ?*c.NSError = null;
         const result = c.MTLDeviceCreateResidencySet(self.ptr, descriptor.ptr, &raw_error);
         if (raw_error) |ptr| {
-            return metal_error.fromMetalError(ptr);
+            return errors.fromMTLError(ptr);
         }
         const ptr = result orelse return error.InvalidArgument;
         return .{ .ptr = ptr };

@@ -1,9 +1,9 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const Resource = @import("Resource.zig");
+const Resource = @import("resource.zig");
 const Buffer = @import("Buffer.zig").Buffer;
-const Texture = @import("Texture.zig").Texture;
-const AccelerationStructure = @import("AccelerationStructure.zig").AccelerationStructure;
+const Texture = @import("texture.zig").Texture;
+const AccelerationStructure = @import("acceleration_structure.zig").AccelerationStructure;
 
 pub const ResidencySetDescriptor = extern struct {
     ptr: *c.MTLResidencySetDescriptor,

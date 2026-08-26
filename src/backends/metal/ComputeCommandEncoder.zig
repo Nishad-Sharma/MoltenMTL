@@ -1,12 +1,12 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const types = @import("Types.zig");
+const types = @import("types.zig");
 const Buffer = @import("Buffer.zig").Buffer;
-const Texture = @import("Texture.zig").Texture;
-const arguments = @import("ArgumentTable.zig");
-const pipeline = @import("ComputePipeline.zig");
-const AccelerationStructure = @import("AccelerationStructure.zig").AccelerationStructure;
-const AccelerationStructureDescriptor = @import("AccelerationStructure.zig").AccelerationStructureDescriptor;
+const Texture = @import("texture.zig").Texture;
+const arguments = @import("argument_table.zig");
+const pipeline = @import("compute_pipeline.zig");
+const AccelerationStructure = @import("acceleration_structure.zig").AccelerationStructure;
+const AccelerationStructureDescriptor = @import("acceleration_structure.zig").AccelerationStructureDescriptor;
 const command = @import("CommandEncoder.zig");
 
 pub const ComputeCommandEncoder = extern struct {

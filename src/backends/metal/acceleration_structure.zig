@@ -1,7 +1,7 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const resource = @import("Resource.zig");
-const types = @import("Types.zig");
+const resource = @import("resource.zig");
+const types = @import("types.zig");
 
 pub const AccelerationStructureUsage = c.MTLAccelerationStructureUsage;
 pub const AccelerationStructureInstanceDescriptorType = c.MTLAccelerationStructureInstanceDescriptorType;

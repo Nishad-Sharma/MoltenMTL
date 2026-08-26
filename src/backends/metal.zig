@@ -3,23 +3,23 @@
 //! Wrapper types live beside their matching metal-c/metal-cpp header family in
 //! `Metal/` and `QuartzCore/`. This file preserves the flat `@import("metal")` API.
 
-const types = @import("metal/Types.zig");
+const types = @import("metal/types.zig");
 const errors = @import("metal/Error.zig");
-const resources = @import("metal/Resource.zig");
+const resources = @import("metal/resource.zig");
 const buffers = @import("metal/Buffer.zig");
-const pixels = @import("metal/PixelFormat.zig");
-const textures = @import("metal/Texture.zig");
+const pixels = @import("metal/pixel_format.zig");
+const textures = @import("metal/texture.zig");
 const events = @import("metal/Event.zig");
 const drawables = @import("metal/Drawable.zig");
-const residency = @import("metal/ResidencySet.zig");
-const as = @import("metal/AccelerationStructure.zig");
-const arguments = @import("metal/ArgumentTable.zig");
+const residency = @import("metal/residency_set.zig");
+const as = @import("metal/acceleration_structure.zig");
+const arguments = @import("metal/argument_table.zig");
 const compiler = @import("metal/Compiler.zig");
 const libraries = @import("metal/Library.zig");
 const library_descriptors = @import("metal/LibraryDescriptor.zig");
 const function_descriptors = @import("metal/LibraryFunctionDescriptor.zig");
-const compute_descriptors = @import("metal/ComputePipeline.zig");
-const compute_pipelines = @import("metal/ComputePipeline.zig");
+const compute_descriptors = @import("metal/compute_pipeline.zig");
+const compute_pipelines = @import("metal/compute_pipeline.zig");
 const command_allocators = @import("metal/CommandAllocator.zig");
 const command_buffers = @import("metal/CommandBuffer.zig");
 const command_queues = @import("metal/CommandQueue.zig");

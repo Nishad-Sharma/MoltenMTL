@@ -2,7 +2,7 @@ const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const CommandAllocator = @import("CommandAllocator.zig").CommandAllocator;
 const ComputeCommandEncoder = @import("ComputeCommandEncoder.zig").ComputeCommandEncoder;
-const ResidencySet = @import("ResidencySet.zig").ResidencySet;
+const ResidencySet = @import("residency_set.zig").ResidencySet;
 
 pub const CommandBuffer = extern struct {
     ptr: *c.MTL4CommandBuffer,

@@ -38,7 +38,6 @@ pub const AttributeFormatFloat2 = backend.AttributeFormatFloat2;
 pub const AttributeFormatFloat3 = backend.AttributeFormatFloat3;
 pub const AttributeFormatFloat4 = backend.AttributeFormatFloat4;
 
-pub const AutoreleasePool = backend.AutoreleasePool;
 pub const Error = backend.Error;
 pub const ResourceOptions = backend.ResourceOptions;
 pub const Resource = backend.Resource;

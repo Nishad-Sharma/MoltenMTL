@@ -1,6 +1,6 @@
 const c = @import("c.zig").c;
 const object = @import("Object.zig");
-const types = @import("Types.zig");
+const types = @import("types.zig");
 
 pub const VisibilityOptions = c.MTL4VisibilityOptions;
 pub const VisibilityOptionNone: VisibilityOptions = c.MTL4VisibilityOptionNone;

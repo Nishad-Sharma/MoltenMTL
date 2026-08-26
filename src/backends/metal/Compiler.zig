@@ -3,8 +3,8 @@ const object = @import("Object.zig");
 const errors = @import("Error.zig");
 const Library = @import("Library.zig").Library;
 const LibraryDescriptor = @import("LibraryDescriptor.zig").LibraryDescriptor;
-const ComputePipelineDescriptor = @import("ComputePipeline.zig").ComputePipelineDescriptor;
-const ComputePipelineState = @import("ComputePipeline.zig").ComputePipelineState;
+const ComputePipelineDescriptor = @import("compute_pipeline.zig").ComputePipelineDescriptor;
+const ComputePipelineState = @import("compute_pipeline.zig").ComputePipelineState;
 
 pub const CompilerDescriptor = extern struct {
     ptr: *c.MTL4CompilerDescriptor,

@@ -2,7 +2,7 @@ const c = @import("c.zig").c;
 const object = @import("Object.zig");
 const Device = @import("Device.zig").Device;
 const Drawable = @import("Drawable.zig").Drawable;
-const PixelFormat = @import("PixelFormat.zig").PixelFormat;
+const PixelFormat = @import("pixel_format.zig").PixelFormat;
 
 pub const SwapChain = extern struct {
     ptr: *c.CAMetalLayer,
