@@ -207,6 +207,26 @@ pub const Manifest = struct {
             .unclassified => return error.UnauditedDeclaration,
         };
 
+        std.log.info(
+            "{s}: {d} declarations ({d} generated, {d} manual, {d} excluded, {d} rejected)",
+            .{ self.framework, self.entries.items.len, generated, manual, excluded, rejected },
+        );
+        if (rejected != 0) {
+            // Rejected means a selected declaration the generator cannot represent
+            // safely. Parity requires this to reach zero, so name every one.
+            std.log.warn(
+                "{s}: {d} selected declarations are rejected",
+                .{ self.framework, rejected },
+            );
+            for (self.entries.items) |entry| {
+                if (entry.status != .rejected) continue;
+                std.log.warn(
+                    "  rejected {s} {s}: {s}",
+                    .{ @tagName(entry.kind), entry.name, entry.reason },
+                );
+            }
+        }
+
         const Output = struct {
             framework: []const u8,
             counts: struct {
