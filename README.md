@@ -1,28 +1,41 @@
 # Slag
 
-Zig graphics API that abstracts over Vulkan and Metal4.
+A Zig graphics API intended to abstract over Vulkan and Metal 4.
 
-## metal-c
+## Current state
 
-An Apple-only C wrapper over Apple's metal-cpp headers. The public headers mirror
-metal-cpp's `Metal/` layout and expose the Metal 4 path needed for compute-based
-inline ray tracing:
+The repository currently contains only `mach-objc`: a generator that produces
+Zig bindings to the Objective-C APIs the RHI needs — Metal, MetalFX, and the
+narrow QuartzCore and AppKit surface required to host and present a Metal
+layer. The earlier `metal-c` C++ shim over Apple's metal-cpp headers has been
+removed; the RHI will be rebuilt directly on the generated Objective-C
+bindings.
 
-- Metal 4 command allocators, command buffers, queues, compute encoders, barriers,
-  argument tables, shader compilation, and compute pipelines
-- buffers, textures, shared events, and residency sets
-- triangle BLAS and instance TLAS construction/refit for inline ray queries
-- `CAMetalLayer` drawables for presentation
+See `PLANS.md` for the robustness plan and its phase order.
 
-Standard Metal APIs are wrapped only where Metal 4 continues to use them, such as
-resources, pipeline state objects, acceleration-structure storage, events, and
-drawables. Include `<Metal/Metal.h>` and `<QuartzCore/CAMetalLayer.h>`.
+## mach-objc
 
-The library targets macOS 26 and newer and builds as `metal-c` with Zig:
+Xcode's Objective-C headers are the sole authority for signatures, ABI, enum
+values, record layouts, nullability, ownership, availability, and block
+signatures. The generator reads Clang's Objective-C AST and fails generation
+rather than guessing.
+
+- Target is `aarch64-macos` only, deployment floor macOS 26.0.
+- Generated bindings are a raw Objective-C layer: plain Zig pointers following
+  Cocoa ownership conventions, with no ownership wrappers in the type system.
+- Every declaration in the inventoried surface is classified in a checked-in
+  manifest as `generated`, `manual`, `excluded`, or `rejected`, so coverage and
+  known gaps are reviewable.
+
+Build and test:
 
 ```sh
-zig build
+cd mach-objc
+zig build test          # ABI fixture, runtime, generator and Metal 4 tests
+./verify.sh             # regenerate, test, and fail on any checked-in diff
+zig build run-raytraced-triangle
 ```
 
-Every returned object follows Metal retain/release ownership. Release it with
-`NSRelease`; use `NSAutoreleasePoolCreate` on threads that call Metal APIs.
+Objects returned by the bindings follow Cocoa retain/release ownership. Release
+them explicitly, and use `objc.AutoreleasePool.init()`/`deinit()` on threads
+that call into Metal.
