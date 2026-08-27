@@ -122,7 +122,7 @@ current `rejected` list on its own.
   MetalFX (12) and QuartzCore (4) are properties, and every one resolves to a
   declared accessor under the implemented matcher.
 
-### 5. Reachability and the selected surface — P0, M — **implemented, pending verification**
+### 5. Reachability and the selected surface — P0, M — **done**
 
 Moved ahead of record generation: it gives record generation a defined scope and
 an acceptance criterion, and it is the cheaper of the two.
@@ -166,8 +166,11 @@ that catches a dependency forgotten when adding an API, and it proves the rest
 of `excluded` unreachable. Structs that cross the API boundary inside a buffer
 must still be named in the selection list by hand.
 
-- Acceptance: the closure runs clean or names precisely what is missing, and
-  every framework reports its explicit/transitive split.
+- Acceptance met. Once the walk followed bindings instead of declarations,
+  QuartzCore went from 123 rejected to 0 and MetalFX to 0, leaving Metal with 13
+  block typedefs — precisely what was missing, and the first slice of Phase 6.
+  Reported split: Metal 705 explicit + 40 transitive, MetalFX 28 + 0,
+  QuartzCore 5 + 0.
 
 ### 6. Records and generated layout verification — P0, L
 
@@ -193,6 +196,12 @@ must still be named in the selection list by hand.
   variants, `MTLPackedFloat3`, `MTLPackedFloat4x3`, `MTLComponentTransform`,
   `MTLAxisAlignedBoundingBox`, and the `MTLDraw*IndirectArguments` and
   `MTLDispatchThreadsIndirectArguments` family.
+- **Done:** emit block typedefs. Objective-C names its completion handlers, but
+  the generator expanded them inline at each use, leaving the typedef with no
+  Zig declaration — usable API, nothing a caller could spell, and the 13 unbound
+  declarations Phase 5 reported. Every block typedef an emitted method uses now
+  gets a `pub const` alias. Only typedefs collected during generation are
+  aliased, so an alias can never name a type that was not bound.
 - Acceptance: zero bound structs whose layout is asserted by hand.
 
 ### 7. ABI type fidelity and nullability — P0, M
