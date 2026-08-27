@@ -2063,6 +2063,10 @@ fn Generator(comptime WriterType: type) type {
                     return;
                 }
             }
+            if (unsupportedBlockReason(method)) |reason| {
+                try self.manifest.markIfPresent(.method, manifest_name, .rejected, reason);
+                return;
+            }
 
             // Class 'type methods' and 'self methods' can have naming conflicts, e.g. NSCursor pop()
             // which takes a self parameter and NSCursor pop() which is a type method. We prefix the
@@ -2177,6 +2181,43 @@ fn Generator(comptime WriterType: type) type {
                 try self.writer.print("{s}_", .{param.name});
             }
             try self.writer.writeAll("}");
+        }
+
+        /// Why this method's block parameters cannot be bound, if they cannot.
+        ///
+        /// The bindings support exactly the shape the selected surface uses: an
+        /// escaping handler returning void. A block that returns a value, or that
+        /// takes another block, has no representation here that anything has
+        /// tested, and emitting one regardless would put an unexercised ABI on a
+        /// caller's critical path, where the failure is silent memory corruption
+        /// rather than a compile error.
+        fn unsupportedBlockReason(method: Method) ?[]const u8 {
+            for (method.params.items) |param| {
+                const function = getBlockType(param) orelse continue;
+
+                switch (function.return_type.*) {
+                    .void => {},
+                    else => return "block parameter returns a value; only void-returning handlers are supported",
+                }
+
+                for (function.params.items) |block_param| {
+                    const nested = switch (block_param) {
+                        .function => true,
+                        .name => |name| if (registry.typedefs.get(name)) |underlying|
+                            switch (underlying) {
+                                .function => true,
+                                else => false,
+                            }
+                        else
+                            false,
+                        else => false,
+                    };
+                    if (nested) {
+                        return "block parameter takes another block; nested blocks are not supported";
+                    }
+                }
+            }
+            return null;
         }
 
         fn getBlockType(param: Param) ?Type.Function {

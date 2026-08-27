@@ -241,7 +241,7 @@ must still be named in the selection list by hand.
 - Treat nested pointers as optional rather than resolving inner nullability
   precisely.
 
-### 8. Completion-handler blocks — P1, M
+### 8. Completion-handler blocks — P1, M — **implemented, pending verification**
 
 The block machinery in `src/system.zig` is already largely built: `Block`,
 `BlockLiteral`, trivial and copy/dispose descriptors, `_Block_copy` and
@@ -260,9 +260,12 @@ void (^)(id result, NSError *error)
 - **Reject any other block signature at generation time** with a specific
   reason. Not implementing return-value blocks, by-value struct arguments, or
   `noescape` variants removes a whole class of ABI risk rather than testing it.
-- Test what is supported: copy and dispose callbacks, captured Objective-C
-  retain/release balance, invocation from a non-creating thread, and nullable
-  handler arguments.
+- **Done:** test what is supported. `tests/objc_blocks.zig` covers global-block
+  invocation through the C ABI, a stack block reaching its captured context,
+  copy and dispose firing when a stack block is copied to the heap and released,
+  invocation from a thread that did not create the block, and a null argument on
+  the failure path. The ABI was hand-rolled and had no test at all, while every
+  asynchronous Metal entry point crosses it.
 - Keep block fixes in the in-tree runtime; do not add a second block library.
 
 ### 9. Ownership by method family — P1, S

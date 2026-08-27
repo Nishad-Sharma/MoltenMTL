@@ -90,6 +90,17 @@ pub fn build(b: *std.Build) void {
     const run_generator_tests = b.addRunArtifact(generator_tests);
     test_step.dependOn(&run_generator_tests.step);
 
+    const block_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/objc_blocks.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    block_tests.root_module.addImport("mach-objc", module);
+    const run_block_tests = b.addRunArtifact(block_tests);
+    test_step.dependOn(&run_block_tests.step);
+
     const raytrace_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("tests/metal4_raytrace.zig"),
