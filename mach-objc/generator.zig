@@ -1344,6 +1344,9 @@ fn Generator(comptime WriterType: type) type {
         enums: EnumList,
         containers: ContainerList,
         selectors: SelectorHashSet,
+        /// Block typedefs referenced by an emitted method, collected during
+        /// generation so that only aliases whose types were bound get emitted.
+        block_typedefs: SelectorHashSet,
         namespace: []const u8,
         allow_methods: []const [2][]const u8,
 
@@ -1359,6 +1362,7 @@ fn Generator(comptime WriterType: type) type {
                 .enums = EnumList.init(allocator),
                 .containers = ContainerList.init(allocator),
                 .selectors = SelectorHashSet.init(allocator),
+                .block_typedefs = SelectorHashSet.init(allocator),
                 .namespace = undefined,
                 .allow_methods = undefined,
             };
@@ -1368,6 +1372,7 @@ fn Generator(comptime WriterType: type) type {
             self.enums.deinit();
             self.containers.deinit();
             self.selectors.deinit();
+            self.block_typedefs.deinit();
         }
 
         pub fn addProtocol(self: *Self, name: []const u8) !void {
@@ -1665,6 +1670,50 @@ fn Generator(comptime WriterType: type) type {
         pub fn generate(self: *Self) !void {
             try self.generateEnumerations();
             try self.generateContainers();
+            try self.generateBlockTypedefs();
+        }
+
+        /// Emit a named alias for every block typedef an emitted method uses.
+        ///
+        /// Objective-C names its completion handlers — `MTLNewLibraryCompletionHandler`
+        /// and the rest — but the generator expands them inline at each use, which
+        /// leaves the typedef itself with no Zig declaration: usable API, but
+        /// nothing a caller can spell, and an unbound declaration in the manifest.
+        ///
+        /// Only typedefs collected during generation are aliased, so an alias can
+        /// never reference a type that was not bound. The alias includes the
+        /// pointer because the Objective-C typedef names the block pointer type,
+        /// and it is the same Zig type as the expanded form, so callers can use
+        /// either spelling interchangeably.
+        fn generateBlockTypedefs(self: *Self) !void {
+            var names: std.ArrayList([]const u8) = .empty;
+            defer names.deinit(self.allocator);
+            var iterator = self.block_typedefs.keyIterator();
+            while (iterator.next()) |name| try names.append(self.allocator, name.*);
+            std.sort.insertion([]const u8, names.items, {}, stringLessThan);
+
+            for (names.items) |name| {
+                const function = switch (registry.typedefs.get(name) orelse continue) {
+                    .function => |f| f,
+                    else => continue,
+                };
+                try self.writer.writeAll("\npub const ");
+                try self.generateTypeName(name);
+                try self.writer.writeAll(" = *ns.Block(fn (");
+                for (function.params.items, 0..) |param_ty, i| {
+                    if (i > 0) try self.writer.writeAll(", ");
+                    try self.generateType(param_ty);
+                }
+                try self.writer.writeAll(") ");
+                try self.generateType(function.return_type.*);
+                try self.writer.writeAll(");\n");
+                try self.manifest.markIfPresent(
+                    .typedef,
+                    name,
+                    .generated,
+                    "generated Objective-C block type alias",
+                );
+            }
         }
 
         fn generateEnumerations(self: *Self) !void {
@@ -1971,6 +2020,12 @@ fn Generator(comptime WriterType: type) type {
 
         fn generateMethodParam(self: *Self, param: Param) !void {
             if (getBlockType(param)) |f| {
+                // Remember the named typedef so an alias can be emitted for it.
+                // A block written inline in the signature has no name to alias.
+                switch (param.ty) {
+                    .name => |name| try self.block_typedefs.put(name, {}),
+                    else => {},
+                }
                 try self.writer.print("{s}_: *ns.Block(fn (", .{param.name});
                 var first = true;
                 for (f.params.items) |param_ty| {
