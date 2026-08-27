@@ -51,18 +51,17 @@ field-offset assertions derived from Clang, then layout fidelity is a property
 of the generator rather than of a human transcribing constants, and the size of
 the bound surface stops being a risk to manage.
 
-What the manifest currently shows:
+What the manifest showed when this plan was written, and where each item stands:
 
 - **No struct is generated.** All 42 Metal record entries are unbound. Every
   struct the bindings expose is hand-written in `src/metal.zig` — 23 of them,
   which the manifest detects as `manual` typedefs. Only 6 carry a `@sizeOf`
   assertion, and none assert alignment or field offsets.
-- **All 30 `rejected` entries are a single bug.** Every one is a boolean
-  property with a `getter=isFoo` attribute: `rasterizationEnabled`, `headless`,
-  `lowPower`, `framebufferOnly`, `blendingEnabled`, `active`, `used`. The getter
-  is generated correctly — `isRasterizationEnabled` is in the output. Only the
-  property-to-accessor match fails, because property status is resolved by
-  looking up a *method of the same name*.
+- **All 46 `rejected` entries were a single bug** — resolved in Phase 4. Every
+  one was a boolean property whose getter had been generated correctly all
+  along; property status was resolved by looking up a *method of the same name*,
+  which can never match `isHeadless`. Metal 30, MetalFX 12 and QuartzCore 4 now
+  all report zero rejected, with generated Zig byte-identical.
 - **The real gaps hide in `excluded`.**
   `MTLAccelerationStructureInstanceDescriptor`, `MTLPackedFloat3`,
   `MTLPackedFloat4x3`, `MTLComponentTransform`, and the three indirect-draw
@@ -70,6 +69,12 @@ What the manifest currently shows:
   surface" — indistinguishable from genuinely irrelevant API, because
   reachability is never computed. Instance acceleration structures and indirect
   draws are RHI blockers, not out-of-scope API.
+
+Phase 5 turned up a caveat on that last point: computing reachability is what
+makes `excluded` trustworthy, but it does not find these particular types,
+because none of them appears in a signature — they reach Metal inside buffer
+contents. Phase 5 makes the rest of `excluded` safe to ignore; Phase 6 has to
+name these explicitly.
 
 Phases 4 and 5 change no generated Zig at all; their diffs are confined to
 `.manifest.json`. Phase 6 is the first that rewrites `metal.zig`. Keeping that
@@ -117,23 +122,43 @@ current `rejected` list on its own.
   MetalFX (12) and QuartzCore (4) are properties, and every one resolves to a
   declared accessor under the implemented matcher.
 
-### 5. Reachability and the selected surface — P0, M
+### 5. Reachability and the selected surface — P0, M — **implemented, pending verification**
 
 Moved ahead of record generation: it gives record generation a defined scope and
 an acceptance criterion, and it is the cheaper of the two.
 
 - Compute the transitive Objective-C type closure of the explicit selection
   list, so selecting a declaration also selects every type reachable from its
-  public signature — records, typedefs, enums, protocols, blocks, superclasses,
-  and Foundation/CoreGraphics types. The existing `registry.Type` already
-  carries pointer, generic and function shapes to walk.
+  public signature — superclasses, adopted protocols, parameter and return
+  types, property types, and whatever those resolve to through typedefs.
+- Stop the walk at names this framework's inventory does not own. Foundation
+  types are bound by hand in `src/foundation.zig`, and walking through them
+  would manufacture reachability that says nothing about this framework.
+- Treat reachability as satisfied by name, not by kind. Metal declares
+  `@class MTL4BinaryFunction` beside a protocol of the same name and binds only
+  the protocol; the unused sibling is not a gap.
 - Record provenance per declaration as `explicit`, `transitive_dependency`, or
   `sdk_only`.
-- Fail generation on any declaration reachable from the explicit list that is
-  neither generated nor audited. This is the point of the phase: `excluded` must
-  become trustworthy as "genuinely not needed".
-- Acceptance: the RHI-critical types currently sitting in `excluded` are
-  reclassified as reachable, and the generator says so loudly.
+- Classify a reachable declaration that is neither generated nor manually bound
+  as `rejected` rather than `excluded`, so `excluded` becomes trustworthy as
+  "genuinely not needed" and the rejected list stays the work queue.
+
+**Correction to this phase's original acceptance criterion.** It was written
+expecting the closure to reclassify the RHI-critical types sitting in
+`excluded`. It will not, and the reason matters: reachability is a property of
+the *type graph*, and those types appear in no signature.
+`MTLAccelerationStructureInstanceDescriptor` and the indirect-draw argument
+structs are filled in by the caller and copied into a buffer — no Metal method
+takes one, and searching the generated and manual Metal sources finds no
+reference to any of them.
+
+The closure is therefore necessary but not sufficient. It is the standing guard
+that catches a dependency forgotten when adding an API, and it proves the rest
+of `excluded` unreachable. Structs that cross the API boundary inside a buffer
+must still be named in the selection list by hand.
+
+- Acceptance: the closure runs clean or names precisely what is missing, and
+  every framework reports its explicit/transitive split.
 
 ### 6. Records and generated layout verification — P0, L
 
@@ -150,7 +175,15 @@ an acceptance criterion, and it is the cheaper of the two.
   entries.
 - Generate exported C functions and constants, or record an audited reason for
   each that is not generated.
-- Scope is whatever Phase 5 proves reachable — not all 42 record entries.
+- Scope is whatever Phase 5 proves reachable, plus the buffer-only structs named
+  below — not all 42 record entries.
+- Add the buffer-only structs to the explicit selection list. They cross the API
+  boundary inside `MTLBuffer` contents rather than in a signature, so Phase 5's
+  closure cannot discover them: at minimum
+  `MTLAccelerationStructureInstanceDescriptor` with its motion and user-ID
+  variants, `MTLPackedFloat3`, `MTLPackedFloat4x3`, `MTLComponentTransform`,
+  `MTLAxisAlignedBoundingBox`, and the `MTLDraw*IndirectArguments` and
+  `MTLDispatchThreadsIndirectArguments` family.
 - Acceptance: zero bound structs whose layout is asserted by hand.
 
 ### 7. ABI type fidelity and nullability — P0, M
