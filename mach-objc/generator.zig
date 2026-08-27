@@ -1347,6 +1347,9 @@ fn Generator(comptime WriterType: type) type {
         /// Block typedefs referenced by an emitted method, collected during
         /// generation so that only aliases whose types were bound get emitted.
         block_typedefs: SelectorHashSet,
+        /// Clang's layout for each hand-written record, used to assert that the
+        /// hand-written Zig declaration still matches the SDK.
+        record_layouts: []const RecordLayout,
         namespace: []const u8,
         allow_methods: []const [2][]const u8,
 
@@ -1363,6 +1366,7 @@ fn Generator(comptime WriterType: type) type {
                 .containers = ContainerList.init(allocator),
                 .selectors = SelectorHashSet.init(allocator),
                 .block_typedefs = SelectorHashSet.init(allocator),
+                .record_layouts = &.{},
                 .namespace = undefined,
                 .allow_methods = undefined,
             };
@@ -1671,6 +1675,45 @@ fn Generator(comptime WriterType: type) type {
             try self.generateEnumerations();
             try self.generateContainers();
             try self.generateBlockTypedefs();
+            try self.generateRecordLayoutAssertions();
+        }
+
+        /// Assert every hand-written record's layout against Clang's.
+        ///
+        /// These structs are still declared by hand, so nothing but a check keeps
+        /// them honest, and the failure mode is quiet: swapping two same-sized
+        /// fields changes neither size nor alignment, and every call that passes
+        /// one then reads the wrong member. Size alone would not catch it, which
+        /// is why each field offset is asserted individually.
+        ///
+        /// The numbers come from Clang's own record layout dump rather than from
+        /// a person reading a header, which is the whole point — a hand-written
+        /// assertion of a hand-written layout proves nothing.
+        fn generateRecordLayoutAssertions(self: *Self) !void {
+            for (self.record_layouts) |layout| {
+                // Only this framework's own records: another framework's are
+                // declared in its output or in the shared hand-written modules,
+                // and are not in scope here.
+                if (!std.mem.eql(u8, getNamespace(layout.name), self.namespace)) continue;
+
+                try self.writer.print("\n// {s}\ncomptime {{\n", .{layout.name});
+                try self.writer.writeAll("    std.debug.assert(@sizeOf(");
+                try self.generateTypeName(layout.name);
+                try self.writer.print(") == {d});\n", .{layout.size});
+                try self.writer.writeAll("    std.debug.assert(@alignOf(");
+                try self.generateTypeName(layout.name);
+                try self.writer.print(") == {d});\n", .{layout.alignment});
+                for (layout.fields) |field| {
+                    try self.writer.writeAll("    std.debug.assert(@offsetOf(");
+                    try self.generateTypeName(layout.name);
+                    try self.writer.print(", \"{s}\") == {d});\n", .{ field.name, field.offset });
+                }
+                try self.writer.writeAll("}\n");
+
+                const reason = "manually maintained record; size, alignment and field offsets verified against Clang";
+                try self.manifest.markIfPresent(.typedef, layout.name, .manual, reason);
+                try self.manifest.markIfPresent(.record, layout.name, .manual, reason);
+            }
         }
 
         /// Emit a named alias for every block typedef an emitted method uses.
@@ -3360,6 +3403,196 @@ fn generateUIKit(generator: anytype) !void {
     try generator.addProtocol("NSObject");
 }
 
+const FieldLayout = struct {
+    name: []const u8,
+    /// Byte offset from the start of the record.
+    offset: u64,
+};
+
+const RecordLayout = struct {
+    name: []const u8,
+    size: u64,
+    alignment: u64,
+    fields: []const FieldLayout,
+};
+
+fn parseLabelledInteger(text: []const u8, label: []const u8) !u64 {
+    const start = std.mem.indexOf(u8, text, label) orelse return error.MalformedRecordLayout;
+    var index = start + label.len;
+    const begin = index;
+    while (index < text.len and std.ascii.isDigit(text[index])) index += 1;
+    if (index == begin) return error.MalformedRecordLayout;
+    return std.fmt.parseInt(u64, text[begin..index], 10);
+}
+
+fn lastToken(text: []const u8) ?[]const u8 {
+    const trimmed = std.mem.trim(u8, text, " ");
+    if (trimmed.len == 0) return null;
+    const space = std.mem.lastIndexOfScalar(u8, trimmed, ' ') orelse return trimmed;
+    return trimmed[space + 1 ..];
+}
+
+/// Parse the output of `clang -Xclang -fdump-record-layouts`.
+///
+/// Each record arrives as a block:
+///
+///     *** Dumping AST Record Layout
+///              0 | MTLOrigin
+///              0 |   NSUInteger x
+///              8 |   NSUInteger y
+///                | [sizeof=24, align=8]
+///
+/// Indentation after the `|` gives nesting depth. The record sits at depth 0 and
+/// its own fields at depth 1; deeper lines expand the interior of a nested
+/// record and are skipped, since a nested field's position is already accounted
+/// for by the field that contains it.
+///
+/// The lazy dump is used rather than `-fdump-record-layouts-complete` because it
+/// names each record by the typedef the probe referenced it through. The
+/// complete dump prints `struct (unnamed at file:line:col)` for the anonymous
+/// structs that most Metal types are declared as, which would then have to be
+/// joined back to their typedefs by source location.
+fn parseRecordLayouts(arena: std.mem.Allocator, text: []const u8) ![]const RecordLayout {
+    var layouts = std.array_list.Managed(RecordLayout).init(arena);
+    var fields = std.array_list.Managed(FieldLayout).init(arena);
+    var name: ?[]const u8 = null;
+
+    var lines = std.mem.splitScalar(u8, text, '\n');
+    while (lines.next()) |raw_line| {
+        const line = std.mem.trimEnd(u8, raw_line, "\r");
+        if (std.mem.indexOf(u8, line, "*** Dumping AST Record Layout") != null) {
+            name = null;
+            fields.clearRetainingCapacity();
+            continue;
+        }
+
+        const bar = std.mem.indexOfScalar(u8, line, '|') orelse continue;
+        const rest = line[bar + 1 ..];
+        var indent: usize = 0;
+        while (indent < rest.len and rest[indent] == ' ') indent += 1;
+        const body = rest[indent..];
+        if (body.len == 0) continue;
+
+        if (std.mem.startsWith(u8, body, "[sizeof=")) {
+            const record_name = name orelse continue;
+            try layouts.append(.{
+                .name = record_name,
+                .size = try parseLabelledInteger(body, "sizeof="),
+                .alignment = try parseLabelledInteger(body, ", align="),
+                .fields = try arena.dupe(FieldLayout, fields.items),
+            });
+            name = null;
+            fields.clearRetainingCapacity();
+            continue;
+        }
+
+        const offset_text = std.mem.trim(u8, line[0..bar], " ");
+        // Bitfields are dumped as `0:0-2`. Nothing in the selected surface uses
+        // them, and guessing at a Zig representation for one would be exactly the
+        // silent mistake these assertions exist to prevent.
+        if (std.mem.indexOfScalar(u8, offset_text, ':') != null) {
+            return error.UnsupportedBitfieldLayout;
+        }
+        const offset = std.fmt.parseInt(u64, offset_text, 10) catch continue;
+
+        const depth = if (indent == 0) 0 else (indent - 1) / 2;
+        if (depth == 0) {
+            name = body;
+        } else if (depth == 1) {
+            try fields.append(.{
+                .name = lastToken(body) orelse continue,
+                .offset = offset,
+            });
+        }
+    }
+
+    return try layouts.toOwnedSlice();
+}
+
+/// Does a manual source declare `objc_name` as a hand-written `extern struct`?
+fn manualDeclaresExternStruct(
+    sources: []const coverage.ManualSource,
+    objc_name: []const u8,
+) bool {
+    const zig_name = trimNamespace(objc_name);
+    for (sources) |source| {
+        var lines = std.mem.splitScalar(u8, source.content, '\n');
+        while (lines.next()) |line| {
+            const trimmed = std.mem.trimStart(u8, line, " \t");
+            if (!std.mem.startsWith(u8, trimmed, "pub const ")) continue;
+            const rest = trimmed["pub const ".len..];
+            if (!std.mem.startsWith(u8, rest, zig_name)) continue;
+            const declaration = std.mem.trimStart(u8, rest[zig_name.len..], " ");
+            if (std.mem.startsWith(u8, declaration, "= extern struct")) return true;
+        }
+    }
+    return false;
+}
+
+/// Records this framework binds by hand, in declaration-name order.
+fn handWrittenRecordNames(
+    arena: std.mem.Allocator,
+    manifest: *const coverage.Manifest,
+    sources: []const coverage.ManualSource,
+    namespace: []const u8,
+) ![]const []const u8 {
+    var names: std.ArrayList([]const u8) = .empty;
+    var seen = std.StringHashMap(void).init(arena);
+    for (manifest.entries.items) |entry| {
+        if (entry.kind != .typedef and entry.kind != .record) continue;
+        if (!std.mem.eql(u8, getNamespace(entry.name), namespace)) continue;
+        if (!manualDeclaresExternStruct(sources, entry.name)) continue;
+        if ((try seen.getOrPut(entry.name)).found_existing) continue;
+        try names.append(arena, entry.name);
+    }
+    std.sort.insertion([]const u8, names.items, {}, stringLessThan);
+    return try names.toOwnedSlice(arena);
+}
+
+/// Ask Clang for the layout of each named record.
+///
+/// The probe references every record through its typedef so that the layout dump
+/// prints it under that name.
+fn probeRecordLayouts(
+    arena: std.mem.Allocator,
+    io: std.Io,
+    spec: FrameworkSpec,
+    dirs: SdkDirs,
+    header_content: []const u8,
+    names: []const []const u8,
+) ![]const RecordLayout {
+    if (names.len == 0) return &.{};
+
+    var probe: std.ArrayList(u8) = .empty;
+    try probe.appendSlice(arena, header_content);
+    for (names) |name| {
+        try probe.appendSlice(arena, "_Static_assert(sizeof(");
+        try probe.appendSlice(arena, name);
+        try probe.appendSlice(arena, ") > 0, \"\");\n");
+    }
+
+    const probe_path = ".zig-cache/tmp_record_layouts.m";
+    try std.Io.Dir.writeFile(.cwd(), io, .{ .sub_path = probe_path, .data = probe.items });
+    defer std.Io.Dir.deleteFile(.cwd(), io, probe_path) catch {};
+
+    var argv: std.ArrayList([]const u8) = .empty;
+    try argv.appendSlice(arena, &.{
+        "clang",
+        probe_path,
+        "-Xclang",
+        "-fdump-record-layouts",
+        "-fsyntax-only",
+        "-Wno-deprecated-declarations",
+        "-isysroot",
+        dirs.macos_sdk_root,
+        "-F",
+        dirs.macos_frameworks_dir,
+    });
+    for (spec.extra_clang_args) |arg| try argv.append(arena, arg);
+
+    return parseRecordLayouts(arena, try runCommand(arena, io, argv.items));
+}
+
 const FrameworkSpec = struct {
     name: []const u8,
     tag: Framework,
@@ -3536,6 +3769,14 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     defer atomic_output.deinit(io);
     try atomic_output.file.writeStreamingAll(io, manual_content);
 
+    const manual_sources = [_]coverage.ManualSource{
+        .{ .path = spec.manual_path, .content = manual_content },
+        .{ .path = "src/foundation.zig", .content = foundation_content },
+        .{ .path = "src/core_foundation.zig", .content = core_foundation_content },
+        .{ .path = "src/core_graphics.zig", .content = core_graphics_content },
+        .{ .path = "src/system.zig", .content = system_content },
+    };
+
     var file_buf: [4096]u8 = undefined;
     var file_writer = atomic_output.file.writerStreaming(io, &file_buf);
     var generator = Generator(std.Io.Writer).init(allocator, &file_writer.interface, &manifest);
@@ -3547,18 +3788,30 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
         .quartz_core => try generateQuartzCore(&generator),
         .app_kit => try generateAppKit(&generator),
     }
+    // Ask Clang for the layout of every record this framework binds by hand.
+    // Runs after the selection list is set, so that `generator.namespace` is
+    // known, and before generation, which emits the assertions.
+    var layout_arena = std.heap.ArenaAllocator.init(allocator);
+    defer layout_arena.deinit();
+    generator.record_layouts = try probeRecordLayouts(
+        layout_arena.allocator(),
+        io,
+        spec,
+        dirs,
+        header_content,
+        try handWrittenRecordNames(
+            layout_arena.allocator(),
+            &manifest,
+            &manual_sources,
+            generator.namespace,
+        ),
+    );
+
     try generator.generate();
     try generator.markSelectedClosure();
     try file_writer.flush();
 
     if (spec.manifest_path) |manifest_path| {
-        const manual_sources = [_]coverage.ManualSource{
-            .{ .path = spec.manual_path, .content = manual_content },
-            .{ .path = "src/foundation.zig", .content = foundation_content },
-            .{ .path = "src/core_foundation.zig", .content = core_foundation_content },
-            .{ .path = "src/core_graphics.zig", .content = core_graphics_content },
-            .{ .path = "src/system.zig", .content = system_content },
-        };
         try manifest.finalize(&manual_sources);
         try manifest.write(io, manifest_path);
     }
@@ -3789,6 +4042,82 @@ fn findPropertyAccessors(
     }
 
     return try found.toOwnedSlice();
+}
+
+test "clang record layouts parse into sizes, alignments and field offsets" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    const dump =
+        \\
+        \\*** Dumping AST Record Layout
+        \\         0 | MTLOrigin
+        \\         0 |   NSUInteger x
+        \\         8 |   NSUInteger y
+        \\        16 |   NSUInteger z
+        \\           | [sizeof=24, align=8]
+        \\
+        \\*** Dumping AST Record Layout
+        \\         0 | MTLRegion
+        \\         0 |   MTLOrigin origin
+        \\         0 |     NSUInteger x
+        \\         8 |     NSUInteger y
+        \\        24 |   MTLSize size
+        \\        24 |     NSUInteger width
+        \\           | [sizeof=48, align=8]
+    ;
+
+    const layouts = try parseRecordLayouts(arena.allocator(), dump);
+    try std.testing.expectEqual(@as(usize, 2), layouts.len);
+
+    try std.testing.expectEqualStrings("MTLOrigin", layouts[0].name);
+    try std.testing.expectEqual(@as(u64, 24), layouts[0].size);
+    try std.testing.expectEqual(@as(u64, 8), layouts[0].alignment);
+    try std.testing.expectEqual(@as(usize, 3), layouts[0].fields.len);
+    try std.testing.expectEqualStrings("z", layouts[0].fields[2].name);
+    try std.testing.expectEqual(@as(u64, 16), layouts[0].fields[2].offset);
+
+    // A nested record contributes one field, not its expanded interior.
+    try std.testing.expectEqualStrings("MTLRegion", layouts[1].name);
+    try std.testing.expectEqual(@as(usize, 2), layouts[1].fields.len);
+    try std.testing.expectEqualStrings("origin", layouts[1].fields[0].name);
+    try std.testing.expectEqualStrings("size", layouts[1].fields[1].name);
+    try std.testing.expectEqual(@as(u64, 24), layouts[1].fields[1].offset);
+}
+
+test "bitfield record layouts are rejected rather than guessed" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    const dump =
+        \\*** Dumping AST Record Layout
+        \\         0 | struct B
+        \\     0:0-2 |   int a
+        \\           | [sizeof=4, align=4]
+    ;
+
+    try std.testing.expectError(
+        error.UnsupportedBitfieldLayout,
+        parseRecordLayouts(arena.allocator(), dump),
+    );
+}
+
+test "hand-written records are detected by their extern struct declaration" {
+    const source =
+        \\pub const OriginExtra = extern struct {};
+        \\pub const Origin = extern struct {
+        \\    x: ns.UInteger,
+        \\};
+        \\pub const Coordinate2D = SamplePosition;
+    ;
+    const sources = [_]coverage.ManualSource{.{ .path = "src/metal.zig", .content = source }};
+
+    try std.testing.expect(manualDeclaresExternStruct(&sources, "MTLOrigin"));
+    try std.testing.expect(manualDeclaresExternStruct(&sources, "MTLOriginExtra"));
+    // An alias to another record is not itself a record declaration.
+    try std.testing.expect(!manualDeclaresExternStruct(&sources, "MTLCoordinate2D"));
+    // Nor is a name that merely appears on the right-hand side.
+    try std.testing.expect(!manualDeclaresExternStruct(&sources, "MTLSamplePosition"));
 }
 
 test "boolean accessor matching tolerates plurals and acronym casing" {
