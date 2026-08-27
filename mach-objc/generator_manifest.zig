@@ -16,6 +16,7 @@ pub const Status = enum {
     unclassified,
     generated,
     manual,
+    excluded,
     rejected,
 };
 
@@ -123,6 +124,9 @@ pub const Manifest = struct {
     }
 
     pub fn finalize(self: *Self, manual_sources: []const ManualSource) !void {
+        // Manual declarations are part of the selected binding surface even when
+        // they are not emitted by the generator, so classify them before deciding
+        // whether the remaining SDK declarations are excluded or rejected.
         for (self.entries.items) |*entry| {
             if (entry.status != .unclassified) continue;
 
@@ -135,9 +139,46 @@ pub const Manifest = struct {
                 );
                 continue;
             }
+        }
 
-            entry.status = .rejected;
-            entry.reason = try self.arena.allocator().dupe(u8, rejectionReason(entry.kind));
+        // Phase 3 inventories SDK declarations without assuming that every
+        // declaration is selected. Any top-level declaration left unclassified
+        // after generation and manual-source auditing is therefore excluded.
+        // Phase 4's scope inventory will explicitly select additional entries;
+        // selected entries that cannot be represented must be marked rejected.
+        for (self.entries.items) |*entry| {
+            if (entry.status != .unclassified) continue;
+            switch (entry.kind) {
+                .enum_decl, .function, .record, .variable, .typedef, .interface, .protocol => {
+                    entry.status = .excluded;
+                    entry.reason = try self.arena.allocator().dupe(
+                        u8,
+                        exclusionReason(entry.kind),
+                    );
+                },
+                .method, .property => {},
+            }
+        }
+
+        // Members follow their owning container. Members of an excluded SDK
+        // container are outside the selected surface; an unclassified member of
+        // a generated container was selected but not represented safely.
+        for (self.entries.items) |*entry| {
+            if (entry.status != .unclassified) continue;
+            const owner_status = self.memberOwnerStatus(entry.name);
+            if (owner_status == .generated or owner_status == .rejected) {
+                entry.status = .rejected;
+                entry.reason = try self.arena.allocator().dupe(
+                    u8,
+                    rejectionReason(entry.kind),
+                );
+            } else {
+                entry.status = .excluded;
+                entry.reason = try self.arena.allocator().dupe(
+                    u8,
+                    "owning Objective-C container is outside the selected binding surface",
+                );
+            }
         }
 
         for (self.entries.items) |entry| {
@@ -156,10 +197,12 @@ pub const Manifest = struct {
     pub fn write(self: *Self, io: std.Io, path: []const u8) !void {
         var generated: usize = 0;
         var manual: usize = 0;
+        var excluded: usize = 0;
         var rejected: usize = 0;
         for (self.entries.items) |entry| switch (entry.status) {
             .generated => generated += 1,
             .manual => manual += 1,
+            .excluded => excluded += 1,
             .rejected => rejected += 1,
             .unclassified => return error.UnauditedDeclaration,
         };
@@ -170,6 +213,7 @@ pub const Manifest = struct {
                 total: usize,
                 generated: usize,
                 manual: usize,
+                excluded: usize,
                 rejected: usize,
             },
             declarations: []const Entry,
@@ -180,6 +224,7 @@ pub const Manifest = struct {
                 .total = self.entries.items.len,
                 .generated = generated,
                 .manual = manual,
+                .excluded = excluded,
                 .rejected = rejected,
             },
             .declarations = self.entries.items,
@@ -246,12 +291,38 @@ pub const Manifest = struct {
             .record => "record generation is not implemented; declaration explicitly rejected",
             .variable => "exported variable generation is not implemented; declaration explicitly rejected",
             .typedef => "typedef is not emitted or manually audited; declaration explicitly rejected",
-            .enum_decl => "enum is outside the selected generated set; declaration explicitly rejected",
-            .interface => "interface is outside the selected generated set; declaration explicitly rejected",
-            .protocol => "protocol is outside the selected generated set; declaration explicitly rejected",
-            .method => "method is outside the selected generated method set; declaration explicitly rejected",
-            .property => "property is not represented by a selected generated accessor; declaration explicitly rejected",
+            .enum_decl => "selected enum is not represented safely; declaration explicitly rejected",
+            .interface => "selected interface is not represented safely; declaration explicitly rejected",
+            .protocol => "selected protocol is not represented safely; declaration explicitly rejected",
+            .method => "selected method is not represented by a generated wrapper; declaration explicitly rejected",
+            .property => "selected property is not represented by generated accessors; declaration explicitly rejected",
         };
+    }
+
+    fn exclusionReason(kind: DeclarationKind) []const u8 {
+        return switch (kind) {
+            .enum_decl => "valid SDK enum outside the selected binding surface",
+            .function => "valid SDK function outside the selected binding surface",
+            .record => "valid SDK record outside the selected binding surface",
+            .variable => "valid SDK variable outside the selected binding surface",
+            .typedef => "valid SDK typedef outside the selected binding surface",
+            .interface => "valid SDK interface outside the selected binding surface",
+            .protocol => "valid SDK protocol outside the selected binding surface",
+            .method, .property => unreachable,
+        };
+    }
+
+    fn memberOwnerStatus(self: *const Self, member_name: []const u8) Status {
+        const separator = std.mem.indexOfScalar(u8, member_name, '.') orelse return .unclassified;
+        const owner = member_name[0..separator];
+        for (self.entries.items) |entry| {
+            if ((entry.kind == .interface or entry.kind == .protocol) and
+                std.mem.eql(u8, entry.name, owner))
+            {
+                return entry.status;
+            }
+        }
+        return .unclassified;
     }
 
     fn entryLessThan(_: void, lhs: Entry, rhs: Entry) bool {
@@ -278,6 +349,30 @@ test "manual classification requires an active declaration" {
     }};
     try manifest.finalize(&sources);
 
-    try std.testing.expectEqual(.rejected, manifest.statusOf(.function, "MTLCopyAllDevices").?);
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.function, "MTLCopyAllDevices").?);
     try std.testing.expectEqual(.manual, manifest.statusOf(.record, "MTLOrigin").?);
+}
+
+test "valid SDK declarations outside the selected surface are excluded" {
+    var manifest = Manifest.init(std.testing.allocator, "QuartzCore");
+    defer manifest.deinit();
+
+    _ = try manifest.add(.interface, "CAAnimation", "CAAnimation.h");
+    _ = try manifest.add(.method, "CAAnimation.animation", "CAAnimation.h");
+    _ = try manifest.add(.property, "CAAnimation.delegate", "CAAnimation.h");
+    _ = try manifest.add(.interface, "CALayer", "CALayer.h");
+    _ = try manifest.add(.method, "CALayer.unrepresented", "CALayer.h");
+    try manifest.mark(
+        .interface,
+        "CALayer",
+        .generated,
+        "generated Objective-C class wrapper",
+    );
+
+    try manifest.finalize(&.{});
+
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.interface, "CAAnimation").?);
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.method, "CAAnimation.animation").?);
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.property, "CAAnimation.delegate").?);
+    try std.testing.expectEqual(.rejected, manifest.statusOf(.method, "CALayer.unrepresented").?);
 }

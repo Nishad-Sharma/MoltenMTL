@@ -1575,13 +1575,28 @@ fn Generator(comptime WriterType: type) type {
                 );
                 defer self.allocator.free(property_name);
                 const method_status = self.manifest.statusOf(.method, property_name);
-                if (method_status == .generated) {
-                    try self.manifest.markIfPresent(
-                        .property,
-                        property_name,
-                        .generated,
-                        "represented by generated Objective-C accessor methods",
-                    );
+                if (method_status) |status| {
+                    switch (status) {
+                        .generated => try self.manifest.markIfPresent(
+                            .property,
+                            property_name,
+                            .generated,
+                            "represented by generated Objective-C accessor methods",
+                        ),
+                        .excluded => try self.manifest.markIfPresent(
+                            .property,
+                            property_name,
+                            .excluded,
+                            "Objective-C property accessors are outside the selected binding surface",
+                        ),
+                        .rejected => try self.manifest.markIfPresent(
+                            .property,
+                            property_name,
+                            .rejected,
+                            "selected Objective-C property accessors are not represented safely",
+                        ),
+                        .unclassified, .manual => {},
+                    }
                 }
             }
 
@@ -1622,7 +1637,7 @@ fn Generator(comptime WriterType: type) type {
                 try self.manifest.markIfPresent(
                     .method,
                     manifest_name,
-                    .rejected,
+                    .excluded,
                     "method excluded by the audited framework method allowlist",
                 );
                 return;
@@ -1632,7 +1647,7 @@ fn Generator(comptime WriterType: type) type {
                     try self.manifest.markIfPresent(
                         .method,
                         manifest_name,
-                        .rejected,
+                        .excluded,
                         "duplicate inherited method omitted from this wrapper",
                     );
                     return;

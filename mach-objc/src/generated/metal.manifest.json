@@ -4,7 +4,8 @@
     "total": 4696,
     "generated": 4181,
     "manual": 359,
-    "rejected": 156
+    "excluded": 126,
+    "rejected": 30
   },
   "declarations": [
     {
@@ -2279,8 +2280,8 @@
       "name": "MTL4BufferRangeMake",
       "kind": "function",
       "header": "MTL4BufferRange.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTL4BufferRange",
@@ -2944,29 +2945,29 @@
       "name": "(anonymous:129)",
       "kind": "record",
       "header": "MTL4CommandQueue.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:177)",
       "kind": "record",
       "header": "MTL4CommandQueue.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:198)",
       "kind": "record",
       "header": "MTL4CommandQueue.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:95)",
       "kind": "record",
       "header": "MTL4CommandQueue.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTL4CommandQueueError",
@@ -3007,8 +3008,8 @@
       "name": "MTL4CommandQueueErrorDomain",
       "kind": "variable",
       "header": "MTL4CommandQueue.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTL4CommitFeedback.GPUEndTime",
@@ -3063,8 +3064,8 @@
       "name": "MTL4CommitFeedbackHandler",
       "kind": "typedef",
       "header": "MTL4CommitFeedback.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTL4BinaryFunctionDescriptor",
@@ -3455,15 +3456,15 @@
       "name": "MTL4NewBinaryFunctionCompletionHandler",
       "kind": "typedef",
       "header": "MTL4Compiler.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTL4NewMachineLearningPipelineStateCompletionHandler",
       "kind": "typedef",
       "header": "MTL4Compiler.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTL4CompilerTaskStatus",
@@ -4141,8 +4142,8 @@
       "name": "(anonymous:18)",
       "kind": "record",
       "header": "MTL4Counters.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTL4CounterHeapType",
@@ -4309,8 +4310,8 @@
       "name": "MTL4BinaryFunction",
       "kind": "interface",
       "header": "MTL4LinkingDescriptor.h",
-      "status": "rejected",
-      "reason": "interface is outside the selected generated set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK interface outside the selected binding surface"
     },
     {
       "name": "MTL4PipelineStageDynamicLinkingDescriptor",
@@ -4337,8 +4338,8 @@
       "name": "MTLDynamicLibrary",
       "kind": "interface",
       "header": "MTL4LinkingDescriptor.h",
-      "status": "rejected",
-      "reason": "interface is outside the selected generated set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK interface outside the selected binding surface"
     },
     {
       "name": "MTL4PipelineStageDynamicLinkingDescriptor.binaryLinkedFunctions",
@@ -4603,7 +4604,7 @@
       "name": "MTL4MachineLearningPipelineDescriptor.label",
       "kind": "method",
       "header": "MTL4MachineLearningPipeline.h",
-      "status": "rejected",
+      "status": "excluded",
       "reason": "duplicate inherited method omitted from this wrapper"
     },
     {
@@ -4638,7 +4639,7 @@
       "name": "MTL4MachineLearningPipelineDescriptor.setLabel:",
       "kind": "method",
       "header": "MTL4MachineLearningPipeline.h",
-      "status": "rejected",
+      "status": "excluded",
       "reason": "duplicate inherited method omitted from this wrapper"
     },
     {
@@ -4687,8 +4688,8 @@
       "name": "MTL4MachineLearningPipelineDescriptor.label",
       "kind": "property",
       "header": "MTL4MachineLearningPipeline.h",
-      "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "Objective-C property accessors are outside the selected binding surface"
     },
     {
       "name": "MTL4MachineLearningPipelineDescriptor.machineLearningFunctionDescriptor",
@@ -5234,7 +5235,7 @@
       "kind": "property",
       "header": "MTL4MeshRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTL4MeshRenderPipelineDescriptor.requiredThreadsPerMeshThreadgroup",
@@ -6858,7 +6859,7 @@
       "kind": "property",
       "header": "MTL4RenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTL4RenderPipelineDescriptor.supportFragmentBinaryLinking",
@@ -9671,43 +9672,43 @@
       "name": "(anonymous:762)",
       "kind": "record",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:789)",
       "kind": "record",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:849)",
       "kind": "record",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:912)",
       "kind": "record",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:945)",
       "kind": "record",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLAccelerationStructureInstanceDescriptor",
       "kind": "typedef",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLAccelerationStructureInstanceDescriptorType",
@@ -9727,8 +9728,8 @@
       "name": "MTLAccelerationStructureMotionInstanceDescriptor",
       "kind": "typedef",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLAccelerationStructureRefitOptions",
@@ -9748,8 +9749,8 @@
       "name": "MTLAccelerationStructureUserIDInstanceDescriptor",
       "kind": "typedef",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLCurveBasis",
@@ -9776,15 +9777,15 @@
       "name": "MTLIndirectAccelerationStructureInstanceDescriptor",
       "kind": "typedef",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLIndirectAccelerationStructureMotionInstanceDescriptor",
       "kind": "typedef",
       "header": "MTLAccelerationStructure.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLMatrixLayout",
@@ -10035,85 +10036,85 @@
       "name": "MTLPackedFloat3Make",
       "kind": "function",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLPackedFloatQuaternionMake",
       "kind": "function",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "(anonymous:196)",
       "kind": "record",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLPackedFloatQuaternion",
       "kind": "record",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "_MTLAxisAlignedBoundingBox",
       "kind": "record",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "_MTLPackedFloat3",
       "kind": "record",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "_MTLPackedFloat4x3",
       "kind": "record",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLAxisAlignedBoundingBox",
       "kind": "typedef",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLComponentTransform",
       "kind": "typedef",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLPackedFloat3",
       "kind": "typedef",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLPackedFloat4x3",
       "kind": "typedef",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLPackedFloatQuaternion",
       "kind": "typedef",
       "header": "MTLAccelerationStructureTypes.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLAllocation.allocatedSize",
@@ -10750,7 +10751,7 @@
       "kind": "property",
       "header": "MTLArgument.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLArgument.arrayLength",
@@ -10890,7 +10891,7 @@
       "kind": "property",
       "header": "MTLArgument.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLBinding.index",
@@ -10918,7 +10919,7 @@
       "kind": "property",
       "header": "MTLArgument.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLBufferBinding.bufferAlignment",
@@ -11100,7 +11101,7 @@
       "kind": "property",
       "header": "MTLArgument.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLTextureBinding.textureDataType",
@@ -11211,8 +11212,8 @@
       "name": "MTLArgumentAccess",
       "kind": "typedef",
       "header": "MTLArgument.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLArgumentType",
@@ -11554,8 +11555,8 @@
       "name": "MTLAttributeStrideStatic",
       "kind": "variable",
       "header": "MTLArgumentEncoder.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLBinaryArchiveError",
@@ -11715,8 +11716,8 @@
       "name": "MTLBinaryArchiveDomain",
       "kind": "variable",
       "header": "MTLBinaryArchive.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLBlitOption",
@@ -12261,7 +12262,7 @@
       "name": "MTLCaptureManager.init",
       "kind": "method",
       "header": "MTLCaptureManager.h",
-      "status": "rejected",
+      "status": "excluded",
       "reason": "duplicate inherited method omitted from this wrapper"
     },
     {
@@ -12422,8 +12423,8 @@
       "name": "MTLCaptureErrorDomain",
       "kind": "variable",
       "header": "MTLCaptureManager.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLCaptureScope.beginScope",
@@ -13192,8 +13193,8 @@
       "name": "MTLCommandBufferHandler",
       "kind": "typedef",
       "header": "MTLCommandBuffer.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLCommandBufferStatus",
@@ -13220,15 +13221,15 @@
       "name": "MTLCommandBufferEncoderInfoErrorKey",
       "kind": "variable",
       "header": "MTLCommandBuffer.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLCommandBufferErrorDomain",
       "kind": "variable",
       "header": "MTLCommandBuffer.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLBarrierScope",
@@ -13871,22 +13872,22 @@
       "name": "(anonymous:27)",
       "kind": "record",
       "header": "MTLComputeCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:31)",
       "kind": "record",
       "header": "MTLComputeCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:36)",
       "kind": "record",
       "header": "MTLComputeCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLDispatchThreadgroupsIndirectArguments",
@@ -13899,8 +13900,8 @@
       "name": "MTLDispatchThreadsIndirectArguments",
       "kind": "typedef",
       "header": "MTLComputeCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLStageInRegionIndirectArguments",
@@ -14851,22 +14852,22 @@
       "name": "(anonymous:73)",
       "kind": "record",
       "header": "MTLCounters.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:78)",
       "kind": "record",
       "header": "MTLCounters.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:88)",
       "kind": "record",
       "header": "MTLCounters.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLCommonCounter",
@@ -15279,7 +15280,7 @@
       "kind": "property",
       "header": "MTLDepthStencil.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDepthStencilDescriptor.frontFaceStencil",
@@ -15453,15 +15454,15 @@
       "name": "MTLCopyAllDevices",
       "kind": "function",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLCopyAllDevicesWithObserver",
       "kind": "function",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLCreateSystemDefaultDevice",
@@ -15474,8 +15475,8 @@
       "name": "MTLRemoveDeviceObserver",
       "kind": "function",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTL4ArgumentTableDescriptor",
@@ -16889,7 +16890,7 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.counterSets",
@@ -16910,7 +16911,7 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.hasUnifiedMemory",
@@ -16924,7 +16925,7 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.location",
@@ -16945,7 +16946,7 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.maxArgumentBufferSamplerCount",
@@ -17022,14 +17023,14 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.rasterOrderGroupsSupported",
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.readWriteTextureSupport",
@@ -17057,7 +17058,7 @@
       "kind": "property",
       "header": "MTLDevice.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLDevice.shouldMaximizeConcurrentCompilation",
@@ -17448,15 +17449,15 @@
       "name": "(anonymous:317)",
       "kind": "record",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:380)",
       "kind": "record",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLAccelerationStructureSizes",
@@ -17497,8 +17498,8 @@
       "name": "MTLDeviceNotificationHandler",
       "kind": "typedef",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLDeviceNotificationName",
@@ -17567,8 +17568,8 @@
       "name": "MTLDeviceErrorDomain",
       "kind": "variable",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLDeviceRemovalRequestedNotification",
@@ -17595,57 +17596,57 @@
       "name": "NSProcessInfo.hasPerformanceProfile:",
       "kind": "method",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "method is outside the selected generated method set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "owning Objective-C container is outside the selected binding surface"
     },
     {
       "name": "NSProcessInfo.isDeviceCertifiedFor:",
       "kind": "method",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "method is outside the selected generated method set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "owning Objective-C container is outside the selected binding surface"
     },
     {
       "name": "NSDeviceCertification",
       "kind": "typedef",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "NSProcessPerformanceProfile",
       "kind": "typedef",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "NSDeviceCertificationiPhonePerformanceGaming",
       "kind": "variable",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "NSProcessInfoPerformanceProfileDidChangeNotification",
       "kind": "variable",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "NSProcessPerformanceProfileDefault",
       "kind": "variable",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "NSProcessPerformanceProfileSustained",
       "kind": "variable",
       "header": "MTLDeviceCertification.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLDrawable.addPresentedHandler:",
@@ -17714,8 +17715,8 @@
       "name": "MTLDrawablePresentedHandler",
       "kind": "typedef",
       "header": "MTLDrawable.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLDynamicLibraryError",
@@ -17798,8 +17799,8 @@
       "name": "MTLDynamicLibraryDomain",
       "kind": "variable",
       "header": "MTLDynamicLibrary.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLSharedEventHandle",
@@ -17889,7 +17890,7 @@
       "name": "MTLSharedEventListener.init",
       "kind": "method",
       "header": "MTLEvent.h",
-      "status": "rejected",
+      "status": "excluded",
       "reason": "duplicate inherited method omitted from this wrapper"
     },
     {
@@ -17959,8 +17960,8 @@
       "name": "MTLSharedEventNotificationBlock",
       "kind": "typedef",
       "header": "MTLEvent.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLFence.device",
@@ -19338,8 +19339,8 @@
       "name": "MTLIOCommandBufferHandler",
       "kind": "typedef",
       "header": "MTLIOCommandBuffer.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLIOStatus",
@@ -19632,8 +19633,8 @@
       "name": "MTLIOErrorDomain",
       "kind": "variable",
       "header": "MTLIOCommandQueue.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLIOCompressionStatus",
@@ -19646,36 +19647,36 @@
       "name": "MTLIOCompressionContextAppendData",
       "kind": "function",
       "header": "MTLIOCompressor.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLIOCompressionContextDefaultChunkSize",
       "kind": "function",
       "header": "MTLIOCompressor.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLIOCreateCompressionContext",
       "kind": "function",
       "header": "MTLIOCompressor.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLIOFlushAndDestroyCompressionContext",
       "kind": "function",
       "header": "MTLIOCompressor.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLIOCompressionContext",
       "kind": "typedef",
       "header": "MTLIOCompressor.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLIOCompressionStatus",
@@ -19695,8 +19696,8 @@
       "name": "MTLIndirectCommandBufferExecutionRangeMake",
       "kind": "function",
       "header": "MTLIndirectCommandBuffer.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLIndirectCommandBufferDescriptor",
@@ -20164,15 +20165,15 @@
       "name": "(anonymous:36)",
       "kind": "record",
       "header": "MTLIndirectCommandBuffer.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLIndirectCommandBufferExecutionRange",
       "kind": "typedef",
       "header": "MTLIndirectCommandBuffer.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLIndirectCommandType",
@@ -20563,15 +20564,15 @@
       "name": "(anonymous:17)",
       "kind": "record",
       "header": "MTLIntersectionFunctionTable.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLIntersectionFunctionBufferArguments",
       "kind": "typedef",
       "header": "MTLIntersectionFunctionTable.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLIntersectionFunctionSignature",
@@ -21236,7 +21237,7 @@
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLAttribute.attributeIndex",
@@ -21264,14 +21265,14 @@
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLAttribute.patchData",
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLCompileOptions.allowReferencingUndefinedSymbols",
@@ -21530,7 +21531,7 @@
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLVertexAttribute.attributeIndex",
@@ -21558,14 +21559,14 @@
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLVertexAttribute.patchData",
       "kind": "property",
       "header": "MTLLibrary.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLArgumentEncoder",
@@ -21697,43 +21698,43 @@
       "name": "MTLNewComputePipelineStateCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLNewComputePipelineStateWithReflectionCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLNewDynamicLibraryCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLNewLibraryCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLNewRenderPipelineStateCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLNewRenderPipelineStateWithReflectionCompletionHandler",
       "kind": "typedef",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLPatchType",
@@ -21746,8 +21747,8 @@
       "name": "MTLLibraryErrorDomain",
       "kind": "variable",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLLinkedFunctions",
@@ -21949,8 +21950,8 @@
       "name": "MTLLogStateErrorDomain",
       "kind": "variable",
       "header": "MTLLogState.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLParallelRenderCommandEncoder.renderCommandEncoder",
@@ -22173,7 +22174,7 @@
       "name": "MTLRasterizationRateLayerDescriptor.init",
       "kind": "method",
       "header": "MTLRasterizationRate.h",
-      "status": "rejected",
+      "status": "excluded",
       "reason": "duplicate inherited method omitted from this wrapper"
     },
     {
@@ -23552,57 +23553,57 @@
       "name": "(anonymous:100)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:106)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:44)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:48)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:73)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:80)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:88)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:93)",
       "kind": "record",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLCullMode",
@@ -23622,22 +23623,22 @@
       "name": "MTLDrawIndexedPrimitivesIndirectArguments",
       "kind": "typedef",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLDrawPatchIndirectArguments",
       "kind": "typedef",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLDrawPrimitivesIndirectArguments",
       "kind": "typedef",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLPrimitiveType",
@@ -23650,8 +23651,8 @@
       "name": "MTLQuadTessellationFactorsHalf",
       "kind": "typedef",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLRenderStages",
@@ -23678,8 +23679,8 @@
       "name": "MTLTriangleTessellationFactorsHalf",
       "kind": "typedef",
       "header": "MTLRenderCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLVertexAmplificationViewMapping",
@@ -23755,8 +23756,8 @@
       "name": "MTLClearColorMake",
       "kind": "function",
       "header": "MTLRenderPass.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLRenderPassAttachmentDescriptor",
@@ -24658,8 +24659,8 @@
       "name": "(anonymous:12)",
       "kind": "record",
       "header": "MTLRenderPass.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLClearColor",
@@ -26367,14 +26368,14 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.alphaToOneEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.binaryArchives",
@@ -26528,7 +26529,7 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.requiredThreadsPerMeshThreadgroup",
@@ -26577,7 +26578,7 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLRenderPipelineColorAttachmentDescriptor.destinationAlphaBlendFactor",
@@ -26633,14 +26634,14 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLRenderPipelineDescriptor.alphaToOneEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLRenderPipelineDescriptor.binaryArchives",
@@ -26745,7 +26746,7 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLRenderPipelineDescriptor.sampleCount",
@@ -26808,7 +26809,7 @@
       "kind": "property",
       "header": "MTLRenderPipeline.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLRenderPipelineDescriptor.tessellationFactorStepFunction",
@@ -27801,15 +27802,15 @@
       "name": "(anonymous:38)",
       "kind": "record",
       "header": "MTLResourceStateCommandEncoder.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLMapIndirectArguments",
       "kind": "typedef",
       "header": "MTLResourceStateCommandEncoder.h",
-      "status": "rejected",
-      "reason": "typedef is not emitted or manually audited; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK typedef outside the selected binding surface"
     },
     {
       "name": "MTLSparseTextureMappingMode",
@@ -29229,8 +29230,8 @@
       "name": "MTLTensorDomain",
       "kind": "variable",
       "header": "MTLTensor.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLTextureCompressionType",
@@ -29264,8 +29265,8 @@
       "name": "MTLTextureSwizzleChannelsMake",
       "kind": "function",
       "header": "MTLTexture.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLSharedTextureHandle",
@@ -29979,7 +29980,7 @@
       "kind": "property",
       "header": "MTLTexture.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLTexture.gpuResourceID",
@@ -30077,7 +30078,7 @@
       "kind": "property",
       "header": "MTLTexture.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLTexture.sparseTextureTier",
@@ -30286,8 +30287,8 @@
       "name": "(anonymous:47)",
       "kind": "record",
       "header": "MTLTexture.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLTextureCompressionType",
@@ -30356,78 +30357,78 @@
       "name": "MTLCoordinate2DMake",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLOriginMake",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLRegionMake1D",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLRegionMake2D",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLRegionMake3D",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLSamplePositionMake",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "MTLSizeMake",
       "kind": "function",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "top-level C function generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK function outside the selected binding surface"
     },
     {
       "name": "(anonymous:15)",
       "kind": "record",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:29)",
       "kind": "record",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:44)",
       "kind": "record",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "(anonymous:79)",
       "kind": "record",
       "header": "MTLTypes.h",
-      "status": "rejected",
-      "reason": "record generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK record outside the selected binding surface"
     },
     {
       "name": "MTLResourceID",
@@ -30741,8 +30742,8 @@
       "name": "MTLBufferLayoutStrideDynamic",
       "kind": "variable",
       "header": "MTLVertexDescriptor.h",
-      "status": "rejected",
-      "reason": "exported variable generation is not implemented; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK variable outside the selected binding surface"
     },
     {
       "name": "MTLVisibleFunctionTableDescriptor",
@@ -31700,8 +31701,8 @@
       "name": "NSObject",
       "kind": "interface",
       "header": "NSObject.h",
-      "status": "rejected",
-      "reason": "interface is outside the selected generated set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK interface outside the selected binding surface"
     },
     {
       "name": "NSString",
@@ -31714,8 +31715,8 @@
       "name": "NSObject",
       "kind": "protocol",
       "header": "NSObject.h",
-      "status": "rejected",
-      "reason": "protocol is outside the selected generated set; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "valid SDK protocol outside the selected binding surface"
     },
     {
       "name": "NSDictionary",

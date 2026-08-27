@@ -4,6 +4,7 @@
     "total": 547,
     "generated": 533,
     "manual": 2,
+    "excluded": 0,
     "rejected": 12
   },
   "declarations": [
@@ -649,7 +650,7 @@
       "kind": "property",
       "header": "MTLFXFrameInterpolator.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXFrameInterpolatorBase.depthTexture",
@@ -824,7 +825,7 @@
       "kind": "property",
       "header": "MTLFXFrameInterpolator.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXFrameInterpolatorBase.uiTextureFormat",
@@ -2364,7 +2365,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerBase.depthTexture",
@@ -2693,7 +2694,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.colorTextureFormat",
@@ -2707,7 +2708,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureFormat",
@@ -2784,7 +2785,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureFormat",
@@ -2819,7 +2820,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureFormat",
@@ -2833,7 +2834,7 @@
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureFormat",
@@ -3491,7 +3492,7 @@
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalScalerBase.depthTexture",
@@ -3694,7 +3695,7 @@
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.colorTextureFormat",
@@ -3729,7 +3730,7 @@
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.inputHeight",
@@ -3778,7 +3779,7 @@
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
       "status": "rejected",
-      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureFormat",
