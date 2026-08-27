@@ -2136,6 +2136,7 @@ fn generateAppKit(generator: anytype) !void {
         [2][]const u8{ "NSApplication", "sharedApplication" },
         [2][]const u8{ "NSApplication", "delegate" },
         [2][]const u8{ "NSApplication", "setDelegate" },
+        [2][]const u8{ "NSApplication", "finishLaunching" },
         [2][]const u8{ "NSApplication", "run" },
         [2][]const u8{ "NSApplication", "setActivationPolicy" },
         [2][]const u8{ "NSApplication", "activateIgnoringOtherApps" },
@@ -2212,6 +2213,7 @@ fn generateAppKit(generator: anytype) !void {
         [2][]const u8{ "NSView", "setBoundsOrigin" },
         [2][]const u8{ "NSView", "setBoundsSize" },
         [2][]const u8{ "NSView", "window" },
+        [2][]const u8{ "NSView", "bounds" },
         [2][]const u8{ "NSView", "visibleRect" },
         [2][]const u8{ "NSView", "addTrackingArea" },
 
@@ -2380,7 +2382,6 @@ fn generateAppKit(generator: anytype) !void {
 
     // try generator.addEnum("NSRequestUserAttentionType");
     // try generator.addEnum("NSWindowListOptions");
-    try generator.addEnum("NSApplicationActivationPolicy");
     // try generator.addEnum("NSApplicationDelegateReply");
     // try generator.addEnum("NSApplicationPresentationOptions");
     // try generator.addEnum("NSApplicationOcclusionState");
@@ -2736,6 +2737,14 @@ const framework_specs = [_]FrameworkSpec{
         .header_content = .{ .inline_text = "\n#include <QuartzCore/QuartzCore.h>\n" },
         .extra_clang_args = &.{"-Wno-availability"},
     },
+    .{
+        .name = "AppKit",
+        .tag = .app_kit,
+        .manual_path = "src/app_kit.zig",
+        .output_path = "src/generated/app_kit.zig",
+        .header_content = .{ .inline_text = "\n#include <AppKit/AppKit.h>\n" },
+        .extra_clang_args = &.{"-Wno-availability"},
+    },
 };
 
 fn runCommand(allocator: std.mem.Allocator, io: std.Io, argv: []const []const u8) ![]u8 {
@@ -2855,6 +2864,7 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
         .metal => try generateMetal(&generator),
         .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
+        .app_kit => try generateAppKit(&generator),
     }
     try generator.generate();
     try file_writer.flush();
@@ -2872,6 +2882,7 @@ fn generateAllFrameworks(allocator: std.mem.Allocator, io: std.Io, dirs: SdkDirs
         "src/generated/metal.zig",
         "src/generated/metal_fx.zig",
         "src/generated/quartz_core.zig",
+        "src/generated/app_kit.zig",
     });
     allocator.free(fmt_stdout);
 }
@@ -2917,6 +2928,7 @@ fn generateSingleFramework(allocator: std.mem.Allocator, io: std.Io, framework: 
         .metal => try generateMetal(&generator),
         .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
+        .app_kit => try generateAppKit(&generator),
     }
     try generator.generate();
     try stdout_writer.flush();
@@ -2927,7 +2939,7 @@ fn usage() void {
         \\mach-objc-generator [options]
         \\
         \\Options:
-        \\  --framework Metal,MetalFX,QuartzCore  generate a single framework to stdout
+        \\  --framework Metal,MetalFX,QuartzCore,AppKit  generate a single framework to stdout
         \\  --generate-all                         generate all frameworks
         \\  --sdk-root <path>                      path to the macOS SDK
         \\  --frameworks-dir <path>                path to the SDK Frameworks directory
@@ -2940,6 +2952,7 @@ const Framework = enum {
     metal,
     metal_fx,
     quartz_core,
+    app_kit,
 };
 
 pub fn main(init: std.process.Init) anyerror!void {
@@ -2965,6 +2978,7 @@ pub fn main(init: std.process.Init) anyerror!void {
                 if (std.mem.eql(u8, fw_arg, "Metal")) break :blk .metal;
                 if (std.mem.eql(u8, fw_arg, "MetalFX")) break :blk .metal_fx;
                 if (std.mem.eql(u8, fw_arg, "QuartzCore")) break :blk .quartz_core;
+                if (std.mem.eql(u8, fw_arg, "AppKit")) break :blk .app_kit;
                 usage();
                 std.process.exit(1);
             };

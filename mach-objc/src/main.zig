@@ -1,6 +1,7 @@
 const std = @import("std");
 
 pub const objc = @import("objc.zig");
+pub const app_kit = @import("generated/app_kit.zig");
 pub const core_foundation = @import("core_foundation.zig");
 pub const core_graphics = @import("core_graphics.zig");
 pub const foundation = @import("foundation.zig");

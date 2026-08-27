@@ -5,6 +5,7 @@ Generated direct Objective-C bindings for the graphics frameworks shipped with X
 - Metal's complete `MTL*` and `MTL4*` Objective-C interfaces, protocols, methods, and enums
 - MetalFX, including `MTLFX*` and `MTL4FX*`
 - QuartzCore's `CALayer`, `CAMetalLayer`, and `CAMetalDrawable` presentation path
+- the AppKit windowing subset needed for native `NSApplication`, `NSWindow`, and `NSView` hosts
 - the Objective-C and Foundation runtime types required by those APIs
 
 The package deliberately does not generate unrelated Apple frameworks.
@@ -38,5 +39,23 @@ defer device.release();
 const queue = device.newMTL4CommandQueue() orelse return error.Metal4Unavailable;
 defer queue.release();
 ```
+
+## Ray-traced triangle
+
+Run the native AppKit and `CAMetalLayer` example until its window closes:
+
+```sh
+zig build run-raytraced-triangle
+```
+
+Run the bounded three-frame presentation smoke instead:
+
+```sh
+MTL_DEBUG_LAYER=1 zig build smoke-raytraced-triangle
+```
+
+The compute kernel traces one ray per drawable pixel and writes barycentric colour directly to the
+swapchain texture. The Metal 4 queue waits for and signals each drawable around command submission
+before presentation.
 
 This package is derived from [mach-objc](https://code.hexops.org/hexops/mach-objc).
