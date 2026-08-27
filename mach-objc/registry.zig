@@ -17,6 +17,7 @@ pub const Type = union(enum) {
     c_ulonglong,
     name: []const u8,
     pointer: Pointer,
+    array: Array,
     instance_type,
     function: Function,
     generic: Generic,
@@ -25,6 +26,11 @@ pub const Type = union(enum) {
         is_single: bool,
         is_const: bool,
         is_optional: bool,
+        child: *Type,
+    };
+
+    pub const Array = struct {
+        len: u64,
         child: *Type,
     };
 

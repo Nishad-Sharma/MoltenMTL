@@ -550,13 +550,42 @@ pub const Parser = struct {
 
             return self.parsePointerSuffix(base_type, is_const, is_single);
         } else if (self.lookahead.kind == .lbracket) {
-            if (self.reject_unsupported) return error.UnsupportedArrayType;
-            try self.match(.lbracket);
-            if (self.lookahead.kind == .int)
-                try self.match(.int);
-            try self.match(.rbracket);
+            // Dimensions are collected iteratively rather than by recursing into
+            // parseTypeSuffix: a self-recursive call would make this function's
+            // inferred error set depend on itself.
+            var lengths: [8]u64 = undefined;
+            var count: usize = 0;
+            while (self.lookahead.kind == .lbracket) {
+                try self.match(.lbracket);
 
-            return self.parsePointerSuffix(base_type, is_const, is_single);
+                // `T[]` is a decayed parameter in one context and a flexible
+                // array member in another, and the spelling alone cannot say
+                // which. Only the lenient path keeps the old pointer reading.
+                if (self.lookahead.kind != .int) {
+                    if (self.reject_unsupported) return error.UnsupportedArrayType;
+                    try self.match(.rbracket);
+                    return self.parsePointerSuffix(base_type, is_const, is_single);
+                }
+                if (count == lengths.len) return error.UnsupportedArrayType;
+
+                lengths[count] = std.fmt.parseInt(u64, self.lookahead.text, 10) catch
+                    return error.UnsupportedArrayType;
+                count += 1;
+                try self.match(.int);
+                try self.match(.rbracket);
+            }
+
+            // `float[4][3]` is four `float[3]`, so build outwards from the
+            // innermost dimension.
+            var result = base_type;
+            var index = count;
+            while (index > 0) {
+                index -= 1;
+                const child = try self.allocator.create(Type);
+                child.* = result;
+                result = .{ .array = .{ .len = lengths[index], .child = child } };
+            }
+            return result;
         } else if (self.lookahead.kind == .lparen) {
             try self.match(.lparen);
 
@@ -1600,6 +1629,7 @@ fn Generator(comptime WriterType: type) type {
             switch (ty) {
                 .name => |name| try self.markNamedType(name, queue, visited_types),
                 .pointer => |pointer| try self.markTypeClosure(pointer.child.*, queue, visited_types),
+                .array => |array| try self.markTypeClosure(array.child.*, queue, visited_types),
                 .function => |function| {
                     try self.markTypeClosure(function.return_type.*, queue, visited_types);
                     for (function.params.items) |param| {
@@ -2179,6 +2209,10 @@ fn Generator(comptime WriterType: type) type {
                 },
                 .name => |n| {
                     try self.generateTypeName(n);
+                },
+                .array => |a| {
+                    try self.writer.print("[{d}]", .{a.len});
+                    try self.generateType(a.child.*);
                 },
                 .instance_type => {
                     try self.writer.writeAll("@This()");
@@ -4301,8 +4335,29 @@ test "clang getter and setter overrides are captured" {
     try std.testing.expectEqualStrings("setRasterizationEnabled:", property.explicit_setter);
 }
 
+test "fixed size arrays are preserved rather than decayed to pointers" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    var lexer = Lexer{ .source = "float[3]" };
+    var parser = try Parser.init(arena.allocator(), &lexer, true);
+    const ty = try parser.parseType();
+    try std.testing.expectEqual(@as(u64, 3), ty.array.len);
+    try std.testing.expectEqual(@as(u8, 32), ty.array.child.*.float);
+
+    // `float[4][3]` is four `float[3]`, not three `float[4]`.
+    var nested_lexer = Lexer{ .source = "float[4][3]" };
+    var nested_parser = try Parser.init(arena.allocator(), &nested_lexer, true);
+    const nested = try nested_parser.parseType();
+    try std.testing.expectEqual(@as(u64, 4), nested.array.len);
+    try std.testing.expectEqual(@as(u64, 3), nested.array.child.*.array.len);
+    try std.testing.expectEqual(@as(u8, 32), nested.array.child.*.array.child.*.float);
+}
+
 test "strict type parsing rejects representations it cannot preserve" {
-    try expectStrictTypeError("int [4]", error.UnsupportedArrayType);
+    // An unsized array is a decayed parameter in one context and a flexible
+    // array member in another; the spelling cannot distinguish them.
+    try expectStrictTypeError("int []", error.UnsupportedArrayType);
     try expectStrictTypeError("void (*)(void)", error.UnsupportedFunctionPointer);
     try expectStrictTypeError("id<NSCopying, NSObject>", error.UnsupportedGenericObjectType);
 }
