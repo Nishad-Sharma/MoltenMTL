@@ -112,6 +112,13 @@ pub fn build(b: *std.Build) void {
     raytraced_triangle.root_module.addImport("mach-objc", module);
     b.installArtifact(raytraced_triangle);
 
+    // Compile the example as part of `zig build test`. It is the only consumer
+    // of the bindings written the way a caller would write them, and nothing
+    // else here compiles it: a signature change broke it while the test step
+    // stayed green, which makes it documentation that can rot unnoticed.
+    // Running it needs a window server, so this depends on the build only.
+    test_step.dependOn(&raytraced_triangle.step);
+
     const run_raytraced_triangle = b.addRunArtifact(raytraced_triangle);
     if (b.args) |args| run_raytraced_triangle.addArgs(args);
     const run_raytraced_triangle_step = b.step(

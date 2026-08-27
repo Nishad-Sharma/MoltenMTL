@@ -179,7 +179,7 @@ fn run(frame_limit: ?usize) !void {
     geometry.setTriangleCount(1);
     geometry.as(mtl.MTL4AccelerationStructureGeometryDescriptor).setOpaque(true);
 
-    const GeometryArray = ns.Array(*mtl.MTL4AccelerationStructureGeometryDescriptor);
+    const GeometryArray = ns.Array(?*mtl.MTL4AccelerationStructureGeometryDescriptor);
     const geometry_descriptors = objc.msgSend(
         GeometryArray.InternalInfo.class(),
         "arrayWithObject:",
