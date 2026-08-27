@@ -285,14 +285,191 @@ pub const MTL4CopySparseBufferMappingOperation = extern struct {
     destinationOffset: ns.UInteger,
 };
 
-comptime {
-    std.debug.assert(@sizeOf(MTL4BufferRange) == 16);
-    std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
-    std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
-    std.debug.assert(@sizeOf(MTL4CopySparseTextureMappingOperation) == 104);
-    std.debug.assert(@sizeOf(MTL4UpdateSparseBufferMappingOperation) == 32);
-    std.debug.assert(@sizeOf(MTL4CopySparseBufferMappingOperation) == 24);
-}
+// The hand-written @sizeOf assertions that used to sit here are gone: the
+// generator now emits size, alignment and every field offset for each record in
+// this file, with the numbers taken from Clang's own record layout dump. See the
+// comptime blocks at the end of src/generated/metal.zig.
+
+// ------------------------------------------------------------------------------------------------
+// MTLAccelerationStructureTypes.h
+//
+// These records cross the API boundary inside buffer contents rather than in any
+// method signature, so nothing reaches them through the type graph. They are
+// bound here deliberately, and their layouts are asserted against Clang.
+
+/// Three packed floats.
+///
+/// The Objective-C declaration is a union of an x/y/z struct and a `float[3]`,
+/// which have identical layout; `elements` gives the array view.
+pub const PackedFloat3 = extern struct {
+    x: f32,
+    y: f32,
+    z: f32,
+
+    pub fn init(x: f32, y: f32, z: f32) PackedFloat3 {
+        return .{ .x = x, .y = y, .z = z };
+    }
+
+    pub fn elements(self: *PackedFloat3) *[3]f32 {
+        return @ptrCast(self);
+    }
+};
+
+pub const PackedFloatQuaternion = extern struct {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+
+    pub fn init(x: f32, y: f32, z: f32, w: f32) PackedFloatQuaternion {
+        return .{ .x = x, .y = y, .z = z, .w = w };
+    }
+};
+
+pub const PackedFloat4x3 = extern struct {
+    columns: [4]PackedFloat3,
+
+    pub fn init(columns: [4]PackedFloat3) PackedFloat4x3 {
+        return .{ .columns = columns };
+    }
+};
+
+pub const AxisAlignedBoundingBox = extern struct {
+    min: PackedFloat3,
+    max: PackedFloat3,
+
+    pub fn init(min: PackedFloat3, max: PackedFloat3) AxisAlignedBoundingBox {
+        return .{ .min = min, .max = max };
+    }
+};
+
+pub const ComponentTransform = extern struct {
+    scale: PackedFloat3,
+    shear: PackedFloat3,
+    pivot: PackedFloat3,
+    rotation: PackedFloatQuaternion,
+    translation: PackedFloat3,
+};
+
+// ------------------------------------------------------------------------------------------------
+// MTLAccelerationStructure.h — instance descriptors written into instance buffers
+
+pub const AccelerationStructureInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+};
+
+pub const AccelerationStructureUserIDInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+    userID: u32,
+};
+
+pub const AccelerationStructureMotionInstanceDescriptor = extern struct {
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+    userID: u32,
+    motionTransformsStartIndex: u32,
+    motionTransformsCount: u32,
+    motionStartBorderMode: MotionBorderMode,
+    motionEndBorderMode: MotionBorderMode,
+    motionStartTime: f32,
+    motionEndTime: f32,
+};
+
+pub const IndirectAccelerationStructureInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    userID: u32,
+    accelerationStructureID: ResourceID,
+};
+
+pub const IndirectAccelerationStructureMotionInstanceDescriptor = extern struct {
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    userID: u32,
+    accelerationStructureID: ResourceID,
+    motionTransformsStartIndex: u32,
+    motionTransformsCount: u32,
+    motionStartBorderMode: MotionBorderMode,
+    motionEndBorderMode: MotionBorderMode,
+    motionStartTime: f32,
+    motionEndTime: f32,
+};
+
+// ------------------------------------------------------------------------------------------------
+// Indirect command arguments — written into indirect buffers by the GPU or host
+
+pub const DrawPrimitivesIndirectArguments = extern struct {
+    vertexCount: u32,
+    instanceCount: u32,
+    vertexStart: u32,
+    baseInstance: u32,
+};
+
+pub const DrawIndexedPrimitivesIndirectArguments = extern struct {
+    indexCount: u32,
+    instanceCount: u32,
+    indexStart: u32,
+    /// Signed: an index buffer may address vertices before the bound base.
+    baseVertex: i32,
+    baseInstance: u32,
+};
+
+pub const DrawPatchIndirectArguments = extern struct {
+    patchCount: u32,
+    instanceCount: u32,
+    patchStart: u32,
+    baseInstance: u32,
+};
+
+pub const DispatchThreadsIndirectArguments = extern struct {
+    threadsPerGrid: [3]u32,
+    threadsPerThreadgroup: [3]u32,
+};
+
+pub const IndirectCommandBufferExecutionRange = extern struct {
+    location: u32,
+    length: u32,
+};
+
+pub const IntersectionFunctionBufferArguments = extern struct {
+    intersectionFunctionBuffer: u64,
+    intersectionFunctionBufferSize: u64,
+    intersectionFunctionStride: u64,
+};
+
+pub const MapIndirectArguments = extern struct {
+    regionOriginX: u32,
+    regionOriginY: u32,
+    regionOriginZ: u32,
+    regionSizeWidth: u32,
+    regionSizeHeight: u32,
+    regionSizeDepth: u32,
+    mipMapLevel: u32,
+    sliceId: u32,
+};
+
+pub const QuadTessellationFactorsHalf = extern struct {
+    edgeTessellationFactor: [4]u16,
+    insideTessellationFactor: [2]u16,
+};
+
+pub const TriangleTessellationFactorsHalf = extern struct {
+    edgeTessellationFactor: [3]u16,
+    insideTessellationFactor: u16,
+};
 // ------------------------------------------------------------------------------------------------
 
 pub const MTL4AlphaToCoverageState = ns.Integer;
@@ -11506,6 +11683,29 @@ comptime {
     std.debug.assert(@offsetOf(MTL4BufferRange, "length") == 8);
 }
 
+// MTLPackedFloat3
+comptime {
+    std.debug.assert(@sizeOf(PackedFloat3) == 12);
+    std.debug.assert(@alignOf(PackedFloat3) == 4);
+}
+
+// MTLPackedFloatQuaternion
+comptime {
+    std.debug.assert(@sizeOf(PackedFloatQuaternion) == 16);
+    std.debug.assert(@alignOf(PackedFloatQuaternion) == 4);
+    std.debug.assert(@offsetOf(PackedFloatQuaternion, "x") == 0);
+    std.debug.assert(@offsetOf(PackedFloatQuaternion, "y") == 4);
+    std.debug.assert(@offsetOf(PackedFloatQuaternion, "z") == 8);
+    std.debug.assert(@offsetOf(PackedFloatQuaternion, "w") == 12);
+}
+
+// MTLPackedFloat4x3
+comptime {
+    std.debug.assert(@sizeOf(PackedFloat4x3) == 48);
+    std.debug.assert(@alignOf(PackedFloat4x3) == 4);
+    std.debug.assert(@offsetOf(PackedFloat4x3, "columns") == 0);
+}
+
 // MTL4UpdateSparseTextureMappingOperation
 comptime {
     std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
@@ -11546,11 +11746,47 @@ comptime {
     std.debug.assert(@offsetOf(MTL4CopySparseBufferMappingOperation, "destinationOffset") == 16);
 }
 
+// MTLIndirectCommandBufferExecutionRange
+comptime {
+    std.debug.assert(@sizeOf(IndirectCommandBufferExecutionRange) == 8);
+    std.debug.assert(@alignOf(IndirectCommandBufferExecutionRange) == 4);
+    std.debug.assert(@offsetOf(IndirectCommandBufferExecutionRange, "location") == 0);
+    std.debug.assert(@offsetOf(IndirectCommandBufferExecutionRange, "length") == 4);
+}
+
 // MTL4TimestampHeapEntry
 comptime {
     std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
     std.debug.assert(@alignOf(MTL4TimestampHeapEntry) == 8);
     std.debug.assert(@offsetOf(MTL4TimestampHeapEntry, "timestamp") == 0);
+}
+
+// MTLAccelerationStructureInstanceDescriptor
+comptime {
+    std.debug.assert(@sizeOf(AccelerationStructureInstanceDescriptor) == 64);
+    std.debug.assert(@alignOf(AccelerationStructureInstanceDescriptor) == 4);
+    std.debug.assert(@offsetOf(AccelerationStructureInstanceDescriptor, "transformationMatrix") == 0);
+    std.debug.assert(@offsetOf(AccelerationStructureInstanceDescriptor, "options") == 48);
+    std.debug.assert(@offsetOf(AccelerationStructureInstanceDescriptor, "mask") == 52);
+    std.debug.assert(@offsetOf(AccelerationStructureInstanceDescriptor, "intersectionFunctionTableOffset") == 56);
+    std.debug.assert(@offsetOf(AccelerationStructureInstanceDescriptor, "accelerationStructureIndex") == 60);
+}
+
+// MTLAccelerationStructureMotionInstanceDescriptor
+comptime {
+    std.debug.assert(@sizeOf(AccelerationStructureMotionInstanceDescriptor) == 44);
+    std.debug.assert(@alignOf(AccelerationStructureMotionInstanceDescriptor) == 4);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "options") == 0);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "mask") == 4);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "intersectionFunctionTableOffset") == 8);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "accelerationStructureIndex") == 12);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "userID") == 16);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionTransformsStartIndex") == 20);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionTransformsCount") == 24);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionStartBorderMode") == 28);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionEndBorderMode") == 32);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionStartTime") == 36);
+    std.debug.assert(@offsetOf(AccelerationStructureMotionInstanceDescriptor, "motionEndTime") == 40);
 }
 
 // MTLAccelerationStructureSizes
@@ -11560,6 +11796,37 @@ comptime {
     std.debug.assert(@offsetOf(AccelerationStructureSizes, "accelerationStructureSize") == 0);
     std.debug.assert(@offsetOf(AccelerationStructureSizes, "buildScratchBufferSize") == 8);
     std.debug.assert(@offsetOf(AccelerationStructureSizes, "refitScratchBufferSize") == 16);
+}
+
+// MTLAccelerationStructureUserIDInstanceDescriptor
+comptime {
+    std.debug.assert(@sizeOf(AccelerationStructureUserIDInstanceDescriptor) == 68);
+    std.debug.assert(@alignOf(AccelerationStructureUserIDInstanceDescriptor) == 4);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "transformationMatrix") == 0);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "options") == 48);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "mask") == 52);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "intersectionFunctionTableOffset") == 56);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "accelerationStructureIndex") == 60);
+    std.debug.assert(@offsetOf(AccelerationStructureUserIDInstanceDescriptor, "userID") == 64);
+}
+
+// MTLAxisAlignedBoundingBox
+comptime {
+    std.debug.assert(@sizeOf(AxisAlignedBoundingBox) == 24);
+    std.debug.assert(@alignOf(AxisAlignedBoundingBox) == 4);
+    std.debug.assert(@offsetOf(AxisAlignedBoundingBox, "min") == 0);
+    std.debug.assert(@offsetOf(AxisAlignedBoundingBox, "max") == 12);
+}
+
+// MTLComponentTransform
+comptime {
+    std.debug.assert(@sizeOf(ComponentTransform) == 64);
+    std.debug.assert(@alignOf(ComponentTransform) == 4);
+    std.debug.assert(@offsetOf(ComponentTransform, "scale") == 0);
+    std.debug.assert(@offsetOf(ComponentTransform, "shear") == 12);
+    std.debug.assert(@offsetOf(ComponentTransform, "pivot") == 24);
+    std.debug.assert(@offsetOf(ComponentTransform, "rotation") == 36);
+    std.debug.assert(@offsetOf(ComponentTransform, "translation") == 52);
 }
 
 // MTLCounterResultStageUtilization
@@ -11602,11 +11869,110 @@ comptime {
     std.debug.assert(@offsetOf(DispatchThreadgroupsIndirectArguments, "threadgroupsPerGrid") == 0);
 }
 
+// MTLDispatchThreadsIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(DispatchThreadsIndirectArguments) == 24);
+    std.debug.assert(@alignOf(DispatchThreadsIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(DispatchThreadsIndirectArguments, "threadsPerGrid") == 0);
+    std.debug.assert(@offsetOf(DispatchThreadsIndirectArguments, "threadsPerThreadgroup") == 12);
+}
+
+// MTLDrawIndexedPrimitivesIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(DrawIndexedPrimitivesIndirectArguments) == 20);
+    std.debug.assert(@alignOf(DrawIndexedPrimitivesIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(DrawIndexedPrimitivesIndirectArguments, "indexCount") == 0);
+    std.debug.assert(@offsetOf(DrawIndexedPrimitivesIndirectArguments, "instanceCount") == 4);
+    std.debug.assert(@offsetOf(DrawIndexedPrimitivesIndirectArguments, "indexStart") == 8);
+    std.debug.assert(@offsetOf(DrawIndexedPrimitivesIndirectArguments, "baseVertex") == 12);
+    std.debug.assert(@offsetOf(DrawIndexedPrimitivesIndirectArguments, "baseInstance") == 16);
+}
+
+// MTLDrawPatchIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(DrawPatchIndirectArguments) == 16);
+    std.debug.assert(@alignOf(DrawPatchIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(DrawPatchIndirectArguments, "patchCount") == 0);
+    std.debug.assert(@offsetOf(DrawPatchIndirectArguments, "instanceCount") == 4);
+    std.debug.assert(@offsetOf(DrawPatchIndirectArguments, "patchStart") == 8);
+    std.debug.assert(@offsetOf(DrawPatchIndirectArguments, "baseInstance") == 12);
+}
+
+// MTLDrawPrimitivesIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(DrawPrimitivesIndirectArguments) == 16);
+    std.debug.assert(@alignOf(DrawPrimitivesIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(DrawPrimitivesIndirectArguments, "vertexCount") == 0);
+    std.debug.assert(@offsetOf(DrawPrimitivesIndirectArguments, "instanceCount") == 4);
+    std.debug.assert(@offsetOf(DrawPrimitivesIndirectArguments, "vertexStart") == 8);
+    std.debug.assert(@offsetOf(DrawPrimitivesIndirectArguments, "baseInstance") == 12);
+}
+
 // MTLResourceID
 comptime {
     std.debug.assert(@sizeOf(ResourceID) == 8);
     std.debug.assert(@alignOf(ResourceID) == 8);
     std.debug.assert(@offsetOf(ResourceID, "_impl") == 0);
+}
+
+// MTLIndirectAccelerationStructureInstanceDescriptor
+comptime {
+    std.debug.assert(@sizeOf(IndirectAccelerationStructureInstanceDescriptor) == 72);
+    std.debug.assert(@alignOf(IndirectAccelerationStructureInstanceDescriptor) == 8);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "transformationMatrix") == 0);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "options") == 48);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "mask") == 52);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "intersectionFunctionTableOffset") == 56);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "userID") == 60);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureInstanceDescriptor, "accelerationStructureID") == 64);
+}
+
+// MTLIndirectAccelerationStructureMotionInstanceDescriptor
+comptime {
+    std.debug.assert(@sizeOf(IndirectAccelerationStructureMotionInstanceDescriptor) == 48);
+    std.debug.assert(@alignOf(IndirectAccelerationStructureMotionInstanceDescriptor) == 8);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "options") == 0);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "mask") == 4);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "intersectionFunctionTableOffset") == 8);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "userID") == 12);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "accelerationStructureID") == 16);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionTransformsStartIndex") == 24);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionTransformsCount") == 28);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionStartBorderMode") == 32);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionEndBorderMode") == 36);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionStartTime") == 40);
+    std.debug.assert(@offsetOf(IndirectAccelerationStructureMotionInstanceDescriptor, "motionEndTime") == 44);
+}
+
+// MTLIntersectionFunctionBufferArguments
+comptime {
+    std.debug.assert(@sizeOf(IntersectionFunctionBufferArguments) == 24);
+    std.debug.assert(@alignOf(IntersectionFunctionBufferArguments) == 8);
+    std.debug.assert(@offsetOf(IntersectionFunctionBufferArguments, "intersectionFunctionBuffer") == 0);
+    std.debug.assert(@offsetOf(IntersectionFunctionBufferArguments, "intersectionFunctionBufferSize") == 8);
+    std.debug.assert(@offsetOf(IntersectionFunctionBufferArguments, "intersectionFunctionStride") == 16);
+}
+
+// MTLMapIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(MapIndirectArguments) == 32);
+    std.debug.assert(@alignOf(MapIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionOriginX") == 0);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionOriginY") == 4);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionOriginZ") == 8);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionSizeWidth") == 12);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionSizeHeight") == 16);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "regionSizeDepth") == 20);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "mipMapLevel") == 24);
+    std.debug.assert(@offsetOf(MapIndirectArguments, "sliceId") == 28);
+}
+
+// MTLQuadTessellationFactorsHalf
+comptime {
+    std.debug.assert(@sizeOf(QuadTessellationFactorsHalf) == 12);
+    std.debug.assert(@alignOf(QuadTessellationFactorsHalf) == 2);
+    std.debug.assert(@offsetOf(QuadTessellationFactorsHalf, "edgeTessellationFactor") == 0);
+    std.debug.assert(@offsetOf(QuadTessellationFactorsHalf, "insideTessellationFactor") == 8);
 }
 
 // MTLSizeAndAlign
@@ -11623,6 +11989,14 @@ comptime {
     std.debug.assert(@alignOf(StageInRegionIndirectArguments) == 4);
     std.debug.assert(@offsetOf(StageInRegionIndirectArguments, "stageInOrigin") == 0);
     std.debug.assert(@offsetOf(StageInRegionIndirectArguments, "stageInSize") == 12);
+}
+
+// MTLTriangleTessellationFactorsHalf
+comptime {
+    std.debug.assert(@sizeOf(TriangleTessellationFactorsHalf) == 8);
+    std.debug.assert(@alignOf(TriangleTessellationFactorsHalf) == 2);
+    std.debug.assert(@offsetOf(TriangleTessellationFactorsHalf, "edgeTessellationFactor") == 0);
+    std.debug.assert(@offsetOf(TriangleTessellationFactorsHalf, "insideTessellationFactor") == 6);
 }
 
 // MTLVertexAmplificationViewMapping

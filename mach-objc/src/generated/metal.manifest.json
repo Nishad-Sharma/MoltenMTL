@@ -3,8 +3,8 @@
   "counts": {
     "total": 4696,
     "generated": 4224,
-    "manual": 359,
-    "excluded": 113,
+    "manual": 379,
+    "excluded": 93,
     "rejected": 0
   },
   "declarations": [
@@ -12479,8 +12479,8 @@
       "header": "MTLAccelerationStructure.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLAccelerationStructureInstanceDescriptorType",
@@ -12506,8 +12506,8 @@
       "header": "MTLAccelerationStructure.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLAccelerationStructureRefitOptions",
@@ -12533,8 +12533,8 @@
       "header": "MTLAccelerationStructure.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLCurveBasis",
@@ -12569,8 +12569,8 @@
       "header": "MTLAccelerationStructure.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLIndirectAccelerationStructureMotionInstanceDescriptor",
@@ -12578,8 +12578,8 @@
       "header": "MTLAccelerationStructure.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLMatrixLayout",
@@ -12929,8 +12929,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK record outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "_MTLAxisAlignedBoundingBox",
@@ -12965,8 +12965,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLComponentTransform",
@@ -12974,8 +12974,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLPackedFloat3",
@@ -12983,8 +12983,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLPackedFloat4x3",
@@ -12992,8 +12992,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLPackedFloatQuaternion",
@@ -13001,8 +13001,8 @@
       "header": "MTLAccelerationStructureTypes.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLAllocation.allocatedSize",
@@ -17870,8 +17870,8 @@
       "header": "MTLComputeCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLStageInRegionIndirectArguments",
@@ -25934,8 +25934,8 @@
       "header": "MTLIndirectCommandBuffer.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLIndirectCommandType",
@@ -26447,8 +26447,8 @@
       "header": "MTLIntersectionFunctionTable.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLIntersectionFunctionSignature",
@@ -30371,8 +30371,8 @@
       "header": "MTLRenderCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLDrawPatchIndirectArguments",
@@ -30380,8 +30380,8 @@
       "header": "MTLRenderCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLDrawPrimitivesIndirectArguments",
@@ -30389,8 +30389,8 @@
       "header": "MTLRenderCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLPrimitiveType",
@@ -30407,8 +30407,8 @@
       "header": "MTLRenderCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLRenderStages",
@@ -30443,8 +30443,8 @@
       "header": "MTLRenderCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLVertexAmplificationViewMapping",
@@ -35753,8 +35753,8 @@
       "header": "MTLResourceStateCommandEncoder.h",
       "selected": false,
       "provenance": "sdk_only",
-      "status": "excluded",
-      "reason": "valid SDK typedef outside the selected binding surface"
+      "status": "manual",
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLSparseTextureMappingMode",
