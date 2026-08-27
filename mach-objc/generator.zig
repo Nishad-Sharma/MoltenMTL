@@ -1467,6 +1467,16 @@ fn Generator(comptime WriterType: type) type {
             provenance: coverage.Provenance,
         };
 
+        /// Error set of the closure walk.
+        ///
+        /// Written out rather than inferred because `markTypeClosure` and
+        /// `markNamedType` are mutually recursive — a typedef resolves to a type
+        /// which may name another typedef — and Zig cannot infer an error set
+        /// through a dependency loop. It is the union of what the walk's callees
+        /// produce: allocation for the queues and visited sets, and the manifest
+        /// lookup.
+        const ClosureError = std.mem.Allocator.Error || error{ManifestDeclarationNotFound};
+
         /// Mark every declaration reachable from the explicit selection list.
         ///
         /// Selecting a class selects what its public signatures mention:
@@ -1540,7 +1550,7 @@ fn Generator(comptime WriterType: type) type {
             ty: Type,
             queue: *std.array_list.Managed(PendingContainer),
             visited_types: *std.StringHashMap(void),
-        ) !void {
+        ) ClosureError!void {
             switch (ty) {
                 .name => |name| try self.markNamedType(name, queue, visited_types),
                 .pointer => |pointer| try self.markTypeClosure(pointer.child.*, queue, visited_types),
@@ -1565,7 +1575,7 @@ fn Generator(comptime WriterType: type) type {
             name: []const u8,
             queue: *std.array_list.Managed(PendingContainer),
             visited_types: *std.StringHashMap(void),
-        ) !void {
+        ) ClosureError!void {
             if ((try visited_types.getOrPut(name)).found_existing) return;
 
             // One identifier can appear under several declaration kinds — an enum
