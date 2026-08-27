@@ -122,9 +122,12 @@ fn CopyDisposeBlockDescriptor(comptime Context: type) type {
         pub const CopyFn = fn (dst: *BlockLiteral(Context), src: *const BlockLiteral(Context)) callconv(.c) void;
         pub const DisposeFn = fn (block: *const BlockLiteral(Context)) callconv(.c) void;
 
-        fn static(comptime size: c_ulong, comptime copy: CopyFn, comptime dispose: DisposeFn) *const CopyDisposeBlockDescriptor {
+        // `@This()`, not `CopyDisposeBlockDescriptor`: inside the generic that
+        // name refers to the function returning the type, not to the type.
+        fn static(comptime size: c_ulong, comptime copy: CopyFn, comptime dispose: DisposeFn) *const @This() {
+            const Descriptor = @This();
             const Static = struct {
-                const descriptor: CopyDisposeBlockDescriptor = .{
+                const descriptor: Descriptor = .{
                     .size = size,
                     .copy = copy,
                     .dispose = dispose,
