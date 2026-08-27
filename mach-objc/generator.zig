@@ -1523,26 +1523,63 @@ fn Generator(comptime WriterType: type) type {
                     &visited_protocols;
                 if ((try visited.getOrPut(container.name)).found_existing) continue;
 
+                // Containers reached from another framework are bound in that
+                // framework's output. Every generated class has NSObject as its
+                // superclass, and NSObject is hand-written in src/foundation.zig
+                // as ObjectInterface/ObjectProtocol, so it is neither this
+                // manifest's to generate nor detectable as manual by name.
+                if (pending.provenance == .transitive_dependency and
+                    !std.mem.eql(u8, getNamespace(container.name), self.namespace)) continue;
+
                 const kind: coverage.DeclarationKind =
                     if (container.is_interface) .interface else .protocol;
                 _ = try self.manifest.selectIfPresent(kind, container.name, pending.provenance);
 
+                // The superclass is emitted as part of the wrapper, so it is a
+                // genuine dependency. Adopted protocols are not: every generated
+                // ExternClass and ExternProtocol carries an empty protocol list,
+                // so following them would claim reachability the bindings do not
+                // have. CALayer adopts CAMediaTiming without binding any of it.
                 if (container.super) |super| {
                     try queue.append(.{ .container = super, .provenance = .transitive_dependency });
                 }
-                for (container.protocols.items) |protocol| {
-                    try queue.append(.{ .container = protocol, .provenance = .transitive_dependency });
-                }
+
                 for (container.methods.items) |method| {
+                    if (!try self.memberIsGenerated(.method, container.name, method.name)) continue;
                     try self.markTypeClosure(method.return_type, &queue, &visited_types);
                     for (method.params.items) |param| {
                         try self.markTypeClosure(param.ty, &queue, &visited_types);
                     }
                 }
                 for (container.properties.items) |property| {
+                    if (!try self.memberIsGenerated(.property, container.name, property.name)) continue;
                     try self.markTypeClosure(property.ty, &queue, &visited_types);
                 }
             }
+        }
+
+        /// Was this member actually emitted?
+        ///
+        /// Reachability has to follow the bindings, not the SDK. A container can
+        /// declare far more than the generator emits — QuartzCore binds a handful
+        /// of CALayer methods from an allowlist and excludes the rest — and
+        /// walking an excluded declaration would drag its parameter types in as
+        /// dependencies of a binding that does not exist. This runs after
+        /// `generate`, so the manifest already knows what was emitted.
+        fn memberIsGenerated(
+            self: *Self,
+            kind: coverage.DeclarationKind,
+            container_name: []const u8,
+            member_name: []const u8,
+        ) !bool {
+            const manifest_name = try std.fmt.allocPrint(
+                self.allocator,
+                "{s}.{s}",
+                .{ container_name, member_name },
+            );
+            defer self.allocator.free(manifest_name);
+            const status = self.manifest.statusOf(kind, manifest_name) orelse return false;
+            return status == .generated;
         }
 
         fn markTypeClosure(
@@ -1577,6 +1614,18 @@ fn Generator(comptime WriterType: type) type {
             visited_types: *std.StringHashMap(void),
         ) ClosureError!void {
             if ((try visited_types.getOrPut(name)).found_existing) return;
+
+            // Names belonging to another framework are bound elsewhere and are
+            // not this manifest's responsibility: Metal types referenced by
+            // CAMetalLayer are emitted into metal.zig, and Foundation and
+            // CoreGraphics types are hand-written in src/foundation.zig and
+            // src/core_graphics.zig. This matters because QuartzCore's own
+            // headers forward-declare `@protocol MTLDevice`, which puts it in the
+            // QuartzCore inventory where it would otherwise look like an unbound
+            // dependency. The same rule covers NSObject, whose Zig binding is
+            // named ObjectInterface and so is invisible to manual-source
+            // detection.
+            if (!std.mem.eql(u8, getNamespace(name), self.namespace)) return;
 
             // One identifier can appear under several declaration kinds — an enum
             // and its typedef, an interface and a like-named protocol — so record

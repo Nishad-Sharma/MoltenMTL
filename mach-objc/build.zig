@@ -2,17 +2,28 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
-    // The deployment floor is pinned rather than inherited from the host so that
-    // generated bindings target a known runtime. mach-objc does not parse
-    // availability or weak-link post-floor symbols, so the floor is the contract:
-    // every symbol in the selected surface must exist at this version.
-    const target = b.standardTargetOptions(.{
-        .default_target = .{
-            .cpu_arch = .aarch64,
-            .os_tag = .macos,
-            .os_version_min = .{ .semver = .{ .major = 26, .minor = 0, .patch = 0 } },
-        },
-    });
+    const target = b.standardTargetOptions(.{});
+
+    // mach-objc does not parse availability or weak-link post-floor symbols, so
+    // the deployment floor is the contract: every symbol in the selected surface
+    // must exist at this version.
+    //
+    // Checked here rather than pinned into the default target query. Setting
+    // os_version_min makes Query.isNativeOs() false, at which point Zig stops
+    // discovering the host SDK and every module that links objc or a framework
+    // fails with "unable to find dynamic system library 'objc' ... searched
+    // paths: none". A real pin would have to pass the SDK's framework, include
+    // and library paths to every module by hand.
+    if (target.result.os.tag != .macos or target.result.cpu.arch != .aarch64) {
+        @panic("mach-objc requires an aarch64-macos target");
+    }
+    if (target.result.os.version_range.semver.min.order(.{
+        .major = 26,
+        .minor = 0,
+        .patch = 0,
+    }) == .lt) {
+        @panic("mach-objc requires a macOS 26.0 or newer deployment target");
+    }
     const sdk_root = b.option(
         []const u8,
         "macos-sdk",
