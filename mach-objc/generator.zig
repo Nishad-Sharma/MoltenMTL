@@ -666,7 +666,6 @@ pub const Parser = struct {
 
     fn parsePointerProps(self: *Self, elem_is_const: bool) !PointerProps {
         var is_const = elem_is_const;
-        var is_optional = false;
         var nullability: reg.Type.Nullability = .unannotated;
         while (true) {
             if (self.lookahead.kind == .kw_const) {
@@ -674,7 +673,6 @@ pub const Parser = struct {
                 is_const = true;
             } else if (self.lookahead.kind == .kw_nullable) {
                 try self.match(.kw_nullable);
-                is_optional = true;
                 nullability = .nullable;
             } else if (self.lookahead.kind == .kw_nonnull) {
                 try self.match(.kw_nonnull);
@@ -688,7 +686,16 @@ pub const Parser = struct {
             } else break;
         }
 
-        return .{ .is_const = is_const, .is_optional = is_optional, .nullability = nullability };
+        // Optional unless the header positively said otherwise. `_Nullable_result`
+        // and `_Null_unspecified` both admit null, and an unannotated pointer is
+        // one the header never spoke about — rendering that as non-optional is a
+        // guess whose failure mode is a null dereference with no diagnostic, while
+        // the cost of being wrong the other way is an unwrap.
+        return .{
+            .is_const = is_const,
+            .is_optional = nullability != .nonnull,
+            .nullability = nullability,
+        };
     }
 
     fn parsePointerSuffix(
@@ -4441,6 +4448,26 @@ test "clang getter and setter overrides are captured" {
     try std.testing.expectEqualStrings("rasterizationEnabled", property.name);
     try std.testing.expectEqualStrings("isRasterizationEnabled", property.explicit_getter);
     try std.testing.expectEqualStrings("setRasterizationEnabled:", property.explicit_setter);
+}
+
+fn expectPointerOptional(source: []const u8, expected: bool) !void {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    var lexer = Lexer{ .source = source };
+    var parser = try Parser.init(arena.allocator(), &lexer, false);
+    const ty = try parser.parseType();
+    try std.testing.expectEqual(expected, ty.pointer.is_optional);
+}
+
+test "pointers are optional unless the header says nonnull" {
+    try expectPointerOptional("NSString * _Nonnull", false);
+
+    try expectPointerOptional("NSString * _Nullable", true);
+    // Null on the failure path is exactly where an unwrap must be forced.
+    try expectPointerOptional("NSString * _Nullable_result", true);
+    try expectPointerOptional("NSString * _Null_unspecified", true);
+    // The header never said; guessing nonnull would be unsound.
+    try expectPointerOptional("NSString *", true);
 }
 
 test "fixed size arrays are preserved rather than decayed to pointers" {
