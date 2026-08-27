@@ -1690,6 +1690,7 @@ fn Generator(comptime WriterType: type) type {
         /// a person reading a header, which is the whole point — a hand-written
         /// assertion of a hand-written layout proves nothing.
         fn generateRecordLayoutAssertions(self: *Self) !void {
+            var verified: usize = 0;
             for (self.record_layouts) |layout| {
                 // Only this framework's own records: another framework's are
                 // declared in its output or in the shared hand-written modules,
@@ -1713,6 +1714,14 @@ fn Generator(comptime WriterType: type) type {
                 const reason = "manually maintained record; size, alignment and field offsets verified against Clang";
                 try self.manifest.markIfPresent(.typedef, layout.name, .manual, reason);
                 try self.manifest.markIfPresent(.record, layout.name, .manual, reason);
+                verified += 1;
+            }
+
+            if (verified != 0) {
+                std.log.info(
+                    "{s}: verified {d} hand-written record layouts against Clang",
+                    .{ self.manifest.framework, verified },
+                );
             }
         }
 
@@ -3452,16 +3461,28 @@ fn lastToken(text: []const u8) ?[]const u8 {
 /// complete dump prints `struct (unnamed at file:line:col)` for the anonymous
 /// structs that most Metal types are declared as, which would then have to be
 /// joined back to their typedefs by source location.
-fn parseRecordLayouts(arena: std.mem.Allocator, text: []const u8) ![]const RecordLayout {
+///
+/// Only records named in `wanted` are kept. Including a framework header lays
+/// out a great deal besides what the probe asked for — system headers reached
+/// through `Metal.h` contain bitfields and other shapes with no bearing on the
+/// selected surface — and passing judgement on those would be noise at best and
+/// a spurious generation failure at worst.
+fn parseRecordLayouts(
+    arena: std.mem.Allocator,
+    text: []const u8,
+    wanted: *const std.StringHashMap(void),
+) ![]const RecordLayout {
     var layouts = std.array_list.Managed(RecordLayout).init(arena);
     var fields = std.array_list.Managed(FieldLayout).init(arena);
     var name: ?[]const u8 = null;
+    var keep = false;
 
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |raw_line| {
         const line = std.mem.trimEnd(u8, raw_line, "\r");
         if (std.mem.indexOf(u8, line, "*** Dumping AST Record Layout") != null) {
             name = null;
+            keep = false;
             fields.clearRetainingCapacity();
             continue;
         }
@@ -3474,31 +3495,44 @@ fn parseRecordLayouts(arena: std.mem.Allocator, text: []const u8) ![]const Recor
         if (body.len == 0) continue;
 
         if (std.mem.startsWith(u8, body, "[sizeof=")) {
-            const record_name = name orelse continue;
-            try layouts.append(.{
-                .name = record_name,
-                .size = try parseLabelledInteger(body, "sizeof="),
-                .alignment = try parseLabelledInteger(body, ", align="),
-                .fields = try arena.dupe(FieldLayout, fields.items),
-            });
+            if (keep) {
+                if (name) |record_name| try layouts.append(.{
+                    .name = record_name,
+                    .size = try parseLabelledInteger(body, "sizeof="),
+                    .alignment = try parseLabelledInteger(body, ", align="),
+                    .fields = try arena.dupe(FieldLayout, fields.items),
+                });
+            }
             name = null;
+            keep = false;
             fields.clearRetainingCapacity();
             continue;
         }
 
         const offset_text = std.mem.trim(u8, line[0..bar], " ");
-        // Bitfields are dumped as `0:0-2`. Nothing in the selected surface uses
-        // them, and guessing at a Zig representation for one would be exactly the
-        // silent mistake these assertions exist to prevent.
+        const depth = if (indent == 0) 0 else (indent - 1) / 2;
+
+        // Bitfields are dumped as `0:0-2` instead of a plain byte offset. One
+        // sitting directly in a record being verified has no honest `@offsetOf`
+        // to assert, so it fails loudly. Deeper down it belongs to a nested
+        // record, which is verified separately if it is bound at all.
         if (std.mem.indexOfScalar(u8, offset_text, ':') != null) {
-            return error.UnsupportedBitfieldLayout;
+            if (keep and depth == 1) {
+                std.log.err(
+                    "record {s} has a bitfield member, which cannot be layout-verified",
+                    .{name orelse "<unknown>"},
+                );
+                return error.UnsupportedBitfieldLayout;
+            }
+            continue;
         }
+
         const offset = std.fmt.parseInt(u64, offset_text, 10) catch continue;
 
-        const depth = if (indent == 0) 0 else (indent - 1) / 2;
         if (depth == 0) {
             name = body;
-        } else if (depth == 1) {
+            keep = wanted.contains(body);
+        } else if (depth == 1 and keep) {
             try fields.append(.{
                 .name = lastToken(body) orelse continue,
                 .offset = offset,
@@ -3590,7 +3624,10 @@ fn probeRecordLayouts(
     });
     for (spec.extra_clang_args) |arg| try argv.append(arena, arg);
 
-    return parseRecordLayouts(arena, try runCommand(arena, io, argv.items));
+    var wanted = std.StringHashMap(void).init(arena);
+    for (names) |name| try wanted.put(name, {});
+
+    return parseRecordLayouts(arena, try runCommand(arena, io, argv.items), &wanted);
 }
 
 const FrameworkSpec = struct {
@@ -4065,9 +4102,21 @@ test "clang record layouts parse into sizes, alignments and field offsets" {
         \\        24 |   MTLSize size
         \\        24 |     NSUInteger width
         \\           | [sizeof=48, align=8]
+        \\
+        \\*** Dumping AST Record Layout
+        \\         0 | __not_requested
+        \\     0:0-2 |   int bits
+        \\           | [sizeof=4, align=4]
     ;
 
-    const layouts = try parseRecordLayouts(arena.allocator(), dump);
+    var wanted = std.StringHashMap(void).init(std.testing.allocator);
+    defer wanted.deinit();
+    try wanted.put("MTLOrigin", {});
+    try wanted.put("MTLRegion", {});
+
+    // Including a framework header lays out far more than the probe asked for.
+    // A record nobody requested is skipped, bitfields and all.
+    const layouts = try parseRecordLayouts(arena.allocator(), dump, &wanted);
     try std.testing.expectEqual(@as(usize, 2), layouts.len);
 
     try std.testing.expectEqualStrings("MTLOrigin", layouts[0].name);
@@ -4096,10 +4145,20 @@ test "bitfield record layouts are rejected rather than guessed" {
         \\           | [sizeof=4, align=4]
     ;
 
+    var wanted = std.StringHashMap(void).init(std.testing.allocator);
+    defer wanted.deinit();
+    try wanted.put("struct B", {});
+
     try std.testing.expectError(
         error.UnsupportedBitfieldLayout,
-        parseRecordLayouts(arena.allocator(), dump),
+        parseRecordLayouts(arena.allocator(), dump, &wanted),
     );
+
+    // The same record goes unmentioned when it was never requested.
+    var empty = std.StringHashMap(void).init(std.testing.allocator);
+    defer empty.deinit();
+    const skipped = try parseRecordLayouts(arena.allocator(), dump, &empty);
+    try std.testing.expectEqual(@as(usize, 0), skipped.len);
 }
 
 test "hand-written records are detected by their extern struct declaration" {
