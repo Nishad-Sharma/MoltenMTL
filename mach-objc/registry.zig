@@ -41,7 +41,7 @@ pub const Type = union(enum) {
 
 pub const EnumValue = struct {
     name: []const u8,
-    value: i64,
+    value: i128,
     is_max_uint: bool = false,
 };
 

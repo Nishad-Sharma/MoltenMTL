@@ -1,5 +1,6 @@
 const std = @import("std");
 const reg = @import("registry.zig");
+const coverage = @import("generator_manifest.zig");
 
 const Container = reg.Container;
 const Enum = reg.Enum;
@@ -14,7 +15,14 @@ const TypeParam = reg.TypeParam;
 var registry: Registry = undefined;
 
 // ------------------------------------------------------------------------------------------------
-pub const ParseError = error{ UnexpectedCharacter, UnexpectedToken };
+pub const ParseError = error{
+    UnexpectedCharacter,
+    UnexpectedToken,
+    UnsupportedArrayType,
+    UnsupportedFunctionPointer,
+    UnsupportedGenericObjectType,
+    UnsupportedParenthesizedType,
+};
 
 pub const Token = struct {
     kind: Kind,
@@ -288,9 +296,15 @@ pub const Parser = struct {
     allocator: std.mem.Allocator,
     lookahead: Token,
     lexer: *Lexer,
+    reject_unsupported: bool,
 
-    pub fn init(allocator: std.mem.Allocator, lexer: *Lexer) !Parser {
-        return Parser{ .allocator = allocator, .lookahead = try lexer.next(), .lexer = lexer };
+    pub fn init(allocator: std.mem.Allocator, lexer: *Lexer, reject_unsupported: bool) !Parser {
+        return Parser{
+            .allocator = allocator,
+            .lookahead = try lexer.next(),
+            .lexer = lexer,
+            .reject_unsupported = reject_unsupported,
+        };
     }
 
     /// Returns true if `text` is a known Apple SDK attribute-macro identifier (e.g.
@@ -477,8 +491,9 @@ pub const Parser = struct {
                     const types = try self.parseTypeList();
                     try self.match(.greater);
 
-                    // TODO - how should handle multiple types?
-
+                    if (self.reject_unsupported and types.items.len != 1) {
+                        return error.UnsupportedGenericObjectType;
+                    }
                     return self.parsePointerSuffix(types.items[0], is_const, true);
                 } else {
                     const t = Type{ .name = "objc.Id" };
@@ -501,11 +516,7 @@ pub const Parser = struct {
             },
             .kw_instancetype => {
                 try self.match(.kw_instancetype);
-
-                const child = try self.allocator.create(Type);
-                child.* = .{ .instance_type = {} };
-
-                return Type{ .pointer = .{ .is_single = true, .is_const = is_const, .is_optional = false, .child = child } };
+                return self.parsePointerSuffix(.{ .instance_type = {} }, is_const, true);
             },
             .kw_struct => {
                 try self.match(.kw_struct);
@@ -539,7 +550,7 @@ pub const Parser = struct {
 
             return self.parsePointerSuffix(base_type, is_const, is_single);
         } else if (self.lookahead.kind == .lbracket) {
-            // TODO - handle arrays
+            if (self.reject_unsupported) return error.UnsupportedArrayType;
             try self.match(.lbracket);
             if (self.lookahead.kind == .int)
                 try self.match(.int);
@@ -550,6 +561,7 @@ pub const Parser = struct {
             try self.match(.lparen);
 
             if (self.lookahead.kind == .star) {
+                if (self.reject_unsupported) return error.UnsupportedFunctionPointer;
                 try self.match(.star);
 
                 const props = try self.parsePointerProps(is_const);
@@ -580,6 +592,7 @@ pub const Parser = struct {
                     },
                 };
             } else {
+                if (self.reject_unsupported) return error.UnsupportedParenthesizedType;
                 _ = try self.parseTypeList();
                 try self.match(.rparen);
             }
@@ -624,11 +637,12 @@ pub const Parser = struct {
         return .{ .is_const = is_const, .is_optional = is_optional };
     }
 
-    fn parsePointerSuffix(self: *Self, base_type: Type, is_const: bool, is_single: bool) error{
-        OutOfMemory,
-        UnexpectedToken,
-        UnexpectedCharacter,
-    }!Type {
+    fn parsePointerSuffix(
+        self: *Self,
+        base_type: Type,
+        is_const: bool,
+        is_single: bool,
+    ) (ParseError || error{OutOfMemory})!Type {
         const props = try self.parsePointerProps(is_const);
         const child = try self.allocator.create(Type);
         child.* = base_type;
@@ -753,17 +767,47 @@ pub fn getBool(x: std.json.Value, key: []const u8) bool {
     }
 }
 
+pub fn getInteger(x: std.json.Value, key: []const u8) ?i64 {
+    switch (x) {
+        .object => |o| {
+            const value = o.get(key) orelse return null;
+            return switch (value) {
+                .integer => |integer| integer,
+                else => null,
+            };
+        },
+        else => return null,
+    }
+}
+
 pub const Converter = struct {
     const Self = @This();
 
     allocator: std.mem.Allocator,
     arena: std.heap.ArenaAllocator,
+    manifest: *coverage.Manifest,
+    surface: Framework,
+    dependencies: std.StringHashMap(void),
+    strict_types: bool = false,
+    emit_diagnostics: bool = true,
+    current_header: []const u8 = "<unknown>",
 
-    pub fn init(allocator: std.mem.Allocator) Converter {
-        return Converter{ .allocator = allocator, .arena = std.heap.ArenaAllocator.init(allocator) };
+    pub fn init(
+        allocator: std.mem.Allocator,
+        manifest: *coverage.Manifest,
+        surface: Framework,
+    ) Converter {
+        return .{
+            .allocator = allocator,
+            .arena = std.heap.ArenaAllocator.init(allocator),
+            .manifest = manifest,
+            .surface = surface,
+            .dependencies = std.StringHashMap(void).init(allocator),
+        };
     }
 
     pub fn deinit(self: *Self) void {
+        self.dependencies.deinit();
         self.arena.deinit();
     }
 
@@ -771,7 +815,183 @@ pub const Converter = struct {
         const kind = getString(n, "kind");
         if (std.mem.eql(u8, kind, "TranslationUnitDecl")) {
             try self.convertTranslationUnitDecl(n);
+            try self.expandDependencies(n);
+            try self.collectCoverage(n);
+        } else {
+            return error.ExpectedTranslationUnitDecl;
         }
+    }
+
+    fn isDirectName(self: *Self, name: []const u8) bool {
+        return switch (self.surface) {
+            .metal => std.mem.startsWith(u8, name, "MTL"),
+            .metal_fx => std.mem.startsWith(u8, name, "MTLFX") or
+                std.mem.startsWith(u8, name, "MTL4FX"),
+            .quartz_core => std.mem.startsWith(u8, name, "CA"),
+            .app_kit => false,
+        };
+    }
+
+    fn isDirectHeader(self: *Self, header: []const u8) bool {
+        const framework_component = switch (self.surface) {
+            .metal => "/Metal.framework/",
+            .metal_fx => "/MetalFX.framework/",
+            .quartz_core => "/QuartzCore.framework/",
+            .app_kit => "/AppKit.framework/",
+        };
+        return std.mem.indexOf(u8, header, framework_component) != null;
+    }
+
+    fn noteTypeDependencies(self: *Self, qual_type: []const u8) !void {
+        var index: usize = 0;
+        while (index < qual_type.len) {
+            while (index < qual_type.len and
+                !(std.ascii.isAlphabetic(qual_type[index]) or qual_type[index] == '_'))
+            {
+                index += 1;
+            }
+            const start = index;
+            while (index < qual_type.len and
+                (std.ascii.isAlphanumeric(qual_type[index]) or qual_type[index] == '_'))
+            {
+                index += 1;
+            }
+            if (start == index) continue;
+            const identifier = qual_type[start..index];
+            if (self.isDirectName(identifier) or
+                std.mem.startsWith(u8, identifier, "NS") or
+                std.mem.startsWith(u8, identifier, "CF") or
+                std.mem.startsWith(u8, identifier, "CG"))
+            {
+                try self.dependencies.put(identifier, {});
+            }
+        }
+    }
+
+    fn expandDependencies(self: *Self, n: std.json.Value) !void {
+        var changed = true;
+        while (changed) {
+            const previous_count = self.dependencies.count();
+            for (getArray(n, "inner")) |child| {
+                if (!std.mem.eql(u8, getString(child, "kind"), "TypedefDecl")) continue;
+                const name = getString(child, "name");
+                if (!self.dependencies.contains(name)) continue;
+                if (getObject(child, "type")) |ty| {
+                    try self.noteTypeDependencies(getString(ty, "qualType"));
+                }
+            }
+            changed = self.dependencies.count() != previous_count;
+        }
+    }
+
+    fn collectCoverage(self: *Self, n: std.json.Value) !void {
+        self.current_header = "<unknown>";
+        for (getArray(n, "inner")) |child| {
+            const kind = getString(child, "kind");
+            const header = self.declarationHeader(child);
+            var name = getString(child, "name");
+            if (std.mem.eql(u8, kind, "ObjCCategoryDecl")) {
+                if (getObject(child, "interface")) |interface| {
+                    name = getString(interface, "name");
+                }
+            }
+
+            const required = self.isDirectHeader(header) or
+                self.isDirectName(name) or
+                (name.len > 0 and self.dependencies.contains(name));
+            if (!required) continue;
+
+            if (declarationKind(kind)) |manifest_kind| {
+                const manifest_name = if (name.len > 0)
+                    name
+                else
+                    try std.fmt.allocPrint(
+                        self.arena.allocator(),
+                        "(anonymous:{d})",
+                        .{declarationLine(child)},
+                    );
+                _ = try self.manifest.add(manifest_kind, manifest_name, std.fs.path.basename(header));
+            }
+
+            if (std.mem.eql(u8, kind, "ObjCInterfaceDecl") or
+                std.mem.eql(u8, kind, "ObjCProtocolDecl") or
+                std.mem.eql(u8, kind, "ObjCCategoryDecl"))
+            {
+                if (self.isDirectName(name) or self.isDirectHeader(header)) {
+                    try self.collectContainerCoverage(name, child, header);
+                }
+            }
+        }
+    }
+
+    fn collectContainerCoverage(
+        self: *Self,
+        container_name: []const u8,
+        n: std.json.Value,
+        fallback_header: []const u8,
+    ) !void {
+        for (getArray(n, "inner")) |child| {
+            const kind = getString(child, "kind");
+            const manifest_kind: coverage.DeclarationKind = if (std.mem.eql(u8, kind, "ObjCMethodDecl"))
+                .method
+            else if (std.mem.eql(u8, kind, "ObjCPropertyDecl"))
+                .property
+            else
+                continue;
+            const child_name = getString(child, "name");
+            const full_name = try std.fmt.allocPrint(
+                self.arena.allocator(),
+                "{s}.{s}",
+                .{ container_name, child_name },
+            );
+            const explicit_header = explicitLocationFile(child);
+            const header = if (explicit_header.len > 0) explicit_header else fallback_header;
+            _ = try self.manifest.add(manifest_kind, full_name, std.fs.path.basename(header));
+        }
+    }
+
+    fn declarationHeader(self: *Self, n: std.json.Value) []const u8 {
+        const explicit = explicitLocationFile(n);
+        if (explicit.len > 0) self.current_header = explicit;
+        return self.current_header;
+    }
+
+    fn declarationKind(kind: []const u8) ?coverage.DeclarationKind {
+        if (std.mem.eql(u8, kind, "EnumDecl")) return .enum_decl;
+        if (std.mem.eql(u8, kind, "FunctionDecl")) return .function;
+        if (std.mem.eql(u8, kind, "RecordDecl")) return .record;
+        if (std.mem.eql(u8, kind, "VarDecl")) return .variable;
+        if (std.mem.eql(u8, kind, "TypedefDecl")) return .typedef;
+        if (std.mem.eql(u8, kind, "ObjCInterfaceDecl")) return .interface;
+        if (std.mem.eql(u8, kind, "ObjCProtocolDecl")) return .protocol;
+        return null;
+    }
+
+    fn explicitLocationFile(n: std.json.Value) []const u8 {
+        const loc = getObject(n, "loc") orelse return "";
+        const direct = getString(loc, "file");
+        if (direct.len > 0) return direct;
+        if (getObject(loc, "expansionLoc")) |expansion| {
+            const file = getString(expansion, "file");
+            if (file.len > 0) return file;
+        }
+        if (getObject(loc, "spellingLoc")) |spelling| {
+            const file = getString(spelling, "file");
+            if (file.len > 0) return file;
+        }
+        return "";
+    }
+
+    fn declarationLine(n: std.json.Value) i64 {
+        const loc = getObject(n, "loc") orelse return 0;
+        if (getInteger(loc, "line")) |line| return line;
+        if (getObject(loc, "expansionLoc")) |expansion| {
+            if (getInteger(expansion, "line")) |line| return line;
+        }
+        if (getObject(loc, "spellingLoc")) |spelling| {
+            if (getInteger(spelling, "line")) |line| return line;
+        }
+        return 0;
     }
 
     fn convertTranslationUnitDecl(self: *Self, n: std.json.Value) !void {
@@ -803,6 +1023,10 @@ pub const Converter = struct {
             return;
         }
 
+        const previous_strict = self.strict_types;
+        self.strict_types = self.isDirectName(name);
+        defer self.strict_types = previous_strict;
+
         var e = try registry.getEnum(name);
         if (getObject(n, "fixedUnderlyingType")) |ty| {
             e.ty = try self.convertType(ty);
@@ -810,57 +1034,78 @@ pub const Converter = struct {
             e.ty = .{ .int = 32 };
         }
 
+        var next_implicit_value: i128 = 0;
         for (getArray(n, "inner")) |child| {
             const childKind = getString(child, "kind");
             if (std.mem.eql(u8, childKind, "EnumConstantDecl")) {
-                const v = try self.convertEnumConstantDecl(child);
+                const v = try self.convertEnumConstantDecl(child, next_implicit_value);
                 try e.values.append(v);
+                next_implicit_value = v.value + 1;
             }
         }
     }
 
-    fn convertEnumConstantDecl(self: *Self, n: std.json.Value) !EnumValue {
-        var value: i64 = 0;
-        var is_max_uint = false;
+    fn convertEnumConstantDecl(
+        self: *Self,
+        n: std.json.Value,
+        implicit_value: i128,
+    ) !EnumValue {
+        var evaluated: ?EnumValue = null;
         for (getArray(n, "inner")) |child| {
             const childKind = getString(child, "kind");
             if (std.mem.eql(u8, childKind, "ConstantExpr")) {
-                const result = self.convertConstantExpr(child);
-                value = result.value;
-                is_max_uint = result.is_max_uint;
+                evaluated = try self.convertConstantExpr(child);
             } else if (std.mem.eql(u8, childKind, "ImplicitCastExpr")) {
-                const result = self.convertImplicitCastExpr(child);
-                value = result.value;
-                is_max_uint = result.is_max_uint;
+                evaluated = try self.convertImplicitCastExpr(child);
             }
         }
 
-        return .{ .name = getString(n, "name"), .value = value, .is_max_uint = is_max_uint };
-    }
-
-    fn convertConstantExpr(_: *Self, n: std.json.Value) EnumValue {
-        const value = getString(n, "value");
-        if (std.fmt.parseInt(i64, value, 10)) |v| {
-            return .{ .name = "", .value = v };
-        } else |_| {
-            if (std.fmt.parseUnsigned(u64, value, 10)) |v| {
-                if (v == std.math.maxInt(u64)) {
-                    return .{ .name = "", .value = 0, .is_max_uint = true };
-                }
-            } else |_| {}
-            return .{ .name = "", .value = 0 };
+        const children = getArray(n, "inner");
+        var has_expression = false;
+        for (children) |child| {
+            const kind = getString(child, "kind");
+            if (!std.mem.endsWith(u8, kind, "Attr")) has_expression = true;
         }
+        if (evaluated == null and has_expression) {
+            if (self.emit_diagnostics) {
+                std.debug.print(
+                    "unsupported enum expression for {s}\n",
+                    .{getString(n, "name")},
+                );
+            }
+            return error.UnsupportedEnumExpression;
+        }
+        const result = evaluated orelse EnumValue{ .name = "", .value = implicit_value };
+        return .{
+            .name = getString(n, "name"),
+            .value = result.value,
+            .is_max_uint = result.is_max_uint,
+        };
     }
 
-    fn convertImplicitCastExpr(self: *Self, n: std.json.Value) EnumValue {
+    fn convertConstantExpr(self: *Self, n: std.json.Value) !EnumValue {
+        const value = getString(n, "value");
+        const parsed = std.fmt.parseInt(i128, value, 10) catch {
+            if (self.emit_diagnostics) {
+                std.debug.print("Clang did not provide an integer enum value: '{s}'\n", .{value});
+            }
+            return error.InvalidClangEnumValue;
+        };
+        if (parsed == std.math.maxInt(u64)) {
+            return .{ .name = "", .value = parsed, .is_max_uint = true };
+        }
+        return .{ .name = "", .value = parsed };
+    }
+
+    fn convertImplicitCastExpr(self: *Self, n: std.json.Value) !EnumValue {
         for (getArray(n, "inner")) |child| {
             const childKind = getString(child, "kind");
             if (std.mem.eql(u8, childKind, "ConstantExpr")) {
-                return self.convertConstantExpr(child);
+                return try self.convertConstantExpr(child);
             }
         }
 
-        return .{ .name = "", .value = 0 };
+        return error.MissingClangEnumValue;
     }
 
     fn convertFunctionDecl(self: *Self, n: std.json.Value) void {
@@ -870,12 +1115,20 @@ pub const Converter = struct {
 
     fn convertObjCCategoryDecl(self: *Self, n: std.json.Value) !void {
         const interfaceDecl = getObject(n, "interface").?;
-        const container = try registry.getInterface(getString(interfaceDecl, "name"));
+        const name = getString(interfaceDecl, "name");
+        const previous_strict = self.strict_types;
+        self.strict_types = self.isDirectName(name);
+        defer self.strict_types = previous_strict;
+        const container = try registry.getInterface(name);
         try self.convertContainer(container, n);
     }
 
     fn convertObjCInterfaceDecl(self: *Self, n: std.json.Value) !void {
-        var container = try registry.getInterface(getString(n, "name"));
+        const name = getString(n, "name");
+        const previous_strict = self.strict_types;
+        self.strict_types = self.isDirectName(name);
+        defer self.strict_types = previous_strict;
+        var container = try registry.getInterface(name);
         if (getObject(n, "super")) |super| {
             const superName = getString(super, "name");
             if (superName.len > 0) {
@@ -887,7 +1140,11 @@ pub const Converter = struct {
     }
 
     fn convertObjcProtocolDecl(self: *Self, n: std.json.Value) !void {
-        var container = try registry.getProtocol(getString(n, "name"));
+        const name = getString(n, "name");
+        const previous_strict = self.strict_types;
+        self.strict_types = self.isDirectName(name);
+        defer self.strict_types = previous_strict;
+        var container = try registry.getProtocol(name);
         if (getObject(n, "super")) |super| {
             const superName = getString(super, "name");
             if (superName.len > 0) {
@@ -971,10 +1228,37 @@ pub const Converter = struct {
     }
 
     fn convertType(self: *Self, t: std.json.Value) !Type {
-        //std.debug.print("convertType: {s}\n", .{t.qualType});
-        var lexer = Lexer{ .source = getString(t, "qualType") };
-        var parser = try Parser.init(self.arena.allocator(), &lexer);
-        return parser.parseType();
+        const qual_type = getString(t, "qualType");
+        if (self.strict_types) {
+            try self.noteTypeDependencies(qual_type);
+            if (std.mem.indexOf(u8, qual_type, "vector_type") != null or
+                std.mem.indexOf(u8, qual_type, "vector_size") != null)
+            {
+                if (self.emit_diagnostics) {
+                    std.debug.print("unsupported vector type in selected surface: {s}\n", .{qual_type});
+                }
+                return error.UnsupportedVectorType;
+            }
+        }
+
+        var lexer = Lexer{ .source = qual_type };
+        var parser = try Parser.init(self.arena.allocator(), &lexer, self.strict_types);
+        const result = parser.parseType() catch |err| {
+            if (self.emit_diagnostics) {
+                std.debug.print("failed to convert selected type '{s}': {s}\n", .{ qual_type, @errorName(err) });
+            }
+            return err;
+        };
+        if (self.strict_types and parser.lookahead.kind != .eof) {
+            if (self.emit_diagnostics) {
+                std.debug.print(
+                    "unconsumed type syntax in selected type '{s}' at '{s}'\n",
+                    .{ qual_type, parser.lookahead.text },
+                );
+            }
+            return error.UnconsumedTypeSyntax;
+        }
+        return result;
     }
 };
 
@@ -1046,16 +1330,22 @@ fn Generator(comptime WriterType: type) type {
 
         allocator: std.mem.Allocator,
         writer: *WriterType,
+        manifest: *coverage.Manifest,
         enums: EnumList,
         containers: ContainerList,
         selectors: SelectorHashSet,
         namespace: []const u8,
         allow_methods: []const [2][]const u8,
 
-        fn init(allocator: std.mem.Allocator, writer: *WriterType) Self {
+        fn init(
+            allocator: std.mem.Allocator,
+            writer: *WriterType,
+            manifest: *coverage.Manifest,
+        ) Self {
             return Self{
                 .allocator = allocator,
                 .writer = writer,
+                .manifest = manifest,
                 .enums = EnumList.init(allocator),
                 .containers = ContainerList.init(allocator),
                 .selectors = SelectorHashSet.init(allocator),
@@ -1072,29 +1362,43 @@ fn Generator(comptime WriterType: type) type {
 
         pub fn addProtocol(self: *Self, name: []const u8) !void {
             const container = registry.protocols.get(name) orelse {
-                std.debug.print("Protocol {s} not found\n", .{name});
-                return;
+                std.debug.print("required protocol {s} not found\n", .{name});
+                return error.MissingRequiredProtocol;
             };
 
             try self.addContainer(container);
+            try self.manifest.markIfPresent(
+                .protocol,
+                name,
+                .generated,
+                "generated Objective-C protocol wrapper",
+            );
         }
 
         pub fn addInterface(self: *Self, name: []const u8) !void {
             const container = registry.interfaces.get(name) orelse {
-                std.debug.print("Interface {s} not found\n", .{name});
-                return;
+                std.debug.print("required interface {s} not found\n", .{name});
+                return error.MissingRequiredInterface;
             };
 
             try self.addContainer(container);
+            try self.manifest.markIfPresent(
+                .interface,
+                name,
+                .generated,
+                "generated Objective-C class wrapper",
+            );
         }
 
         pub fn addEnum(self: *Self, name: []const u8) !void {
             const e = registry.enums.get(name) orelse {
-                std.debug.print("Enum {s} not found\n", .{name});
-                return;
+                std.debug.print("required enum {s} not found\n", .{name});
+                return error.MissingRequiredEnum;
             };
 
             try self.enums.append(e);
+            try self.manifest.markIfPresent(.enum_decl, name, .generated, "generated enum values");
+            try self.manifest.markIfPresent(.typedef, name, .generated, "generated as the enum underlying type alias");
         }
 
         pub fn addEnumsWithPrefix(self: *Self, prefix: []const u8) !void {
@@ -1263,6 +1567,24 @@ fn Generator(comptime WriterType: type) type {
             }
             for (seen.items) |s| self.allocator.free(s);
 
+            for (container.properties.items) |property| {
+                const property_name = try std.fmt.allocPrint(
+                    self.allocator,
+                    "{s}.{s}",
+                    .{ container.name, property.name },
+                );
+                defer self.allocator.free(property_name);
+                const method_status = self.manifest.statusOf(.method, property_name);
+                if (method_status == .generated) {
+                    try self.manifest.markIfPresent(
+                        .property,
+                        property_name,
+                        .generated,
+                        "represented by generated Objective-C accessor methods",
+                    );
+                }
+            }
+
             try self.writer.print("}};\n", .{});
             if (container.type_params.items.len > 0) {
                 try self.writer.print("}}\n", .{});
@@ -1289,10 +1611,32 @@ fn Generator(comptime WriterType: type) type {
         }
 
         fn generateMethod(self: *Self, container: *Container, method: Method) !void {
-            if (!self.isAllowedMethod(container, method)) return;
+            const manifest_name = try std.fmt.allocPrint(
+                self.allocator,
+                "{s}.{s}",
+                .{ container.name, method.name },
+            );
+            defer self.allocator.free(manifest_name);
+
+            if (!self.isAllowedMethod(container, method)) {
+                try self.manifest.markIfPresent(
+                    .method,
+                    manifest_name,
+                    .rejected,
+                    "method excluded by the audited framework method allowlist",
+                );
+                return;
+            }
             if (container.super) |super| {
-                if (self.doesParentHaveMethod(super, method.name))
+                if (self.doesParentHaveMethod(super, method.name)) {
+                    try self.manifest.markIfPresent(
+                        .method,
+                        manifest_name,
+                        .rejected,
+                        "duplicate inherited method omitted from this wrapper",
+                    );
                     return;
+                }
             }
 
             // Class 'type methods' and 'self methods' can have naming conflicts, e.g. NSCursor pop()
@@ -1326,6 +1670,12 @@ fn Generator(comptime WriterType: type) type {
             try self.generateMethodArgs(method);
             try self.writer.print(");\n", .{});
             try self.writer.print("    }}\n", .{});
+            try self.manifest.markIfPresent(
+                .method,
+                manifest_name,
+                .generated,
+                "generated typed Objective-C message wrapper",
+            );
         }
 
         fn doesParentHaveMethod(self: *Self, container: *Container, name: []const u8) bool {
@@ -2705,6 +3055,8 @@ const FrameworkSpec = struct {
     tag: Framework,
     manual_path: []const u8,
     output_path: []const u8,
+    manifest_path: ?[]const u8,
+    parity_surface: bool,
     header_content: union(enum) {
         inline_text: []const u8,
         file_path: []const u8,
@@ -2718,6 +3070,8 @@ const framework_specs = [_]FrameworkSpec{
         .tag = .metal,
         .manual_path = "src/metal.zig",
         .output_path = "src/generated/metal.zig",
+        .manifest_path = "src/generated/metal.manifest.json",
+        .parity_surface = true,
         .header_content = .{ .inline_text = "\n#include <Metal/Metal.h>\n" },
         .extra_clang_args = &.{},
     },
@@ -2726,6 +3080,8 @@ const framework_specs = [_]FrameworkSpec{
         .tag = .metal_fx,
         .manual_path = "src/metal_fx.zig",
         .output_path = "src/generated/metal_fx.zig",
+        .manifest_path = "src/generated/metal_fx.manifest.json",
+        .parity_surface = true,
         .header_content = .{ .inline_text = "\n#include <MetalFX/MetalFX.h>\n" },
         .extra_clang_args = &.{},
     },
@@ -2734,6 +3090,8 @@ const framework_specs = [_]FrameworkSpec{
         .tag = .quartz_core,
         .manual_path = "src/quartz_core.zig",
         .output_path = "src/generated/quartz_core.zig",
+        .manifest_path = "src/generated/quartz_core.manifest.json",
+        .parity_surface = true,
         .header_content = .{ .inline_text = "\n#include <QuartzCore/QuartzCore.h>\n" },
         .extra_clang_args = &.{"-Wno-availability"},
     },
@@ -2742,6 +3100,8 @@ const framework_specs = [_]FrameworkSpec{
         .tag = .app_kit,
         .manual_path = "src/app_kit.zig",
         .output_path = "src/generated/app_kit.zig",
+        .manifest_path = null,
+        .parity_surface = false,
         .header_content = .{ .inline_text = "\n#include <AppKit/AppKit.h>\n" },
         .extra_clang_args = &.{"-Wno-availability"},
     },
@@ -2826,6 +3186,14 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     // Read manual zig file
     const manual_content = try readFileContents(allocator, io, spec.manual_path);
     defer allocator.free(manual_content);
+    const foundation_content = try readFileContents(allocator, io, "src/foundation.zig");
+    defer allocator.free(foundation_content);
+    const core_foundation_content = try readFileContents(allocator, io, "src/core_foundation.zig");
+    defer allocator.free(core_foundation_content);
+    const core_graphics_content = try readFileContents(allocator, io, "src/core_graphics.zig");
+    defer allocator.free(core_graphics_content);
+    const system_content = try readFileContents(allocator, io, "src/system.zig");
+    defer allocator.free(system_content);
 
     // Parse JSON
     var scanner = std.json.Scanner.initCompleteInput(allocator, json_data);
@@ -2845,19 +3213,22 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     registry.deinit();
     registry = Registry.init(allocator);
 
-    var converter = Converter.init(allocator);
+    var manifest = coverage.Manifest.init(allocator, spec.name);
+    defer manifest.deinit();
+
+    var converter = Converter.init(allocator, &manifest, spec.tag);
     defer converter.deinit();
     try converter.convert(valueTree.value);
 
     // Create output file, write manual content, then generate
     try std.Io.Dir.createDirPath(.cwd(), io, "src/generated");
-    var out_file = try std.Io.Dir.createFile(.cwd(), io, spec.output_path, .{});
-    defer out_file.close(io);
-    try out_file.writeStreamingAll(io, manual_content);
+    var atomic_output = try std.Io.Dir.cwd().createFileAtomic(io, spec.output_path, .{ .replace = true });
+    defer atomic_output.deinit(io);
+    try atomic_output.file.writeStreamingAll(io, manual_content);
 
     var file_buf: [4096]u8 = undefined;
-    var file_writer = out_file.writerStreaming(io, &file_buf);
-    var generator = Generator(std.Io.Writer).init(allocator, &file_writer.interface);
+    var file_writer = atomic_output.file.writerStreaming(io, &file_buf);
+    var generator = Generator(std.Io.Writer).init(allocator, &file_writer.interface, &manifest);
     defer generator.deinit();
 
     switch (spec.tag) {
@@ -2868,10 +3239,27 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     }
     try generator.generate();
     try file_writer.flush();
+
+    if (spec.manifest_path) |manifest_path| {
+        const manual_sources = [_]coverage.ManualSource{
+            .{ .path = spec.manual_path, .content = manual_content },
+            .{ .path = "src/foundation.zig", .content = foundation_content },
+            .{ .path = "src/core_foundation.zig", .content = core_foundation_content },
+            .{ .path = "src/core_graphics.zig", .content = core_graphics_content },
+            .{ .path = "src/system.zig", .content = system_content },
+        };
+        try manifest.finalize(&manual_sources);
+        try manifest.write(io, manifest_path);
+    }
+    try atomic_output.replace(io);
 }
 
 fn generateAllFrameworks(allocator: std.mem.Allocator, io: std.Io, dirs: SdkDirs) !void {
+    registry = Registry.init(allocator);
+    defer registry.deinit();
+
     for (framework_specs) |spec| {
+        if (!spec.parity_surface) continue;
         try generateForFramework(allocator, io, spec, dirs);
     }
 
@@ -2882,7 +3270,6 @@ fn generateAllFrameworks(allocator: std.mem.Allocator, io: std.Io, dirs: SdkDirs
         "src/generated/metal.zig",
         "src/generated/metal_fx.zig",
         "src/generated/quartz_core.zig",
-        "src/generated/app_kit.zig",
     });
     allocator.free(fmt_stdout);
 }
@@ -2914,14 +3301,17 @@ fn generateSingleFramework(allocator: std.mem.Allocator, io: std.Io, framework: 
     registry = Registry.init(allocator);
     defer registry.deinit();
 
-    var converter = Converter.init(allocator);
+    var manifest = coverage.Manifest.init(allocator, @tagName(framework));
+    defer manifest.deinit();
+
+    var converter = Converter.init(allocator, &manifest, framework);
     defer converter.deinit();
 
     try converter.convert(valueTree.value);
 
     var stdout_buf: [4096]u8 = undefined;
     var stdout_writer = std.Io.File.stdout().writerStreaming(io, &stdout_buf);
-    var generator = Generator(std.Io.Writer).init(allocator, &stdout_writer.interface);
+    var generator = Generator(std.Io.Writer).init(allocator, &stdout_writer.interface, &manifest);
     defer generator.deinit();
 
     switch (framework) {
@@ -3014,4 +3404,63 @@ pub fn main(init: std.process.Init) anyerror!void {
 
 test {
     std.testing.refAllDecls(@This());
+}
+
+test "strict type parsing rejects representations it cannot preserve" {
+    try expectStrictTypeError("int [4]", error.UnsupportedArrayType);
+    try expectStrictTypeError("void (*)(void)", error.UnsupportedFunctionPointer);
+    try expectStrictTypeError("id<NSCopying, NSObject>", error.UnsupportedGenericObjectType);
+}
+
+test "selected vector types and invalid enum values fail closed" {
+    var manifest = coverage.Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+    var converter = Converter.init(std.testing.allocator, &manifest, .metal);
+    defer converter.deinit();
+    converter.strict_types = true;
+    converter.emit_diagnostics = false;
+
+    var type_json = try std.json.parseFromSlice(
+        std.json.Value,
+        std.testing.allocator,
+        "{\"qualType\":\"float __attribute__((ext_vector_type(4)))\"}",
+        .{},
+    );
+    defer type_json.deinit();
+    try std.testing.expectError(
+        error.UnsupportedVectorType,
+        converter.convertType(type_json.value),
+    );
+
+    var constant_json = try std.json.parseFromSlice(
+        std.json.Value,
+        std.testing.allocator,
+        "{\"value\":\"not-an-integer\"}",
+        .{},
+    );
+    defer constant_json.deinit();
+    try std.testing.expectError(
+        error.InvalidClangEnumValue,
+        converter.convertConstantExpr(constant_json.value),
+    );
+
+    var expression_json = try std.json.parseFromSlice(
+        std.json.Value,
+        std.testing.allocator,
+        "{\"name\":\"Unsupported\",\"inner\":[{\"kind\":\"UnaryOperator\"}]}",
+        .{},
+    );
+    defer expression_json.deinit();
+    try std.testing.expectError(
+        error.UnsupportedEnumExpression,
+        converter.convertEnumConstantDecl(expression_json.value, 0),
+    );
+}
+
+fn expectStrictTypeError(source: []const u8, expected_error: anyerror) !void {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    var lexer = Lexer{ .source = source };
+    var parser = try Parser.init(arena.allocator(), &lexer, true);
+    try std.testing.expectError(expected_error, parser.parseType());
 }

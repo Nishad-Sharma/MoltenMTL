@@ -329,7 +329,7 @@ pub const MTL4CompilerTaskStatusFinished: MTL4CompilerTaskStatus = 3;
 
 pub const MTL4CounterHeapType = ns.Integer;
 pub const MTL4CounterHeapTypeInvalid: MTL4CounterHeapType = 0;
-pub const MTL4CounterHeapTypeTimestamp: MTL4CounterHeapType = 0;
+pub const MTL4CounterHeapTypeTimestamp: MTL4CounterHeapType = 1;
 
 pub const MTL4IndirectCommandBufferSupportState = ns.Integer;
 pub const MTL4IndirectCommandBufferSupportStateDisabled: MTL4IndirectCommandBufferSupportState = 0;
@@ -540,12 +540,12 @@ pub const CPUCacheModeWriteCombined: CPUCacheMode = 1;
 
 pub const CaptureDestination = ns.Integer;
 pub const CaptureDestinationDeveloperTools: CaptureDestination = 1;
-pub const CaptureDestinationGPUTraceDocument: CaptureDestination = 0;
+pub const CaptureDestinationGPUTraceDocument: CaptureDestination = 2;
 
 pub const CaptureError = ns.Integer;
 pub const CaptureErrorNotSupported: CaptureError = 1;
-pub const CaptureErrorAlreadyCapturing: CaptureError = 0;
-pub const CaptureErrorInvalidDescriptor: CaptureError = 0;
+pub const CaptureErrorAlreadyCapturing: CaptureError = 2;
+pub const CaptureErrorInvalidDescriptor: CaptureError = 3;
 
 pub const ColorWriteMask = ns.UInteger;
 pub const ColorWriteMaskNone: ColorWriteMask = 0;
@@ -605,15 +605,15 @@ pub const CompileSymbolVisibilityHidden: CompileSymbolVisibility = 1;
 
 pub const CounterSampleBufferError = ns.Integer;
 pub const CounterSampleBufferErrorOutOfMemory: CounterSampleBufferError = 0;
-pub const CounterSampleBufferErrorInvalid: CounterSampleBufferError = 0;
-pub const CounterSampleBufferErrorInternal: CounterSampleBufferError = 0;
+pub const CounterSampleBufferErrorInvalid: CounterSampleBufferError = 1;
+pub const CounterSampleBufferErrorInternal: CounterSampleBufferError = 2;
 
 pub const CounterSamplingPoint = ns.UInteger;
 pub const CounterSamplingPointAtStageBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtDrawBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtDispatchBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtTileDispatchBoundary: CounterSamplingPoint = 0;
-pub const CounterSamplingPointAtBlitBoundary: CounterSamplingPoint = 0;
+pub const CounterSamplingPointAtDrawBoundary: CounterSamplingPoint = 1;
+pub const CounterSamplingPointAtDispatchBoundary: CounterSamplingPoint = 2;
+pub const CounterSamplingPointAtTileDispatchBoundary: CounterSamplingPoint = 3;
+pub const CounterSamplingPointAtBlitBoundary: CounterSamplingPoint = 4;
 
 pub const CullMode = ns.UInteger;
 pub const CullModeNone: CullMode = 0;
@@ -750,7 +750,7 @@ pub const DeviceLocationUnspecified: DeviceLocation = std.math.maxInt(ns.UIntege
 
 pub const DispatchType = ns.UInteger;
 pub const DispatchTypeSerial: DispatchType = 0;
-pub const DispatchTypeConcurrent: DispatchType = 0;
+pub const DispatchTypeConcurrent: DispatchType = 1;
 
 pub const DynamicLibraryError = ns.UInteger;
 pub const DynamicLibraryErrorNone: DynamicLibraryError = 0;
@@ -940,11 +940,11 @@ pub const LoadActionClear: LoadAction = 2;
 
 pub const LogLevel = ns.Integer;
 pub const LogLevelUndefined: LogLevel = 0;
-pub const LogLevelDebug: LogLevel = 0;
-pub const LogLevelInfo: LogLevel = 0;
-pub const LogLevelNotice: LogLevel = 0;
-pub const LogLevelError: LogLevel = 0;
-pub const LogLevelFault: LogLevel = 0;
+pub const LogLevelDebug: LogLevel = 1;
+pub const LogLevelInfo: LogLevel = 2;
+pub const LogLevelNotice: LogLevel = 3;
+pub const LogLevelError: LogLevel = 4;
+pub const LogLevelFault: LogLevel = 5;
 
 pub const LogStateError = ns.UInteger;
 pub const LogStateErrorInvalidSize: LogStateError = 1;
@@ -7136,8 +7136,8 @@ pub const TensorExtents = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn initWithRank_values(self_: *@This(), rank_: ns.UInteger, values_: ?*const ns.Integer) *@This() {
-        return objc.msgSend(self_, "initWithRank:values:", *@This(), .{ rank_, values_ });
+    pub fn initWithRank_values(self_: *@This(), rank_: ns.UInteger, values_: ?*const ns.Integer) ?*@This() {
+        return objc.msgSend(self_, "initWithRank:values:", ?*@This(), .{ rank_, values_ });
     }
     pub fn extentAtDimensionIndex(self_: *@This(), dimensionIndex_: ns.UInteger) ns.Integer {
         return objc.msgSend(self_, "extentAtDimensionIndex:", ns.Integer, .{dimensionIndex_});

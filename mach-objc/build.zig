@@ -59,6 +59,16 @@ pub fn build(b: *std.Build) void {
     const run_objc_abi_tests = b.addRunArtifact(objc_abi_tests);
     test_step.dependOn(&run_objc_abi_tests.step);
 
+    const generator_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("generator.zig"),
+            .target = b.graph.host,
+            .optimize = optimize,
+        }),
+    });
+    const run_generator_tests = b.addRunArtifact(generator_tests);
+    test_step.dependOn(&run_generator_tests.step);
+
     const raytrace_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("tests/metal4_raytrace.zig"),

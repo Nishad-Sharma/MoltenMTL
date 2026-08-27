@@ -1,0 +1,3840 @@
+{
+  "framework": "MetalFX",
+  "counts": {
+    "total": 547,
+    "generated": 533,
+    "manual": 2,
+    "rejected": 12
+  },
+  "declarations": [
+    {
+      "name": "MTL4FXFrameInterpolator.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTL4FXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTL4FXFrameInterpolator",
+      "kind": "protocol",
+      "header": "MTL4FXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXSpatialScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTL4FXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTL4FXSpatialScaler",
+      "kind": "protocol",
+      "header": "MTL4FXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalDenoisedScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTL4FXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalDenoisedScaler",
+      "kind": "protocol",
+      "header": "MTL4FXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTL4FXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTL4FXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor",
+      "kind": "interface",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C class wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolator.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.aspectRatio",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTextureUsage",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.deltaTime",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTextureUsage",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.farPlane",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.fence",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.fieldOfView",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.inputHeight",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.inputWidth",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.isDepthReversed",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.isUITextureComposited",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.jitterOffsetX",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.jitterOffsetY",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTextureUsage",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionVectorScaleX",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionVectorScaleY",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.nearPlane",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputHeight",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTextureUsage",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputWidth",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.prevColorTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setAspectRatio:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setColorTexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setDeltaTime:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setDepthReversed:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setDepthTexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setFarPlane:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setFence:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setFieldOfView:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setIsUITextureComposited:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setJitterOffsetX:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setJitterOffsetY:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setMotionTexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setMotionVectorScaleX:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setMotionVectorScaleY:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setNearPlane:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setOutputTexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setPrevColorTexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setShouldResetHistory:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.setUITexture:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.shouldResetHistory",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTexture",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTextureUsage",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.inputHeight",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.inputWidth",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.newFrameInterpolatorWithDevice:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.newFrameInterpolatorWithDevice:compiler:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputHeight",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputWidth",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.scaler",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setColorTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setDepthTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setInputHeight:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setInputWidth:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setMotionTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setOutputHeight:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setOutputTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setOutputWidth:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setScaler:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.setUITextureFormat:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.supportsDevice:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.supportsMetal4FX:",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.uiTextureFormat",
+      "kind": "method",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.aspectRatio",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.colorTextureUsage",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.deltaTime",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthReversed",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.depthTextureUsage",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.farPlane",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.fence",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.fieldOfView",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.inputHeight",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.inputWidth",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.jitterOffsetX",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.jitterOffsetY",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionTextureUsage",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionVectorScaleX",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.motionVectorScaleY",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.nearPlane",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputHeight",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputTextureUsage",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.outputWidth",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.prevColorTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.shouldResetHistory",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTexture",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTextureComposited",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase.uiTextureUsage",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.inputHeight",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.inputWidth",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputHeight",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.outputWidth",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.scaler",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorDescriptor.uiTextureFormat",
+      "kind": "property",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTL4FXFrameInterpolator",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalDenoisedScaler",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolator",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatorBase",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScaler",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTLFXFrameInterpolator.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerColorProcessingMode",
+      "kind": "enum_decl",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated enum values"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor",
+      "kind": "interface",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C class wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorProcessingMode",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTexture",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTextureUsage",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.fence",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputContentHeight",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputContentWidth",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputHeight",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputWidth",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputHeight",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTexture",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTextureUsage",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputWidth",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.setColorTexture:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.setFence:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.setInputContentHeight:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.setInputContentWidth:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.setOutputTexture:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.colorProcessingMode",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.inputHeight",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.inputWidth",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.newSpatialScalerWithDevice:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.newSpatialScalerWithDevice:compiler:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputHeight",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputWidth",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setColorProcessingMode:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setColorTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setInputHeight:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setInputWidth:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setOutputHeight:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setOutputTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.setOutputWidth:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.supportsDevice:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.supportsMetal4FX:",
+      "kind": "method",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorProcessingMode",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTexture",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.colorTextureUsage",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.fence",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputContentHeight",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputContentWidth",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputHeight",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.inputWidth",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputHeight",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTexture",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputTextureUsage",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase.outputWidth",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.colorProcessingMode",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.inputHeight",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.inputWidth",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputHeight",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXSpatialScalerDescriptor.outputWidth",
+      "kind": "property",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTL4FXSpatialScaler",
+      "kind": "protocol",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTL4FXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScaler",
+      "kind": "protocol",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerBase",
+      "kind": "protocol",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXSpatialScalerColorProcessingMode",
+      "kind": "typedef",
+      "header": "MTLFXSpatialScaler.h",
+      "status": "generated",
+      "reason": "generated as the enum underlying type alias"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor",
+      "kind": "interface",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C class wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.exposureTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.fence",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputContentMaxScale",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputContentMinScale",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.isDepthReversed",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.jitterOffsetX",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.jitterOffsetY",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionVectorScaleX",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionVectorScaleY",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.preExposure",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveMaskTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setColorTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setDenoiseStrengthMaskTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setDepthReversed:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setDepthTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setDiffuseAlbedoTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setExposureTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setFence:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setJitterOffsetX:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setJitterOffsetY:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setMotionTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setMotionVectorScaleX:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setMotionVectorScaleY:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setNormalTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setOutputTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setPreExposure:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setReactiveMaskTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setRoughnessTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setShouldResetHistory:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setSpecularAlbedoTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setSpecularHitDistanceTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setTransparencyOverlayTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setViewToClipMatrix:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.setWorldToViewMatrix:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.shouldResetHistory",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.viewToClipMatrix",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.worldToViewMatrix",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.diffuseAlbedoTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.inputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.inputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.isAutoExposureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.isDenoiseStrengthMaskTextureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.isReactiveMaskTextureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.isSpecularHitDistanceTextureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.isTransparencyOverlayTextureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.newTemporalDenoisedScalerWithDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.newTemporalDenoisedScalerWithDevice:compiler:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.normalTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.requiresSynchronousInitialization",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.roughnessTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setAutoExposureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setColorTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setDenoiseStrengthMaskTextureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setDenoiseStrengthMaskTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setDepthTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setDiffuseAlbedoTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setInputHeight:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setInputWidth:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setMotionTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setNormalTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setOutputHeight:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setOutputTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setOutputWidth:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setReactiveMaskTextureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setReactiveMaskTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setRequiresSynchronousInitialization:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setRoughnessTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setSpecularAlbedoTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setSpecularHitDistanceTextureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setSpecularHitDistanceTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setTransparencyOverlayTextureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.setTransparencyOverlayTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.specularAlbedoTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.supportedInputContentMaxScaleForDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.supportedInputContentMinScaleForDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.supportsDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.supportsMetal4FX:",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.colorTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.denoiseStrengthMaskTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthReversed",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.depthTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.diffuseAlbedoTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.exposureTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.fence",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputContentMaxScale",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputContentMinScale",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.inputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.jitterOffsetX",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.jitterOffsetY",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionVectorScaleX",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.motionVectorScaleY",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.normalTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.outputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.preExposure",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveMaskTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.reactiveTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.roughnessTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.shouldResetHistory",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularAlbedoTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.specularHitDistanceTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.transparencyOverlayTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.viewToClipMatrix",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase.worldToViewMatrix",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.autoExposureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.diffuseAlbedoTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.inputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.inputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.normalTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.outputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.requiresSynchronousInitialization",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.roughnessTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.specularAlbedoTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTL4FXTemporalDenoisedScaler",
+      "kind": "protocol",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScaler",
+      "kind": "protocol",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalDenoisedScalerBase",
+      "kind": "protocol",
+      "header": "MTLFXTemporalDenoisedScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor",
+      "kind": "interface",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C class wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScaler.encodeToCommandBuffer:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.exposureTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.fence",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentMaxScale",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentMinScale",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.isDepthReversed",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.jitterOffsetX",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.jitterOffsetY",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionVectorScaleX",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionVectorScaleY",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.preExposure",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveMaskTexture",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveTextureUsage",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reset",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setColorTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setDepthReversed:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setDepthTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setExposureTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setFence:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setInputContentHeight:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setInputContentWidth:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setJitterOffsetX:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setJitterOffsetY:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setMotionTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setMotionVectorScaleX:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setMotionVectorScaleY:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setOutputTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setPreExposure:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setReactiveMaskTexture:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.setReset:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.colorTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.depthTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputContentMaxScale",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputContentMinScale",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.isAutoExposureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.isInputContentPropertiesEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.isReactiveMaskTextureEnabled",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.motionTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.newTemporalScalerWithDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.newTemporalScalerWithDevice:compiler:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputHeight",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputWidth",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureFormat",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.requiresSynchronousInitialization",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setAutoExposureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setColorTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setDepthTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setInputContentMaxScale:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setInputContentMinScale:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setInputContentPropertiesEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setInputHeight:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setInputWidth:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setMotionTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setOutputHeight:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setOutputTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setOutputWidth:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setReactiveMaskTextureEnabled:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setReactiveMaskTextureFormat:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.setRequiresSynchronousInitialization:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.supportedInputContentMaxScaleForDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.supportedInputContentMinScaleForDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.supportsDevice:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.supportsMetal4FX:",
+      "kind": "method",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated typed Objective-C message wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.colorTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthReversed",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.depthTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.exposureTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.fence",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentMaxScale",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentMinScale",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputContentWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.inputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.jitterOffsetX",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.jitterOffsetY",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionVectorScaleX",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.motionVectorScaleY",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.outputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.preExposure",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveMaskTexture",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reactiveTextureUsage",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase.reset",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.autoExposureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.colorTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.depthTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputContentMaxScale",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputContentMinScale",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputContentPropertiesEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.inputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.motionTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputHeight",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.outputWidth",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureEnabled",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "rejected",
+      "reason": "property is not represented by a selected generated accessor; declaration explicitly rejected"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureFormat",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTLFXTemporalScalerDescriptor.requiresSynchronousInitialization",
+      "kind": "property",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
+    },
+    {
+      "name": "MTL4FXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXFrameInterpolatableScaler",
+      "kind": "protocol",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScaler",
+      "kind": "protocol",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "MTLFXTemporalScalerBase",
+      "kind": "protocol",
+      "header": "MTLFXTemporalScaler.h",
+      "status": "generated",
+      "reason": "generated Objective-C protocol wrapper"
+    },
+    {
+      "name": "NSInteger",
+      "kind": "typedef",
+      "header": "NSObjCRuntime.h",
+      "status": "manual",
+      "reason": "manually maintained declaration in src/foundation.zig"
+    },
+    {
+      "name": "NSUInteger",
+      "kind": "typedef",
+      "header": "NSObjCRuntime.h",
+      "status": "manual",
+      "reason": "manually maintained declaration in src/metal_fx.zig"
+    }
+  ]
+}
