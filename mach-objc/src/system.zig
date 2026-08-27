@@ -224,7 +224,10 @@ const _NSConcreteGlobalBlock = @extern(*anyopaque, .{
 
 pub fn globalBlock(comptime invoke: anytype) *Block(SignatureWithoutBlockLiteral(@TypeOf(invoke))) {
     const Static = struct {
-        const literal = globalBlockLiteral(invoke, {});
+        // `var`, not `const`: the block is handed out as a mutable pointer, and a
+        // global block genuinely does live in static storage for the life of the
+        // program, so one instance per `invoke` is the correct identity.
+        var literal = globalBlockLiteral(invoke, {});
     };
     return Static.literal.asBlock();
 }

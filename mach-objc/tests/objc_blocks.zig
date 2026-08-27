@@ -27,7 +27,7 @@ test "a global block invokes through the C ABI" {
 }
 
 test "a stack block reaches its captured context" {
-    const Context = struct { base: i32 };
+    const Context = extern struct { base: i32 };
     const Helper = struct {
         var observed: i32 = 0;
         fn invoke(literal: *system.BlockLiteral(Context), addend: i32) callconv(.c) void {
@@ -41,7 +41,7 @@ test "a stack block reaches its captured context" {
 }
 
 test "copying a block to the heap runs copy, and releasing it runs dispose" {
-    const Context = struct { tag: i32 };
+    const Context = extern struct { tag: i32 };
     const Helper = struct {
         var copies: i32 = 0;
         var disposes: i32 = 0;
@@ -75,7 +75,7 @@ test "copying a block to the heap runs copy, and releasing it runs dispose" {
 }
 
 test "a copied block survives being invoked from another thread" {
-    const Context = struct { base: i32 };
+    const Context = extern struct { base: i32 };
     const Helper = struct {
         var observed: i32 = 0;
         fn invoke(literal: *system.BlockLiteral(Context), addend: i32) callconv(.c) void {
