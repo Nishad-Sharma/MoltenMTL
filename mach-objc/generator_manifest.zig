@@ -203,6 +203,17 @@ pub const Manifest = struct {
             }
         }
 
+        // A hand-written binding is the most explicit form of selection there is,
+        // however it came to be classified — records are marked manual during
+        // generation, when their layout is verified against Clang, and so never
+        // reach the pass above. Without this, `selected` reports the opposite of
+        // the truth for every hand-written declaration.
+        for (self.entries.items) |*entry| {
+            if (entry.status != .manual or entry.selected) continue;
+            entry.selected = true;
+            entry.provenance = .explicit;
+        }
+
         // Phase 3 inventories SDK declarations without assuming that every
         // declaration is selected. Any top-level declaration left unclassified
         // after generation and manual-source auditing is therefore excluded.
@@ -465,6 +476,34 @@ test "manual classification requires an active declaration" {
 
     try std.testing.expectEqual(.excluded, manifest.statusOf(.function, "MTLCopyAllDevices").?);
     try std.testing.expectEqual(.manual, manifest.statusOf(.record, "MTLOrigin").?);
+}
+
+test "hand-written declarations are part of the selected surface" {
+    var manifest = Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+
+    _ = try manifest.add(.record, "MTLPackedFloat3", "MTLAccelerationStructureTypes.h");
+    _ = try manifest.add(.interface, "NSArray", "NSArray.h");
+
+    // Records are marked manual during generation, before finalize sees them.
+    try manifest.mark(.record, "MTLPackedFloat3", .manual, "layout verified against Clang");
+    // Something already reached as a dependency keeps the provenance it had.
+    try manifest.select(.interface, "NSArray", .transitive_dependency);
+
+    const sources = [_]ManualSource{.{
+        .path = "src/foundation.zig",
+        .content = "pub const Array = opaque {};",
+    }};
+    try manifest.finalize(&sources);
+
+    for (manifest.entries.items) |entry| {
+        try std.testing.expect(entry.selected);
+        if (entry.kind == .record) {
+            try std.testing.expectEqual(Provenance.explicit, entry.provenance);
+        } else {
+            try std.testing.expectEqual(Provenance.transitive_dependency, entry.provenance);
+        }
+    }
 }
 
 test "a reachable declaration that is not bound is rejected" {
