@@ -14,6 +14,22 @@ const TypeParam = reg.TypeParam;
 
 var registry: Registry = undefined;
 
+/// How the Objective-C headers annotate the pointers this generator converts.
+///
+/// Nullability is only as good as the annotations behind it: an unannotated
+/// pointer is a guess whichever way it is rendered. Counting the shapes says
+/// whether that guess is rare enough to ignore, and whether the two annotations
+/// currently rendered as non-optional occur at all.
+const NullabilityStats = struct {
+    nonnull: usize = 0,
+    nullable: usize = 0,
+    nullable_result: usize = 0,
+    null_unspecified: usize = 0,
+    unannotated: usize = 0,
+};
+
+var nullability_stats: NullabilityStats = .{};
+
 // ------------------------------------------------------------------------------------------------
 pub const ParseError = error{
     UnexpectedCharacter,
@@ -647,6 +663,7 @@ pub const Parser = struct {
     fn parsePointerProps(self: *Self, elem_is_const: bool) !PointerProps {
         var is_const = elem_is_const;
         var is_optional = false;
+        var annotated = false;
         while (true) {
             if (self.lookahead.kind == .kw_const) {
                 try self.match(.kw_const);
@@ -654,14 +671,23 @@ pub const Parser = struct {
             } else if (self.lookahead.kind == .kw_nullable) {
                 try self.match(.kw_nullable);
                 is_optional = true;
+                annotated = true;
+                nullability_stats.nullable += 1;
             } else if (self.lookahead.kind == .kw_nonnull) {
                 try self.match(.kw_nonnull);
+                annotated = true;
+                nullability_stats.nonnull += 1;
             } else if (self.lookahead.kind == .kw_null_unspecified) {
                 try self.match(.kw_null_unspecified);
+                annotated = true;
+                nullability_stats.null_unspecified += 1;
             } else if (self.lookahead.kind == .kw_nullable_result) {
                 try self.match(.kw_nullable_result);
+                annotated = true;
+                nullability_stats.nullable_result += 1;
             } else break;
         }
+        if (!annotated) nullability_stats.unannotated += 1;
 
         return .{ .is_const = is_const, .is_optional = is_optional };
     }
@@ -3877,6 +3903,7 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     // Re-initialize global registry
     registry.deinit();
     registry = Registry.init(allocator);
+    nullability_stats = .{};
 
     var manifest = coverage.Manifest.init(allocator, spec.name);
     defer manifest.deinit();
@@ -3884,6 +3911,22 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     var converter = Converter.init(allocator, &manifest, spec.tag);
     defer converter.deinit();
     try converter.convert(valueTree.value);
+
+    // Only _Nullable currently produces an optional pointer. _Nullable_result and
+    // _Null_unspecified are rendered non-optional, and so is a pointer with no
+    // annotation at all — those three counts are the blast radius of changing the
+    // rule to "optional unless provably _Nonnull".
+    std.log.info(
+        "{s}: pointer nullability — {d} _Nonnull, {d} _Nullable, {d} _Nullable_result, {d} _Null_unspecified, {d} unannotated",
+        .{
+            spec.name,
+            nullability_stats.nonnull,
+            nullability_stats.nullable,
+            nullability_stats.nullable_result,
+            nullability_stats.null_unspecified,
+            nullability_stats.unannotated,
+        },
+    );
 
     // Create output file, write manual content, then generate
     try std.Io.Dir.createDirPath(.cwd(), io, "src/generated");
