@@ -11498,6 +11498,14 @@ comptime {
     std.debug.assert(@offsetOf(ScissorRect, "height") == 24);
 }
 
+// MTL4BufferRange
+comptime {
+    std.debug.assert(@sizeOf(MTL4BufferRange) == 16);
+    std.debug.assert(@alignOf(MTL4BufferRange) == 8);
+    std.debug.assert(@offsetOf(MTL4BufferRange, "bufferAddress") == 0);
+    std.debug.assert(@offsetOf(MTL4BufferRange, "length") == 8);
+}
+
 // MTL4UpdateSparseTextureMappingOperation
 comptime {
     std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
@@ -11592,6 +11600,13 @@ comptime {
     std.debug.assert(@sizeOf(DispatchThreadgroupsIndirectArguments) == 12);
     std.debug.assert(@alignOf(DispatchThreadgroupsIndirectArguments) == 4);
     std.debug.assert(@offsetOf(DispatchThreadgroupsIndirectArguments, "threadgroupsPerGrid") == 0);
+}
+
+// MTLResourceID
+comptime {
+    std.debug.assert(@sizeOf(ResourceID) == 8);
+    std.debug.assert(@alignOf(ResourceID) == 8);
+    std.debug.assert(@offsetOf(ResourceID, "_impl") == 0);
 }
 
 // MTLSizeAndAlign

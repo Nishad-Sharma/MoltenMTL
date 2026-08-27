@@ -174,10 +174,15 @@ must still be named in the selection list by hand.
 
 ### 6. Records and generated layout verification — P0, L — **in progress**
 
-- Generate C records and their typedefs from the Clang AST instead of
-  hand-writing them. Retain a manual Zig record only when it is allowlisted and
-  layout-verified.
-- **Done for hand-written records:** emit generated `comptime` assertions for
+- **Record generation was dropped.** `convertRecordDecl` is a stub, so this
+  meant building field extraction and anonymous-record-to-typedef joining from
+  scratch — and it would not have replaced the hand-written records anyway. They
+  carry 14 `init`-style helpers used throughout the example and the raytrace
+  test, which a generated bare struct cannot provide. With every hand-written
+  record now asserted against Clang, a hand-written record is *provably* correct,
+  which was the actual goal; generation would only have added a second way to
+  produce declarations that still needed hand-written helpers on top.
+- **Done:** emit generated `comptime` assertions for
   size, alignment and every field offset, with values obtained from Clang rather
   than restated by hand. The generator writes a probe translation unit that
   references each record through its typedef, runs
@@ -186,8 +191,8 @@ must still be named in the selection list by hand.
   by the typedef the probe referenced, where the complete dump prints
   `struct (unnamed at file:line:col)` for the anonymous structs most Metal types
   are declared as. Bitfield layouts are rejected rather than guessed.
-  Still to do: extend the same assertions to generated records, and delete the
-  six hand-written `@sizeOf` asserts in `src/metal.zig` once they are redundant.
+  The six hand-written `@sizeOf` asserts in `src/metal.zig` are gone, superseded
+  by generated assertions that also cover alignment and every field offset.
 - Resolve a named typedef of an anonymous struct to one Zig declaration, so
   `MTLOrigin` and its underlying anonymous record stop being two manifest
   entries.

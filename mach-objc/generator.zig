@@ -3488,6 +3488,22 @@ fn stripRecordTagKeyword(name: []const u8) []const u8 {
     return name;
 }
 
+/// Is `text` usable as a Zig field name in `@offsetOf`?
+///
+/// An anonymous member dumps with no name at all — the union inside
+/// `_MTLPackedFloat3` prints as its own type followed by nothing — so the last
+/// token of the line is a fragment of a source location rather than an
+/// identifier. Such members get no offset assertion; the record's size and
+/// alignment are still checked.
+fn isIdentifier(text: []const u8) bool {
+    if (text.len == 0) return false;
+    if (!std.ascii.isAlphabetic(text[0]) and text[0] != '_') return false;
+    for (text[1..]) |c| {
+        if (!std.ascii.isAlphanumeric(c) and c != '_') return false;
+    }
+    return true;
+}
+
 /// Parse the output of `clang -Xclang -fdump-record-layouts`.
 ///
 /// Each record arrives as a block:
@@ -3578,17 +3594,26 @@ fn parseRecordLayouts(
         const offset = std.fmt.parseInt(u64, offset_text, 10) catch continue;
 
         if (depth == 0) {
-            const record_name = stripRecordTagKeyword(body);
+            const tag_stripped = stripRecordTagKeyword(body);
+            // Apple writes a record's tag with a leading underscore and its
+            // typedef without: `struct _MTLPackedFloat3` is `MTLPackedFloat3`.
+            // The probe asked for the typedef, so report it under that name.
+            const record_name = if (!wanted.contains(tag_stripped) and
+                tag_stripped.len > 1 and tag_stripped[0] == '_' and
+                wanted.contains(tag_stripped[1..]))
+                tag_stripped[1..]
+            else
+                tag_stripped;
+
             name = record_name;
             keep = wanted.contains(record_name);
             for (layouts.items) |existing| {
                 if (std.mem.eql(u8, existing.name, record_name)) keep = false;
             }
         } else if (depth == 1 and keep) {
-            try fields.append(.{
-                .name = lastToken(body) orelse continue,
-                .offset = offset,
-            });
+            const field_name = lastToken(body) orelse continue;
+            if (!isIdentifier(field_name)) continue;
+            try fields.append(.{ .name = field_name, .offset = offset });
         }
     }
 
@@ -4204,6 +4229,34 @@ test "clang record layouts parse into sizes, alignments and field offsets" {
     try std.testing.expectEqualStrings("MTLResourceID", layouts[2].name);
     try std.testing.expectEqual(@as(u64, 8), layouts[2].size);
     try std.testing.expectEqualStrings("_impl", layouts[2].fields[0].name);
+}
+
+test "underscored tags and anonymous members are handled" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+
+    // `MTLPackedFloat3` is `struct _MTLPackedFloat3`, and its sole member is an
+    // anonymous union, which dumps with a source location where a field name
+    // would be.
+    const dump =
+        \\*** Dumping AST Record Layout
+        \\         0 | struct _MTLPackedFloat3
+        \\         0 |   union _MTLPackedFloat3::(anonymous at MTLAccelerationStructureTypes.h:19:5) 
+        \\         0 |     float x
+        \\           | [sizeof=12, align=4]
+    ;
+
+    var wanted = std.StringHashMap(void).init(std.testing.allocator);
+    defer wanted.deinit();
+    try wanted.put("MTLPackedFloat3", {});
+
+    const layouts = try parseRecordLayouts(arena.allocator(), dump, &wanted, null);
+    try std.testing.expectEqual(@as(usize, 1), layouts.len);
+    try std.testing.expectEqualStrings("MTLPackedFloat3", layouts[0].name);
+    try std.testing.expectEqual(@as(u64, 12), layouts[0].size);
+    try std.testing.expectEqual(@as(u64, 4), layouts[0].alignment);
+    // Size and alignment still hold; the unnamed member yields no offset.
+    try std.testing.expectEqual(@as(usize, 0), layouts[0].fields.len);
 }
 
 test "bitfield record layouts are rejected rather than guessed" {

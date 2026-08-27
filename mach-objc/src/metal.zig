@@ -285,12 +285,189 @@ pub const MTL4CopySparseBufferMappingOperation = extern struct {
     destinationOffset: ns.UInteger,
 };
 
-comptime {
-    std.debug.assert(@sizeOf(MTL4BufferRange) == 16);
-    std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
-    std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
-    std.debug.assert(@sizeOf(MTL4CopySparseTextureMappingOperation) == 104);
-    std.debug.assert(@sizeOf(MTL4UpdateSparseBufferMappingOperation) == 32);
-    std.debug.assert(@sizeOf(MTL4CopySparseBufferMappingOperation) == 24);
-}
+// The hand-written @sizeOf assertions that used to sit here are gone: the
+// generator now emits size, alignment and every field offset for each record in
+// this file, with the numbers taken from Clang's own record layout dump. See the
+// comptime blocks at the end of src/generated/metal.zig.
+
+// ------------------------------------------------------------------------------------------------
+// MTLAccelerationStructureTypes.h
+//
+// These records cross the API boundary inside buffer contents rather than in any
+// method signature, so nothing reaches them through the type graph. They are
+// bound here deliberately, and their layouts are asserted against Clang.
+
+/// Three packed floats.
+///
+/// The Objective-C declaration is a union of an x/y/z struct and a `float[3]`,
+/// which have identical layout; `elements` gives the array view.
+pub const PackedFloat3 = extern struct {
+    x: f32,
+    y: f32,
+    z: f32,
+
+    pub fn init(x: f32, y: f32, z: f32) PackedFloat3 {
+        return .{ .x = x, .y = y, .z = z };
+    }
+
+    pub fn elements(self: *PackedFloat3) *[3]f32 {
+        return @ptrCast(self);
+    }
+};
+
+pub const PackedFloatQuaternion = extern struct {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+
+    pub fn init(x: f32, y: f32, z: f32, w: f32) PackedFloatQuaternion {
+        return .{ .x = x, .y = y, .z = z, .w = w };
+    }
+};
+
+pub const PackedFloat4x3 = extern struct {
+    columns: [4]PackedFloat3,
+
+    pub fn init(columns: [4]PackedFloat3) PackedFloat4x3 {
+        return .{ .columns = columns };
+    }
+};
+
+pub const AxisAlignedBoundingBox = extern struct {
+    min: PackedFloat3,
+    max: PackedFloat3,
+
+    pub fn init(min: PackedFloat3, max: PackedFloat3) AxisAlignedBoundingBox {
+        return .{ .min = min, .max = max };
+    }
+};
+
+pub const ComponentTransform = extern struct {
+    scale: PackedFloat3,
+    shear: PackedFloat3,
+    pivot: PackedFloat3,
+    rotation: PackedFloatQuaternion,
+    translation: PackedFloat3,
+};
+
+// ------------------------------------------------------------------------------------------------
+// MTLAccelerationStructure.h — instance descriptors written into instance buffers
+
+pub const AccelerationStructureInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+};
+
+pub const AccelerationStructureUserIDInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+    userID: u32,
+};
+
+pub const AccelerationStructureMotionInstanceDescriptor = extern struct {
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    accelerationStructureIndex: u32,
+    userID: u32,
+    motionTransformsStartIndex: u32,
+    motionTransformsCount: u32,
+    motionStartBorderMode: MotionBorderMode,
+    motionEndBorderMode: MotionBorderMode,
+    motionStartTime: f32,
+    motionEndTime: f32,
+};
+
+pub const IndirectAccelerationStructureInstanceDescriptor = extern struct {
+    transformationMatrix: PackedFloat4x3,
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    userID: u32,
+    accelerationStructureID: ResourceID,
+};
+
+pub const IndirectAccelerationStructureMotionInstanceDescriptor = extern struct {
+    options: AccelerationStructureInstanceOptions,
+    mask: u32,
+    intersectionFunctionTableOffset: u32,
+    userID: u32,
+    accelerationStructureID: ResourceID,
+    motionTransformsStartIndex: u32,
+    motionTransformsCount: u32,
+    motionStartBorderMode: MotionBorderMode,
+    motionEndBorderMode: MotionBorderMode,
+    motionStartTime: f32,
+    motionEndTime: f32,
+};
+
+// ------------------------------------------------------------------------------------------------
+// Indirect command arguments — written into indirect buffers by the GPU or host
+
+pub const DrawPrimitivesIndirectArguments = extern struct {
+    vertexCount: u32,
+    instanceCount: u32,
+    vertexStart: u32,
+    baseInstance: u32,
+};
+
+pub const DrawIndexedPrimitivesIndirectArguments = extern struct {
+    indexCount: u32,
+    instanceCount: u32,
+    indexStart: u32,
+    /// Signed: an index buffer may address vertices before the bound base.
+    baseVertex: i32,
+    baseInstance: u32,
+};
+
+pub const DrawPatchIndirectArguments = extern struct {
+    patchCount: u32,
+    instanceCount: u32,
+    patchStart: u32,
+    baseInstance: u32,
+};
+
+pub const DispatchThreadsIndirectArguments = extern struct {
+    threadsPerGrid: [3]u32,
+    threadsPerThreadgroup: [3]u32,
+};
+
+pub const IndirectCommandBufferExecutionRange = extern struct {
+    location: u32,
+    length: u32,
+};
+
+pub const IntersectionFunctionBufferArguments = extern struct {
+    intersectionFunctionBuffer: u64,
+    intersectionFunctionBufferSize: u64,
+    intersectionFunctionStride: u64,
+};
+
+pub const MapIndirectArguments = extern struct {
+    regionOriginX: u32,
+    regionOriginY: u32,
+    regionOriginZ: u32,
+    regionSizeWidth: u32,
+    regionSizeHeight: u32,
+    regionSizeDepth: u32,
+    mipMapLevel: u32,
+    sliceId: u32,
+};
+
+pub const QuadTessellationFactorsHalf = extern struct {
+    edgeTessellationFactor: [4]u16,
+    insideTessellationFactor: [2]u16,
+};
+
+pub const TriangleTessellationFactorsHalf = extern struct {
+    edgeTessellationFactor: [3]u16,
+    insideTessellationFactor: u16,
+};
 // ------------------------------------------------------------------------------------------------

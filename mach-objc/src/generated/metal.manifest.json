@@ -2940,7 +2940,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4BufferRange",
@@ -2949,7 +2949,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4CommandAllocatorDescriptor",
@@ -39129,7 +39129,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLCoordinate2D",
@@ -39165,7 +39165,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLSamplePosition",
