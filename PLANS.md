@@ -137,6 +137,15 @@ an acceptance criterion, and it is the cheaper of the two.
 - Treat reachability as satisfied by name, not by kind. Metal declares
   `@class MTL4BinaryFunction` beside a protocol of the same name and binds only
   the protocol; the unused sibling is not a gap.
+- Follow the bindings, not the SDK. Walk only members the manifest records as
+  generated: a container declares far more than the generator emits, and
+  following an excluded method drags its parameter types in as dependencies of
+  a binding that does not exist. Do not follow adopted protocols at all — every
+  generated `ExternClass` and `ExternProtocol` carries an empty protocol list.
+- Skip names and transitively reached containers owned by another framework's
+  namespace. QuartzCore headers forward-declare `@protocol MTLDevice` though it
+  is emitted into `metal.zig`, and `NSObject` — superclass of everything — is
+  hand-written as `ObjectInterface`, invisible to name-based manual detection.
 - Record provenance per declaration as `explicit`, `transitive_dependency`, or
   `sdk_only`.
 - Classify a reachable declaration that is neither generated nor manually bound
@@ -254,12 +263,13 @@ What remains of the old constructors-and-properties phase.
   autorelease-pool requirement and the regeneration workflow in `README.md`.
   Internal does not mean undocumented; this is for future-you.
 - Declaration counts are reported during generation as of `ffb533d`.
-- **Pin the minimum macOS version explicitly** in `mach-objc/build.zig` via
-  `os_version_min`. Nothing currently sets it — `objc.zig` enforces only
-  `aarch64-macos`, and the old 26.0 check lived in the root build that was
-  deleted. The removal of availability handling rests on floor-equals-SDK, so
-  that assumption should be enforced by the build rather than assumed in a
-  document.
+- The macOS floor is checked in `mach-objc/build.zig` against the resolved
+  target. It is deliberately *not* pinned into the default target query:
+  setting `os_version_min` makes `Query.isNativeOs()` false, Zig then stops
+  discovering the host SDK, and every module that links `objc` or a framework
+  fails to find it. A true pin would have to pass the SDK's framework, include
+  and library paths to every module by hand. Worth doing only if binaries ever
+  need to run on an older macOS than the build host.
 
 ## Deliberately out of scope
 
