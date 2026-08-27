@@ -3441,6 +3441,19 @@ fn lastToken(text: []const u8) ?[]const u8 {
     return trimmed[space + 1 ..];
 }
 
+/// Strip the tag keyword Clang prints before a named record.
+///
+/// A record the SDK declares with a tag dumps as `struct MTLResourceID`, while
+/// one reachable only through a typedef dumps under the typedef name. Both refer
+/// to the same declaration as far as the manifest is concerned.
+fn stripRecordTagKeyword(name: []const u8) []const u8 {
+    const keywords = [_][]const u8{ "struct ", "union ", "class " };
+    for (keywords) |keyword| {
+        if (std.mem.startsWith(u8, name, keyword)) return name[keyword.len..];
+    }
+    return name;
+}
+
 /// Parse the output of `clang -Xclang -fdump-record-layouts`.
 ///
 /// Each record arrives as a block:
@@ -3471,6 +3484,10 @@ fn parseRecordLayouts(
     arena: std.mem.Allocator,
     text: []const u8,
     wanted: *const std.StringHashMap(void),
+    /// Receives the offending record's name when the parse fails on a bitfield.
+    /// The parser reports through this rather than logging, so that exercising
+    /// the failure path in a test does not look like a real error.
+    bitfield_record: ?*[]const u8,
 ) ![]const RecordLayout {
     var layouts = std.array_list.Managed(RecordLayout).init(arena);
     var fields = std.array_list.Managed(FieldLayout).init(arena);
@@ -3518,10 +3535,7 @@ fn parseRecordLayouts(
         // record, which is verified separately if it is bound at all.
         if (std.mem.indexOfScalar(u8, offset_text, ':') != null) {
             if (keep and depth == 1) {
-                std.log.err(
-                    "record {s} has a bitfield member, which cannot be layout-verified",
-                    .{name orelse "<unknown>"},
-                );
+                if (bitfield_record) |out| out.* = name orelse "<unknown>";
                 return error.UnsupportedBitfieldLayout;
             }
             continue;
@@ -3530,8 +3544,12 @@ fn parseRecordLayouts(
         const offset = std.fmt.parseInt(u64, offset_text, 10) catch continue;
 
         if (depth == 0) {
-            name = body;
-            keep = wanted.contains(body);
+            const record_name = stripRecordTagKeyword(body);
+            name = record_name;
+            keep = wanted.contains(record_name);
+            for (layouts.items) |existing| {
+                if (std.mem.eql(u8, existing.name, record_name)) keep = false;
+            }
         } else if (depth == 1 and keep) {
             try fields.append(.{
                 .name = lastToken(body) orelse continue,
@@ -3627,7 +3645,15 @@ fn probeRecordLayouts(
     var wanted = std.StringHashMap(void).init(arena);
     for (names) |name| try wanted.put(name, {});
 
-    return parseRecordLayouts(arena, try runCommand(arena, io, argv.items), &wanted);
+    const dump = try runCommand(arena, io, argv.items);
+    var bitfield_record: []const u8 = "<unknown>";
+    return parseRecordLayouts(arena, dump, &wanted, &bitfield_record) catch |err| {
+        if (err == error.UnsupportedBitfieldLayout) std.log.err(
+            "record {s} has a bitfield member, which cannot be layout-verified",
+            .{bitfield_record},
+        );
+        return err;
+    };
 }
 
 const FrameworkSpec = struct {
@@ -4104,6 +4130,11 @@ test "clang record layouts parse into sizes, alignments and field offsets" {
         \\           | [sizeof=48, align=8]
         \\
         \\*** Dumping AST Record Layout
+        \\         0 | struct MTLResourceID
+        \\         0 |   unsigned long long _impl
+        \\           | [sizeof=8, align=8]
+        \\
+        \\*** Dumping AST Record Layout
         \\         0 | __not_requested
         \\     0:0-2 |   int bits
         \\           | [sizeof=4, align=4]
@@ -4113,11 +4144,12 @@ test "clang record layouts parse into sizes, alignments and field offsets" {
     defer wanted.deinit();
     try wanted.put("MTLOrigin", {});
     try wanted.put("MTLRegion", {});
+    try wanted.put("MTLResourceID", {});
 
     // Including a framework header lays out far more than the probe asked for.
     // A record nobody requested is skipped, bitfields and all.
-    const layouts = try parseRecordLayouts(arena.allocator(), dump, &wanted);
-    try std.testing.expectEqual(@as(usize, 2), layouts.len);
+    const layouts = try parseRecordLayouts(arena.allocator(), dump, &wanted, null);
+    try std.testing.expectEqual(@as(usize, 3), layouts.len);
 
     try std.testing.expectEqualStrings("MTLOrigin", layouts[0].name);
     try std.testing.expectEqual(@as(u64, 24), layouts[0].size);
@@ -4132,6 +4164,12 @@ test "clang record layouts parse into sizes, alignments and field offsets" {
     try std.testing.expectEqualStrings("origin", layouts[1].fields[0].name);
     try std.testing.expectEqualStrings("size", layouts[1].fields[1].name);
     try std.testing.expectEqual(@as(u64, 24), layouts[1].fields[1].offset);
+
+    // A record the SDK declares with a tag dumps as `struct MTLResourceID`, but
+    // it is the same declaration the manifest knows as MTLResourceID.
+    try std.testing.expectEqualStrings("MTLResourceID", layouts[2].name);
+    try std.testing.expectEqual(@as(u64, 8), layouts[2].size);
+    try std.testing.expectEqualStrings("_impl", layouts[2].fields[0].name);
 }
 
 test "bitfield record layouts are rejected rather than guessed" {
@@ -4147,17 +4185,19 @@ test "bitfield record layouts are rejected rather than guessed" {
 
     var wanted = std.StringHashMap(void).init(std.testing.allocator);
     defer wanted.deinit();
-    try wanted.put("struct B", {});
+    try wanted.put("B", {});
 
+    var offending: []const u8 = "";
     try std.testing.expectError(
         error.UnsupportedBitfieldLayout,
-        parseRecordLayouts(arena.allocator(), dump, &wanted),
+        parseRecordLayouts(arena.allocator(), dump, &wanted, &offending),
     );
+    try std.testing.expectEqualStrings("B", offending);
 
     // The same record goes unmentioned when it was never requested.
     var empty = std.StringHashMap(void).init(std.testing.allocator);
     defer empty.deinit();
-    const skipped = try parseRecordLayouts(arena.allocator(), dump, &empty);
+    const skipped = try parseRecordLayouts(arena.allocator(), dump, &empty, null);
     try std.testing.expectEqual(@as(usize, 0), skipped.len);
 }
 

@@ -11395,3 +11395,225 @@ pub const VisibleFunctionTable = opaque {
         return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
 };
+
+pub const MTL4CommitFeedbackHandler = *ns.Block(fn (*MTL4CommitFeedback) void);
+
+pub const MTL4NewBinaryFunctionCompletionHandler = *ns.Block(fn (?*MTL4BinaryFunctionProtocol, ?*ns.Error) void);
+
+pub const MTL4NewMachineLearningPipelineStateCompletionHandler = *ns.Block(fn (?*MTL4MachineLearningPipelineState, ?*ns.Error) void);
+
+pub const CommandBufferHandler = *ns.Block(fn (*CommandBuffer) void);
+
+pub const DrawablePresentedHandler = *ns.Block(fn (*Drawable) void);
+
+pub const IOCommandBufferHandler = *ns.Block(fn (*IOCommandBuffer) void);
+
+pub const NewComputePipelineStateCompletionHandler = *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void);
+
+pub const NewComputePipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*ComputePipelineState, *ComputePipelineReflection, ?*ns.Error) void);
+
+pub const NewDynamicLibraryCompletionHandler = *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void);
+
+pub const NewLibraryCompletionHandler = *ns.Block(fn (?*Library, ?*ns.Error) void);
+
+pub const NewRenderPipelineStateCompletionHandler = *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void);
+
+pub const NewRenderPipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*RenderPipelineState, *RenderPipelineReflection, ?*ns.Error) void);
+
+pub const SharedEventNotificationBlock = *ns.Block(fn (*SharedEvent, u64) void);
+
+// MTLOrigin
+comptime {
+    std.debug.assert(@sizeOf(Origin) == 24);
+    std.debug.assert(@alignOf(Origin) == 8);
+    std.debug.assert(@offsetOf(Origin, "x") == 0);
+    std.debug.assert(@offsetOf(Origin, "y") == 8);
+    std.debug.assert(@offsetOf(Origin, "z") == 16);
+}
+
+// MTLSize
+comptime {
+    std.debug.assert(@sizeOf(Size) == 24);
+    std.debug.assert(@alignOf(Size) == 8);
+    std.debug.assert(@offsetOf(Size, "width") == 0);
+    std.debug.assert(@offsetOf(Size, "height") == 8);
+    std.debug.assert(@offsetOf(Size, "depth") == 16);
+}
+
+// MTLRegion
+comptime {
+    std.debug.assert(@sizeOf(Region) == 48);
+    std.debug.assert(@alignOf(Region) == 8);
+    std.debug.assert(@offsetOf(Region, "origin") == 0);
+    std.debug.assert(@offsetOf(Region, "size") == 24);
+}
+
+// MTLSamplePosition
+comptime {
+    std.debug.assert(@sizeOf(SamplePosition) == 8);
+    std.debug.assert(@alignOf(SamplePosition) == 4);
+    std.debug.assert(@offsetOf(SamplePosition, "x") == 0);
+    std.debug.assert(@offsetOf(SamplePosition, "y") == 4);
+}
+
+// MTLTextureSwizzleChannels
+comptime {
+    std.debug.assert(@sizeOf(TextureSwizzleChannels) == 4);
+    std.debug.assert(@alignOf(TextureSwizzleChannels) == 1);
+    std.debug.assert(@offsetOf(TextureSwizzleChannels, "red") == 0);
+    std.debug.assert(@offsetOf(TextureSwizzleChannels, "green") == 1);
+    std.debug.assert(@offsetOf(TextureSwizzleChannels, "blue") == 2);
+    std.debug.assert(@offsetOf(TextureSwizzleChannels, "alpha") == 3);
+}
+
+// MTLClearColor
+comptime {
+    std.debug.assert(@sizeOf(ClearColor) == 32);
+    std.debug.assert(@alignOf(ClearColor) == 8);
+    std.debug.assert(@offsetOf(ClearColor, "red") == 0);
+    std.debug.assert(@offsetOf(ClearColor, "green") == 8);
+    std.debug.assert(@offsetOf(ClearColor, "blue") == 16);
+    std.debug.assert(@offsetOf(ClearColor, "alpha") == 24);
+}
+
+// MTLViewport
+comptime {
+    std.debug.assert(@sizeOf(Viewport) == 48);
+    std.debug.assert(@alignOf(Viewport) == 8);
+    std.debug.assert(@offsetOf(Viewport, "originX") == 0);
+    std.debug.assert(@offsetOf(Viewport, "originY") == 8);
+    std.debug.assert(@offsetOf(Viewport, "width") == 16);
+    std.debug.assert(@offsetOf(Viewport, "height") == 24);
+    std.debug.assert(@offsetOf(Viewport, "znear") == 32);
+    std.debug.assert(@offsetOf(Viewport, "zfar") == 40);
+}
+
+// MTLScissorRect
+comptime {
+    std.debug.assert(@sizeOf(ScissorRect) == 32);
+    std.debug.assert(@alignOf(ScissorRect) == 8);
+    std.debug.assert(@offsetOf(ScissorRect, "x") == 0);
+    std.debug.assert(@offsetOf(ScissorRect, "y") == 8);
+    std.debug.assert(@offsetOf(ScissorRect, "width") == 16);
+    std.debug.assert(@offsetOf(ScissorRect, "height") == 24);
+}
+
+// MTL4UpdateSparseTextureMappingOperation
+comptime {
+    std.debug.assert(@sizeOf(MTL4UpdateSparseTextureMappingOperation) == 80);
+    std.debug.assert(@alignOf(MTL4UpdateSparseTextureMappingOperation) == 8);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseTextureMappingOperation, "mode") == 0);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseTextureMappingOperation, "textureRegion") == 8);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseTextureMappingOperation, "textureLevel") == 56);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseTextureMappingOperation, "textureSlice") == 64);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseTextureMappingOperation, "heapOffset") == 72);
+}
+
+// MTL4CopySparseTextureMappingOperation
+comptime {
+    std.debug.assert(@sizeOf(MTL4CopySparseTextureMappingOperation) == 104);
+    std.debug.assert(@alignOf(MTL4CopySparseTextureMappingOperation) == 8);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "sourceRegion") == 0);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "sourceLevel") == 48);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "sourceSlice") == 56);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "destinationOrigin") == 64);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "destinationLevel") == 88);
+    std.debug.assert(@offsetOf(MTL4CopySparseTextureMappingOperation, "destinationSlice") == 96);
+}
+
+// MTL4UpdateSparseBufferMappingOperation
+comptime {
+    std.debug.assert(@sizeOf(MTL4UpdateSparseBufferMappingOperation) == 32);
+    std.debug.assert(@alignOf(MTL4UpdateSparseBufferMappingOperation) == 8);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseBufferMappingOperation, "mode") == 0);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseBufferMappingOperation, "bufferRange") == 8);
+    std.debug.assert(@offsetOf(MTL4UpdateSparseBufferMappingOperation, "heapOffset") == 24);
+}
+
+// MTL4CopySparseBufferMappingOperation
+comptime {
+    std.debug.assert(@sizeOf(MTL4CopySparseBufferMappingOperation) == 24);
+    std.debug.assert(@alignOf(MTL4CopySparseBufferMappingOperation) == 8);
+    std.debug.assert(@offsetOf(MTL4CopySparseBufferMappingOperation, "sourceRange") == 0);
+    std.debug.assert(@offsetOf(MTL4CopySparseBufferMappingOperation, "destinationOffset") == 16);
+}
+
+// MTL4TimestampHeapEntry
+comptime {
+    std.debug.assert(@sizeOf(MTL4TimestampHeapEntry) == 8);
+    std.debug.assert(@alignOf(MTL4TimestampHeapEntry) == 8);
+    std.debug.assert(@offsetOf(MTL4TimestampHeapEntry, "timestamp") == 0);
+}
+
+// MTLAccelerationStructureSizes
+comptime {
+    std.debug.assert(@sizeOf(AccelerationStructureSizes) == 24);
+    std.debug.assert(@alignOf(AccelerationStructureSizes) == 8);
+    std.debug.assert(@offsetOf(AccelerationStructureSizes, "accelerationStructureSize") == 0);
+    std.debug.assert(@offsetOf(AccelerationStructureSizes, "buildScratchBufferSize") == 8);
+    std.debug.assert(@offsetOf(AccelerationStructureSizes, "refitScratchBufferSize") == 16);
+}
+
+// MTLCounterResultStageUtilization
+comptime {
+    std.debug.assert(@sizeOf(CounterResultStageUtilization) == 48);
+    std.debug.assert(@alignOf(CounterResultStageUtilization) == 8);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "totalCycles") == 0);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "vertexCycles") == 8);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "tessellationCycles") == 16);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "postTessellationVertexCycles") == 24);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "fragmentCycles") == 32);
+    std.debug.assert(@offsetOf(CounterResultStageUtilization, "renderTargetCycles") == 40);
+}
+
+// MTLCounterResultStatistic
+comptime {
+    std.debug.assert(@sizeOf(CounterResultStatistic) == 64);
+    std.debug.assert(@alignOf(CounterResultStatistic) == 8);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "tessellationInputPatches") == 0);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "vertexInvocations") == 8);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "postTessellationVertexInvocations") == 16);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "clipperInvocations") == 24);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "clipperPrimitivesOut") == 32);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "fragmentInvocations") == 40);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "fragmentsPassed") == 48);
+    std.debug.assert(@offsetOf(CounterResultStatistic, "computeKernelInvocations") == 56);
+}
+
+// MTLCounterResultTimestamp
+comptime {
+    std.debug.assert(@sizeOf(CounterResultTimestamp) == 8);
+    std.debug.assert(@alignOf(CounterResultTimestamp) == 8);
+    std.debug.assert(@offsetOf(CounterResultTimestamp, "timestamp") == 0);
+}
+
+// MTLDispatchThreadgroupsIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(DispatchThreadgroupsIndirectArguments) == 12);
+    std.debug.assert(@alignOf(DispatchThreadgroupsIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(DispatchThreadgroupsIndirectArguments, "threadgroupsPerGrid") == 0);
+}
+
+// MTLSizeAndAlign
+comptime {
+    std.debug.assert(@sizeOf(SizeAndAlign) == 16);
+    std.debug.assert(@alignOf(SizeAndAlign) == 8);
+    std.debug.assert(@offsetOf(SizeAndAlign, "size") == 0);
+    std.debug.assert(@offsetOf(SizeAndAlign, "align") == 8);
+}
+
+// MTLStageInRegionIndirectArguments
+comptime {
+    std.debug.assert(@sizeOf(StageInRegionIndirectArguments) == 24);
+    std.debug.assert(@alignOf(StageInRegionIndirectArguments) == 4);
+    std.debug.assert(@offsetOf(StageInRegionIndirectArguments, "stageInOrigin") == 0);
+    std.debug.assert(@offsetOf(StageInRegionIndirectArguments, "stageInSize") == 12);
+}
+
+// MTLVertexAmplificationViewMapping
+comptime {
+    std.debug.assert(@sizeOf(VertexAmplificationViewMapping) == 8);
+    std.debug.assert(@alignOf(VertexAmplificationViewMapping) == 4);
+    std.debug.assert(@offsetOf(VertexAmplificationViewMapping, "viewportArrayIndexOffset") == 0);
+    std.debug.assert(@offsetOf(VertexAmplificationViewMapping, "renderTargetArrayIndexOffset") == 4);
+}

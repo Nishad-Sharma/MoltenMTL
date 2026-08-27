@@ -2,10 +2,10 @@
   "framework": "Metal",
   "counts": {
     "total": 4696,
-    "generated": 4211,
+    "generated": 4224,
     "manual": 359,
     "excluded": 113,
-    "rejected": 13
+    "rejected": 0
   },
   "declarations": [
     {
@@ -3831,7 +3831,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4CopySparseTextureMappingOperation",
@@ -3840,7 +3840,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4UpdateSparseBufferMappingOperation",
@@ -3849,7 +3849,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4UpdateSparseTextureMappingOperation",
@@ -3858,7 +3858,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4CommandQueueErrorDomain",
@@ -3938,8 +3938,8 @@
       "header": "MTL4CommitFeedback.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTL4BinaryFunctionDescriptor",
@@ -4442,8 +4442,8 @@
       "header": "MTL4Compiler.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTL4NewMachineLearningPipelineStateCompletionHandler",
@@ -4451,8 +4451,8 @@
       "header": "MTL4Compiler.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTL4CompilerTaskStatus",
@@ -5352,7 +5352,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTL4FunctionDescriptor",
@@ -16961,8 +16961,8 @@
       "header": "MTLCommandBuffer.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLCommandBufferStatus",
@@ -17862,7 +17862,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLDispatchThreadsIndirectArguments",
@@ -17880,7 +17880,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLComputePassDescriptor",
@@ -19140,7 +19140,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLCounterResultStatistic",
@@ -19149,7 +19149,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLCounterResultTimestamp",
@@ -19158,7 +19158,7 @@
       "selected": false,
       "provenance": "sdk_only",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLCounterSampleBufferError",
@@ -22452,7 +22452,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLArgumentBuffersTier",
@@ -22560,7 +22560,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLSparseTextureRegionAlignmentMode",
@@ -22775,8 +22775,8 @@
       "header": "MTLDrawable.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLDynamicLibraryError",
@@ -23090,8 +23090,8 @@
       "header": "MTLEvent.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLFence.device",
@@ -24863,8 +24863,8 @@
       "header": "MTLIOCommandBuffer.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLIOStatus",
@@ -27896,8 +27896,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLNewComputePipelineStateWithReflectionCompletionHandler",
@@ -27905,8 +27905,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLNewDynamicLibraryCompletionHandler",
@@ -27914,8 +27914,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLNewLibraryCompletionHandler",
@@ -27923,8 +27923,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLNewRenderPipelineStateCompletionHandler",
@@ -27932,8 +27932,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLNewRenderPipelineStateWithReflectionCompletionHandler",
@@ -27941,8 +27941,8 @@
       "header": "MTLLibrary.h",
       "selected": true,
       "provenance": "transitive_dependency",
-      "status": "rejected",
-      "reason": "reachable from the selected surface but not generated or manually bound"
+      "status": "generated",
+      "reason": "generated Objective-C block type alias"
     },
     {
       "name": "MTLPatchType",
@@ -30426,7 +30426,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLTriangleFillMode",
@@ -30453,7 +30453,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLViewport",
@@ -30462,7 +30462,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLVisibilityResultMode",
@@ -31713,7 +31713,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLLoadAction",
@@ -38967,7 +38967,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLTextureType",
@@ -39147,7 +39147,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLRegion",
@@ -39156,7 +39156,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLResourceID",
@@ -39174,7 +39174,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLSize",
@@ -39183,7 +39183,7 @@
       "selected": true,
       "provenance": "transitive_dependency",
       "status": "manual",
-      "reason": "manually maintained declaration in src/metal.zig"
+      "reason": "manually maintained record; size, alignment and field offsets verified against Clang"
     },
     {
       "name": "MTLVertexFormat",
