@@ -4917,8 +4917,8 @@
       "name": "NSInteger",
       "kind": "typedef",
       "header": "NSObjCRuntime.h",
-      "selected": false,
-      "provenance": "sdk_only",
+      "selected": true,
+      "provenance": "explicit",
       "status": "manual",
       "reason": "manually maintained declaration in src/foundation.zig"
     },
@@ -4926,8 +4926,8 @@
       "name": "NSUInteger",
       "kind": "typedef",
       "header": "NSObjCRuntime.h",
-      "selected": false,
-      "provenance": "sdk_only",
+      "selected": true,
+      "provenance": "explicit",
       "status": "manual",
       "reason": "manually maintained declaration in src/metal_fx.zig"
     }

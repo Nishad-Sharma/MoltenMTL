@@ -307,7 +307,11 @@ pub const Lexer = struct {
 
 pub const Parser = struct {
     const Self = @This();
-    const PointerProps = struct { is_const: bool, is_optional: bool };
+    const PointerProps = struct {
+        is_const: bool,
+        is_optional: bool,
+        nullability: reg.Type.Nullability = .unannotated,
+    };
 
     allocator: std.mem.Allocator,
     lookahead: Token,
@@ -663,7 +667,7 @@ pub const Parser = struct {
     fn parsePointerProps(self: *Self, elem_is_const: bool) !PointerProps {
         var is_const = elem_is_const;
         var is_optional = false;
-        var annotated = false;
+        var nullability: reg.Type.Nullability = .unannotated;
         while (true) {
             if (self.lookahead.kind == .kw_const) {
                 try self.match(.kw_const);
@@ -671,25 +675,20 @@ pub const Parser = struct {
             } else if (self.lookahead.kind == .kw_nullable) {
                 try self.match(.kw_nullable);
                 is_optional = true;
-                annotated = true;
-                nullability_stats.nullable += 1;
+                nullability = .nullable;
             } else if (self.lookahead.kind == .kw_nonnull) {
                 try self.match(.kw_nonnull);
-                annotated = true;
-                nullability_stats.nonnull += 1;
+                nullability = .nonnull;
             } else if (self.lookahead.kind == .kw_null_unspecified) {
                 try self.match(.kw_null_unspecified);
-                annotated = true;
-                nullability_stats.null_unspecified += 1;
+                nullability = .null_unspecified;
             } else if (self.lookahead.kind == .kw_nullable_result) {
                 try self.match(.kw_nullable_result);
-                annotated = true;
-                nullability_stats.nullable_result += 1;
+                nullability = .nullable_result;
             } else break;
         }
-        if (!annotated) nullability_stats.unannotated += 1;
 
-        return .{ .is_const = is_const, .is_optional = is_optional };
+        return .{ .is_const = is_const, .is_optional = is_optional, .nullability = nullability };
     }
 
     fn parsePointerSuffix(
@@ -706,6 +705,7 @@ pub const Parser = struct {
             .is_single = is_single,
             .is_const = props.is_const,
             .is_optional = props.is_optional,
+            .nullability = props.nullability,
             .child = child,
         } };
         return self.parseTypeSuffix(t, false, is_single);
@@ -2244,6 +2244,18 @@ fn Generator(comptime WriterType: type) type {
                     try self.writer.writeAll("@This()");
                 },
                 .pointer => |p| {
+                    // Counted here rather than while parsing: the converter walks
+                    // every declaration in the translation unit, so parse-time
+                    // counts are dominated by the system headers each framework
+                    // drags in and say nothing about the bound surface. A pointer
+                    // reaching this point is one being written into the bindings.
+                    switch (p.nullability) {
+                        .unannotated => nullability_stats.unannotated += 1,
+                        .nonnull => nullability_stats.nonnull += 1,
+                        .nullable => nullability_stats.nullable += 1,
+                        .nullable_result => nullability_stats.nullable_result += 1,
+                        .null_unspecified => nullability_stats.null_unspecified += 1,
+                    }
                     if (p.is_optional)
                         try self.writer.writeAll("?");
                     if (p.is_single or p.is_optional) {
@@ -3912,22 +3924,6 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     defer converter.deinit();
     try converter.convert(valueTree.value);
 
-    // Only _Nullable currently produces an optional pointer. _Nullable_result and
-    // _Null_unspecified are rendered non-optional, and so is a pointer with no
-    // annotation at all — those three counts are the blast radius of changing the
-    // rule to "optional unless provably _Nonnull".
-    std.log.info(
-        "{s}: pointer nullability — {d} _Nonnull, {d} _Nullable, {d} _Nullable_result, {d} _Null_unspecified, {d} unannotated",
-        .{
-            spec.name,
-            nullability_stats.nonnull,
-            nullability_stats.nullable,
-            nullability_stats.nullable_result,
-            nullability_stats.null_unspecified,
-            nullability_stats.unannotated,
-        },
-    );
-
     // Create output file, write manual content, then generate
     try std.Io.Dir.createDirPath(.cwd(), io, "src/generated");
     var atomic_output = try std.Io.Dir.cwd().createFileAtomic(io, spec.output_path, .{ .replace = true });
@@ -3973,6 +3969,22 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     );
 
     try generator.generate();
+
+    // Only _Nullable currently produces an optional pointer. The other three
+    // counts are the blast radius of changing the rule to "optional unless
+    // provably _Nonnull", measured over the pointers actually emitted.
+    std.log.info(
+        "{s}: emitted pointer nullability — {d} _Nonnull, {d} _Nullable, {d} _Nullable_result, {d} _Null_unspecified, {d} unannotated",
+        .{
+            spec.name,
+            nullability_stats.nonnull,
+            nullability_stats.nullable,
+            nullability_stats.nullable_result,
+            nullability_stats.null_unspecified,
+            nullability_stats.unannotated,
+        },
+    );
+
     try generator.markSelectedClosure();
     try file_writer.flush();
 

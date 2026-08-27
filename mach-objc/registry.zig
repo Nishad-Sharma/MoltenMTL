@@ -22,10 +22,26 @@ pub const Type = union(enum) {
     function: Function,
     generic: Generic,
 
+    /// How the Objective-C header annotated this pointer.
+    ///
+    /// Kept alongside `is_optional` because the two answer different questions:
+    /// `is_optional` is what the binding renders today, while this is what the
+    /// header actually said. Only `_Nullable` currently yields an optional, so
+    /// everything else here is a pointer rendered non-optional on the strength of
+    /// an annotation that did not say so.
+    pub const Nullability = enum {
+        unannotated,
+        nonnull,
+        nullable,
+        nullable_result,
+        null_unspecified,
+    };
+
     pub const Pointer = struct {
         is_single: bool,
         is_const: bool,
         is_optional: bool,
+        nullability: Nullability = .unannotated,
         child: *Type,
     };
 
