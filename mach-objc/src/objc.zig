@@ -315,15 +315,19 @@ pub fn ExternClass(comptime name: []const u8, T: type, Super: type, comptime pro
             @compileError("Cannot cast `" ++ @typeName(T) ++ "` to `" ++ @typeName(Base) ++ "`");
         }
 
-        pub fn new() *T {
+        // The runtime returns a nullable id from all three: +new and +alloc can
+        // fail, and a class may override +alloc or -init to return nil. Casting
+        // that to a non-optional pointer discards the one signal the runtime
+        // gives, so the optional is carried through to the caller.
+        pub fn new() ?*T {
             return @ptrCast(opt_new(class()));
         }
 
-        pub fn alloc() *T {
+        pub fn alloc() ?*T {
             return @ptrCast(objc_alloc(class()));
         }
 
-        pub fn allocInit() *T {
+        pub fn allocInit() ?*T {
             return @ptrCast(alloc_init(class()));
         }
 

@@ -85,7 +85,7 @@ fn run(frame_limit: ?usize) !void {
         appkit.WindowStyleMaskClosable |
         appkit.WindowStyleMaskMiniaturizable |
         appkit.WindowStyleMaskResizable;
-    const window = appkit.Window.alloc().initWithContentRect_styleMask_backing_defer_screen(
+    const window = appkit.Window.alloc().?.initWithContentRect_styleMask_backing_defer_screen(
         content_rect,
         style,
         appkit.BackingStoreBuffered,
@@ -98,7 +98,7 @@ fn run(frame_limit: ?usize) !void {
     window.center();
 
     const view = window.contentView() orelse return error.MissingContentView;
-    const layer = ca.MetalLayer.allocInit();
+    const layer = ca.MetalLayer.allocInit().?;
     defer layer.release();
     layer.setDevice(device);
     layer.setPixelFormat(mtl.PixelFormatBGRA8Unorm);
@@ -118,7 +118,7 @@ fn run(frame_limit: ?usize) !void {
     const completion = device.newSharedEvent() orelse return error.OutOfHostMemory;
     defer completion.release();
 
-    const compiler_descriptor = mtl.MTL4CompilerDescriptor.allocInit();
+    const compiler_descriptor = mtl.MTL4CompilerDescriptor.allocInit().?;
     defer compiler_descriptor.release();
     var metal_error: ?*ns.Error = null;
     const compiler = device.newCompilerWithDescriptor_error(
@@ -127,7 +127,7 @@ fn run(frame_limit: ?usize) !void {
     ) orelse return reportMetalError(metal_error);
     defer compiler.release();
 
-    const library_descriptor = mtl.MTL4LibraryDescriptor.allocInit();
+    const library_descriptor = mtl.MTL4LibraryDescriptor.allocInit().?;
     defer library_descriptor.release();
     library_descriptor.setName(ns.String.stringWithUTF8String("raytraced-triangle"));
     library_descriptor.setSource(ns.String.stringWithUTF8String(shader_source));
@@ -138,12 +138,12 @@ fn run(frame_limit: ?usize) !void {
     ) orelse return reportMetalError(metal_error);
     defer library.release();
 
-    const function_descriptor = mtl.MTL4LibraryFunctionDescriptor.allocInit();
+    const function_descriptor = mtl.MTL4LibraryFunctionDescriptor.allocInit().?;
     defer function_descriptor.release();
     function_descriptor.setLibrary(library);
     function_descriptor.setName(ns.String.stringWithUTF8String("raytrace_triangle"));
 
-    const pipeline_descriptor = mtl.MTL4ComputePipelineDescriptor.allocInit();
+    const pipeline_descriptor = mtl.MTL4ComputePipelineDescriptor.allocInit().?;
     defer pipeline_descriptor.release();
     pipeline_descriptor.setComputeFunctionDescriptor(
         function_descriptor.as(mtl.MTL4FunctionDescriptor),
@@ -168,7 +168,7 @@ fn run(frame_limit: ?usize) !void {
     ) orelse return error.OutOfHostMemory;
     defer vertex_buffer.release();
 
-    const geometry = mtl.MTL4AccelerationStructureTriangleGeometryDescriptor.allocInit();
+    const geometry = mtl.MTL4AccelerationStructureTriangleGeometryDescriptor.allocInit().?;
     defer geometry.release();
     geometry.setVertexBuffer(.init(
         vertex_buffer.gpuAddress(),
@@ -187,7 +187,7 @@ fn run(frame_limit: ?usize) !void {
         .{geometry.as(mtl.MTL4AccelerationStructureGeometryDescriptor)},
     );
 
-    const acceleration_descriptor = mtl.MTL4PrimitiveAccelerationStructureDescriptor.allocInit();
+    const acceleration_descriptor = mtl.MTL4PrimitiveAccelerationStructureDescriptor.allocInit().?;
     defer acceleration_descriptor.release();
     acceleration_descriptor.setGeometryDescriptors(geometry_descriptors);
 
@@ -205,7 +205,7 @@ fn run(frame_limit: ?usize) !void {
     ) orelse return error.OutOfHostMemory;
     defer scratch_buffer.release();
 
-    const static_residency_descriptor = mtl.ResidencySetDescriptor.allocInit();
+    const static_residency_descriptor = mtl.ResidencySetDescriptor.allocInit().?;
     defer static_residency_descriptor.release();
     static_residency_descriptor.setInitialCapacity(4);
     metal_error = null;
@@ -252,7 +252,7 @@ fn run(frame_limit: ?usize) !void {
         const drawable = layer.nextDrawable() orelse continue;
         const texture = drawable.texture();
 
-        const argument_descriptor = mtl.MTL4ArgumentTableDescriptor.allocInit();
+        const argument_descriptor = mtl.MTL4ArgumentTableDescriptor.allocInit().?;
         defer argument_descriptor.release();
         argument_descriptor.setMaxBufferBindCount(1);
         argument_descriptor.setMaxTextureBindCount(1);
@@ -266,7 +266,7 @@ fn run(frame_limit: ?usize) !void {
         arguments.setResource_atBufferIndex(acceleration_structure.gpuResourceID(), 0);
         arguments.setTexture_atIndex(texture.gpuResourceID(), 0);
 
-        const drawable_residency_descriptor = mtl.ResidencySetDescriptor.allocInit();
+        const drawable_residency_descriptor = mtl.ResidencySetDescriptor.allocInit().?;
         defer drawable_residency_descriptor.release();
         drawable_residency_descriptor.setInitialCapacity(1);
         metal_error = null;

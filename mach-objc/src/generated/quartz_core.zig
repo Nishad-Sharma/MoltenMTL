@@ -57,8 +57,8 @@ pub const MetalLayer = opaque {
     pub fn setDevice(self_: *@This(), device_: ?*mtl.Device) void {
         return objc.msgSend(self_, "setDevice:", void, .{device_});
     }
-    pub fn preferredDevice(self_: *@This()) *mtl.Device {
-        return objc.msgSend(self_, "preferredDevice", *mtl.Device, .{});
+    pub fn preferredDevice(self_: *@This()) ?*mtl.Device {
+        return objc.msgSend(self_, "preferredDevice", ?*mtl.Device, .{});
     }
     pub fn pixelFormat(self_: *@This()) mtl.PixelFormat {
         return objc.msgSend(self_, "pixelFormat", mtl.PixelFormat, .{});

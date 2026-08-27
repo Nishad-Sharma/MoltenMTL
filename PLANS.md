@@ -215,16 +215,22 @@ must still be named in the selection list by hand.
   aliased, so an alias can never name a type that was not bound.
 - Acceptance: zero bound structs whose layout is asserted by hand.
 
-### 7. ABI type fidelity and nullability — P0, M
+### 7. ABI type fidelity and nullability — P0, M — **in progress**
 
 - Preserve signedness, integer width, pointer constness, enum underlying types,
   block calling conventions, and output-pointer shapes such as `NSError **`.
   This half is pure correctness and is not negotiable.
-- Nullability follows one rule: **optional unless provably `_Nonnull`.** Map
-  `_Nullable`, `_Nullable_result`, `_Null_unspecified` and unannotated pointers
-  all to `?*T`. This is sound by default and avoids chasing attribute flavours
-  that Zig cannot distinguish anyway.
-- `new`, `alloc` and `allocInit` return optional pointers.
+- **Done:** nullability follows one rule, **optional unless provably
+  `_Nonnull`**. Measured over emitted pointers before the change: Metal 1014
+  `_Nonnull`, 1206 `_Nullable`, 7 `_Nullable_result`, 0 `_Null_unspecified`, 206
+  unannotated — so it moved about 8% of emitted pointers. `_Nullable_result` was
+  a real bug, meaning null on the failure path. Measure over *emitted* pointers,
+  not parsed ones: the converter walks every declaration in the translation unit,
+  and a parse-time count is dominated by the system headers each framework drags
+  in.
+- **Done:** `new`, `alloc` and `allocInit` return optional pointers. The runtime
+  returns a nullable id from all three, and the previous `@ptrCast` to `*T`
+  discarded the only signal it gives.
 - Treat nested pointers as optional rather than resolving inner nullability
   precisely.
 

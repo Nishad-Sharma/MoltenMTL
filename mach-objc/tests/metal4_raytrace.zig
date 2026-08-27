@@ -40,7 +40,7 @@ test "MTL4 raytraces one triangle" {
     const allocator = device.newCommandAllocator() orelse return error.SkipZigTest;
     defer allocator.release();
 
-    const compiler_descriptor = mtl.MTL4CompilerDescriptor.allocInit();
+    const compiler_descriptor = mtl.MTL4CompilerDescriptor.allocInit().?;
     defer compiler_descriptor.release();
     var metal_error: ?*ns.Error = null;
     const compiler = device.newCompilerWithDescriptor_error(
@@ -49,7 +49,7 @@ test "MTL4 raytraces one triangle" {
     ) orelse return reportMetalError(metal_error);
     defer compiler.release();
 
-    const library_descriptor = mtl.MTL4LibraryDescriptor.allocInit();
+    const library_descriptor = mtl.MTL4LibraryDescriptor.allocInit().?;
     defer library_descriptor.release();
     library_descriptor.setName(ns.String.stringWithUTF8String("triangle-raytrace"));
     library_descriptor.setSource(ns.String.stringWithUTF8String(shader_source));
@@ -60,12 +60,12 @@ test "MTL4 raytraces one triangle" {
     ) orelse return reportMetalError(metal_error);
     defer library.release();
 
-    const function_descriptor = mtl.MTL4LibraryFunctionDescriptor.allocInit();
+    const function_descriptor = mtl.MTL4LibraryFunctionDescriptor.allocInit().?;
     defer function_descriptor.release();
     function_descriptor.setLibrary(library);
     function_descriptor.setName(ns.String.stringWithUTF8String("raytrace_triangle"));
 
-    const pipeline_descriptor = mtl.MTL4ComputePipelineDescriptor.allocInit();
+    const pipeline_descriptor = mtl.MTL4ComputePipelineDescriptor.allocInit().?;
     defer pipeline_descriptor.release();
     pipeline_descriptor.setComputeFunctionDescriptor(
         function_descriptor.as(mtl.MTL4FunctionDescriptor),
@@ -90,7 +90,7 @@ test "MTL4 raytraces one triangle" {
     ) orelse return error.OutOfHostMemory;
     defer vertex_buffer.release();
 
-    const geometry = mtl.MTL4AccelerationStructureTriangleGeometryDescriptor.allocInit();
+    const geometry = mtl.MTL4AccelerationStructureTriangleGeometryDescriptor.allocInit().?;
     defer geometry.release();
     geometry.setVertexBuffer(.init(
         vertex_buffer.gpuAddress(),
@@ -109,7 +109,7 @@ test "MTL4 raytraces one triangle" {
         .{geometry.as(mtl.MTL4AccelerationStructureGeometryDescriptor)},
     );
 
-    const acceleration_descriptor = mtl.MTL4PrimitiveAccelerationStructureDescriptor.allocInit();
+    const acceleration_descriptor = mtl.MTL4PrimitiveAccelerationStructureDescriptor.allocInit().?;
     defer acceleration_descriptor.release();
     acceleration_descriptor.setGeometryDescriptors(geometry_descriptors);
 
@@ -135,7 +135,7 @@ test "MTL4 raytraces one triangle" {
     const hit: *u32 = @ptrCast(@alignCast(result_buffer.contents()));
     hit.* = 0;
 
-    const argument_descriptor = mtl.MTL4ArgumentTableDescriptor.allocInit();
+    const argument_descriptor = mtl.MTL4ArgumentTableDescriptor.allocInit().?;
     defer argument_descriptor.release();
     argument_descriptor.setMaxBufferBindCount(2);
     argument_descriptor.setInitializeBindings(true);
@@ -148,7 +148,7 @@ test "MTL4 raytraces one triangle" {
     arguments.setResource_atBufferIndex(acceleration_structure.gpuResourceID(), 0);
     arguments.setAddress_atIndex(result_buffer.gpuAddress(), 1);
 
-    const residency_descriptor = mtl.ResidencySetDescriptor.allocInit();
+    const residency_descriptor = mtl.ResidencySetDescriptor.allocInit().?;
     defer residency_descriptor.release();
     residency_descriptor.setInitialCapacity(5);
     metal_error = null;

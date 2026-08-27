@@ -2252,10 +2252,10 @@ pub const MTL4CompilerTaskOptions = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn lookupArchives(self_: *@This()) ?*ns.Array(*MTL4Archive) {
-        return objc.msgSend(self_, "lookupArchives", ?*ns.Array(*MTL4Archive), .{});
+    pub fn lookupArchives(self_: *@This()) ?*ns.Array(?*MTL4Archive) {
+        return objc.msgSend(self_, "lookupArchives", ?*ns.Array(?*MTL4Archive), .{});
     }
-    pub fn setLookupArchives(self_: *@This(), lookupArchives_: ?*ns.Array(*MTL4Archive)) void {
+    pub fn setLookupArchives(self_: *@This(), lookupArchives_: ?*ns.Array(?*MTL4Archive)) void {
         return objc.msgSend(self_, "setLookupArchives:", void, .{lookupArchives_});
     }
 };
@@ -2563,7 +2563,7 @@ pub const MTL4MachineLearningPipelineDescriptor = opaque {
     pub fn setInputDimensions_atBufferIndex(self_: *@This(), dimensions_: ?*TensorExtents, bufferIndex_: ns.Integer) void {
         return objc.msgSend(self_, "setInputDimensions:atBufferIndex:", void, .{ dimensions_, bufferIndex_ });
     }
-    pub fn setInputDimensions_withRange(self_: *@This(), dimensions_: *ns.Array(*TensorExtents), range_: ns.Range) void {
+    pub fn setInputDimensions_withRange(self_: *@This(), dimensions_: *ns.Array(?*TensorExtents), range_: ns.Range) void {
         return objc.msgSend(self_, "setInputDimensions:withRange:", void, .{ dimensions_, range_ });
     }
     pub fn inputDimensionsAtBufferIndex(self_: *@This(), bufferIndex_: ns.Integer) ?*TensorExtents {
@@ -2590,8 +2590,8 @@ pub const MTL4MachineLearningPipelineReflection = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    pub fn bindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(?*Binding), .{});
     }
 };
 
@@ -2839,16 +2839,16 @@ pub const MTL4PipelineStageDynamicLinkingDescriptor = opaque {
     pub fn setMaxCallStackDepth(self_: *@This(), maxCallStackDepth_: ns.UInteger) void {
         return objc.msgSend(self_, "setMaxCallStackDepth:", void, .{maxCallStackDepth_});
     }
-    pub fn binaryLinkedFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "binaryLinkedFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn binaryLinkedFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "binaryLinkedFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setBinaryLinkedFunctions(self_: *@This(), binaryLinkedFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setBinaryLinkedFunctions(self_: *@This(), binaryLinkedFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setBinaryLinkedFunctions:", void, .{binaryLinkedFunctions_});
     }
-    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
     }
 };
@@ -2863,10 +2863,10 @@ pub const MTL4PrimitiveAccelerationStructureDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor) {
-        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor), .{});
+    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(?*MTL4AccelerationStructureGeometryDescriptor) {
+        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(?*MTL4AccelerationStructureGeometryDescriptor), .{});
     }
-    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(*MTL4AccelerationStructureGeometryDescriptor)) void {
+    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(?*MTL4AccelerationStructureGeometryDescriptor)) void {
         return objc.msgSend(self_, "setGeometryDescriptors:", void, .{geometryDescriptors_});
     }
     pub fn motionStartBorderMode(self_: *@This()) MotionBorderMode {
@@ -3019,34 +3019,34 @@ pub const MTL4RenderPipelineBinaryFunctionsDescriptor = opaque {
     pub fn reset(self_: *@This()) void {
         return objc.msgSend(self_, "reset", void, .{});
     }
-    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setVertexAdditionalBinaryFunctions:", void, .{vertexAdditionalBinaryFunctions_});
     }
-    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setFragmentAdditionalBinaryFunctions:", void, .{fragmentAdditionalBinaryFunctions_});
     }
-    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setTileAdditionalBinaryFunctions:", void, .{tileAdditionalBinaryFunctions_});
     }
-    pub fn objectAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "objectAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn objectAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "objectAdditionalBinaryFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setObjectAdditionalBinaryFunctions(self_: *@This(), objectAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setObjectAdditionalBinaryFunctions(self_: *@This(), objectAdditionalBinaryFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setObjectAdditionalBinaryFunctions:", void, .{objectAdditionalBinaryFunctions_});
     }
-    pub fn meshAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*MTL4BinaryFunctionProtocol) {
-        return objc.msgSend(self_, "meshAdditionalBinaryFunctions", ?*ns.Array(*MTL4BinaryFunctionProtocol), .{});
+    pub fn meshAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*MTL4BinaryFunctionProtocol) {
+        return objc.msgSend(self_, "meshAdditionalBinaryFunctions", ?*ns.Array(?*MTL4BinaryFunctionProtocol), .{});
     }
-    pub fn setMeshAdditionalBinaryFunctions(self_: *@This(), meshAdditionalBinaryFunctions_: ?*ns.Array(*MTL4BinaryFunctionProtocol)) void {
+    pub fn setMeshAdditionalBinaryFunctions(self_: *@This(), meshAdditionalBinaryFunctions_: ?*ns.Array(?*MTL4BinaryFunctionProtocol)) void {
         return objc.msgSend(self_, "setMeshAdditionalBinaryFunctions:", void, .{meshAdditionalBinaryFunctions_});
     }
 };
@@ -3316,22 +3316,22 @@ pub const MTL4StaticLinkingDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
-        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(?*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(?*MTL4FunctionDescriptor), .{});
     }
-    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(?*MTL4FunctionDescriptor)) void {
         return objc.msgSend(self_, "setFunctionDescriptors:", void, .{functionDescriptors_});
     }
-    pub fn privateFunctionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
-        return objc.msgSend(self_, "privateFunctionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    pub fn privateFunctionDescriptors(self_: *@This()) ?*ns.Array(?*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "privateFunctionDescriptors", ?*ns.Array(?*MTL4FunctionDescriptor), .{});
     }
-    pub fn setPrivateFunctionDescriptors(self_: *@This(), privateFunctionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+    pub fn setPrivateFunctionDescriptors(self_: *@This(), privateFunctionDescriptors_: ?*ns.Array(?*MTL4FunctionDescriptor)) void {
         return objc.msgSend(self_, "setPrivateFunctionDescriptors:", void, .{privateFunctionDescriptors_});
     }
-    pub fn groups(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor)) {
-        return objc.msgSend(self_, "groups", ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor)), .{});
+    pub fn groups(self_: *@This()) ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*MTL4FunctionDescriptor)) {
+        return objc.msgSend(self_, "groups", ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*MTL4FunctionDescriptor)), .{});
     }
-    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(*ns.String, *ns.Array(*MTL4FunctionDescriptor))) void {
+    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*MTL4FunctionDescriptor))) void {
         return objc.msgSend(self_, "setGroups:", void, .{groups_});
     }
 };
@@ -3352,10 +3352,10 @@ pub const MTL4StitchedFunctionDescriptor = opaque {
     pub fn setFunctionGraph(self_: *@This(), functionGraph_: ?*FunctionStitchingGraph) void {
         return objc.msgSend(self_, "setFunctionGraph:", void, .{functionGraph_});
     }
-    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(*MTL4FunctionDescriptor) {
-        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(*MTL4FunctionDescriptor), .{});
+    pub fn functionDescriptors(self_: *@This()) ?*ns.Array(?*MTL4FunctionDescriptor) {
+        return objc.msgSend(self_, "functionDescriptors", ?*ns.Array(?*MTL4FunctionDescriptor), .{});
     }
-    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(*MTL4FunctionDescriptor)) void {
+    pub fn setFunctionDescriptors(self_: *@This(), functionDescriptors_: ?*ns.Array(?*MTL4FunctionDescriptor)) void {
         return objc.msgSend(self_, "setFunctionDescriptors:", void, .{functionDescriptors_});
     }
 };
@@ -3667,10 +3667,10 @@ pub const AccelerationStructureMotionBoundingBoxGeometryDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn boundingBoxBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "boundingBoxBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn boundingBoxBuffers(self_: *@This()) *ns.Array(?*MotionKeyframeData) {
+        return objc.msgSend(self_, "boundingBoxBuffers", *ns.Array(?*MotionKeyframeData), .{});
     }
-    pub fn setBoundingBoxBuffers(self_: *@This(), boundingBoxBuffers_: *ns.Array(*MotionKeyframeData)) void {
+    pub fn setBoundingBoxBuffers(self_: *@This(), boundingBoxBuffers_: *ns.Array(?*MotionKeyframeData)) void {
         return objc.msgSend(self_, "setBoundingBoxBuffers:", void, .{boundingBoxBuffers_});
     }
     pub fn boundingBoxStride(self_: *@This()) ns.UInteger {
@@ -3700,10 +3700,10 @@ pub const AccelerationStructureMotionCurveGeometryDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn controlPointBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "controlPointBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn controlPointBuffers(self_: *@This()) *ns.Array(?*MotionKeyframeData) {
+        return objc.msgSend(self_, "controlPointBuffers", *ns.Array(?*MotionKeyframeData), .{});
     }
-    pub fn setControlPointBuffers(self_: *@This(), controlPointBuffers_: *ns.Array(*MotionKeyframeData)) void {
+    pub fn setControlPointBuffers(self_: *@This(), controlPointBuffers_: *ns.Array(?*MotionKeyframeData)) void {
         return objc.msgSend(self_, "setControlPointBuffers:", void, .{controlPointBuffers_});
     }
     pub fn controlPointCount(self_: *@This()) ns.UInteger {
@@ -3724,10 +3724,10 @@ pub const AccelerationStructureMotionCurveGeometryDescriptor = opaque {
     pub fn setControlPointFormat(self_: *@This(), controlPointFormat_: AttributeFormat) void {
         return objc.msgSend(self_, "setControlPointFormat:", void, .{controlPointFormat_});
     }
-    pub fn radiusBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "radiusBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn radiusBuffers(self_: *@This()) *ns.Array(?*MotionKeyframeData) {
+        return objc.msgSend(self_, "radiusBuffers", *ns.Array(?*MotionKeyframeData), .{});
     }
-    pub fn setRadiusBuffers(self_: *@This(), radiusBuffers_: *ns.Array(*MotionKeyframeData)) void {
+    pub fn setRadiusBuffers(self_: *@This(), radiusBuffers_: *ns.Array(?*MotionKeyframeData)) void {
         return objc.msgSend(self_, "setRadiusBuffers:", void, .{radiusBuffers_});
     }
     pub fn radiusFormat(self_: *@This()) AttributeFormat {
@@ -3805,10 +3805,10 @@ pub const AccelerationStructureMotionTriangleGeometryDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn vertexBuffers(self_: *@This()) *ns.Array(*MotionKeyframeData) {
-        return objc.msgSend(self_, "vertexBuffers", *ns.Array(*MotionKeyframeData), .{});
+    pub fn vertexBuffers(self_: *@This()) *ns.Array(?*MotionKeyframeData) {
+        return objc.msgSend(self_, "vertexBuffers", *ns.Array(?*MotionKeyframeData), .{});
     }
-    pub fn setVertexBuffers(self_: *@This(), vertexBuffers_: *ns.Array(*MotionKeyframeData)) void {
+    pub fn setVertexBuffers(self_: *@This(), vertexBuffers_: *ns.Array(?*MotionKeyframeData)) void {
         return objc.msgSend(self_, "setVertexBuffers:", void, .{vertexBuffers_});
     }
     pub fn vertexFormat(self_: *@This()) AttributeFormat {
@@ -4534,10 +4534,10 @@ pub const CompileOptions = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn preprocessorMacros(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol) {
-        return objc.msgSend(self_, "preprocessorMacros", ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol), .{});
+    pub fn preprocessorMacros(self_: *@This()) ?*ns.Dictionary(?*ns.String, ?*ns.ObjectProtocol) {
+        return objc.msgSend(self_, "preprocessorMacros", ?*ns.Dictionary(?*ns.String, ?*ns.ObjectProtocol), .{});
     }
-    pub fn setPreprocessorMacros(self_: *@This(), preprocessorMacros_: ?*ns.Dictionary(*ns.String, *ns.ObjectProtocol)) void {
+    pub fn setPreprocessorMacros(self_: *@This(), preprocessorMacros_: ?*ns.Dictionary(?*ns.String, ?*ns.ObjectProtocol)) void {
         return objc.msgSend(self_, "setPreprocessorMacros:", void, .{preprocessorMacros_});
     }
     pub fn fastMathEnabled(self_: *@This()) bool {
@@ -4576,10 +4576,10 @@ pub const CompileOptions = opaque {
     pub fn setInstallName(self_: *@This(), installName_: ?*ns.String) void {
         return objc.msgSend(self_, "setInstallName:", void, .{installName_});
     }
-    pub fn libraries(self_: *@This()) ?*ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "libraries", ?*ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn libraries(self_: *@This()) ?*ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "libraries", ?*ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setLibraries(self_: *@This(), libraries_: ?*ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setLibraries(self_: *@This(), libraries_: ?*ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setLibraries:", void, .{libraries_});
     }
     pub fn preserveInvariance(self_: *@This()) bool {
@@ -4750,22 +4750,22 @@ pub const ComputePipelineDescriptor = opaque {
     pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
         return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
     }
-    pub fn insertLibraries(self_: *@This()) ?*ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "insertLibraries", ?*ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn insertLibraries(self_: *@This()) ?*ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "insertLibraries", ?*ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setInsertLibraries(self_: *@This(), insertLibraries_: ?*ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setInsertLibraries(self_: *@This(), insertLibraries_: ?*ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setInsertLibraries:", void, .{insertLibraries_});
     }
-    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
     }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
     pub fn linkedFunctions(self_: *@This()) ?*LinkedFunctions {
@@ -4810,11 +4810,11 @@ pub const ComputePipelineReflection = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    pub fn bindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(?*Binding), .{});
     }
-    pub fn arguments(self_: *@This()) *ns.Array(*Argument) {
-        return objc.msgSend(self_, "arguments", *ns.Array(*Argument), .{});
+    pub fn arguments(self_: *@This()) *ns.Array(?*Argument) {
+        return objc.msgSend(self_, "arguments", *ns.Array(?*Argument), .{});
     }
 };
 
@@ -4981,10 +4981,10 @@ pub const FunctionDescriptor = opaque {
     pub fn setOptions(self_: *@This(), options_: FunctionOptions) void {
         return objc.msgSend(self_, "setOptions:", void, .{options_});
     }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
 };
@@ -4999,8 +4999,8 @@ pub const FunctionReflection = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn bindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "bindings", *ns.Array(*Binding), .{});
+    pub fn bindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "bindings", *ns.Array(?*Binding), .{});
     }
     pub fn userAnnotation(self_: *@This()) ?*ns.String {
         return objc.msgSend(self_, "userAnnotation", ?*ns.String, .{});
@@ -5028,7 +5028,7 @@ pub const FunctionStitchingFunctionNode = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn initWithName_arguments_controlDependencies(self_: *@This(), name_: *ns.String, arguments_: *ns.Array(*FunctionStitchingNode), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) *@This() {
+    pub fn initWithName_arguments_controlDependencies(self_: *@This(), name_: *ns.String, arguments_: *ns.Array(?*FunctionStitchingNode), controlDependencies_: *ns.Array(?*FunctionStitchingFunctionNode)) *@This() {
         return objc.msgSend(self_, "initWithName:arguments:controlDependencies:", *@This(), .{ name_, arguments_, controlDependencies_ });
     }
     pub fn name(self_: *@This()) *ns.String {
@@ -5037,16 +5037,16 @@ pub const FunctionStitchingFunctionNode = opaque {
     pub fn setName(self_: *@This(), name_: *ns.String) void {
         return objc.msgSend(self_, "setName:", void, .{name_});
     }
-    pub fn arguments(self_: *@This()) *ns.Array(*FunctionStitchingNode) {
-        return objc.msgSend(self_, "arguments", *ns.Array(*FunctionStitchingNode), .{});
+    pub fn arguments(self_: *@This()) *ns.Array(?*FunctionStitchingNode) {
+        return objc.msgSend(self_, "arguments", *ns.Array(?*FunctionStitchingNode), .{});
     }
-    pub fn setArguments(self_: *@This(), arguments_: *ns.Array(*FunctionStitchingNode)) void {
+    pub fn setArguments(self_: *@This(), arguments_: *ns.Array(?*FunctionStitchingNode)) void {
         return objc.msgSend(self_, "setArguments:", void, .{arguments_});
     }
-    pub fn controlDependencies(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
-        return objc.msgSend(self_, "controlDependencies", *ns.Array(*FunctionStitchingFunctionNode), .{});
+    pub fn controlDependencies(self_: *@This()) *ns.Array(?*FunctionStitchingFunctionNode) {
+        return objc.msgSend(self_, "controlDependencies", *ns.Array(?*FunctionStitchingFunctionNode), .{});
     }
-    pub fn setControlDependencies(self_: *@This(), controlDependencies_: *ns.Array(*FunctionStitchingFunctionNode)) void {
+    pub fn setControlDependencies(self_: *@This(), controlDependencies_: *ns.Array(?*FunctionStitchingFunctionNode)) void {
         return objc.msgSend(self_, "setControlDependencies:", void, .{controlDependencies_});
     }
 };
@@ -5061,7 +5061,7 @@ pub const FunctionStitchingGraph = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn initWithFunctionName_nodes_outputNode_attributes(self_: *@This(), functionName_: *ns.String, nodes_: *ns.Array(*FunctionStitchingFunctionNode), outputNode_: ?*FunctionStitchingFunctionNode, attributes_: *ns.Array(*FunctionStitchingAttribute)) *@This() {
+    pub fn initWithFunctionName_nodes_outputNode_attributes(self_: *@This(), functionName_: *ns.String, nodes_: *ns.Array(?*FunctionStitchingFunctionNode), outputNode_: ?*FunctionStitchingFunctionNode, attributes_: *ns.Array(?*FunctionStitchingAttribute)) *@This() {
         return objc.msgSend(self_, "initWithFunctionName:nodes:outputNode:attributes:", *@This(), .{ functionName_, nodes_, outputNode_, attributes_ });
     }
     pub fn functionName(self_: *@This()) *ns.String {
@@ -5070,10 +5070,10 @@ pub const FunctionStitchingGraph = opaque {
     pub fn setFunctionName(self_: *@This(), functionName_: *ns.String) void {
         return objc.msgSend(self_, "setFunctionName:", void, .{functionName_});
     }
-    pub fn nodes(self_: *@This()) *ns.Array(*FunctionStitchingFunctionNode) {
-        return objc.msgSend(self_, "nodes", *ns.Array(*FunctionStitchingFunctionNode), .{});
+    pub fn nodes(self_: *@This()) *ns.Array(?*FunctionStitchingFunctionNode) {
+        return objc.msgSend(self_, "nodes", *ns.Array(?*FunctionStitchingFunctionNode), .{});
     }
-    pub fn setNodes(self_: *@This(), nodes_: *ns.Array(*FunctionStitchingFunctionNode)) void {
+    pub fn setNodes(self_: *@This(), nodes_: *ns.Array(?*FunctionStitchingFunctionNode)) void {
         return objc.msgSend(self_, "setNodes:", void, .{nodes_});
     }
     pub fn outputNode(self_: *@This()) ?*FunctionStitchingFunctionNode {
@@ -5082,10 +5082,10 @@ pub const FunctionStitchingGraph = opaque {
     pub fn setOutputNode(self_: *@This(), outputNode_: ?*FunctionStitchingFunctionNode) void {
         return objc.msgSend(self_, "setOutputNode:", void, .{outputNode_});
     }
-    pub fn attributes(self_: *@This()) *ns.Array(*FunctionStitchingAttribute) {
-        return objc.msgSend(self_, "attributes", *ns.Array(*FunctionStitchingAttribute), .{});
+    pub fn attributes(self_: *@This()) *ns.Array(?*FunctionStitchingAttribute) {
+        return objc.msgSend(self_, "attributes", *ns.Array(?*FunctionStitchingAttribute), .{});
     }
-    pub fn setAttributes(self_: *@This(), attributes_: *ns.Array(*FunctionStitchingAttribute)) void {
+    pub fn setAttributes(self_: *@This(), attributes_: *ns.Array(?*FunctionStitchingAttribute)) void {
         return objc.msgSend(self_, "setAttributes:", void, .{attributes_});
     }
 };
@@ -5481,10 +5481,10 @@ pub const InstanceAccelerationStructureDescriptor = opaque {
     pub fn setInstanceCount(self_: *@This(), instanceCount_: ns.UInteger) void {
         return objc.msgSend(self_, "setInstanceCount:", void, .{instanceCount_});
     }
-    pub fn instancedAccelerationStructures(self_: *@This()) ?*ns.Array(*AccelerationStructure) {
-        return objc.msgSend(self_, "instancedAccelerationStructures", ?*ns.Array(*AccelerationStructure), .{});
+    pub fn instancedAccelerationStructures(self_: *@This()) ?*ns.Array(?*AccelerationStructure) {
+        return objc.msgSend(self_, "instancedAccelerationStructures", ?*ns.Array(?*AccelerationStructure), .{});
     }
-    pub fn setInstancedAccelerationStructures(self_: *@This(), instancedAccelerationStructures_: ?*ns.Array(*AccelerationStructure)) void {
+    pub fn setInstancedAccelerationStructures(self_: *@This(), instancedAccelerationStructures_: ?*ns.Array(?*AccelerationStructure)) void {
         return objc.msgSend(self_, "setInstancedAccelerationStructures:", void, .{instancedAccelerationStructures_});
     }
     pub fn instanceDescriptorType(self_: *@This()) AccelerationStructureInstanceDescriptorType {
@@ -5576,28 +5576,28 @@ pub const LinkedFunctions = opaque {
     pub fn linkedFunctions() *LinkedFunctions {
         return objc.msgSend(@This().InternalInfo.class(), "linkedFunctions", *LinkedFunctions, .{});
     }
-    pub fn functions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "functions", ?*ns.Array(*Function), .{});
+    pub fn functions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "functions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setFunctions(self_: *@This(), functions_: ?*ns.Array(*Function)) void {
+    pub fn setFunctions(self_: *@This(), functions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setFunctions:", void, .{functions_});
     }
-    pub fn binaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "binaryFunctions", ?*ns.Array(*Function), .{});
+    pub fn binaryFunctions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "binaryFunctions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setBinaryFunctions(self_: *@This(), binaryFunctions_: ?*ns.Array(*Function)) void {
+    pub fn setBinaryFunctions(self_: *@This(), binaryFunctions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setBinaryFunctions:", void, .{binaryFunctions_});
     }
-    pub fn groups(self_: *@This()) ?*ns.Dictionary(*ns.String, *ns.Array(*Function)) {
-        return objc.msgSend(self_, "groups", ?*ns.Dictionary(*ns.String, *ns.Array(*Function)), .{});
+    pub fn groups(self_: *@This()) ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*Function)) {
+        return objc.msgSend(self_, "groups", ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*Function)), .{});
     }
-    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(*ns.String, *ns.Array(*Function))) void {
+    pub fn setGroups(self_: *@This(), groups_: ?*ns.Dictionary(?*ns.String, ?*ns.Array(?*Function))) void {
         return objc.msgSend(self_, "setGroups:", void, .{groups_});
     }
-    pub fn privateFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "privateFunctions", ?*ns.Array(*Function), .{});
+    pub fn privateFunctions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "privateFunctions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setPrivateFunctions(self_: *@This(), privateFunctions_: ?*ns.Array(*Function)) void {
+    pub fn setPrivateFunctions(self_: *@This(), privateFunctions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setPrivateFunctions:", void, .{privateFunctions_});
     }
 };
@@ -5780,10 +5780,10 @@ pub const MeshRenderPipelineDescriptor = opaque {
     pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
         return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
     }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
     pub fn objectLinkedFunctions(self_: *@This()) *LinkedFunctions {
@@ -5933,10 +5933,10 @@ pub const PrimitiveAccelerationStructureDescriptor = opaque {
     pub fn descriptor() *@This() {
         return objc.msgSend(@This().InternalInfo.class(), "descriptor", *@This(), .{});
     }
-    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(*AccelerationStructureGeometryDescriptor) {
-        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(*AccelerationStructureGeometryDescriptor), .{});
+    pub fn geometryDescriptors(self_: *@This()) ?*ns.Array(?*AccelerationStructureGeometryDescriptor) {
+        return objc.msgSend(self_, "geometryDescriptors", ?*ns.Array(?*AccelerationStructureGeometryDescriptor), .{});
     }
-    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(*AccelerationStructureGeometryDescriptor)) void {
+    pub fn setGeometryDescriptors(self_: *@This(), geometryDescriptors_: ?*ns.Array(?*AccelerationStructureGeometryDescriptor)) void {
         return objc.msgSend(self_, "setGeometryDescriptors:", void, .{geometryDescriptors_});
     }
     pub fn motionStartBorderMode(self_: *@This()) MotionBorderMode {
@@ -6656,22 +6656,22 @@ pub const RenderPipelineDescriptor = opaque {
     pub fn setSupportIndirectCommandBuffers(self_: *@This(), supportIndirectCommandBuffers_: bool) void {
         return objc.msgSend(self_, "setSupportIndirectCommandBuffers:", void, .{supportIndirectCommandBuffers_});
     }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
-    pub fn vertexPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "vertexPreloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn vertexPreloadedLibraries(self_: *@This()) *ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "vertexPreloadedLibraries", *ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setVertexPreloadedLibraries(self_: *@This(), vertexPreloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setVertexPreloadedLibraries(self_: *@This(), vertexPreloadedLibraries_: *ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setVertexPreloadedLibraries:", void, .{vertexPreloadedLibraries_});
     }
-    pub fn fragmentPreloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "fragmentPreloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn fragmentPreloadedLibraries(self_: *@This()) *ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "fragmentPreloadedLibraries", *ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setFragmentPreloadedLibraries(self_: *@This(), fragmentPreloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setFragmentPreloadedLibraries(self_: *@This(), fragmentPreloadedLibraries_: *ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setFragmentPreloadedLibraries:", void, .{fragmentPreloadedLibraries_});
     }
     pub fn vertexLinkedFunctions(self_: *@This()) *LinkedFunctions {
@@ -6728,22 +6728,22 @@ pub const RenderPipelineFunctionsDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    pub fn vertexAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "vertexAdditionalBinaryFunctions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+    pub fn setVertexAdditionalBinaryFunctions(self_: *@This(), vertexAdditionalBinaryFunctions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setVertexAdditionalBinaryFunctions:", void, .{vertexAdditionalBinaryFunctions_});
     }
-    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    pub fn fragmentAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "fragmentAdditionalBinaryFunctions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+    pub fn setFragmentAdditionalBinaryFunctions(self_: *@This(), fragmentAdditionalBinaryFunctions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setFragmentAdditionalBinaryFunctions:", void, .{fragmentAdditionalBinaryFunctions_});
     }
-    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(*Function) {
-        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(*Function), .{});
+    pub fn tileAdditionalBinaryFunctions(self_: *@This()) ?*ns.Array(?*Function) {
+        return objc.msgSend(self_, "tileAdditionalBinaryFunctions", ?*ns.Array(?*Function), .{});
     }
-    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(*Function)) void {
+    pub fn setTileAdditionalBinaryFunctions(self_: *@This(), tileAdditionalBinaryFunctions_: ?*ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setTileAdditionalBinaryFunctions:", void, .{tileAdditionalBinaryFunctions_});
     }
 };
@@ -6758,29 +6758,29 @@ pub const RenderPipelineReflection = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn vertexBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "vertexBindings", *ns.Array(*Binding), .{});
+    pub fn vertexBindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "vertexBindings", *ns.Array(?*Binding), .{});
     }
-    pub fn fragmentBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "fragmentBindings", *ns.Array(*Binding), .{});
+    pub fn fragmentBindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "fragmentBindings", *ns.Array(?*Binding), .{});
     }
-    pub fn tileBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "tileBindings", *ns.Array(*Binding), .{});
+    pub fn tileBindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "tileBindings", *ns.Array(?*Binding), .{});
     }
-    pub fn objectBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "objectBindings", *ns.Array(*Binding), .{});
+    pub fn objectBindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "objectBindings", *ns.Array(?*Binding), .{});
     }
-    pub fn meshBindings(self_: *@This()) *ns.Array(*Binding) {
-        return objc.msgSend(self_, "meshBindings", *ns.Array(*Binding), .{});
+    pub fn meshBindings(self_: *@This()) *ns.Array(?*Binding) {
+        return objc.msgSend(self_, "meshBindings", *ns.Array(?*Binding), .{});
     }
-    pub fn vertexArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "vertexArguments", ?*ns.Array(*Argument), .{});
+    pub fn vertexArguments(self_: *@This()) ?*ns.Array(?*Argument) {
+        return objc.msgSend(self_, "vertexArguments", ?*ns.Array(?*Argument), .{});
     }
-    pub fn fragmentArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "fragmentArguments", ?*ns.Array(*Argument), .{});
+    pub fn fragmentArguments(self_: *@This()) ?*ns.Array(?*Argument) {
+        return objc.msgSend(self_, "fragmentArguments", ?*ns.Array(?*Argument), .{});
     }
-    pub fn tileArguments(self_: *@This()) ?*ns.Array(*Argument) {
-        return objc.msgSend(self_, "tileArguments", ?*ns.Array(*Argument), .{});
+    pub fn tileArguments(self_: *@This()) ?*ns.Array(?*Argument) {
+        return objc.msgSend(self_, "tileArguments", ?*ns.Array(?*Argument), .{});
     }
 };
 
@@ -7160,22 +7160,22 @@ pub const StitchedLibraryDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
-    pub fn functionGraphs(self_: *@This()) *ns.Array(*FunctionStitchingGraph) {
-        return objc.msgSend(self_, "functionGraphs", *ns.Array(*FunctionStitchingGraph), .{});
+    pub fn functionGraphs(self_: *@This()) *ns.Array(?*FunctionStitchingGraph) {
+        return objc.msgSend(self_, "functionGraphs", *ns.Array(?*FunctionStitchingGraph), .{});
     }
-    pub fn setFunctionGraphs(self_: *@This(), functionGraphs_: *ns.Array(*FunctionStitchingGraph)) void {
+    pub fn setFunctionGraphs(self_: *@This(), functionGraphs_: *ns.Array(?*FunctionStitchingGraph)) void {
         return objc.msgSend(self_, "setFunctionGraphs:", void, .{functionGraphs_});
     }
-    pub fn functions(self_: *@This()) *ns.Array(*Function) {
-        return objc.msgSend(self_, "functions", *ns.Array(*Function), .{});
+    pub fn functions(self_: *@This()) *ns.Array(?*Function) {
+        return objc.msgSend(self_, "functions", *ns.Array(?*Function), .{});
     }
-    pub fn setFunctions(self_: *@This(), functions_: *ns.Array(*Function)) void {
+    pub fn setFunctions(self_: *@This(), functions_: *ns.Array(?*Function)) void {
         return objc.msgSend(self_, "setFunctions:", void, .{functions_});
     }
-    pub fn binaryArchives(self_: *@This()) *ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", *ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) *ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", *ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: *ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: *ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
     pub fn options(self_: *@This()) StitchedLibraryOptions {
@@ -7238,8 +7238,8 @@ pub const StructType = opaque {
     pub fn memberByName(self_: *@This(), name_: *ns.String) ?*StructMember {
         return objc.msgSend(self_, "memberByName:", ?*StructMember, .{name_});
     }
-    pub fn members(self_: *@This()) *ns.Array(*StructMember) {
-        return objc.msgSend(self_, "members", *ns.Array(*StructMember), .{});
+    pub fn members(self_: *@This()) *ns.Array(?*StructMember) {
+        return objc.msgSend(self_, "members", *ns.Array(?*StructMember), .{});
     }
 };
 
@@ -7622,16 +7622,16 @@ pub const TileRenderPipelineDescriptor = opaque {
     pub fn setMaxTotalThreadsPerThreadgroup(self_: *@This(), maxTotalThreadsPerThreadgroup_: ns.UInteger) void {
         return objc.msgSend(self_, "setMaxTotalThreadsPerThreadgroup:", void, .{maxTotalThreadsPerThreadgroup_});
     }
-    pub fn binaryArchives(self_: *@This()) ?*ns.Array(*BinaryArchive) {
-        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(*BinaryArchive), .{});
+    pub fn binaryArchives(self_: *@This()) ?*ns.Array(?*BinaryArchive) {
+        return objc.msgSend(self_, "binaryArchives", ?*ns.Array(?*BinaryArchive), .{});
     }
-    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(*BinaryArchive)) void {
+    pub fn setBinaryArchives(self_: *@This(), binaryArchives_: ?*ns.Array(?*BinaryArchive)) void {
         return objc.msgSend(self_, "setBinaryArchives:", void, .{binaryArchives_});
     }
-    pub fn preloadedLibraries(self_: *@This()) *ns.Array(*DynamicLibraryProtocol) {
-        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(*DynamicLibraryProtocol), .{});
+    pub fn preloadedLibraries(self_: *@This()) *ns.Array(?*DynamicLibraryProtocol) {
+        return objc.msgSend(self_, "preloadedLibraries", *ns.Array(?*DynamicLibraryProtocol), .{});
     }
-    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(*DynamicLibraryProtocol)) void {
+    pub fn setPreloadedLibraries(self_: *@This(), preloadedLibraries_: *ns.Array(?*DynamicLibraryProtocol)) void {
         return objc.msgSend(self_, "setPreloadedLibraries:", void, .{preloadedLibraries_});
     }
     pub fn linkedFunctions(self_: *@This()) *LinkedFunctions {
@@ -8906,8 +8906,8 @@ pub const Buffer = opaque {
     pub fn length(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "length", ns.UInteger, .{});
     }
-    pub fn remoteStorageBuffer(self_: *@This()) *Buffer {
-        return objc.msgSend(self_, "remoteStorageBuffer", *Buffer, .{});
+    pub fn remoteStorageBuffer(self_: *@This()) ?*Buffer {
+        return objc.msgSend(self_, "remoteStorageBuffer", ?*Buffer, .{});
     }
     pub fn gpuAddress(self_: *@This()) GPUAddress {
         return objc.msgSend(self_, "gpuAddress", GPUAddress, .{});
@@ -9107,8 +9107,8 @@ pub const CommandBufferEncoderInfo = opaque {
     pub fn label(self_: *@This()) *ns.String {
         return objc.msgSend(self_, "label", *ns.String, .{});
     }
-    pub fn debugSignposts(self_: *@This()) *ns.Array(*ns.String) {
-        return objc.msgSend(self_, "debugSignposts", *ns.Array(*ns.String), .{});
+    pub fn debugSignposts(self_: *@This()) *ns.Array(?*ns.String) {
+        return objc.msgSend(self_, "debugSignposts", *ns.Array(?*ns.String), .{});
     }
     pub fn errorState(self_: *@This()) CommandEncoderErrorState {
         return objc.msgSend(self_, "errorState", CommandEncoderErrorState, .{});
@@ -9329,7 +9329,7 @@ pub const ComputePipelineState = opaque {
     pub fn functionHandleWithBinaryFunction(self_: *@This(), function_: *MTL4BinaryFunctionProtocol) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithBinaryFunction:", ?*FunctionHandle, .{function_});
     }
-    pub fn newComputePipelineStateWithBinaryFunctions_error(self_: *@This(), additionalBinaryFunctions_: *ns.Array(*MTL4BinaryFunctionProtocol), error_: ?*?*ns.Error) ?*ComputePipelineState {
+    pub fn newComputePipelineStateWithBinaryFunctions_error(self_: *@This(), additionalBinaryFunctions_: *ns.Array(?*MTL4BinaryFunctionProtocol), error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithBinaryFunctions:error:", ?*ComputePipelineState, .{ additionalBinaryFunctions_, error_ });
     }
     pub fn imageblockMemoryLengthForDimensions(self_: *@This(), imageblockDimensions_: Size) ns.UInteger {
@@ -9338,7 +9338,7 @@ pub const ComputePipelineState = opaque {
     pub fn functionHandleWithFunction(self_: *@This(), function_: *Function) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithFunction:", ?*FunctionHandle, .{function_});
     }
-    pub fn newComputePipelineStateWithAdditionalBinaryFunctions_error(self_: *@This(), functions_: *ns.Array(*Function), error_: ?*?*ns.Error) ?*ComputePipelineState {
+    pub fn newComputePipelineStateWithAdditionalBinaryFunctions_error(self_: *@This(), functions_: *ns.Array(?*Function), error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithAdditionalBinaryFunctions:error:", ?*ComputePipelineState, .{ functions_, error_ });
     }
     pub fn newVisibleFunctionTableWithDescriptor(self_: *@This(), descriptor_: *VisibleFunctionTableDescriptor) ?*VisibleFunctionTable {
@@ -9422,8 +9422,8 @@ pub const CounterSet = opaque {
     pub fn name(self_: *@This()) *ns.String {
         return objc.msgSend(self_, "name", *ns.String, .{});
     }
-    pub fn counters(self_: *@This()) *ns.Array(*Counter) {
-        return objc.msgSend(self_, "counters", *ns.Array(*Counter), .{});
+    pub fn counters(self_: *@This()) *ns.Array(?*Counter) {
+        return objc.msgSend(self_, "counters", *ns.Array(?*Counter), .{});
     }
 };
 
@@ -9536,7 +9536,7 @@ pub const Device = opaque {
     pub fn newRenderPipelineStateWithDescriptor_completionHandler(self_: *@This(), descriptor_: *RenderPipelineDescriptor, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
     }
-    pub fn newRenderPipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *RenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, *RenderPipelineReflection, ?*ns.Error) void)) void {
+    pub fn newRenderPipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *RenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
     pub fn newComputePipelineStateWithFunction_error(self_: *@This(), computeFunction_: *Function, error_: ?*?*ns.Error) ?*ComputePipelineState {
@@ -9548,13 +9548,13 @@ pub const Device = opaque {
     pub fn newComputePipelineStateWithFunction_completionHandler(self_: *@This(), computeFunction_: *Function, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:completionHandler:", void, .{ computeFunction_, completionHandler_ });
     }
-    pub fn newComputePipelineStateWithFunction_options_completionHandler(self_: *@This(), computeFunction_: *Function, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, *ComputePipelineReflection, ?*ns.Error) void)) void {
+    pub fn newComputePipelineStateWithFunction_options_completionHandler(self_: *@This(), computeFunction_: *Function, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ComputePipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:options:completionHandler:", void, .{ computeFunction_, options_, completionHandler_ });
     }
     pub fn newComputePipelineStateWithDescriptor_options_reflection_error(self_: *@This(), descriptor_: *ComputePipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedComputePipelineReflection, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:options:reflection:error:", ?*ComputePipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
-    pub fn newComputePipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *ComputePipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, *ComputePipelineReflection, ?*ns.Error) void)) void {
+    pub fn newComputePipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *ComputePipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ComputePipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
     pub fn newFence(self_: *@This()) ?*Fence {
@@ -9578,19 +9578,19 @@ pub const Device = opaque {
     pub fn newRenderPipelineStateWithTileDescriptor_options_reflection_error(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedRenderPipelineReflection, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithTileDescriptor:options:reflection:error:", ?*RenderPipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
-    pub fn newRenderPipelineStateWithTileDescriptor_options_completionHandler(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, *RenderPipelineReflection, ?*ns.Error) void)) void {
+    pub fn newRenderPipelineStateWithTileDescriptor_options_completionHandler(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithTileDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
     pub fn newRenderPipelineStateWithMeshDescriptor_options_reflection_error(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedRenderPipelineReflection, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithMeshDescriptor:options:reflection:error:", ?*RenderPipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
-    pub fn newRenderPipelineStateWithMeshDescriptor_options_completionHandler(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, *RenderPipelineReflection, ?*ns.Error) void)) void {
+    pub fn newRenderPipelineStateWithMeshDescriptor_options_completionHandler(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithMeshDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
     pub fn getDefaultSamplePositions_count(self_: *@This(), positions_: *SamplePosition, count_: ns.UInteger) void {
         return objc.msgSend(self_, "getDefaultSamplePositions:count:", void, .{ positions_, count_ });
     }
-    pub fn newArgumentEncoderWithArguments(self_: *@This(), arguments_: *ns.Array(*ArgumentDescriptor)) ?*ArgumentEncoder {
+    pub fn newArgumentEncoderWithArguments(self_: *@This(), arguments_: *ns.Array(?*ArgumentDescriptor)) ?*ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderWithArguments:", ?*ArgumentEncoder, .{arguments_});
     }
     pub fn supportsRasterizationRateMapWithLayerCount(self_: *@This(), layerCount_: ns.UInteger) bool {
@@ -9833,8 +9833,8 @@ pub const Device = opaque {
     pub fn maxBufferLength(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "maxBufferLength", ns.UInteger, .{});
     }
-    pub fn counterSets(self_: *@This()) ?*ns.Array(*CounterSet) {
-        return objc.msgSend(self_, "counterSets", ?*ns.Array(*CounterSet), .{});
+    pub fn counterSets(self_: *@This()) ?*ns.Array(?*CounterSet) {
+        return objc.msgSend(self_, "counterSets", ?*ns.Array(?*CounterSet), .{});
     }
     pub fn supportsDynamicLibraries(self_: *@This()) bool {
         return objc.msgSend(self_, "supportsDynamicLibraries", bool, .{});
@@ -9989,17 +9989,17 @@ pub const Function = opaque {
     pub fn patchControlPointCount(self_: *@This()) ns.Integer {
         return objc.msgSend(self_, "patchControlPointCount", ns.Integer, .{});
     }
-    pub fn vertexAttributes(self_: *@This()) ?*ns.Array(*VertexAttribute) {
-        return objc.msgSend(self_, "vertexAttributes", ?*ns.Array(*VertexAttribute), .{});
+    pub fn vertexAttributes(self_: *@This()) ?*ns.Array(?*VertexAttribute) {
+        return objc.msgSend(self_, "vertexAttributes", ?*ns.Array(?*VertexAttribute), .{});
     }
-    pub fn stageInputAttributes(self_: *@This()) ?*ns.Array(*Attribute) {
-        return objc.msgSend(self_, "stageInputAttributes", ?*ns.Array(*Attribute), .{});
+    pub fn stageInputAttributes(self_: *@This()) ?*ns.Array(?*Attribute) {
+        return objc.msgSend(self_, "stageInputAttributes", ?*ns.Array(?*Attribute), .{});
     }
     pub fn name(self_: *@This()) *ns.String {
         return objc.msgSend(self_, "name", *ns.String, .{});
     }
-    pub fn functionConstantsDictionary(self_: *@This()) *ns.Dictionary(*ns.String, *FunctionConstant) {
-        return objc.msgSend(self_, "functionConstantsDictionary", *ns.Dictionary(*ns.String, *FunctionConstant), .{});
+    pub fn functionConstantsDictionary(self_: *@This()) *ns.Dictionary(?*ns.String, ?*FunctionConstant) {
+        return objc.msgSend(self_, "functionConstantsDictionary", *ns.Dictionary(?*ns.String, ?*FunctionConstant), .{});
     }
     pub fn options(self_: *@This()) FunctionOptions {
         return objc.msgSend(self_, "options", FunctionOptions, .{});
@@ -10522,8 +10522,8 @@ pub const Library = opaque {
     pub fn device(self_: *@This()) *Device {
         return objc.msgSend(self_, "device", *Device, .{});
     }
-    pub fn functionNames(self_: *@This()) *ns.Array(*ns.String) {
-        return objc.msgSend(self_, "functionNames", *ns.Array(*ns.String), .{});
+    pub fn functionNames(self_: *@This()) *ns.Array(?*ns.String) {
+        return objc.msgSend(self_, "functionNames", *ns.Array(?*ns.String), .{});
     }
     pub fn @"type"(self_: *@This()) LibraryType {
         return objc.msgSend(self_, "type", LibraryType, .{});
@@ -11169,8 +11169,8 @@ pub const ResidencySet = opaque {
     pub fn allocatedSize(self_: *@This()) u64 {
         return objc.msgSend(self_, "allocatedSize", u64, .{});
     }
-    pub fn allAllocations(self_: *@This()) *ns.Array(*Allocation) {
-        return objc.msgSend(self_, "allAllocations", *ns.Array(*Allocation), .{});
+    pub fn allAllocations(self_: *@This()) *ns.Array(?*Allocation) {
+        return objc.msgSend(self_, "allAllocations", *ns.Array(?*Allocation), .{});
     }
     pub fn allocationCount(self_: *@This()) ns.UInteger {
         return objc.msgSend(self_, "allocationCount", ns.UInteger, .{});
@@ -11490,8 +11490,8 @@ pub const Texture = opaque {
     pub fn gpuResourceID(self_: *@This()) ResourceID {
         return objc.msgSend(self_, "gpuResourceID", ResourceID, .{});
     }
-    pub fn remoteStorageTexture(self_: *@This()) *Texture {
-        return objc.msgSend(self_, "remoteStorageTexture", *Texture, .{});
+    pub fn remoteStorageTexture(self_: *@This()) ?*Texture {
+        return objc.msgSend(self_, "remoteStorageTexture", ?*Texture, .{});
     }
     pub fn swizzle(self_: *@This()) TextureSwizzleChannels {
         return objc.msgSend(self_, "swizzle", TextureSwizzleChannels, .{});
@@ -11587,7 +11587,7 @@ pub const IOCommandBufferHandler = *ns.Block(fn (*IOCommandBuffer) void);
 
 pub const NewComputePipelineStateCompletionHandler = *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void);
 
-pub const NewComputePipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*ComputePipelineState, *ComputePipelineReflection, ?*ns.Error) void);
+pub const NewComputePipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*ComputePipelineState, ?*ComputePipelineReflection, ?*ns.Error) void);
 
 pub const NewDynamicLibraryCompletionHandler = *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void);
 
@@ -11595,7 +11595,7 @@ pub const NewLibraryCompletionHandler = *ns.Block(fn (?*Library, ?*ns.Error) voi
 
 pub const NewRenderPipelineStateCompletionHandler = *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void);
 
-pub const NewRenderPipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*RenderPipelineState, *RenderPipelineReflection, ?*ns.Error) void);
+pub const NewRenderPipelineStateWithReflectionCompletionHandler = *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void);
 
 pub const SharedEventNotificationBlock = *ns.Block(fn (*SharedEvent, u64) void);
 
