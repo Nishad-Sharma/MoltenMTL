@@ -1,6 +1,7 @@
 const builtin = @import("builtin");
 const std = @import("std");
-const objc = @import("mach-objc").objc;
+const mach = @import("mach-objc");
+const objc = mach.objc;
 
 const Struct8 = extern struct {
     x: u64,
@@ -42,8 +43,58 @@ const Fixture = opaque {
     );
 };
 
+const MissingClass = opaque {
+    pub const InternalInfo = objc.ExternClass(
+        "MachObjCClassThatMustNotExist_5AFE600D",
+        @This(),
+        objc.Id,
+        &.{},
+    );
+};
+
 extern fn MachObjCABIFixtureCreate() ?*Fixture;
 extern fn MachObjCABIFixtureClass() *objc.Class;
+extern fn MachObjCAutoreleaseProbeCreate() void;
+extern fn MachObjCAutoreleaseProbeDeallocCount() u64;
+
+test "Objective-C classes resolve through the runtime" {
+    const runtime_class = Fixture.InternalInfo.classIfAvailable();
+    try std.testing.expect(runtime_class != null);
+    try std.testing.expectEqual(
+        @intFromPtr(MachObjCABIFixtureClass()),
+        @intFromPtr(runtime_class.?),
+    );
+    try std.testing.expectEqual(
+        @intFromPtr(runtime_class.?),
+        @intFromPtr(Fixture.InternalInfo.class()),
+    );
+    try std.testing.expect(mach.foundation.String.InternalInfo.classIfAvailable() != null);
+    try std.testing.expectEqual(null, MissingClass.InternalInfo.classIfAvailable());
+}
+
+test "respondsTo handles objects, classes, and nil" {
+    const object = MachObjCABIFixtureCreate() orelse return error.FixtureCreationFailed;
+    defer Fixture.InternalInfo.release(object);
+
+    try std.testing.expect(objc.respondsTo(object, "baseValue"));
+    try std.testing.expect(!objc.respondsTo(object, "selectorThatMustNotExist_5AFE600D"));
+    try std.testing.expect(objc.respondsTo(MachObjCABIFixtureClass(), "classValue"));
+    try std.testing.expect(!objc.respondsTo(@as(?*Fixture, null), "baseValue"));
+}
+
+test "scoped autorelease pool drains autoreleased objects" {
+    const count_before = MachObjCAutoreleaseProbeDeallocCount();
+
+    {
+        var pool = objc.AutoreleasePool.init();
+        defer pool.deinit();
+
+        MachObjCAutoreleaseProbeCreate();
+        try std.testing.expectEqual(count_before, MachObjCAutoreleaseProbeDeallocCount());
+    }
+
+    try std.testing.expectEqual(count_before + 1, MachObjCAutoreleaseProbeDeallocCount());
+}
 
 test "ARM64 Objective-C ordinary message ABI" {
     try std.testing.expectEqual(.aarch64, builtin.target.cpu.arch);

@@ -8,12 +8,30 @@ comptime {
 }
 
 // LLVM's documented ARC APIs that technically aren't part of libobjc's public API.
-pub const AutoreleasePool = opaque {};
-extern "objc" fn objc_autoreleasePoolPop(pool: *AutoreleasePool) void;
-extern "objc" fn objc_autoreleasePoolPush() *AutoreleasePool;
+pub const AutoreleasePoolToken = opaque {};
+extern "objc" fn objc_autoreleasePoolPop(pool: *AutoreleasePoolToken) void;
+extern "objc" fn objc_autoreleasePoolPush() *AutoreleasePoolToken;
 
 pub const autoreleasePoolPop = objc_autoreleasePoolPop;
 pub const autoreleasePoolPush = objc_autoreleasePoolPush;
+
+/// A scoped Objective-C autorelease pool.
+///
+/// Keep this value in one variable and call `deinit()` exactly once; copying it would duplicate
+/// ownership of the underlying runtime token.
+pub const AutoreleasePool = struct {
+    token: ?*AutoreleasePoolToken,
+
+    pub fn init() AutoreleasePool {
+        return .{ .token = objc_autoreleasePoolPush() };
+    }
+
+    pub fn deinit(self: *AutoreleasePool) void {
+        const token = self.token orelse @panic("Objective-C autorelease pool deinitialized twice");
+        self.token = null;
+        objc_autoreleasePoolPop(token);
+    }
+};
 
 extern "objc" fn objc_autorelease(*Id) *Id; // Same as `[object autorelease]`.
 extern "objc" fn objc_release(*Id) void; // Same as `[object release]`.
@@ -231,9 +249,33 @@ pub fn msgSend(receiver: anytype, comptime selector: []const u8, return_type: ty
     return @call(.auto, msg_send_fn, .{ receiver, SelCache.get() } ++ args);
 }
 
+/// Returns whether an Objective-C object or class implements `selector`.
+///
+/// A null optional receiver returns `false`, matching Objective-C nil messaging semantics.
+pub fn respondsTo(receiver: anytype, comptime selector: []const u8) bool {
+    switch (@typeInfo(@TypeOf(receiver))) {
+        .pointer => {},
+        .optional => |optional| {
+            if (@typeInfo(optional.child) != .pointer) {
+                @compileError("respondsTo receiver must be an Objective-C object or class pointer");
+            }
+            if (receiver == null) return false;
+        },
+        else => @compileError("respondsTo receiver must be an Objective-C object or class pointer"),
+    }
+
+    return msgSend(
+        receiver,
+        "respondsToSelector:",
+        bool,
+        .{Selector.named(selector)},
+    );
+}
+
 pub fn ExternClass(comptime name: []const u8, T: type, Super: type, comptime protocols: []const type) type {
     return struct {
         pub const class_name = name;
+        var cached_class = std.atomic.Value(?*Class).init(null);
 
         /// Returns a typed Zig function pointer for an Obj-C `direct_method` on this class.
         /// `Fn` must match the IMP's C ABI signature.
@@ -241,31 +283,23 @@ pub fn ExternClass(comptime name: []const u8, T: type, Super: type, comptime pro
             return @extern(*const Fn, .{ .name = "\x01-[" ++ name ++ " " ++ sel ++ "]" });
         }
 
-        pub fn class() *Class {
-            // This global asm lives inside the `class()` function so we only generate it if `class()` is actually called.
-            const GlobalAsm = struct {
-                comptime {
-                    // zig fmt: off
-                    asm (
-                        "    .section __DATA,__objc_classrefs,regular,no_dead_strip\n" ++
-                        "    .p2align 3, 0x0\n" ++
-                        "_OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ ":\n" ++
-                        "    .quad _OBJC_CLASS_$_" ++ name
-                    );
-                    // zig fmt: on
-                }
-            };
-            _ = GlobalAsm;
+        /// Resolves the Objective-C class through the runtime, returning null when it is not
+        /// available in the running process. Missing classes are not cached so a later framework
+        /// or bundle load can make the class available.
+        pub fn classIfAvailable() ?*Class {
+            if (cached_class.load(.acquire)) |cached| return cached;
 
-            var ptr: *anyopaque = undefined;
-            // zig fmt: off
-            asm (
-                "adrp %[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGE\n" ++
-                "ldr %[ptr], [%[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGEOFF]"
-                : [ptr] "=r" (ptr),
-            );
-            // zig fmt: on
-            return @ptrCast(ptr);
+            const resolved = objc_getClass(name ++ "\x00") orelse return null;
+            if (cached_class.cmpxchgStrong(null, resolved, .acq_rel, .acquire)) |existing| {
+                return existing.?;
+            }
+            return resolved;
+        }
+
+        /// Resolves the Objective-C class or fails clearly when the running OS does not provide it.
+        pub fn class() *Class {
+            return classIfAvailable() orelse
+                @panic("Objective-C class `" ++ name ++ "` is unavailable");
         }
 
         pub fn canCastTo(comptime Base: type) bool {

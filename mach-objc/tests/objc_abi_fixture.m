@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+static uint64_t MachObjCAutoreleaseDeallocCount = 0;
+
 typedef struct {
     uint64_t x;
 } MachObjCStruct8;
@@ -122,10 +124,28 @@ typedef struct {
 }
 @end
 
+@interface MachObjCAutoreleaseProbe : NSObject
+@end
+
+@implementation MachObjCAutoreleaseProbe
+- (void)dealloc {
+    MachObjCAutoreleaseDeallocCount += 1;
+    [super dealloc];
+}
+@end
+
 void *MachObjCABIFixtureCreate(void) {
     return [[MachObjCABIFixture alloc] init];
 }
 
 void *MachObjCABIFixtureClass(void) {
     return (void *)[MachObjCABIFixture class];
+}
+
+void MachObjCAutoreleaseProbeCreate(void) {
+    [[[MachObjCAutoreleaseProbe alloc] init] autorelease];
+}
+
+uint64_t MachObjCAutoreleaseProbeDeallocCount(void) {
+    return MachObjCAutoreleaseDeallocCount;
 }

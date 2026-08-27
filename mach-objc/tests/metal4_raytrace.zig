@@ -28,18 +28,13 @@ const shader_source =
 ;
 
 test "MTL4 raytraces one triangle" {
-    const pool = objc.autoreleasePoolPush();
-    defer objc.autoreleasePoolPop(pool);
+    var pool = objc.AutoreleasePool.init();
+    defer pool.deinit();
 
     const device = mtl.createSystemDefaultDevice() orelse return error.SkipZigTest;
     defer device.release();
 
-    if (!objc.msgSend(
-        device,
-        "respondsToSelector:",
-        bool,
-        .{objc.Selector.named("newCommandAllocator")},
-    )) return error.SkipZigTest;
+    if (!objc.respondsTo(device, "newCommandAllocator")) return error.SkipZigTest;
     if (!device.supportsRaytracing()) return error.SkipZigTest;
 
     const allocator = device.newCommandAllocator() orelse return error.SkipZigTest;

@@ -63,17 +63,12 @@ fn parseFrameLimit(init: std.process.Init) !?usize {
 }
 
 fn run(frame_limit: ?usize) !void {
-    const pool = objc.autoreleasePoolPush();
-    defer objc.autoreleasePoolPop(pool);
+    var pool = objc.AutoreleasePool.init();
+    defer pool.deinit();
 
     const device = mtl.createSystemDefaultDevice() orelse return error.NoMetalDevice;
     defer device.release();
-    if (!objc.msgSend(
-        device,
-        "respondsToSelector:",
-        bool,
-        .{objc.Selector.named("newCommandAllocator")},
-    )) return error.Metal4Unavailable;
+    if (!objc.respondsTo(device, "newCommandAllocator")) return error.Metal4Unavailable;
     if (!device.supportsRaytracing()) return error.RayTracingUnavailable;
 
     const app = appkit.Application.sharedApplication();
@@ -247,8 +242,8 @@ fn run(frame_limit: ?usize) !void {
 
     var frame_count: usize = 0;
     while (window.isVisible()) {
-        const frame_pool = objc.autoreleasePoolPush();
-        defer objc.autoreleasePoolPop(frame_pool);
+        var frame_pool = objc.AutoreleasePool.init();
+        defer frame_pool.deinit();
 
         pumpEvents(app);
         if (!window.isVisible()) break;
