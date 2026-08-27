@@ -40,6 +40,25 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run tests");
     test_step.dependOn(&run_unit_tests.step);
 
+    const objc_abi_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/objc_abi.zig"),
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+    objc_abi_tests.root_module.addImport("mach-objc", module);
+    objc_abi_tests.root_module.addCSourceFile(.{
+        .file = b.path("tests/objc_abi_fixture.m"),
+        .flags = &.{"-fno-objc-arc"},
+    });
+    objc_abi_tests.root_module.linkSystemLibrary("objc", .{});
+    objc_abi_tests.root_module.linkFramework("Foundation", .{});
+
+    const run_objc_abi_tests = b.addRunArtifact(objc_abi_tests);
+    test_step.dependOn(&run_objc_abi_tests.step);
+
     const raytrace_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("tests/metal4_raytrace.zig"),

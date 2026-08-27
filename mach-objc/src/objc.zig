@@ -1,6 +1,12 @@
 const builtin = @import("builtin");
 const std = @import("std");
 
+comptime {
+    if (builtin.target.cpu.arch != .aarch64 or builtin.target.os.tag != .macos) {
+        @compileError("mach-objc requires the aarch64-macos target");
+    }
+}
+
 // LLVM's documented ARC APIs that technically aren't part of libobjc's public API.
 pub const AutoreleasePool = opaque {};
 extern "objc" fn objc_autoreleasePoolPop(pool: *AutoreleasePool) void;
@@ -57,8 +63,12 @@ pub const Id = opaque {
     pub const autorelease = objc_autorelease;
 };
 
-extern "objc" fn sel_registerName(name: [*:0]const u8) ?*anyopaque;
-extern "objc" fn class_getMethodImplementation(cls: ?*Class, name: ?*anyopaque) ?*const fn () callconv(.c) void;
+extern "objc" fn sel_registerName(name: [*:0]const u8) ?*Selector;
+extern "objc" fn class_getMethodImplementation(cls: ?*Class, name: ?*Selector) ?*const fn () callconv(.c) void;
+
+fn registerSelector(comptime name: []const u8) *Selector {
+    return sel_registerName(name ++ "\x00") orelse unreachable;
+}
 
 /// Returns a typed Zig function pointer that calls the superclass's IMP for `selector`.
 ///
@@ -97,16 +107,32 @@ pub fn superFn(
         break :init @Fn(param_types, @ptrCast(param_attrs.ptr), Ret, .{ .@"callconv" = .c });
     };
 
-    // Per-(SuperClass, selector, Fn) cache
+    // Per-(SuperClass, selector, Fn) cache. Selector registration is idempotent, and atomic
+    // selector/IMP publication makes concurrent first use race-free.
     const Cache = struct {
-        var imp: ?*const ImpFn = null;
-        var sel: ?*anyopaque = null;
+        var selector_cache = std.atomic.Value(?*Selector).init(null);
+        var imp = std.atomic.Value(?*const ImpFn).init(null);
 
-        fn resolve() void {
-            const s = sel_registerName(comptime selector ++ "\x00");
-            const i = class_getMethodImplementation(SuperClass.InternalInfo.class(), s);
-            sel = s;
-            imp = @ptrCast(i);
+        fn getSelector() *Selector {
+            if (selector_cache.load(.acquire)) |cached| return cached;
+
+            const registered = registerSelector(selector);
+            if (selector_cache.cmpxchgStrong(null, registered, .acq_rel, .acquire)) |existing| {
+                return existing.?;
+            }
+            return registered;
+        }
+
+        fn get(sel: *Selector) *const ImpFn {
+            if (imp.load(.acquire)) |cached| return cached;
+
+            const resolved: *const ImpFn = @ptrCast(
+                class_getMethodImplementation(SuperClass.InternalInfo.class(), sel) orelse unreachable,
+            );
+            if (imp.cmpxchgStrong(null, resolved, .acq_rel, .acquire)) |existing| {
+                return existing.?;
+            }
+            return resolved;
         }
     };
 
@@ -114,45 +140,45 @@ pub fn superFn(
     return switch (fn_info.params.len) {
         1 => &(struct {
             pub fn impl(a0: fn_info.params[0].type.?) Ret {
-                if (Cache.imp == null) Cache.resolve();
-                return Cache.imp.?(a0, Cache.sel);
+                const sel = Cache.getSelector();
+                return Cache.get(sel)(a0, sel);
             }
         }.impl),
         2 => &(struct {
             pub fn impl(a0: fn_info.params[0].type.?, a1: fn_info.params[1].type.?) Ret {
-                if (Cache.imp == null) Cache.resolve();
-                return Cache.imp.?(a0, Cache.sel, a1);
+                const sel = Cache.getSelector();
+                return Cache.get(sel)(a0, sel, a1);
             }
         }.impl),
         3 => &(struct {
             pub fn impl(a0: fn_info.params[0].type.?, a1: fn_info.params[1].type.?, a2: fn_info.params[2].type.?) Ret {
-                if (Cache.imp == null) Cache.resolve();
-                return Cache.imp.?(a0, Cache.sel, a1, a2);
+                const sel = Cache.getSelector();
+                return Cache.get(sel)(a0, sel, a1, a2);
             }
         }.impl),
         4 => &(struct {
             pub fn impl(a0: fn_info.params[0].type.?, a1: fn_info.params[1].type.?, a2: fn_info.params[2].type.?, a3: fn_info.params[3].type.?) Ret {
-                if (Cache.imp == null) Cache.resolve();
-                return Cache.imp.?(a0, Cache.sel, a1, a2, a3);
+                const sel = Cache.getSelector();
+                return Cache.get(sel)(a0, sel, a1, a2, a3);
             }
         }.impl),
         5 => &(struct {
             pub fn impl(a0: fn_info.params[0].type.?, a1: fn_info.params[1].type.?, a2: fn_info.params[2].type.?, a3: fn_info.params[3].type.?, a4: fn_info.params[4].type.?) Ret {
-                if (Cache.imp == null) Cache.resolve();
-                return Cache.imp.?(a0, Cache.sel, a1, a2, a3, a4);
+                const sel = Cache.getSelector();
+                return Cache.get(sel)(a0, sel, a1, a2, a3, a4);
             }
         }.impl),
         else => @compileError("superFn: unsupported arity (max 5; bump table if needed)"),
     };
 }
 
-/// Calls `objc_msgSend(receiver, selector, args...)` (or `objc_msgSend_stret` if needed).
+/// Calls `objc_msgSend(receiver, selector, args...)` on Apple ARM64.
 ///
 /// Be careful. The return type and argument types *must* match the Objective-C method's signature.
 /// No compile-time verification is performed.
 ///
 /// We resolve the selector at runtime via `sel_registerName` and call plain `objc_msgSend`, caching
-/// the canonical SEL per call site so the lookup happens at most once.
+/// the canonical SEL per call site so initialized calls only require an atomic load.
 pub fn msgSend(receiver: anytype, comptime selector: []const u8, return_type: type, args: anytype) return_type {
     const n_colons = comptime std.mem.count(u8, selector, ":");
     if (comptime n_colons != args.len) {
@@ -185,20 +211,23 @@ pub fn msgSend(receiver: anytype, comptime selector: []const u8, return_type: ty
         );
     };
 
-    const needs_fpret = comptime builtin.target.cpu.arch == .x86 and (return_type == f32 or return_type == f64);
-    const needs_stret = comptime builtin.target.cpu.arch == .x86 and @sizeOf(return_type) > 16;
-    const msg_send_fn_name = comptime if (needs_stret) "objc_msgSend_stret" else if (needs_fpret) "objc_msgSend_fpret" else "objc_msgSend";
-
     // Resolve the selector via the runtime once per call site; cache the result so subsequent
-    // calls are a single load.
+    // calls are a single atomic load. Registration is idempotent, so concurrent first use may
+    // register more than once before one thread publishes the canonical selector.
     const SelCache = struct {
-        var sel: ?*Selector = null;
-        fn get() ?*Selector {
-            if (sel == null) sel = @ptrCast(sel_registerName(selector ++ "\x00"));
-            return sel;
+        var sel = std.atomic.Value(?*Selector).init(null);
+
+        fn get() *Selector {
+            if (sel.load(.acquire)) |cached| return cached;
+
+            const registered = registerSelector(selector);
+            if (sel.cmpxchgStrong(null, registered, .acq_rel, .acquire)) |existing| {
+                return existing.?;
+            }
+            return registered;
         }
     };
-    const msg_send_fn = @extern(*const Fn, .{ .name = msg_send_fn_name });
+    const msg_send_fn = @extern(*const Fn, .{ .name = "objc_msgSend" });
     return @call(.auto, msg_send_fn, .{ receiver, SelCache.get() } ++ args);
 }
 
@@ -229,22 +258,13 @@ pub fn ExternClass(comptime name: []const u8, T: type, Super: type, comptime pro
             _ = GlobalAsm;
 
             var ptr: *anyopaque = undefined;
-            if (comptime builtin.cpu.arch == .x86_64) {
-                // zig fmt: off
-                asm (
-                    "movq _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "(%rip), %[ptr]"
-                    : [ptr] "=r" (ptr),
-                );
-                // zig fmt: on
-            } else {
-                // zig fmt: off
-                asm (
-                    "adrp %[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGE\n" ++
-                    "ldr %[ptr], [%[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGEOFF]"
-                    : [ptr] "=r" (ptr),
-                );
-                // zig fmt: on
-            }
+            // zig fmt: off
+            asm (
+                "adrp %[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGE\n" ++
+                "ldr %[ptr], [%[ptr], _OBJC_CLASSLIST_REFERENCES_$_" ++ name ++ "@PAGEOFF]"
+                : [ptr] "=r" (ptr),
+            );
+            // zig fmt: on
             return @ptrCast(ptr);
         }
 
@@ -348,9 +368,8 @@ pub fn ExternProtocol(comptime runtime_name: []const u8, T: type, comptime super
     };
 }
 
-// We target the modern, LP64 Obj-C runtime on macOS and iOS. Require it here.
+// The aarch64-macos target gate above establishes the modern LP64 Objective-C runtime.
 comptime {
-    std.debug.assert(builtin.os.tag == .macos or builtin.os.tag == .ios);
     std.debug.assert(@sizeOf(usize) == 8);
 }
 
@@ -371,7 +390,7 @@ pub const Selector = opaque {
     /// Return the runtime `SEL` for `name`. The Obj-C runtime interns selectors, so repeated
     /// calls with the same name yield the same pointer, stable for the process lifetime.
     pub fn named(comptime name: []const u8) *Selector {
-        return @ptrCast(sel_registerName(name ++ "\x00").?);
+        return registerSelector(name);
     }
 };
 
