@@ -396,6 +396,12 @@ pub const Parser = struct {
             },
             .kw_char => {
                 try self.match(.kw_char);
+                // Deliberate deviation: plain `char` is *signed* on Apple ARM64, so
+                // strict fidelity would be i8. It is mapped to u8 because the only
+                // place it appears is C strings, where u8 is what Zig's own string
+                // handling expects. The two are layout-identical, so this changes
+                // arithmetic and comparison semantics, never the ABI. `unsigned
+                // char` lands here too and is correct.
                 return self.parseTypeSuffix(.{ .uint = 8 }, is_const, false);
             },
             .kw_short => {

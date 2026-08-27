@@ -215,11 +215,18 @@ must still be named in the selection list by hand.
   aliased, so an alias can never name a type that was not bound.
 - Acceptance: zero bound structs whose layout is asserted by hand.
 
-### 7. ABI type fidelity and nullability — P0, M — **in progress**
+### 7. ABI type fidelity and nullability — P0, M — **done**
 
-- Preserve signedness, integer width, pointer constness, enum underlying types,
-  block calling conventions, and output-pointer shapes such as `NSError **`.
-  This half is pure correctness and is not negotiable.
+- **Audited, already correct:** signedness, integer width, pointer constness,
+  enum underlying types, block calling conventions, and output-pointer shapes.
+  Enum underlying types come from Clang and vary as they should (`u64`, `u32`,
+  `u8`, `c_int`); `NSError **` emits as `?*?*ns.Error` at 66 sites; 100 const
+  pointers are preserved; integer widths keep their C spelling (`c_int`,
+  `c_long`, `c_longlong`) rather than being normalised to fixed widths.
+  One deliberate deviation, now documented at the mapping: plain `char` is
+  signed on Apple ARM64 but is mapped to `u8`, because it only appears in C
+  strings where `u8` is what Zig expects. Layout-identical, so it changes
+  arithmetic semantics and never the ABI.
 - **Done:** nullability follows one rule, **optional unless provably
   `_Nonnull`**. Measured over emitted pointers before the change: Metal 1014
   `_Nonnull`, 1206 `_Nullable`, 7 `_Nullable_result`, 0 `_Null_unspecified`, 206
