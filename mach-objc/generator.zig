@@ -1462,6 +1462,147 @@ fn Generator(comptime WriterType: type) type {
             }
         }
 
+        const PendingContainer = struct {
+            container: *Container,
+            provenance: coverage.Provenance,
+        };
+
+        /// Mark every declaration reachable from the explicit selection list.
+        ///
+        /// Selecting a class selects what its public signatures mention:
+        /// superclasses, adopted protocols, parameter and return types, property
+        /// types, and whatever those resolve to through typedefs.
+        /// `Manifest.finalize` turns anything reachable but unbound into a
+        /// rejection, so this is the standing guard against adding an API and
+        /// forgetting one of the types it depends on.
+        ///
+        /// Reachability here is a property of the type graph only. A record that
+        /// callers fill in and copy into a buffer — an indirect draw argument
+        /// struct, an acceleration structure instance descriptor — appears in no
+        /// signature and cannot be discovered this way. Those must be named in
+        /// the selection list.
+        fn markSelectedClosure(self: *Self) !void {
+            // Interfaces and protocols share a namespace of names in Metal, so
+            // they need separate visited sets or one would mask the other.
+            var visited_interfaces = std.StringHashMap(void).init(self.allocator);
+            defer visited_interfaces.deinit();
+            var visited_protocols = std.StringHashMap(void).init(self.allocator);
+            defer visited_protocols.deinit();
+            var visited_types = std.StringHashMap(void).init(self.allocator);
+            defer visited_types.deinit();
+            var queue = std.array_list.Managed(PendingContainer).init(self.allocator);
+            defer queue.deinit();
+
+            for (self.enums.items) |e| {
+                _ = try self.manifest.selectIfPresent(.enum_decl, e.name, .explicit);
+                _ = try self.manifest.selectIfPresent(.typedef, e.name, .explicit);
+            }
+            // Explicit containers are enqueued first so that breadth-first order
+            // reaches them before anything can claim them as transitive.
+            for (self.containers.items) |container| {
+                try queue.append(.{ .container = container, .provenance = .explicit });
+            }
+
+            var index: usize = 0;
+            while (index < queue.items.len) : (index += 1) {
+                const pending = queue.items[index];
+                const container = pending.container;
+                const visited = if (container.is_interface)
+                    &visited_interfaces
+                else
+                    &visited_protocols;
+                if ((try visited.getOrPut(container.name)).found_existing) continue;
+
+                const kind: coverage.DeclarationKind =
+                    if (container.is_interface) .interface else .protocol;
+                _ = try self.manifest.selectIfPresent(kind, container.name, pending.provenance);
+
+                if (container.super) |super| {
+                    try queue.append(.{ .container = super, .provenance = .transitive_dependency });
+                }
+                for (container.protocols.items) |protocol| {
+                    try queue.append(.{ .container = protocol, .provenance = .transitive_dependency });
+                }
+                for (container.methods.items) |method| {
+                    try self.markTypeClosure(method.return_type, &queue, &visited_types);
+                    for (method.params.items) |param| {
+                        try self.markTypeClosure(param.ty, &queue, &visited_types);
+                    }
+                }
+                for (container.properties.items) |property| {
+                    try self.markTypeClosure(property.ty, &queue, &visited_types);
+                }
+            }
+        }
+
+        fn markTypeClosure(
+            self: *Self,
+            ty: Type,
+            queue: *std.array_list.Managed(PendingContainer),
+            visited_types: *std.StringHashMap(void),
+        ) !void {
+            switch (ty) {
+                .name => |name| try self.markNamedType(name, queue, visited_types),
+                .pointer => |pointer| try self.markTypeClosure(pointer.child.*, queue, visited_types),
+                .function => |function| {
+                    try self.markTypeClosure(function.return_type.*, queue, visited_types);
+                    for (function.params.items) |param| {
+                        try self.markTypeClosure(param, queue, visited_types);
+                    }
+                },
+                .generic => |generic| {
+                    try self.markTypeClosure(generic.base_type.*, queue, visited_types);
+                    for (generic.args.items) |arg| {
+                        try self.markTypeClosure(arg, queue, visited_types);
+                    }
+                },
+                else => {},
+            }
+        }
+
+        fn markNamedType(
+            self: *Self,
+            name: []const u8,
+            queue: *std.array_list.Managed(PendingContainer),
+            visited_types: *std.StringHashMap(void),
+        ) !void {
+            if ((try visited_types.getOrPut(name)).found_existing) return;
+
+            // One identifier can appear under several declaration kinds — an enum
+            // and its typedef, an interface and a like-named protocol — so record
+            // every kind this inventory knows it by.
+            var known = false;
+            const kinds = [_]coverage.DeclarationKind{
+                .enum_decl,
+                .typedef,
+                .record,
+                .interface,
+                .protocol,
+            };
+            for (kinds) |kind| {
+                if (try self.manifest.selectIfPresent(kind, name, .transitive_dependency)) {
+                    known = true;
+                }
+            }
+
+            // Stop at names this framework's inventory does not own. Their own
+            // dependencies are somebody else's surface — Foundation types are
+            // bound by hand in src/foundation.zig — and walking through them
+            // would manufacture reachability that says nothing about this
+            // framework.
+            if (!known) return;
+
+            if (registry.interfaces.get(name)) |container| {
+                try queue.append(.{ .container = container, .provenance = .transitive_dependency });
+            }
+            if (registry.protocols.get(name)) |container| {
+                try queue.append(.{ .container = container, .provenance = .transitive_dependency });
+            }
+            if (registry.typedefs.get(name)) |underlying| {
+                try self.markTypeClosure(underlying, queue, visited_types);
+            }
+        }
+
         pub fn generate(self: *Self) !void {
             try self.generateEnumerations();
             try self.generateContainers();
@@ -3293,6 +3434,7 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
         .app_kit => try generateAppKit(&generator),
     }
     try generator.generate();
+    try generator.markSelectedClosure();
     try file_writer.flush();
 
     if (spec.manifest_path) |manifest_path| {

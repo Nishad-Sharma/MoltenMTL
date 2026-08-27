@@ -20,10 +20,22 @@ pub const Status = enum {
     rejected,
 };
 
+/// How a declaration came to be part of the selected surface.
+pub const Provenance = enum {
+    /// Named directly by the generator's selection list.
+    explicit,
+    /// Reachable from an explicitly selected declaration's public signature.
+    transitive_dependency,
+    /// Present in the SDK inventory but not reachable from the selection list.
+    sdk_only,
+};
+
 pub const Entry = struct {
     name: []const u8,
     kind: DeclarationKind,
     header: []const u8,
+    selected: bool = false,
+    provenance: Provenance = .sdk_only,
     status: Status = .unclassified,
     reason: []const u8 = "",
 };
@@ -97,6 +109,56 @@ pub const Manifest = struct {
         if (!found) return error.ManifestDeclarationNotFound;
     }
 
+    /// Mark a declaration as part of the selected surface.
+    ///
+    /// `explicit` outranks `transitive_dependency`: a declaration named in the
+    /// selection list stays explicit even when something else also reaches it.
+    pub fn select(
+        self: *Self,
+        kind: DeclarationKind,
+        name: []const u8,
+        provenance: Provenance,
+    ) !void {
+        var found = false;
+        for (self.entries.items) |*entry| {
+            if (entry.kind != kind or !std.mem.eql(u8, entry.name, name)) continue;
+            if (!entry.selected or provenance == .explicit) entry.provenance = provenance;
+            entry.selected = true;
+            found = true;
+        }
+        if (!found) return error.ManifestDeclarationNotFound;
+    }
+
+    /// Select a declaration if the inventory knows it. Returns whether it did.
+    ///
+    /// The closure walk uses the return value as its framework boundary: a name
+    /// this manifest does not own belongs to somebody else's surface.
+    pub fn selectIfPresent(
+        self: *Self,
+        kind: DeclarationKind,
+        name: []const u8,
+        provenance: Provenance,
+    ) !bool {
+        self.select(kind, name, provenance) catch |err| switch (err) {
+            error.ManifestDeclarationNotFound => return false,
+        };
+        return true;
+    }
+
+    /// Is any declaration with this name already represented?
+    ///
+    /// One identifier can name both an interface and a protocol — Metal declares
+    /// `@class MTL4BinaryFunction` alongside `@protocol MTL4BinaryFunction`, and
+    /// only the protocol is bound. Reachability is satisfied by the name, so the
+    /// unused sibling must not be reported as a gap.
+    fn nameIsRepresented(self: *const Self, name: []const u8) bool {
+        for (self.entries.items) |entry| {
+            if (!std.mem.eql(u8, entry.name, name)) continue;
+            if (entry.status == .generated or entry.status == .manual) return true;
+        }
+        return false;
+    }
+
     pub fn markIfPresent(
         self: *Self,
         kind: DeclarationKind,
@@ -150,11 +212,28 @@ pub const Manifest = struct {
             if (entry.status != .unclassified) continue;
             switch (entry.kind) {
                 .enum_decl, .function, .record, .variable, .typedef, .interface, .protocol => {
-                    entry.status = .excluded;
-                    entry.reason = try self.arena.allocator().dupe(
-                        u8,
-                        exclusionReason(entry.kind),
-                    );
+                    if (entry.selected and !self.nameIsRepresented(entry.name)) {
+                        // Reachable from the selected surface but neither generated
+                        // nor manually bound. That is a real gap in the bindings,
+                        // not SDK API that happens to be out of scope.
+                        entry.status = .rejected;
+                        entry.reason = try self.arena.allocator().dupe(
+                            u8,
+                            "reachable from the selected surface but not generated or manually bound",
+                        );
+                    } else if (entry.selected) {
+                        entry.status = .excluded;
+                        entry.reason = try self.arena.allocator().dupe(
+                            u8,
+                            "represented by another declaration with the same name",
+                        );
+                    } else {
+                        entry.status = .excluded;
+                        entry.reason = try self.arena.allocator().dupe(
+                            u8,
+                            exclusionReason(entry.kind),
+                        );
+                    }
                 },
                 .method, .property => {},
             }
@@ -207,9 +286,24 @@ pub const Manifest = struct {
             .unclassified => return error.UnauditedDeclaration,
         };
 
+        var explicit: usize = 0;
+        var transitive: usize = 0;
+        for (self.entries.items) |entry| {
+            if (!entry.selected) continue;
+            switch (entry.provenance) {
+                .explicit => explicit += 1,
+                .transitive_dependency => transitive += 1,
+                .sdk_only => {},
+            }
+        }
+
         std.log.info(
             "{s}: {d} declarations ({d} generated, {d} manual, {d} excluded, {d} rejected)",
             .{ self.framework, self.entries.items.len, generated, manual, excluded, rejected },
+        );
+        std.log.info(
+            "{s}: selected surface is {d} explicit + {d} transitive = {d} declarations",
+            .{ self.framework, explicit, transitive, explicit + transitive },
         );
         if (rejected != 0) {
             // Rejected means a selected declaration the generator cannot represent
@@ -371,6 +465,65 @@ test "manual classification requires an active declaration" {
 
     try std.testing.expectEqual(.excluded, manifest.statusOf(.function, "MTLCopyAllDevices").?);
     try std.testing.expectEqual(.manual, manifest.statusOf(.record, "MTLOrigin").?);
+}
+
+test "a reachable declaration that is not bound is rejected" {
+    var manifest = Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+
+    _ = try manifest.add(.record, "MTLReachableButUnbound", "MTLTypes.h");
+    _ = try manifest.add(.record, "MTLNotReachable", "MTLTypes.h");
+    try manifest.select(.record, "MTLReachableButUnbound", .transitive_dependency);
+
+    try manifest.finalize(&.{});
+
+    // Reachable from the selected surface but bound nowhere: a real gap.
+    try std.testing.expectEqual(.rejected, manifest.statusOf(.record, "MTLReachableButUnbound").?);
+    // Never reached: valid SDK API that is simply out of scope.
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.record, "MTLNotReachable").?);
+}
+
+test "a like-named sibling declaration satisfies reachability" {
+    var manifest = Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+
+    // Metal declares `@class MTL4BinaryFunction` alongside a protocol of the same
+    // name, and only the protocol is bound. Reaching the name must not report the
+    // unused class as a gap.
+    _ = try manifest.add(.interface, "MTL4BinaryFunction", "MTL4BinaryFunction.h");
+    _ = try manifest.add(.protocol, "MTL4BinaryFunction", "MTL4BinaryFunction.h");
+    try manifest.mark(
+        .protocol,
+        "MTL4BinaryFunction",
+        .generated,
+        "generated Objective-C protocol wrapper",
+    );
+    try manifest.select(.interface, "MTL4BinaryFunction", .transitive_dependency);
+    try manifest.select(.protocol, "MTL4BinaryFunction", .transitive_dependency);
+
+    try manifest.finalize(&.{});
+
+    try std.testing.expectEqual(.generated, manifest.statusOf(.protocol, "MTL4BinaryFunction").?);
+    try std.testing.expectEqual(.excluded, manifest.statusOf(.interface, "MTL4BinaryFunction").?);
+}
+
+test "explicit provenance outranks transitive" {
+    var manifest = Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+
+    _ = try manifest.add(.interface, "MTLTextureDescriptor", "MTLTexture.h");
+    try manifest.select(.interface, "MTLTextureDescriptor", .transitive_dependency);
+    try manifest.select(.interface, "MTLTextureDescriptor", .explicit);
+    try manifest.select(.interface, "MTLTextureDescriptor", .transitive_dependency);
+
+    var checked = false;
+    for (manifest.entries.items) |entry| {
+        if (entry.kind != .interface or !std.mem.eql(u8, entry.name, "MTLTextureDescriptor")) continue;
+        try std.testing.expect(entry.selected);
+        try std.testing.expectEqual(Provenance.explicit, entry.provenance);
+        checked = true;
+    }
+    try std.testing.expect(checked);
 }
 
 test "valid SDK declarations outside the selected surface are excluded" {
