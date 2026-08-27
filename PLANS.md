@@ -103,7 +103,7 @@ order means the big diff lands against an otherwise verified baseline.
 - Declaration manifest with name, kind, header, status and reason.
 - Transactional output generation.
 
-### 4. Property accessor resolution — P0, S — **implemented, pending verification**
+### 4. Property accessor resolution — P0, S — **done**
 
 Split out from record work because it is small, isolated, and clears the entire
 current `rejected` list on its own.

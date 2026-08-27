@@ -2,10 +2,10 @@
   "framework": "MetalFX",
   "counts": {
     "total": 547,
-    "generated": 533,
+    "generated": 545,
     "manual": 2,
     "excluded": 0,
-    "rejected": 12
+    "rejected": 0
   },
   "declarations": [
     {
@@ -649,8 +649,8 @@
       "name": "MTLFXFrameInterpolatorBase.depthReversed",
       "kind": "property",
       "header": "MTLFXFrameInterpolator.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXFrameInterpolatorBase.depthTexture",
@@ -824,8 +824,8 @@
       "name": "MTLFXFrameInterpolatorBase.uiTextureComposited",
       "kind": "property",
       "header": "MTLFXFrameInterpolator.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXFrameInterpolatorBase.uiTextureFormat",
@@ -2364,8 +2364,8 @@
       "name": "MTLFXTemporalDenoisedScalerBase.depthReversed",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerBase.depthTexture",
@@ -2693,8 +2693,8 @@
       "name": "MTLFXTemporalDenoisedScalerDescriptor.autoExposureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.colorTextureFormat",
@@ -2707,8 +2707,8 @@
       "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.denoiseStrengthMaskTextureFormat",
@@ -2784,8 +2784,8 @@
       "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.reactiveMaskTextureFormat",
@@ -2819,8 +2819,8 @@
       "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.specularHitDistanceTextureFormat",
@@ -2833,8 +2833,8 @@
       "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalDenoisedScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalDenoisedScalerDescriptor.transparencyOverlayTextureFormat",
@@ -3491,8 +3491,8 @@
       "name": "MTLFXTemporalScalerBase.depthReversed",
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalScalerBase.depthTexture",
@@ -3694,8 +3694,8 @@
       "name": "MTLFXTemporalScalerDescriptor.autoExposureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.colorTextureFormat",
@@ -3729,8 +3729,8 @@
       "name": "MTLFXTemporalScalerDescriptor.inputContentPropertiesEnabled",
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.inputHeight",
@@ -3778,8 +3778,8 @@
       "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureEnabled",
       "kind": "property",
       "header": "MTLFXTemporalScaler.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLFXTemporalScalerDescriptor.reactiveMaskTextureFormat",

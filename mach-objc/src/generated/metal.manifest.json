@@ -2,10 +2,10 @@
   "framework": "Metal",
   "counts": {
     "total": 4696,
-    "generated": 4181,
+    "generated": 4211,
     "manual": 359,
     "excluded": 126,
-    "rejected": 30
+    "rejected": 0
   },
   "declarations": [
     {
@@ -5234,8 +5234,8 @@
       "name": "MTL4MeshRenderPipelineDescriptor.rasterizationEnabled",
       "kind": "property",
       "header": "MTL4MeshRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTL4MeshRenderPipelineDescriptor.requiredThreadsPerMeshThreadgroup",
@@ -6858,8 +6858,8 @@
       "name": "MTL4RenderPipelineDescriptor.rasterizationEnabled",
       "kind": "property",
       "header": "MTL4RenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTL4RenderPipelineDescriptor.supportFragmentBinaryLinking",
@@ -10750,8 +10750,8 @@
       "name": "MTLArgument.active",
       "kind": "property",
       "header": "MTLArgument.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLArgument.arrayLength",
@@ -10890,8 +10890,8 @@
       "name": "MTLBinding.argument",
       "kind": "property",
       "header": "MTLArgument.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLBinding.index",
@@ -10918,8 +10918,8 @@
       "name": "MTLBinding.used",
       "kind": "property",
       "header": "MTLArgument.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLBufferBinding.bufferAlignment",
@@ -11100,8 +11100,8 @@
       "name": "MTLTextureBinding.depthTexture",
       "kind": "property",
       "header": "MTLArgument.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLTextureBinding.textureDataType",
@@ -15279,8 +15279,8 @@
       "name": "MTLDepthStencilDescriptor.depthWriteEnabled",
       "kind": "property",
       "header": "MTLDepthStencil.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDepthStencilDescriptor.frontFaceStencil",
@@ -16889,8 +16889,8 @@
       "name": "MTLDevice.barycentricCoordsSupported",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.counterSets",
@@ -16910,8 +16910,8 @@
       "name": "MTLDevice.depth24Stencil8PixelFormatSupported",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.hasUnifiedMemory",
@@ -16924,8 +16924,8 @@
       "name": "MTLDevice.headless",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.location",
@@ -16945,8 +16945,8 @@
       "name": "MTLDevice.lowPower",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.maxArgumentBufferSamplerCount",
@@ -17022,15 +17022,15 @@
       "name": "MTLDevice.programmableSamplePositionsSupported",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.rasterOrderGroupsSupported",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.readWriteTextureSupport",
@@ -17057,8 +17057,8 @@
       "name": "MTLDevice.removable",
       "kind": "property",
       "header": "MTLDevice.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLDevice.shouldMaximizeConcurrentCompilation",
@@ -21236,8 +21236,8 @@
       "name": "MTLAttribute.active",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLAttribute.attributeIndex",
@@ -21264,15 +21264,15 @@
       "name": "MTLAttribute.patchControlPointData",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLAttribute.patchData",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLCompileOptions.allowReferencingUndefinedSymbols",
@@ -21530,8 +21530,8 @@
       "name": "MTLVertexAttribute.active",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLVertexAttribute.attributeIndex",
@@ -21558,15 +21558,15 @@
       "name": "MTLVertexAttribute.patchControlPointData",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLVertexAttribute.patchData",
       "kind": "property",
       "header": "MTLLibrary.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLArgumentEncoder",
@@ -26367,15 +26367,15 @@
       "name": "MTLMeshRenderPipelineDescriptor.alphaToCoverageEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.alphaToOneEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.binaryArchives",
@@ -26528,8 +26528,8 @@
       "name": "MTLMeshRenderPipelineDescriptor.rasterizationEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLMeshRenderPipelineDescriptor.requiredThreadsPerMeshThreadgroup",
@@ -26577,8 +26577,8 @@
       "name": "MTLRenderPipelineColorAttachmentDescriptor.blendingEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLRenderPipelineColorAttachmentDescriptor.destinationAlphaBlendFactor",
@@ -26633,15 +26633,15 @@
       "name": "MTLRenderPipelineDescriptor.alphaToCoverageEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLRenderPipelineDescriptor.alphaToOneEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLRenderPipelineDescriptor.binaryArchives",
@@ -26745,8 +26745,8 @@
       "name": "MTLRenderPipelineDescriptor.rasterizationEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLRenderPipelineDescriptor.sampleCount",
@@ -26808,8 +26808,8 @@
       "name": "MTLRenderPipelineDescriptor.tessellationFactorScaleEnabled",
       "kind": "property",
       "header": "MTLRenderPipeline.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLRenderPipelineDescriptor.tessellationFactorStepFunction",
@@ -29979,8 +29979,8 @@
       "name": "MTLTexture.framebufferOnly",
       "kind": "property",
       "header": "MTLTexture.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLTexture.gpuResourceID",
@@ -30077,8 +30077,8 @@
       "name": "MTLTexture.shareable",
       "kind": "property",
       "header": "MTLTexture.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "MTLTexture.sparseTextureTier",

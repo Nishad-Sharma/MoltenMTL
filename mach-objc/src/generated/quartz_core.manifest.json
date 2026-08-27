@@ -2,10 +2,10 @@
   "framework": "QuartzCore",
   "counts": {
     "total": 1317,
-    "generated": 46,
+    "generated": 49,
     "manual": 273,
-    "excluded": 994,
-    "rejected": 4
+    "excluded": 995,
+    "rejected": 0
   },
   "declarations": [
     {
@@ -4177,8 +4177,8 @@
       "name": "CALayer.doubleSided",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "Objective-C property accessors are outside the selected binding surface"
     },
     {
       "name": "CALayer.drawsAsynchronously",
@@ -4205,22 +4205,22 @@
       "name": "CALayer.frame",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "excluded",
-      "reason": "Objective-C property accessors are outside the selected binding surface"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "CALayer.geometryFlipped",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "Objective-C property accessors are outside the selected binding surface"
     },
     {
       "name": "CALayer.hidden",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "excluded",
+      "reason": "Objective-C property accessors are outside the selected binding surface"
     },
     {
       "name": "CALayer.layoutManager",
@@ -4289,15 +4289,15 @@
       "name": "CALayer.opacity",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "excluded",
-      "reason": "Objective-C property accessors are outside the selected binding surface"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "CALayer.opaque",
       "kind": "property",
       "header": "CALayer.h",
-      "status": "rejected",
-      "reason": "selected property is not represented by generated accessors; declaration explicitly rejected"
+      "status": "generated",
+      "reason": "represented by generated Objective-C accessor methods"
     },
     {
       "name": "CALayer.position",
