@@ -1204,7 +1204,17 @@ pub const Converter = struct {
 
     fn convertProperty(self: *Self, n: std.json.Value) !Property {
         const ty = try self.convertType(getObject(n, "type").?);
-        return Property.init(getString(n, "name"), ty);
+        var property = Property.init(getString(n, "name"), ty);
+        // Clang emits `getter`/`setter` declaration references only when the
+        // property overrides the default selector; default selectors stay
+        // implicit and are reconstructed in findPropertyAccessors.
+        if (getObject(n, "getter")) |getter| {
+            property.explicit_getter = getString(getter, "name");
+        }
+        if (getObject(n, "setter")) |setter| {
+            property.explicit_setter = getString(setter, "name");
+        }
+        return property;
     }
 
     fn convertMethod(self: *Self, n: std.json.Value) !Method {
@@ -1574,8 +1584,8 @@ fn Generator(comptime WriterType: type) type {
                     .{ container.name, property.name },
                 );
                 defer self.allocator.free(property_name);
-                const method_status = self.manifest.statusOf(.method, property_name);
-                if (method_status) |status| {
+                const accessor_status = try self.propertyAccessorStatus(container, property);
+                if (accessor_status) |status| {
                     switch (status) {
                         .generated => try self.manifest.markIfPresent(
                             .property,
@@ -1623,6 +1633,36 @@ fn Generator(comptime WriterType: type) type {
                 }
             }
             return false;
+        }
+
+        /// Classify a property by the accessors that actually represent it.
+        ///
+        /// A property is never emitted directly; it is bound through its getter
+        /// and setter. Resolving it against its real accessors is what keeps a
+        /// property whose getter was generated correctly from being reported as
+        /// unrepresented.
+        fn propertyAccessorStatus(
+            self: *Self,
+            container: *Container,
+            property: Property,
+        ) !?coverage.Status {
+            const accessors = try findPropertyAccessors(self.allocator, container, property);
+            defer self.allocator.free(accessors);
+
+            var result: ?coverage.Status = null;
+            for (accessors) |selector| {
+                const manifest_name = try std.fmt.allocPrint(
+                    self.allocator,
+                    "{s}.{s}",
+                    .{ container.name, selector },
+                );
+                defer self.allocator.free(manifest_name);
+                const status = self.manifest.statusOf(.method, manifest_name) orelse continue;
+                // One represented accessor is enough to represent the property.
+                if (status == .generated) return .generated;
+                if (result == null or status == .rejected) result = status;
+            }
+            return result;
         }
 
         fn generateMethod(self: *Self, container: *Container, method: Method) !void {
@@ -3419,6 +3459,162 @@ pub fn main(init: std.process.Init) anyerror!void {
 
 test {
     std.testing.refAllDecls(@This());
+}
+
+/// Prefixes Apple uses for boolean accessors. `are` covers plural properties
+/// such as `areBarycentricCoordsSupported`.
+const boolean_accessor_prefixes = [_][]const u8{
+    "is",
+    "are",
+    "has",
+    "does",
+    "can",
+    "should",
+    "was",
+    "will",
+};
+
+/// Does `selector` name a boolean-style accessor for `property_name`?
+///
+/// The comparison strips a known prefix and then requires the remainder to match
+/// the property name exactly apart from case, because Apple preserves acronym
+/// casing: `uiTextureComposited` is read through `isUITextureComposited`. The
+/// exact-length requirement is what stops `isNotSupported` from being claimed as
+/// an accessor for `supported`.
+fn isBooleanAccessor(selector: []const u8, property_name: []const u8) bool {
+    if (property_name.len == 0) return false;
+    for (boolean_accessor_prefixes) |prefix| {
+        if (selector.len != prefix.len + property_name.len) continue;
+        if (!std.mem.startsWith(u8, selector, prefix)) continue;
+        if (std.ascii.eqlIgnoreCase(selector[prefix.len..], property_name)) return true;
+    }
+    return false;
+}
+
+/// Selectors that `container` declares which implement `property`.
+///
+/// Clang records `getter=` and `setter=` overrides explicitly but leaves default
+/// selectors implicit, so the defaults are reconstructed and then confirmed
+/// against the selectors the container actually declares. Nothing is claimed
+/// that does not exist.
+///
+/// Returned selectors borrow from `container`; the caller owns only the slice.
+fn findPropertyAccessors(
+    allocator: std.mem.Allocator,
+    container: *Container,
+    property: Property,
+) ![]const []const u8 {
+    var found = std.array_list.Managed([]const u8).init(allocator);
+    errdefer found.deinit();
+    if (property.name.len == 0) return try found.toOwnedSlice();
+
+    const default_setter = try std.fmt.allocPrint(allocator, "set{c}{s}:", .{
+        std.ascii.toUpper(property.name[0]),
+        property.name[1..],
+    });
+    defer allocator.free(default_setter);
+
+    for (container.methods.items) |method| {
+        const matches =
+            (property.explicit_getter.len > 0 and
+                std.mem.eql(u8, method.name, property.explicit_getter)) or
+            (property.explicit_setter.len > 0 and
+                std.mem.eql(u8, method.name, property.explicit_setter)) or
+            std.mem.eql(u8, method.name, property.name) or
+            std.mem.eql(u8, method.name, default_setter) or
+            isBooleanAccessor(method.name, property.name);
+        if (!matches) continue;
+
+        for (found.items) |existing| {
+            if (std.mem.eql(u8, existing, method.name)) break;
+        } else {
+            try found.append(method.name);
+        }
+    }
+
+    return try found.toOwnedSlice();
+}
+
+test "boolean accessor matching tolerates plurals and acronym casing" {
+    try std.testing.expect(isBooleanAccessor("isHeadless", "headless"));
+    try std.testing.expect(isBooleanAccessor("isRasterizationEnabled", "rasterizationEnabled"));
+    try std.testing.expect(isBooleanAccessor("areBarycentricCoordsSupported", "barycentricCoordsSupported"));
+    try std.testing.expect(isBooleanAccessor("isUITextureComposited", "uiTextureComposited"));
+
+    // A longer selector that merely ends with the property name is not an accessor.
+    try std.testing.expect(!isBooleanAccessor("isNotSupported", "supported"));
+    try std.testing.expect(!isBooleanAccessor("headless", "headless"));
+    try std.testing.expect(!isBooleanAccessor("isHeadless", ""));
+}
+
+test "property accessors resolve against declared selectors only" {
+    const allocator = std.testing.allocator;
+    var container = Container.init(allocator, "MTLDevice", false);
+    defer container.deinit();
+
+    const selectors = [_][]const u8{
+        "isHeadless",
+        "label",
+        "setLabel:",
+        "numberOfThings",
+        "isNotSupported",
+    };
+    for (selectors) |selector| {
+        try container.methods.append(Method.init(
+            selector,
+            true,
+            .void,
+            std.array_list.Managed(Param).init(allocator),
+        ));
+    }
+
+    // Boolean getter found even though no method matches the property name.
+    const headless = try findPropertyAccessors(allocator, &container, Property.init("headless", .void));
+    defer allocator.free(headless);
+    try std.testing.expectEqual(@as(usize, 1), headless.len);
+    try std.testing.expectEqualStrings("isHeadless", headless[0]);
+
+    // Getter and default setter both resolve.
+    const label = try findPropertyAccessors(allocator, &container, Property.init("label", .void));
+    defer allocator.free(label);
+    try std.testing.expectEqual(@as(usize, 2), label.len);
+    try std.testing.expectEqualStrings("label", label[0]);
+    try std.testing.expectEqualStrings("setLabel:", label[1]);
+
+    // An explicit getter= override that shares nothing with the property name.
+    var aliased = Property.init("count", .void);
+    aliased.explicit_getter = "numberOfThings";
+    const count = try findPropertyAccessors(allocator, &container, aliased);
+    defer allocator.free(count);
+    try std.testing.expectEqual(@as(usize, 1), count.len);
+    try std.testing.expectEqualStrings("numberOfThings", count[0]);
+
+    // Nothing is invented for a property with no declared accessor.
+    const supported = try findPropertyAccessors(allocator, &container, Property.init("supported", .void));
+    defer allocator.free(supported);
+    try std.testing.expectEqual(@as(usize, 0), supported.len);
+}
+
+test "clang getter and setter overrides are captured" {
+    var manifest = coverage.Manifest.init(std.testing.allocator, "Metal");
+    defer manifest.deinit();
+    var converter = Converter.init(std.testing.allocator, &manifest, .metal);
+    defer converter.deinit();
+
+    var json = try std.json.parseFromSlice(
+        std.json.Value,
+        std.testing.allocator,
+        "{\"name\":\"rasterizationEnabled\",\"type\":{\"qualType\":\"BOOL\"}," ++
+            "\"getter\":{\"kind\":\"ObjCMethodDecl\",\"name\":\"isRasterizationEnabled\"}," ++
+            "\"setter\":{\"kind\":\"ObjCMethodDecl\",\"name\":\"setRasterizationEnabled:\"}}",
+        .{},
+    );
+    defer json.deinit();
+
+    const property = try converter.convertProperty(json.value);
+    try std.testing.expectEqualStrings("rasterizationEnabled", property.name);
+    try std.testing.expectEqualStrings("isRasterizationEnabled", property.explicit_getter);
+    try std.testing.expectEqualStrings("setRasterizationEnabled:", property.explicit_setter);
 }
 
 test "strict type parsing rejects representations it cannot preserve" {

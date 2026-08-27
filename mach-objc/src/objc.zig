@@ -5,6 +5,13 @@ comptime {
     if (builtin.target.cpu.arch != .aarch64 or builtin.target.os.tag != .macos) {
         @compileError("mach-objc requires the aarch64-macos target");
     }
+    // Enforce the deployment floor in code as well as in build.zig, so that an
+    // explicit -Dtarget cannot silently lower it. Availability is not parsed and
+    // post-floor symbols are not weak-linked, so a lower floor would mean
+    // missing symbols at load time rather than a graceful fallback.
+    if (builtin.target.os.version_range.semver.min.order(.{ .major = 26, .minor = 0, .patch = 0 }) == .lt) {
+        @compileError("mach-objc requires a macOS 26.0 or newer deployment target");
+    }
 }
 
 // LLVM's documented ARC APIs that technically aren't part of libobjc's public API.

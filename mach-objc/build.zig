@@ -2,7 +2,17 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
-    const target = b.standardTargetOptions(.{});
+    // The deployment floor is pinned rather than inherited from the host so that
+    // generated bindings target a known runtime. mach-objc does not parse
+    // availability or weak-link post-floor symbols, so the floor is the contract:
+    // every symbol in the selected surface must exist at this version.
+    const target = b.standardTargetOptions(.{
+        .default_target = .{
+            .cpu_arch = .aarch64,
+            .os_tag = .macos,
+            .os_version_min = .{ .semver = .{ .major = 26, .minor = 0, .patch = 0 } },
+        },
+    });
     const sdk_root = b.option(
         []const u8,
         "macos-sdk",

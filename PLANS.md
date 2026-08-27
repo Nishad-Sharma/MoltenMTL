@@ -103,7 +103,7 @@ order means the big diff lands against an otherwise verified baseline.
 - Declaration manifest with name, kind, header, status and reason.
 - Transactional output generation.
 
-### 4. Property accessor resolution — P0, S
+### 4. Property accessor resolution — P0, S — **implemented, pending verification**
 
 Split out from record work because it is small, isolated, and clears the entire
 current `rejected` list on its own.
@@ -112,8 +112,10 @@ current `rejected` list on its own.
   and the `isFoo` convention rather than requiring a method whose name equals
   the property's.
 - Apply the same rule to setters.
-- Acceptance: Metal `rejected` count reaches zero, and the only `verify.sh` diff
-  is in `.manifest.json`.
+- Acceptance: the `rejected` count reaches zero, and the only `verify.sh` diff
+  is in `.manifest.json`. All 46 rejected declarations across Metal (30),
+  MetalFX (12) and QuartzCore (4) are properties, and every one resolves to a
+  declared accessor under the implemented matcher.
 
 ### 5. Reachability and the selected surface — P0, M
 

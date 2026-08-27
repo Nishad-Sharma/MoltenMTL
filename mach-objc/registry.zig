@@ -77,6 +77,12 @@ pub const TypeParam = struct {
 pub const Property = struct {
     name: []const u8,
     ty: Type,
+    /// Selector declared by Clang's `getter=` attribute. Empty when the property
+    /// uses the default selector, which Clang does not record explicitly.
+    explicit_getter: []const u8 = "",
+    /// Selector declared by Clang's `setter=` attribute. Empty when the property
+    /// uses the default selector or is readonly.
+    explicit_setter: []const u8 = "",
 
     pub fn init(name: []const u8, ty: Type) Property {
         return Property{ .name = name, .ty = ty };
