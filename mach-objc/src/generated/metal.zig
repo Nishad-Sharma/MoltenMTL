@@ -4432,12 +4432,15 @@ pub const CaptureManager = opaque {
     pub fn sharedCaptureManager() *CaptureManager {
         return objc.msgSend(@This().InternalInfo.class(), "sharedCaptureManager", *CaptureManager, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCaptureScopeWithDevice(self_: *@This(), device_: *Device) *CaptureScope {
         return objc.msgSend(self_, "newCaptureScopeWithDevice:", *CaptureScope, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCaptureScopeWithCommandQueue(self_: *@This(), commandQueue_: *CommandQueue) *CaptureScope {
         return objc.msgSend(self_, "newCaptureScopeWithCommandQueue:", *CaptureScope, .{commandQueue_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCaptureScopeWithMTL4CommandQueue(self_: *@This(), commandQueue_: *MTL4CommandQueue) *CaptureScope {
         return objc.msgSend(self_, "newCaptureScopeWithMTL4CommandQueue:", *CaptureScope, .{commandQueue_});
     }
@@ -5028,6 +5031,7 @@ pub const FunctionStitchingFunctionNode = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithName_arguments_controlDependencies(self_: *@This(), name_: *ns.String, arguments_: *ns.Array(?*FunctionStitchingNode), controlDependencies_: *ns.Array(?*FunctionStitchingFunctionNode)) *@This() {
         return objc.msgSend(self_, "initWithName:arguments:controlDependencies:", *@This(), .{ name_, arguments_, controlDependencies_ });
     }
@@ -5061,6 +5065,7 @@ pub const FunctionStitchingGraph = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithFunctionName_nodes_outputNode_attributes(self_: *@This(), functionName_: *ns.String, nodes_: *ns.Array(?*FunctionStitchingFunctionNode), outputNode_: ?*FunctionStitchingFunctionNode, attributes_: *ns.Array(?*FunctionStitchingAttribute)) *@This() {
         return objc.msgSend(self_, "initWithFunctionName:nodes:outputNode:attributes:", *@This(), .{ functionName_, nodes_, outputNode_, attributes_ });
     }
@@ -5100,6 +5105,7 @@ pub const FunctionStitchingInputNode = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithArgumentIndex(self_: *@This(), argument_: ns.UInteger) *@This() {
         return objc.msgSend(self_, "initWithArgumentIndex:", *@This(), .{argument_});
     }
@@ -5999,9 +6005,11 @@ pub const RasterizationRateLayerDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithSampleCount(self_: *@This(), sampleCount_: Size) *@This() {
         return objc.msgSend(self_, "initWithSampleCount:", *@This(), .{sampleCount_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithSampleCount_horizontal_vertical(self_: *@This(), sampleCount_: Size, horizontal_: *const f32, vertical_: *const f32) *@This() {
         return objc.msgSend(self_, "initWithSampleCount:horizontal:vertical:", *@This(), .{ sampleCount_, horizontal_, vertical_ });
     }
@@ -7037,6 +7045,7 @@ pub const SharedEventListener = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithDispatchQueue(self_: *@This(), dispatchQueue_: dispatch_queue_t) *@This() {
         return objc.msgSend(self_, "initWithDispatchQueue:", *@This(), .{dispatchQueue_});
     }
@@ -7313,6 +7322,7 @@ pub const TensorExtents = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn initWithRank_values(self_: *@This(), rank_: ns.UInteger, values_: ?*const ns.Integer) ?*@This() {
         return objc.msgSend(self_, "initWithRank:values:", ?*@This(), .{ rank_, values_ });
     }
@@ -7859,18 +7869,23 @@ pub const MTL4Archive = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:error:", ?*ComputePipelineState, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: *MTL4PipelineStageDynamicLinkingDescriptor, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:error:", ?*ComputePipelineState, .{ descriptor_, dynamicLinkingDescriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:error:", ?*RenderPipelineState, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: *MTL4RenderPipelineDynamicLinkingDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:error:", ?*RenderPipelineState, .{ descriptor_, dynamicLinkingDescriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBinaryFunctionWithDescriptor_error(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, error_: ?*?*ns.Error) ?*MTL4BinaryFunctionProtocol {
         return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:error:", ?*MTL4BinaryFunctionProtocol, .{ descriptor_, error_ });
     }
@@ -8090,12 +8105,14 @@ pub const MTL4CommandQueue = opaque {
     pub fn updateTextureMappings_heap_operations_count(self_: *@This(), texture_: *Texture, heap_: ?*Heap, operations_: *const MTL4UpdateSparseTextureMappingOperation, count_: ns.UInteger) void {
         return objc.msgSend(self_, "updateTextureMappings:heap:operations:count:", void, .{ texture_, heap_, operations_, count_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyTextureMappingsFromTexture_toTexture_operations_count(self_: *@This(), sourceTexture_: *Texture, destinationTexture_: *Texture, operations_: *const MTL4CopySparseTextureMappingOperation, count_: ns.UInteger) void {
         return objc.msgSend(self_, "copyTextureMappingsFromTexture:toTexture:operations:count:", void, .{ sourceTexture_, destinationTexture_, operations_, count_ });
     }
     pub fn updateBufferMappings_heap_operations_count(self_: *@This(), buffer_: *Buffer, heap_: ?*Heap, operations_: *const MTL4UpdateSparseBufferMappingOperation, count_: ns.UInteger) void {
         return objc.msgSend(self_, "updateBufferMappings:heap:operations:count:", void, .{ buffer_, heap_, operations_, count_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyBufferMappingsFromBuffer_toBuffer_operations_count(self_: *@This(), sourceBuffer_: *Buffer, destinationBuffer_: *Buffer, operations_: *const MTL4CopySparseBufferMappingOperation, count_: ns.UInteger) void {
         return objc.msgSend(self_, "copyBufferMappingsFromBuffer:toBuffer:operations:count:", void, .{ sourceBuffer_, destinationBuffer_, operations_, count_ });
     }
@@ -8132,63 +8149,83 @@ pub const MTL4Compiler = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithDescriptor_error(self_: *@This(), descriptor_: *MTL4LibraryDescriptor, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithDescriptor:error:", ?*Library, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibrary_error(self_: *@This(), library_: *Library, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
         return objc.msgSend(self_, "newDynamicLibrary:error:", ?*DynamicLibraryProtocol, .{ library_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
         return objc.msgSend(self_, "newDynamicLibraryWithURL:error:", ?*DynamicLibraryProtocol, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:compilerTaskOptions:error:", ?*ComputePipelineState, .{ descriptor_, compilerTaskOptions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4PipelineStageDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:error:", ?*ComputePipelineState, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:compilerTaskOptions:error:", ?*RenderPipelineState, .{ descriptor_, compilerTaskOptions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4RenderPipelineDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:error:", ?*RenderPipelineState, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateBySpecializationWithDescriptor_pipeline_error(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, pipeline_: *RenderPipelineState, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateBySpecializationWithDescriptor:pipeline:error:", ?*RenderPipelineState, .{ descriptor_, pipeline_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBinaryFunctionWithDescriptor_compilerTaskOptions_error(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, error_: ?*?*ns.Error) ?*MTL4BinaryFunctionProtocol {
         return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:compilerTaskOptions:error:", ?*MTL4BinaryFunctionProtocol, .{ descriptor_, compilerTaskOptions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithDescriptor_completionHandler(self_: *@This(), descriptor_: *MTL4LibraryDescriptor, completionHandler_: *ns.Block(fn (?*Library, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newLibraryWithDescriptor:completionHandler:", *MTL4CompilerTask, .{ descriptor_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibrary_completionHandler(self_: *@This(), library_: *Library, completionHandler_: *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newDynamicLibrary:completionHandler:", *MTL4CompilerTask, .{ library_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibraryWithURL_completionHandler(self_: *@This(), url_: *ns.URL, completionHandler_: *ns.Block(fn (?*DynamicLibraryProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newDynamicLibraryWithURL:completionHandler:", *MTL4CompilerTask, .{ url_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4ComputePipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4PipelineStageDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_dynamicLinkingDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, dynamicLinkingDescriptor_: ?*MTL4RenderPipelineDynamicLinkingDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:dynamicLinkingDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, dynamicLinkingDescriptor_, compilerTaskOptions_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateBySpecializationWithDescriptor_pipeline_completionHandler(self_: *@This(), descriptor_: *MTL4PipelineDescriptor, pipeline_: *RenderPipelineState, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newRenderPipelineStateBySpecializationWithDescriptor:pipeline:completionHandler:", *MTL4CompilerTask, .{ descriptor_, pipeline_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBinaryFunctionWithDescriptor_compilerTaskOptions_completionHandler(self_: *@This(), descriptor_: *MTL4BinaryFunctionDescriptor, compilerTaskOptions_: ?*MTL4CompilerTaskOptions, completionHandler_: *ns.Block(fn (?*MTL4BinaryFunctionProtocol, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newBinaryFunctionWithDescriptor:compilerTaskOptions:completionHandler:", *MTL4CompilerTask, .{ descriptor_, compilerTaskOptions_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newMachineLearningPipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *MTL4MachineLearningPipelineDescriptor, error_: ?*?*ns.Error) ?*MTL4MachineLearningPipelineState {
         return objc.msgSend(self_, "newMachineLearningPipelineStateWithDescriptor:error:", ?*MTL4MachineLearningPipelineState, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newMachineLearningPipelineStateWithDescriptor_completionHandler(self_: *@This(), descriptor_: *MTL4MachineLearningPipelineDescriptor, completionHandler_: *ns.Block(fn (?*MTL4MachineLearningPipelineState, ?*ns.Error) void)) *MTL4CompilerTask {
         return objc.msgSend(self_, "newMachineLearningPipelineStateWithDescriptor:completionHandler:", *MTL4CompilerTask, .{ descriptor_, completionHandler_ });
     }
@@ -8258,30 +8295,39 @@ pub const MTL4ComputeCommandEncoder = opaque {
     pub fn executeCommandsInBuffer_indirectBuffer(self_: *@This(), indirectCommandbuffer_: *IndirectCommandBuffer, indirectRangeBuffer_: GPUAddress) void {
         return objc.msgSend(self_, "executeCommandsInBuffer:indirectBuffer:", void, .{ indirectCommandbuffer_, indirectRangeBuffer_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_toTexture(self_: *@This(), sourceTexture_: *Texture, destinationTexture_: *Texture) void {
         return objc.msgSend(self_, "copyFromTexture:toTexture:", void, .{ sourceTexture_, destinationTexture_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_toTexture_destinationSlice_destinationLevel_sliceCount_levelCount(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, sliceCount_: ns.UInteger, levelCount_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:toTexture:destinationSlice:destinationLevel:sliceCount:levelCount:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, destinationTexture_, destinationSlice_, destinationLevel_, sliceCount_, levelCount_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage_options(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger, options_: BlitOption) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:options:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_toBuffer_destinationOffset_size(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, size_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size:", void, .{ sourceBuffer_, sourceOffset_, destinationBuffer_, destinationOffset_, size_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_options(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin, options_: BlitOption) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTensor_sourceOrigin_sourceDimensions_toTensor_destinationOrigin_destinationDimensions(self_: *@This(), sourceTensor_: *Tensor, sourceOrigin_: *TensorExtents, sourceDimensions_: *TensorExtents, destinationTensor_: *Tensor, destinationOrigin_: *TensorExtents, destinationDimensions_: *TensorExtents) void {
         return objc.msgSend(self_, "copyFromTensor:sourceOrigin:sourceDimensions:toTensor:destinationOrigin:destinationDimensions:", void, .{ sourceTensor_, sourceOrigin_, sourceDimensions_, destinationTensor_, destinationOrigin_, destinationDimensions_ });
     }
@@ -8306,6 +8352,7 @@ pub const MTL4ComputeCommandEncoder = opaque {
     pub fn resetCommandsInBuffer_withRange(self_: *@This(), buffer_: *IndirectCommandBuffer, range_: ns.Range) void {
         return objc.msgSend(self_, "resetCommandsInBuffer:withRange:", void, .{ buffer_, range_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyIndirectCommandBuffer_sourceRange_destination_destinationIndex(self_: *@This(), source_: *IndirectCommandBuffer, sourceRange_: ns.Range, destination_: *IndirectCommandBuffer, destinationIndex_: ns.UInteger) void {
         return objc.msgSend(self_, "copyIndirectCommandBuffer:sourceRange:destination:destinationIndex:", void, .{ source_, sourceRange_, destination_, destinationIndex_ });
     }
@@ -8324,12 +8371,14 @@ pub const MTL4ComputeCommandEncoder = opaque {
     pub fn refitAccelerationStructure_descriptor_destination_scratchBuffer_options(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, descriptor_: *MTL4AccelerationStructureDescriptor, destinationAccelerationStructure_: ?*AccelerationStructure, scratchBuffer_: MTL4BufferRange, options_: AccelerationStructureRefitOptions) void {
         return objc.msgSend(self_, "refitAccelerationStructure:descriptor:destination:scratchBuffer:options:", void, .{ sourceAccelerationStructure_, descriptor_, destinationAccelerationStructure_, scratchBuffer_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
         return objc.msgSend(self_, "copyAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
     }
     pub fn writeCompactedAccelerationStructureSize_toBuffer(self_: *@This(), accelerationStructure_: *AccelerationStructure, buffer_: MTL4BufferRange) void {
         return objc.msgSend(self_, "writeCompactedAccelerationStructureSize:toBuffer:", void, .{ accelerationStructure_, buffer_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyAndCompactAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
         return objc.msgSend(self_, "copyAndCompactAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
     }
@@ -8582,6 +8631,7 @@ pub const AccelerationStructureCommandEncoder = opaque {
     pub fn refitAccelerationStructure_descriptor_destination_scratchBuffer_scratchBufferOffset_options(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, descriptor_: *AccelerationStructureDescriptor, destinationAccelerationStructure_: ?*AccelerationStructure, scratchBuffer_: ?*Buffer, scratchBufferOffset_: ns.UInteger, options_: AccelerationStructureRefitOptions) void {
         return objc.msgSend(self_, "refitAccelerationStructure:descriptor:destination:scratchBuffer:scratchBufferOffset:options:", void, .{ sourceAccelerationStructure_, descriptor_, destinationAccelerationStructure_, scratchBuffer_, scratchBufferOffset_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
         return objc.msgSend(self_, "copyAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
     }
@@ -8591,6 +8641,7 @@ pub const AccelerationStructureCommandEncoder = opaque {
     pub fn writeCompactedAccelerationStructureSize_toBuffer_offset_sizeDataType(self_: *@This(), accelerationStructure_: *AccelerationStructure, buffer_: *Buffer, offset_: ns.UInteger, sizeDataType_: DataType) void {
         return objc.msgSend(self_, "writeCompactedAccelerationStructureSize:toBuffer:offset:sizeDataType:", void, .{ accelerationStructure_, buffer_, offset_, sizeDataType_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyAndCompactAccelerationStructure_toAccelerationStructure(self_: *@This(), sourceAccelerationStructure_: *AccelerationStructure, destinationAccelerationStructure_: *AccelerationStructure) void {
         return objc.msgSend(self_, "copyAndCompactAccelerationStructure:toAccelerationStructure:", void, .{ sourceAccelerationStructure_, destinationAccelerationStructure_ });
     }
@@ -8684,6 +8735,7 @@ pub const ArgumentEncoder = opaque {
     pub fn setAccelerationStructure_atIndex(self_: *@This(), accelerationStructure_: ?*AccelerationStructure, index_: ns.UInteger) void {
         return objc.msgSend(self_, "setAccelerationStructure:atIndex:", void, .{ accelerationStructure_, index_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentEncoderForBufferAtIndex(self_: *@This(), index_: ns.UInteger) ?*ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderForBufferAtIndex:", ?*ArgumentEncoder, .{index_});
     }
@@ -8801,18 +8853,23 @@ pub const BlitCommandEncoder = opaque {
     pub fn synchronizeTexture_slice_level(self_: *@This(), texture_: *Texture, slice_: ns.UInteger, level_: ns.UInteger) void {
         return objc.msgSend(self_, "synchronizeTexture:slice:level:", void, .{ texture_, slice_, level_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_sourceBytesPerRow_sourceBytesPerImage_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_options(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, sourceSize_: Size, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, destinationOrigin_: Origin, options_: BlitOption) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:sourceBytesPerRow:sourceBytesPerImage:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:options:", void, .{ sourceBuffer_, sourceOffset_, sourceBytesPerRow_, sourceBytesPerImage_, sourceSize_, destinationTexture_, destinationSlice_, destinationLevel_, destinationOrigin_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toBuffer_destinationOffset_destinationBytesPerRow_destinationBytesPerImage_options(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, sourceOrigin_: Origin, sourceSize_: Size, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, destinationBytesPerRow_: ns.UInteger, destinationBytesPerImage_: ns.UInteger, options_: BlitOption) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toBuffer:destinationOffset:destinationBytesPerRow:destinationBytesPerImage:options:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, sourceOrigin_, sourceSize_, destinationBuffer_, destinationOffset_, destinationBytesPerRow_, destinationBytesPerImage_, options_ });
     }
@@ -8822,12 +8879,15 @@ pub const BlitCommandEncoder = opaque {
     pub fn fillBuffer_range_value(self_: *@This(), buffer_: *Buffer, range_: ns.Range, value_: u8) void {
         return objc.msgSend(self_, "fillBuffer:range:value:", void, .{ buffer_, range_, value_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_sourceSlice_sourceLevel_toTexture_destinationSlice_destinationLevel_sliceCount_levelCount(self_: *@This(), sourceTexture_: *Texture, sourceSlice_: ns.UInteger, sourceLevel_: ns.UInteger, destinationTexture_: *Texture, destinationSlice_: ns.UInteger, destinationLevel_: ns.UInteger, sliceCount_: ns.UInteger, levelCount_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromTexture:sourceSlice:sourceLevel:toTexture:destinationSlice:destinationLevel:sliceCount:levelCount:", void, .{ sourceTexture_, sourceSlice_, sourceLevel_, destinationTexture_, destinationSlice_, destinationLevel_, sliceCount_, levelCount_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTexture_toTexture(self_: *@This(), sourceTexture_: *Texture, destinationTexture_: *Texture) void {
         return objc.msgSend(self_, "copyFromTexture:toTexture:", void, .{ sourceTexture_, destinationTexture_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromBuffer_sourceOffset_toBuffer_destinationOffset_size(self_: *@This(), sourceBuffer_: *Buffer, sourceOffset_: ns.UInteger, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger, size_: ns.UInteger) void {
         return objc.msgSend(self_, "copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size:", void, .{ sourceBuffer_, sourceOffset_, destinationBuffer_, destinationOffset_, size_ });
     }
@@ -8858,6 +8918,7 @@ pub const BlitCommandEncoder = opaque {
     pub fn resetCommandsInBuffer_withRange(self_: *@This(), buffer_: *IndirectCommandBuffer, range_: ns.Range) void {
         return objc.msgSend(self_, "resetCommandsInBuffer:withRange:", void, .{ buffer_, range_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyIndirectCommandBuffer_sourceRange_destination_destinationIndex(self_: *@This(), source_: *IndirectCommandBuffer, sourceRange_: ns.Range, destination_: *IndirectCommandBuffer, destinationIndex_: ns.UInteger) void {
         return objc.msgSend(self_, "copyIndirectCommandBuffer:sourceRange:destination:destinationIndex:", void, .{ source_, sourceRange_, destination_, destinationIndex_ });
     }
@@ -8870,6 +8931,7 @@ pub const BlitCommandEncoder = opaque {
     pub fn resolveCounters_inRange_destinationBuffer_destinationOffset(self_: *@This(), sampleBuffer_: *CounterSampleBuffer, range_: ns.Range, destinationBuffer_: *Buffer, destinationOffset_: ns.UInteger) void {
         return objc.msgSend(self_, "resolveCounters:inRange:destinationBuffer:destinationOffset:", void, .{ sampleBuffer_, range_, destinationBuffer_, destinationOffset_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyFromTensor_sourceOrigin_sourceDimensions_toTensor_destinationOrigin_destinationDimensions(self_: *@This(), sourceTensor_: *Tensor, sourceOrigin_: *TensorExtents, sourceDimensions_: *TensorExtents, destinationTensor_: *Tensor, destinationOrigin_: *TensorExtents, destinationDimensions_: *TensorExtents) void {
         return objc.msgSend(self_, "copyFromTensor:sourceOrigin:sourceDimensions:toTensor:destinationOrigin:destinationDimensions:", void, .{ sourceTensor_, sourceOrigin_, sourceDimensions_, destinationTensor_, destinationOrigin_, destinationDimensions_ });
     }
@@ -8888,9 +8950,11 @@ pub const Buffer = opaque {
     pub fn didModifyRange(self_: *@This(), range_: ns.Range) void {
         return objc.msgSend(self_, "didModifyRange:", void, .{range_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureWithDescriptor_offset_bytesPerRow(self_: *@This(), descriptor_: *TextureDescriptor, offset_: ns.UInteger, bytesPerRow_: ns.UInteger) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:offset:bytesPerRow:", ?*Texture, .{ descriptor_, offset_, bytesPerRow_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTensorWithDescriptor_offset_error(self_: *@This(), descriptor_: *TensorDescriptor, offset_: ns.UInteger, error_: ?*?*ns.Error) ?*Tensor {
         return objc.msgSend(self_, "newTensorWithDescriptor:offset:error:", ?*Tensor, .{ descriptor_, offset_, error_ });
     }
@@ -8900,6 +8964,7 @@ pub const Buffer = opaque {
     pub fn removeAllDebugMarkers(self_: *@This()) void {
         return objc.msgSend(self_, "removeAllDebugMarkers", void, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRemoteBufferViewForDevice(self_: *@This(), device_: *Device) ?*Buffer {
         return objc.msgSend(self_, "newRemoteBufferViewForDevice:", ?*Buffer, .{device_});
     }
@@ -9329,6 +9394,7 @@ pub const ComputePipelineState = opaque {
     pub fn functionHandleWithBinaryFunction(self_: *@This(), function_: *MTL4BinaryFunctionProtocol) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithBinaryFunction:", ?*FunctionHandle, .{function_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithBinaryFunctions_error(self_: *@This(), additionalBinaryFunctions_: *ns.Array(?*MTL4BinaryFunctionProtocol), error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithBinaryFunctions:error:", ?*ComputePipelineState, .{ additionalBinaryFunctions_, error_ });
     }
@@ -9338,12 +9404,15 @@ pub const ComputePipelineState = opaque {
     pub fn functionHandleWithFunction(self_: *@This(), function_: *Function) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithFunction:", ?*FunctionHandle, .{function_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithAdditionalBinaryFunctions_error(self_: *@This(), functions_: *ns.Array(?*Function), error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithAdditionalBinaryFunctions:error:", ?*ComputePipelineState, .{ functions_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newVisibleFunctionTableWithDescriptor(self_: *@This(), descriptor_: *VisibleFunctionTableDescriptor) ?*VisibleFunctionTable {
         return objc.msgSend(self_, "newVisibleFunctionTableWithDescriptor:", ?*VisibleFunctionTable, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIntersectionFunctionTableWithDescriptor(self_: *@This(), descriptor_: *IntersectionFunctionTableDescriptor) ?*IntersectionFunctionTable {
         return objc.msgSend(self_, "newIntersectionFunctionTableWithDescriptor:", ?*IntersectionFunctionTable, .{descriptor_});
     }
@@ -9452,15 +9521,19 @@ pub const Device = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLogStateWithDescriptor_error(self_: *@This(), descriptor_: *LogStateDescriptor, error_: ?*?*ns.Error) ?*LogState {
         return objc.msgSend(self_, "newLogStateWithDescriptor:error:", ?*LogState, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandQueue(self_: *@This()) ?*CommandQueue {
         return objc.msgSend(self_, "newCommandQueue", ?*CommandQueue, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandQueueWithMaxCommandBufferCount(self_: *@This(), maxCommandBufferCount_: ns.UInteger) ?*CommandQueue {
         return objc.msgSend(self_, "newCommandQueueWithMaxCommandBufferCount:", ?*CommandQueue, .{maxCommandBufferCount_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandQueueWithDescriptor(self_: *@This(), descriptor_: *CommandQueueDescriptor) ?*CommandQueue {
         return objc.msgSend(self_, "newCommandQueueWithDescriptor:", ?*CommandQueue, .{descriptor_});
     }
@@ -9470,93 +9543,123 @@ pub const Device = opaque {
     pub fn heapBufferSizeAndAlignWithLength_options(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions) SizeAndAlign {
         return objc.msgSend(self_, "heapBufferSizeAndAlignWithLength:options:", SizeAndAlign, .{ length_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newHeapWithDescriptor(self_: *@This(), descriptor_: *HeapDescriptor) ?*Heap {
         return objc.msgSend(self_, "newHeapWithDescriptor:", ?*Heap, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithLength_options(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithLength:options:", ?*Buffer, .{ length_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithBytes_length_options(self_: *@This(), pointer_: *const anyopaque, length_: ns.UInteger, options_: ResourceOptions) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithBytes:length:options:", ?*Buffer, .{ pointer_, length_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithBytesNoCopy_length_options_deallocator(self_: *@This(), pointer_: *anyopaque, length_: ns.UInteger, options_: ResourceOptions, deallocator_: *ns.Block(fn (*anyopaque, ns.UInteger) void)) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithBytesNoCopy:length:options:deallocator:", ?*Buffer, .{ pointer_, length_, options_, deallocator_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDepthStencilStateWithDescriptor(self_: *@This(), descriptor_: *DepthStencilDescriptor) ?*DepthStencilState {
         return objc.msgSend(self_, "newDepthStencilStateWithDescriptor:", ?*DepthStencilState, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureWithDescriptor(self_: *@This(), descriptor_: *TextureDescriptor) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:", ?*Texture, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureWithDescriptor_iosurface_plane(self_: *@This(), descriptor_: *TextureDescriptor, iosurface_: IOSurfaceRef, plane_: ns.UInteger) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:iosurface:plane:", ?*Texture, .{ descriptor_, iosurface_, plane_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedTextureWithDescriptor(self_: *@This(), descriptor_: *TextureDescriptor) ?*Texture {
         return objc.msgSend(self_, "newSharedTextureWithDescriptor:", ?*Texture, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedTextureWithHandle(self_: *@This(), sharedHandle_: *SharedTextureHandle) ?*Texture {
         return objc.msgSend(self_, "newSharedTextureWithHandle:", ?*Texture, .{sharedHandle_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSamplerStateWithDescriptor(self_: *@This(), descriptor_: *SamplerDescriptor) ?*SamplerState {
         return objc.msgSend(self_, "newSamplerStateWithDescriptor:", ?*SamplerState, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDefaultLibrary(self_: *@This()) ?*Library {
         return objc.msgSend(self_, "newDefaultLibrary", ?*Library, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDefaultLibraryWithBundle_error(self_: *@This(), bundle_: *ns.Bundle, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newDefaultLibraryWithBundle:error:", ?*Library, .{ bundle_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithFile_error(self_: *@This(), filepath_: *ns.String, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithFile:error:", ?*Library, .{ filepath_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithURL:error:", ?*Library, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithData_error(self_: *@This(), data_: dispatch_data_t, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithData:error:", ?*Library, .{ data_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithSource_options_error(self_: *@This(), source_: *ns.String, options_: ?*CompileOptions, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithSource:options:error:", ?*Library, .{ source_, options_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithSource_options_completionHandler(self_: *@This(), source_: *ns.String, options_: ?*CompileOptions, completionHandler_: *ns.Block(fn (?*Library, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newLibraryWithSource:options:completionHandler:", void, .{ source_, options_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithStitchedDescriptor_error(self_: *@This(), descriptor_: *StitchedLibraryDescriptor, error_: ?*?*ns.Error) ?*Library {
         return objc.msgSend(self_, "newLibraryWithStitchedDescriptor:error:", ?*Library, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newLibraryWithStitchedDescriptor_completionHandler(self_: *@This(), descriptor_: *StitchedLibraryDescriptor, completionHandler_: *ns.Block(fn (?*Library, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newLibraryWithStitchedDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_error(self_: *@This(), descriptor_: *RenderPipelineDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:error:", ?*RenderPipelineState, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_options_reflection_error(self_: *@This(), descriptor_: *RenderPipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedRenderPipelineReflection, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:options:reflection:error:", ?*RenderPipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_completionHandler(self_: *@This(), descriptor_: *RenderPipelineDescriptor, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *RenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithFunction_error(self_: *@This(), computeFunction_: *Function, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:error:", ?*ComputePipelineState, .{ computeFunction_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithFunction_options_reflection_error(self_: *@This(), computeFunction_: *Function, options_: PipelineOption, reflection_: ?*AutoreleasedComputePipelineReflection, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:options:reflection:error:", ?*ComputePipelineState, .{ computeFunction_, options_, reflection_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithFunction_completionHandler(self_: *@This(), computeFunction_: *Function, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:completionHandler:", void, .{ computeFunction_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithFunction_options_completionHandler(self_: *@This(), computeFunction_: *Function, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ComputePipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithFunction:options:completionHandler:", void, .{ computeFunction_, options_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_options_reflection_error(self_: *@This(), descriptor_: *ComputePipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedComputePipelineReflection, error_: ?*?*ns.Error) ?*ComputePipelineState {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:options:reflection:error:", ?*ComputePipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newComputePipelineStateWithDescriptor_options_completionHandler(self_: *@This(), descriptor_: *ComputePipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*ComputePipelineState, ?*ComputePipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newComputePipelineStateWithDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFence(self_: *@This()) ?*Fence {
         return objc.msgSend(self_, "newFence", ?*Fence, .{});
     }
@@ -9575,54 +9678,69 @@ pub const Device = opaque {
     pub fn minimumTextureBufferAlignmentForPixelFormat(self_: *@This(), format_: PixelFormat) ns.UInteger {
         return objc.msgSend(self_, "minimumTextureBufferAlignmentForPixelFormat:", ns.UInteger, .{format_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithTileDescriptor_options_reflection_error(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedRenderPipelineReflection, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithTileDescriptor:options:reflection:error:", ?*RenderPipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithTileDescriptor_options_completionHandler(self_: *@This(), descriptor_: *TileRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithTileDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithMeshDescriptor_options_reflection_error(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, options_: PipelineOption, reflection_: ?*AutoreleasedRenderPipelineReflection, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithMeshDescriptor:options:reflection:error:", ?*RenderPipelineState, .{ descriptor_, options_, reflection_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithMeshDescriptor_options_completionHandler(self_: *@This(), descriptor_: *MeshRenderPipelineDescriptor, options_: PipelineOption, completionHandler_: *ns.Block(fn (?*RenderPipelineState, ?*RenderPipelineReflection, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newRenderPipelineStateWithMeshDescriptor:options:completionHandler:", void, .{ descriptor_, options_, completionHandler_ });
     }
     pub fn getDefaultSamplePositions_count(self_: *@This(), positions_: *SamplePosition, count_: ns.UInteger) void {
         return objc.msgSend(self_, "getDefaultSamplePositions:count:", void, .{ positions_, count_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentEncoderWithArguments(self_: *@This(), arguments_: *ns.Array(?*ArgumentDescriptor)) ?*ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderWithArguments:", ?*ArgumentEncoder, .{arguments_});
     }
     pub fn supportsRasterizationRateMapWithLayerCount(self_: *@This(), layerCount_: ns.UInteger) bool {
         return objc.msgSend(self_, "supportsRasterizationRateMapWithLayerCount:", bool, .{layerCount_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRasterizationRateMapWithDescriptor(self_: *@This(), descriptor_: *RasterizationRateMapDescriptor) ?*RasterizationRateMap {
         return objc.msgSend(self_, "newRasterizationRateMapWithDescriptor:", ?*RasterizationRateMap, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIndirectCommandBufferWithDescriptor_maxCommandCount_options(self_: *@This(), descriptor_: *IndirectCommandBufferDescriptor, maxCount_: ns.UInteger, options_: ResourceOptions) ?*IndirectCommandBuffer {
         return objc.msgSend(self_, "newIndirectCommandBufferWithDescriptor:maxCommandCount:options:", ?*IndirectCommandBuffer, .{ descriptor_, maxCount_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newEvent(self_: *@This()) ?*Event {
         return objc.msgSend(self_, "newEvent", ?*Event, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedEvent(self_: *@This()) ?*SharedEvent {
         return objc.msgSend(self_, "newSharedEvent", ?*SharedEvent, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedEventWithHandle(self_: *@This(), sharedEventHandle_: *SharedEventHandle) ?*SharedEvent {
         return objc.msgSend(self_, "newSharedEventWithHandle:", ?*SharedEvent, .{sharedEventHandle_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIOHandleWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*IOFileHandle {
         return objc.msgSend(self_, "newIOHandleWithURL:error:", ?*IOFileHandle, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIOCommandQueueWithDescriptor_error(self_: *@This(), descriptor_: *IOCommandQueueDescriptor, error_: ?*?*ns.Error) ?*IOCommandQueue {
         return objc.msgSend(self_, "newIOCommandQueueWithDescriptor:error:", ?*IOCommandQueue, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIOHandleWithURL_compressionMethod_error(self_: *@This(), url_: *ns.URL, compressionMethod_: IOCompressionMethod, error_: ?*?*ns.Error) ?*IOFileHandle {
         return objc.msgSend(self_, "newIOHandleWithURL:compressionMethod:error:", ?*IOFileHandle, .{ url_, compressionMethod_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIOFileHandleWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*IOFileHandle {
         return objc.msgSend(self_, "newIOFileHandleWithURL:error:", ?*IOFileHandle, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIOFileHandleWithURL_compressionMethod_error(self_: *@This(), url_: *ns.URL, compressionMethod_: IOCompressionMethod, error_: ?*?*ns.Error) ?*IOFileHandle {
         return objc.msgSend(self_, "newIOFileHandleWithURL:compressionMethod:error:", ?*IOFileHandle, .{ url_, compressionMethod_, error_ });
     }
@@ -9641,12 +9759,14 @@ pub const Device = opaque {
     pub fn sparseTileSizeWithTextureType_pixelFormat_sampleCount_sparsePageSize(self_: *@This(), textureType_: TextureType, pixelFormat_: PixelFormat, sampleCount_: ns.UInteger, sparsePageSize_: SparsePageSize) Size {
         return objc.msgSend(self_, "sparseTileSizeWithTextureType:pixelFormat:sampleCount:sparsePageSize:", Size, .{ textureType_, pixelFormat_, sampleCount_, sparsePageSize_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCounterSampleBufferWithDescriptor_error(self_: *@This(), descriptor_: *CounterSampleBufferDescriptor, error_: ?*?*ns.Error) ?*CounterSampleBuffer {
         return objc.msgSend(self_, "newCounterSampleBufferWithDescriptor:error:", ?*CounterSampleBuffer, .{ descriptor_, error_ });
     }
     pub fn sampleTimestamps_gpuTimestamp(self_: *@This(), cpuTimestamp_: *Timestamp, gpuTimestamp_: *Timestamp) void {
         return objc.msgSend(self_, "sampleTimestamps:gpuTimestamp:", void, .{ cpuTimestamp_, gpuTimestamp_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentEncoderWithBufferBinding(self_: *@This(), bufferBinding_: *BufferBinding) *ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderWithBufferBinding:", *ArgumentEncoder, .{bufferBinding_});
     }
@@ -9656,21 +9776,26 @@ pub const Device = opaque {
     pub fn supportsVertexAmplificationCount(self_: *@This(), count_: ns.UInteger) bool {
         return objc.msgSend(self_, "supportsVertexAmplificationCount:", bool, .{count_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibrary_error(self_: *@This(), library_: *Library, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
         return objc.msgSend(self_, "newDynamicLibrary:error:", ?*DynamicLibraryProtocol, .{ library_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newDynamicLibraryWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*DynamicLibraryProtocol {
         return objc.msgSend(self_, "newDynamicLibraryWithURL:error:", ?*DynamicLibraryProtocol, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBinaryArchiveWithDescriptor_error(self_: *@This(), descriptor_: *BinaryArchiveDescriptor, error_: ?*?*ns.Error) ?*BinaryArchive {
         return objc.msgSend(self_, "newBinaryArchiveWithDescriptor:error:", ?*BinaryArchive, .{ descriptor_, error_ });
     }
     pub fn accelerationStructureSizesWithDescriptor(self_: *@This(), descriptor_: *AccelerationStructureDescriptor) AccelerationStructureSizes {
         return objc.msgSend(self_, "accelerationStructureSizesWithDescriptor:", AccelerationStructureSizes, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithSize(self_: *@This(), size_: ns.UInteger) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithSize:", ?*AccelerationStructure, .{size_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithDescriptor(self_: *@This(), descriptor_: *AccelerationStructureDescriptor) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithDescriptor:", ?*AccelerationStructure, .{descriptor_});
     }
@@ -9680,51 +9805,65 @@ pub const Device = opaque {
     pub fn heapAccelerationStructureSizeAndAlignWithDescriptor(self_: *@This(), descriptor_: *AccelerationStructureDescriptor) SizeAndAlign {
         return objc.msgSend(self_, "heapAccelerationStructureSizeAndAlignWithDescriptor:", SizeAndAlign, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newResidencySetWithDescriptor_error(self_: *@This(), desc_: *ResidencySetDescriptor, error_: ?*?*ns.Error) ?*ResidencySet {
         return objc.msgSend(self_, "newResidencySetWithDescriptor:error:", ?*ResidencySet, .{ desc_, error_ });
     }
     pub fn tensorSizeAndAlignWithDescriptor(self_: *@This(), descriptor_: *TensorDescriptor) SizeAndAlign {
         return objc.msgSend(self_, "tensorSizeAndAlignWithDescriptor:", SizeAndAlign, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTensorWithDescriptor_error(self_: *@This(), descriptor_: *TensorDescriptor, error_: ?*?*ns.Error) ?*Tensor {
         return objc.msgSend(self_, "newTensorWithDescriptor:error:", ?*Tensor, .{ descriptor_, error_ });
     }
     pub fn functionHandleWithFunction(self_: *@This(), function_: *Function) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithFunction:", ?*FunctionHandle, .{function_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandAllocator(self_: *@This()) ?*MTL4CommandAllocator {
         return objc.msgSend(self_, "newCommandAllocator", ?*MTL4CommandAllocator, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandAllocatorWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CommandAllocatorDescriptor, error_: ?*?*ns.Error) ?*MTL4CommandAllocator {
         return objc.msgSend(self_, "newCommandAllocatorWithDescriptor:error:", ?*MTL4CommandAllocator, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newMTL4CommandQueue(self_: *@This()) ?*MTL4CommandQueue {
         return objc.msgSend(self_, "newMTL4CommandQueue", ?*MTL4CommandQueue, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newMTL4CommandQueueWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CommandQueueDescriptor, error_: ?*?*ns.Error) ?*MTL4CommandQueue {
         return objc.msgSend(self_, "newMTL4CommandQueueWithDescriptor:error:", ?*MTL4CommandQueue, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCommandBuffer(self_: *@This()) ?*MTL4CommandBuffer {
         return objc.msgSend(self_, "newCommandBuffer", ?*MTL4CommandBuffer, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentTableWithDescriptor_error(self_: *@This(), descriptor_: *MTL4ArgumentTableDescriptor, error_: ?*?*ns.Error) ?*MTL4ArgumentTable {
         return objc.msgSend(self_, "newArgumentTableWithDescriptor:error:", ?*MTL4ArgumentTable, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureViewPoolWithDescriptor_error(self_: *@This(), descriptor_: *ResourceViewPoolDescriptor, error_: ?*?*ns.Error) ?*TextureViewPool {
         return objc.msgSend(self_, "newTextureViewPoolWithDescriptor:error:", ?*TextureViewPool, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCompilerWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CompilerDescriptor, error_: ?*?*ns.Error) ?*MTL4Compiler {
         return objc.msgSend(self_, "newCompilerWithDescriptor:error:", ?*MTL4Compiler, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArchiveWithURL_error(self_: *@This(), url_: *ns.URL, error_: ?*?*ns.Error) ?*MTL4Archive {
         return objc.msgSend(self_, "newArchiveWithURL:error:", ?*MTL4Archive, .{ url_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newPipelineDataSetSerializerWithDescriptor(self_: *@This(), descriptor_: *MTL4PipelineDataSetSerializerDescriptor) *MTL4PipelineDataSetSerializer {
         return objc.msgSend(self_, "newPipelineDataSetSerializerWithDescriptor:", *MTL4PipelineDataSetSerializer, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithLength_options_placementSparsePageSize(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions, placementSparsePageSize_: SparsePageSize) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithLength:options:placementSparsePageSize:", ?*Buffer, .{ length_, options_, placementSparsePageSize_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newCounterHeapWithDescriptor_error(self_: *@This(), descriptor_: *MTL4CounterHeapDescriptor, error_: ?*?*ns.Error) ?*MTL4CounterHeap {
         return objc.msgSend(self_, "newCounterHeapWithDescriptor:error:", ?*MTL4CounterHeap, .{ descriptor_, error_ });
     }
@@ -9965,9 +10104,11 @@ pub const Function = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentEncoderWithBufferIndex(self_: *@This(), bufferIndex_: ns.UInteger) *ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:", *ArgumentEncoder, .{bufferIndex_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newArgumentEncoderWithBufferIndex_reflection(self_: *@This(), bufferIndex_: ns.UInteger, reflection_: ?*AutoreleasedArgument) *ArgumentEncoder {
         return objc.msgSend(self_, "newArgumentEncoderWithBufferIndex:reflection:", *ArgumentEncoder, .{ bufferIndex_, reflection_ });
     }
@@ -10095,30 +10236,38 @@ pub const Heap = opaque {
     pub fn maxAvailableSizeWithAlignment(self_: *@This(), alignment_: ns.UInteger) ns.UInteger {
         return objc.msgSend(self_, "maxAvailableSizeWithAlignment:", ns.UInteger, .{alignment_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithLength_options(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithLength:options:", ?*Buffer, .{ length_, options_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureWithDescriptor(self_: *@This(), descriptor_: *TextureDescriptor) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:", ?*Texture, .{descriptor_});
     }
     pub fn setPurgeableState(self_: *@This(), state_: PurgeableState) PurgeableState {
         return objc.msgSend(self_, "setPurgeableState:", PurgeableState, .{state_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newBufferWithLength_options_offset(self_: *@This(), length_: ns.UInteger, options_: ResourceOptions, offset_: ns.UInteger) ?*Buffer {
         return objc.msgSend(self_, "newBufferWithLength:options:offset:", ?*Buffer, .{ length_, options_, offset_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureWithDescriptor_offset(self_: *@This(), descriptor_: *TextureDescriptor, offset_: ns.UInteger) ?*Texture {
         return objc.msgSend(self_, "newTextureWithDescriptor:offset:", ?*Texture, .{ descriptor_, offset_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithSize(self_: *@This(), size_: ns.UInteger) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithSize:", ?*AccelerationStructure, .{size_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithDescriptor(self_: *@This(), descriptor_: *AccelerationStructureDescriptor) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithDescriptor:", ?*AccelerationStructure, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithSize_offset(self_: *@This(), size_: ns.UInteger, offset_: ns.UInteger) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithSize:offset:", ?*AccelerationStructure, .{ size_, offset_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newAccelerationStructureWithDescriptor_offset(self_: *@This(), descriptor_: *AccelerationStructureDescriptor, offset_: ns.UInteger) ?*AccelerationStructure {
         return objc.msgSend(self_, "newAccelerationStructureWithDescriptor:offset:", ?*AccelerationStructure, .{ descriptor_, offset_ });
     }
@@ -10176,6 +10325,7 @@ pub const IOCommandBuffer = opaque {
     pub fn loadTexture_slice_level_size_sourceBytesPerRow_sourceBytesPerImage_destinationOrigin_sourceHandle_sourceHandleOffset(self_: *@This(), texture_: *Texture, slice_: ns.UInteger, level_: ns.UInteger, size_: Size, sourceBytesPerRow_: ns.UInteger, sourceBytesPerImage_: ns.UInteger, destinationOrigin_: Origin, sourceHandle_: *IOFileHandle, sourceHandleOffset_: ns.UInteger) void {
         return objc.msgSend(self_, "loadTexture:slice:level:size:sourceBytesPerRow:sourceBytesPerImage:destinationOrigin:sourceHandle:sourceHandleOffset:", void, .{ texture_, slice_, level_, size_, sourceBytesPerRow_, sourceBytesPerImage_, destinationOrigin_, sourceHandle_, sourceHandleOffset_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyStatusToBuffer_offset(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger) void {
         return objc.msgSend(self_, "copyStatusToBuffer:offset:", void, .{ buffer_, offset_ });
     }
@@ -10278,6 +10428,7 @@ pub const IOScratchBufferAllocator = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newScratchBufferWithMinimumSize(self_: *@This(), minimumSize_: ns.UInteger) ?*IOScratchBuffer {
         return objc.msgSend(self_, "newScratchBufferWithMinimumSize:", ?*IOScratchBuffer, .{minimumSize_});
     }
@@ -10489,27 +10640,34 @@ pub const Library = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFunctionWithName(self_: *@This(), functionName_: *ns.String) ?*Function {
         return objc.msgSend(self_, "newFunctionWithName:", ?*Function, .{functionName_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFunctionWithName_constantValues_error(self_: *@This(), name_: *ns.String, constantValues_: *FunctionConstantValues, error_: ?*?*ns.Error) ?*Function {
         return objc.msgSend(self_, "newFunctionWithName:constantValues:error:", ?*Function, .{ name_, constantValues_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFunctionWithName_constantValues_completionHandler(self_: *@This(), name_: *ns.String, constantValues_: *FunctionConstantValues, completionHandler_: *ns.Block(fn (?*Function, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newFunctionWithName:constantValues:completionHandler:", void, .{ name_, constantValues_, completionHandler_ });
     }
     pub fn reflectionForFunctionWithName(self_: *@This(), functionName_: *ns.String) ?*FunctionReflection {
         return objc.msgSend(self_, "reflectionForFunctionWithName:", ?*FunctionReflection, .{functionName_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFunctionWithDescriptor_completionHandler(self_: *@This(), descriptor_: *FunctionDescriptor, completionHandler_: *ns.Block(fn (?*Function, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newFunctionWithDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFunctionWithDescriptor_error(self_: *@This(), descriptor_: *FunctionDescriptor, error_: ?*?*ns.Error) ?*Function {
         return objc.msgSend(self_, "newFunctionWithDescriptor:error:", ?*Function, .{ descriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIntersectionFunctionWithDescriptor_completionHandler(self_: *@This(), descriptor_: *IntersectionFunctionDescriptor, completionHandler_: *ns.Block(fn (?*Function, ?*ns.Error) void)) void {
         return objc.msgSend(self_, "newIntersectionFunctionWithDescriptor:completionHandler:", void, .{ descriptor_, completionHandler_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIntersectionFunctionWithDescriptor_error(self_: *@This(), descriptor_: *IntersectionFunctionDescriptor, error_: ?*?*ns.Error) ?*Function {
         return objc.msgSend(self_, "newIntersectionFunctionWithDescriptor:error:", ?*Function, .{ descriptor_, error_ });
     }
@@ -10605,6 +10763,7 @@ pub const RasterizationRateMap = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyParameterDataToBuffer_offset(self_: *@This(), buffer_: *Buffer, offset_: ns.UInteger) void {
         return objc.msgSend(self_, "copyParameterDataToBuffer:offset:", void, .{ buffer_, offset_ });
     }
@@ -11052,9 +11211,11 @@ pub const RenderPipelineState = opaque {
     pub fn functionHandleWithBinaryFunction_stage(self_: *@This(), function_: *MTL4BinaryFunctionProtocol, stage_: RenderStages) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithBinaryFunction:stage:", ?*FunctionHandle, .{ function_, stage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithBinaryFunctions_error(self_: *@This(), binaryFunctionsDescriptor_: *MTL4RenderPipelineBinaryFunctionsDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithBinaryFunctions:error:", ?*RenderPipelineState, .{ binaryFunctionsDescriptor_, error_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineDescriptorForSpecialization(self_: *@This()) *MTL4PipelineDescriptor {
         return objc.msgSend(self_, "newRenderPipelineDescriptorForSpecialization", *MTL4PipelineDescriptor, .{});
     }
@@ -11064,12 +11225,15 @@ pub const RenderPipelineState = opaque {
     pub fn functionHandleWithFunction_stage(self_: *@This(), function_: *Function, stage_: RenderStages) ?*FunctionHandle {
         return objc.msgSend(self_, "functionHandleWithFunction:stage:", ?*FunctionHandle, .{ function_, stage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newVisibleFunctionTableWithDescriptor_stage(self_: *@This(), descriptor_: *VisibleFunctionTableDescriptor, stage_: RenderStages) ?*VisibleFunctionTable {
         return objc.msgSend(self_, "newVisibleFunctionTableWithDescriptor:stage:", ?*VisibleFunctionTable, .{ descriptor_, stage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newIntersectionFunctionTableWithDescriptor_stage(self_: *@This(), descriptor_: *IntersectionFunctionTableDescriptor, stage_: RenderStages) ?*IntersectionFunctionTable {
         return objc.msgSend(self_, "newIntersectionFunctionTableWithDescriptor:stage:", ?*IntersectionFunctionTable, .{ descriptor_, stage_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRenderPipelineStateWithAdditionalBinaryFunctions_error(self_: *@This(), additionalBinaryFunctions_: *RenderPipelineFunctionsDescriptor, error_: ?*?*ns.Error) ?*RenderPipelineState {
         return objc.msgSend(self_, "newRenderPipelineStateWithAdditionalBinaryFunctions:error:", ?*RenderPipelineState, .{ additionalBinaryFunctions_, error_ });
     }
@@ -11262,6 +11426,7 @@ pub const ResourceViewPool = opaque {
     pub const release = InternalInfo.release;
     pub const autorelease = InternalInfo.autorelease;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn copyResourceViewsFromPool_sourceRange_destinationIndex(self_: *@This(), sourcePool_: *ResourceViewPool, sourceRange_: ns.Range, destinationIndex_: ns.UInteger) ResourceID {
         return objc.msgSend(self_, "copyResourceViewsFromPool:sourceRange:destinationIndex:", ResourceID, .{ sourcePool_, sourceRange_, destinationIndex_ });
     }
@@ -11307,6 +11472,7 @@ pub const SharedEvent = opaque {
     pub fn notifyListener_atValue_block(self_: *@This(), listener_: *SharedEventListener, value_: u64, block_: *ns.Block(fn (*SharedEvent, u64) void)) void {
         return objc.msgSend(self_, "notifyListener:atValue:block:", void, .{ listener_, value_, block_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedEventHandle(self_: *@This()) *SharedEventHandle {
         return objc.msgSend(self_, "newSharedEventHandle", *SharedEventHandle, .{});
     }
@@ -11394,21 +11560,27 @@ pub const Texture = opaque {
     pub fn replaceRegion_mipmapLevel_withBytes_bytesPerRow(self_: *@This(), region_: Region, level_: ns.UInteger, pixelBytes_: *const anyopaque, bytesPerRow_: ns.UInteger) void {
         return objc.msgSend(self_, "replaceRegion:mipmapLevel:withBytes:bytesPerRow:", void, .{ region_, level_, pixelBytes_, bytesPerRow_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureViewWithPixelFormat(self_: *@This(), pixelFormat_: PixelFormat) ?*Texture {
         return objc.msgSend(self_, "newTextureViewWithPixelFormat:", ?*Texture, .{pixelFormat_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureViewWithPixelFormat_textureType_levels_slices(self_: *@This(), pixelFormat_: PixelFormat, textureType_: TextureType, levelRange_: ns.Range, sliceRange_: ns.Range) ?*Texture {
         return objc.msgSend(self_, "newTextureViewWithPixelFormat:textureType:levels:slices:", ?*Texture, .{ pixelFormat_, textureType_, levelRange_, sliceRange_ });
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSharedTextureHandle(self_: *@This()) ?*SharedTextureHandle {
         return objc.msgSend(self_, "newSharedTextureHandle", ?*SharedTextureHandle, .{});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureViewWithDescriptor(self_: *@This(), descriptor_: *TextureViewDescriptor) ?*Texture {
         return objc.msgSend(self_, "newTextureViewWithDescriptor:", ?*Texture, .{descriptor_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newRemoteTextureViewForDevice(self_: *@This(), device_: *Device) ?*Texture {
         return objc.msgSend(self_, "newRemoteTextureViewForDevice:", ?*Texture, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTextureViewWithPixelFormat_textureType_levels_slices_swizzle(self_: *@This(), pixelFormat_: PixelFormat, textureType_: TextureType, levelRange_: ns.Range, sliceRange_: ns.Range, swizzle_: TextureSwizzleChannels) ?*Texture {
         return objc.msgSend(self_, "newTextureViewWithPixelFormat:textureType:levels:slices:swizzle:", ?*Texture, .{ pixelFormat_, textureType_, levelRange_, sliceRange_, swizzle_ });
     }

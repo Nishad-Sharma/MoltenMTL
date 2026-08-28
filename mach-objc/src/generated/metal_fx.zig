@@ -28,9 +28,11 @@ pub const FrameInterpolatorDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFrameInterpolatorWithDevice(self_: *@This(), device_: *mtl.Device) ?*FrameInterpolator {
         return objc.msgSend(self_, "newFrameInterpolatorWithDevice:", ?*FrameInterpolator, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newFrameInterpolatorWithDevice_compiler(self_: *@This(), device_: *mtl.Device, compiler_: *mtl.MTL4Compiler) ?*MTL4FXFrameInterpolator {
         return objc.msgSend(self_, "newFrameInterpolatorWithDevice:compiler:", ?*MTL4FXFrameInterpolator, .{ device_, compiler_ });
     }
@@ -112,9 +114,11 @@ pub const SpatialScalerDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSpatialScalerWithDevice(self_: *@This(), device_: *mtl.Device) ?*SpatialScaler {
         return objc.msgSend(self_, "newSpatialScalerWithDevice:", ?*SpatialScaler, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newSpatialScalerWithDevice_compiler(self_: *@This(), device_: *mtl.Device, compiler_: *mtl.MTL4Compiler) ?*MTL4FXSpatialScaler {
         return objc.msgSend(self_, "newSpatialScalerWithDevice:compiler:", ?*MTL4FXSpatialScaler, .{ device_, compiler_ });
     }
@@ -178,9 +182,11 @@ pub const TemporalDenoisedScalerDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTemporalDenoisedScalerWithDevice(self_: *@This(), device_: *mtl.Device) ?*TemporalDenoisedScaler {
         return objc.msgSend(self_, "newTemporalDenoisedScalerWithDevice:", ?*TemporalDenoisedScaler, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTemporalDenoisedScalerWithDevice_compiler(self_: *@This(), device_: *mtl.Device, compiler_: *mtl.MTL4Compiler) ?*MTL4FXTemporalDenoisedScaler {
         return objc.msgSend(self_, "newTemporalDenoisedScalerWithDevice:compiler:", ?*MTL4FXTemporalDenoisedScaler, .{ device_, compiler_ });
     }
@@ -340,9 +346,11 @@ pub const TemporalScalerDescriptor = opaque {
     pub const alloc = InternalInfo.alloc;
     pub const allocInit = InternalInfo.allocInit;
 
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTemporalScalerWithDevice(self_: *@This(), device_: *mtl.Device) ?*TemporalScaler {
         return objc.msgSend(self_, "newTemporalScalerWithDevice:", ?*TemporalScaler, .{device_});
     }
+    /// Returns +1: the caller owns the result and must release it.
     pub fn newTemporalScalerWithDevice_compiler(self_: *@This(), device_: *mtl.Device, compiler_: *mtl.MTL4Compiler) ?*MTL4FXTemporalScaler {
         return objc.msgSend(self_, "newTemporalScalerWithDevice:compiler:", ?*MTL4FXTemporalScaler, .{ device_, compiler_ });
     }

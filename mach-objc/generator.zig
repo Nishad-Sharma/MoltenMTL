@@ -41,6 +41,24 @@ var ownership_stats: OwnershipStats = .{};
 /// Cocoa's method families: the selector alone says who owns the result.
 const ownership_families = [_][]const u8{ "alloc", "new", "copy", "mutableCopy", "init" };
 
+/// Does this return type carry an object the caller could own?
+///
+/// ARC's method families only govern methods returning a retainable object
+/// pointer. `copyFromTexture:toTexture:` is a blit command returning void: it is
+/// in the `copy` family by name and owns nothing, and
+/// `newLibraryWithSource:options:completionHandler:` hands its result to a block
+/// rather than returning it.
+fn returnsRetainableObject(return_type: Type) bool {
+    return switch (return_type) {
+        .instance_type => true,
+        .pointer => |pointer| switch (pointer.child.*) {
+            .name, .instance_type => true,
+            else => false,
+        },
+        else => false,
+    };
+}
+
 /// Does `selector` belong to a method family that returns a +1 reference?
 ///
 /// The rule is the one ARC uses: after any leading underscores, the family is a
@@ -2151,9 +2169,13 @@ fn Generator(comptime WriterType: type) type {
             // exists precisely to mark a method that looks like a family member and
             // is not. A disagreement is legitimate API rather than an error, but it
             // is the interesting case, so it is reported.
-            const family_retained = returnsRetained(method.name);
-            const retained = if (method.explicit_ownership) |explicit| explicit == .returns_retained else family_retained;
-            if (method.explicit_ownership != null and family_retained != retained) {
+            const returns_object = returnsRetainableObject(method.return_type);
+            const family_retained = returns_object and returnsRetained(method.name);
+            const retained = if (method.explicit_ownership) |explicit|
+                returns_object and explicit == .returns_retained
+            else
+                family_retained;
+            if (method.explicit_ownership != null and returns_object and family_retained != retained) {
                 std.log.warn(
                     "{s}: selector family disagrees with its explicit ownership attribute; the attribute wins",
                     .{manifest_name},
@@ -4595,6 +4617,23 @@ fn expectPointerOptional(source: []const u8, expected: bool) !void {
     var parser = try Parser.init(arena.allocator(), &lexer, false);
     const ty = try parser.parseType();
     try std.testing.expectEqual(expected, ty.pointer.is_optional);
+}
+
+test "ownership applies only to methods returning an object" {
+    const object = Type{ .pointer = .{
+        .is_single = true,
+        .is_const = false,
+        .is_optional = true,
+        .child = @constCast(&Type{ .name = "MTLTexture" }),
+    } };
+    try std.testing.expect(returnsRetainableObject(object));
+    try std.testing.expect(returnsRetainableObject(.instance_type));
+
+    // A blit command is in the `copy` family by name and owns nothing.
+    try std.testing.expect(!returnsRetainableObject(.void));
+    // Nor does a returned struct, such as MTLResourceID.
+    try std.testing.expect(!returnsRetainableObject(Type{ .name = "MTLResourceID" }));
+    try std.testing.expect(!returnsRetainableObject(Type{ .uint = 64 }));
 }
 
 test "method families are whole words" {
