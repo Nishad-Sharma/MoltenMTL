@@ -280,7 +280,7 @@ capturing an Objective-C object would have failed to compile. None of this was
 visible from reading the file — the trivial descriptor beside the broken generic
 one uses the same pattern correctly, because it is not generic.
 
-### 9. Ownership by method family — P1, S
+### 9. Ownership by method family — P1, S — **implemented, pending verification**
 
 Downgraded from full ownership-attribute parsing. Cocoa's naming rule covers
 essentially all of Metal, and the RHI encapsulates ownership once at its own
@@ -288,14 +288,20 @@ boundary.
 
 - Classify results from the method family in the selector: `alloc`, `new`,
   `copy` and `mutableCopy` return +1; everything else returns +0.
-- Emit that as a doc comment and store it in the manifest.
-- **Fail generation** if a declaration carries an explicit
-  `ns_returns_retained` / `ns_returns_not_retained` attribute that contradicts
-  its family. That turns the assumption into a checked one instead of a hope.
+- Emit that as a doc comment on +1 results only. +0 is the rule, and repeating
+  it on two thousand methods would bury the exception that matters. Manifest
+  storage was skipped: it has no consumer, and the classifier is covered by a
+  test directly.
+- ~~Fail generation on a contradiction.~~ **Corrected during implementation:**
+  `ns_returns_not_retained` exists precisely to mark a method that looks like a
+  family member and is not, so a disagreement is legitimate API and failing on it
+  would break valid declarations. The explicit attribute wins and the
+  disagreement is reported, which is what "checked rather than hoped" actually
+  requires here.
 - Do not parse consumed arguments or consumed `self`. Do not add `Owned`,
   `Borrowed` or transfer-pointer types.
 
-### 10. Unavailable initializers — P1, S
+### 10. Unavailable initializers — P1, S — **implemented, pending verification**
 
 What remains of the old constructors-and-properties phase.
 

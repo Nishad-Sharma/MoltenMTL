@@ -120,6 +120,13 @@ pub const Param = struct {
     }
 };
 
+/// Who owns a returned object.
+///
+/// Cocoa's rule is the selector's method family: `alloc`, `new`, `copy`,
+/// `mutableCopy` and `init` hand back a +1 reference the caller must release,
+/// and everything else returns +0.
+pub const Ownership = enum { returns_retained, returns_not_retained };
+
 pub const Method = struct {
     const Self = @This();
     const ParamList = std.array_list.Managed(Param);
@@ -128,6 +135,11 @@ pub const Method = struct {
     instance: bool,
     return_type: Type,
     params: ParamList,
+    /// `__attribute__((unavailable))`, which is what `NS_UNAVAILABLE` expands to.
+    unavailable: bool = false,
+    /// An explicit `ns_returns_retained` / `ns_returns_not_retained`. Absent for
+    /// almost every method, whose ownership follows from its selector instead.
+    explicit_ownership: ?Ownership = null,
 
     pub fn init(name: []const u8, instance: bool, return_type: Type, params: ParamList) Method {
         return Method{

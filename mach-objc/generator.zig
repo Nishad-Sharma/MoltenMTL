@@ -30,6 +30,32 @@ const NullabilityStats = struct {
 
 var nullability_stats: NullabilityStats = .{};
 
+const OwnershipStats = struct {
+    returns_retained: usize = 0,
+    explicit: usize = 0,
+    unavailable: usize = 0,
+};
+
+var ownership_stats: OwnershipStats = .{};
+
+/// Cocoa's method families: the selector alone says who owns the result.
+const ownership_families = [_][]const u8{ "alloc", "new", "copy", "mutableCopy", "init" };
+
+/// Does `selector` belong to a method family that returns a +1 reference?
+///
+/// The rule is the one ARC uses: after any leading underscores, the family is a
+/// whole leading word. `newBuffer` is in the `new` family; `newer` is not,
+/// because the next character is lowercase and so continues the word.
+fn returnsRetained(selector: []const u8) bool {
+    const name = std.mem.trimStart(u8, selector, "_");
+    for (ownership_families) |family| {
+        if (!std.mem.startsWith(u8, name, family)) continue;
+        const rest = name[family.len..];
+        if (rest.len == 0 or !std.ascii.isLower(rest[0])) return true;
+    }
+    return false;
+}
+
 // ------------------------------------------------------------------------------------------------
 pub const ParseError = error{
     UnexpectedCharacter,
@@ -1289,15 +1315,29 @@ pub const Converter = struct {
         const return_type = try self.convertType(getObject(n, "returnType").?);
         var params = std.array_list.Managed(Param).init(registry.allocator);
 
+        var unavailable = false;
+        var explicit_ownership: ?reg.Ownership = null;
         for (getArray(n, "inner")) |child| {
             const childKind = getString(child, "kind");
             if (std.mem.eql(u8, childKind, "ParmVarDecl")) {
                 const param = try self.convertParam(child);
                 try params.append(param);
+            } else if (std.mem.eql(u8, childKind, "UnavailableAttr")) {
+                unavailable = true;
+                ownership_stats.unavailable += 1;
+            } else if (std.mem.eql(u8, childKind, "NSReturnsRetainedAttr")) {
+                explicit_ownership = .returns_retained;
+                ownership_stats.explicit += 1;
+            } else if (std.mem.eql(u8, childKind, "NSReturnsNotRetainedAttr")) {
+                explicit_ownership = .returns_not_retained;
+                ownership_stats.explicit += 1;
             }
         }
 
-        return Method.init(getString(n, "name"), getBool(n, "instance"), return_type, params);
+        var method = Method.init(getString(n, "name"), getBool(n, "instance"), return_type, params);
+        method.unavailable = unavailable;
+        method.explicit_ownership = explicit_ownership;
+        return method;
     }
 
     fn convertParam(self: *Self, n: std.json.Value) !Param {
@@ -1923,8 +1963,9 @@ fn Generator(comptime WriterType: type) type {
             try self.writer.writeAll("    pub const release = InternalInfo.release;\n");
             try self.writer.writeAll("    pub const autorelease = InternalInfo.autorelease;\n");
 
-            if (container.is_interface and self.doesParentHaveMethod(container, "init")) {
-                // TODO: check if the type (or one of its parents) marks new/alloc/init as NS_UNAVAILABLE.
+            if (container.is_interface and self.doesParentHaveMethod(container, "init") and
+                !initIsUnavailable(container))
+            {
                 try self.writer.writeAll("    pub const new = InternalInfo.new;\n");
                 try self.writer.writeAll("    pub const alloc = InternalInfo.alloc;\n");
                 try self.writer.writeAll("    pub const allocInit = InternalInfo.allocInit;\n");
@@ -2011,6 +2052,24 @@ fn Generator(comptime WriterType: type) type {
         /// and setter. Resolving it against its real accessors is what keeps a
         /// property whose getter was generated correctly from being reported as
         /// unrepresented.
+        /// Does this class, or one it inherits from, withdraw `init`?
+        ///
+        /// `NS_UNAVAILABLE` on an initialiser means the class must be built
+        /// through a factory method instead. Offering `new`/`alloc`/`allocInit`
+        /// regardless hands the caller a constructor that compiles and then fails
+        /// at runtime. The nearest declaration wins, since a subclass may
+        /// reinstate what its superclass withdrew.
+        fn initIsUnavailable(container: *Container) bool {
+            var current: ?*Container = container;
+            while (current) |c| : (current = c.super) {
+                for (c.methods.items) |method| {
+                    if (!std.mem.eql(u8, method.name, "init")) continue;
+                    return method.unavailable;
+                }
+            }
+            return false;
+        }
+
         fn propertyAccessorStatus(
             self: *Self,
             container: *Container,
@@ -2086,6 +2145,27 @@ fn Generator(comptime WriterType: type) type {
                 new_name[0] = 'T';
                 new_name[1] = '_';
                 name = new_name;
+            }
+
+            // An explicit attribute outranks the selector: `ns_returns_not_retained`
+            // exists precisely to mark a method that looks like a family member and
+            // is not. A disagreement is legitimate API rather than an error, but it
+            // is the interesting case, so it is reported.
+            const family_retained = returnsRetained(method.name);
+            const retained = if (method.explicit_ownership) |explicit| explicit == .returns_retained else family_retained;
+            if (method.explicit_ownership != null and family_retained != retained) {
+                std.log.warn(
+                    "{s}: selector family disagrees with its explicit ownership attribute; the attribute wins",
+                    .{manifest_name},
+                );
+            }
+            if (retained) {
+                // Only +1 is annotated. +0 is the rule, and repeating it on two
+                // thousand methods would bury the exception that matters.
+                try self.writer.writeAll(
+                    "    /// Returns +1: the caller owns the result and must release it.\n",
+                );
+                ownership_stats.returns_retained += 1;
             }
 
             try self.writer.writeAll("    pub fn ");
@@ -3970,6 +4050,7 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
     registry.deinit();
     registry = Registry.init(allocator);
     nullability_stats = .{};
+    ownership_stats = .{};
 
     var manifest = coverage.Manifest.init(allocator, spec.name);
     defer manifest.deinit();
@@ -4036,6 +4117,16 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
             nullability_stats.nullable_result,
             nullability_stats.null_unspecified,
             nullability_stats.unannotated,
+        },
+    );
+
+    std.log.info(
+        "{s}: ownership — {d} methods return +1, {d} carry an explicit attribute, {d} declarations are unavailable",
+        .{
+            spec.name,
+            ownership_stats.returns_retained,
+            ownership_stats.explicit,
+            ownership_stats.unavailable,
         },
     );
 
@@ -4504,6 +4595,23 @@ fn expectPointerOptional(source: []const u8, expected: bool) !void {
     var parser = try Parser.init(arena.allocator(), &lexer, false);
     const ty = try parser.parseType();
     try std.testing.expectEqual(expected, ty.pointer.is_optional);
+}
+
+test "method families are whole words" {
+    // The family is what ARC treats as one: a leading word, not a prefix.
+    try std.testing.expect(returnsRetained("new"));
+    try std.testing.expect(returnsRetained("newBufferWithLength:options:"));
+    try std.testing.expect(returnsRetained("copyWithZone:"));
+    try std.testing.expect(returnsRetained("mutableCopy"));
+    try std.testing.expect(returnsRetained("initWithRank:values:"));
+    try std.testing.expect(returnsRetained("_newPrivateThing"));
+
+    // `newer` continues the word, so it is not the `new` family.
+    try std.testing.expect(!returnsRetained("newer"));
+    try std.testing.expect(!returnsRetained("initialize"));
+    try std.testing.expect(!returnsRetained("copying"));
+    try std.testing.expect(!returnsRetained("device"));
+    try std.testing.expect(!returnsRetained("renewBuffer"));
 }
 
 test "pointers are optional unless the header says nonnull" {
