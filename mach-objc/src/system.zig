@@ -192,7 +192,13 @@ pub fn stackBlockLiteral(
             .isa = _NSConcreteStackBlock,
             .flags = if (has_copy_dispose) 1 << 25 else 0,
             .invoke = invoke,
-            .descriptor = if (has_copy_dispose) Literal.copyDisposeStaticDescriptor(copy, dispose) else Literal.trivialStaticDescriptor(),
+            // `has_copy_dispose` is comptime-known, so only the taken branch is
+            // analysed and the unwraps are safe: reaching this one means both
+            // helpers were supplied.
+            .descriptor = if (has_copy_dispose)
+                Literal.copyDisposeStaticDescriptor(copy.?, dispose.?)
+            else
+                Literal.trivialStaticDescriptor(),
             .context = context,
         },
     };
