@@ -241,7 +241,7 @@ must still be named in the selection list by hand.
 - Treat nested pointers as optional rather than resolving inner nullability
   precisely.
 
-### 8. Completion-handler blocks — P1, M — **implemented, pending verification**
+### 8. Completion-handler blocks — P1, M — **done**
 
 The block machinery in `src/system.zig` is already largely built: `Block`,
 `BlockLiteral`, trivial and copy/dispose descriptors, `_Block_copy` and
@@ -267,6 +267,18 @@ void (^)(id result, NSError *error)
   the failure path. The ABI was hand-rolled and had no test at all, while every
   asynchronous Metal entry point crosses it.
 - Keep block fixes in the in-tree runtime; do not add a second block library.
+
+**What the tests found.** The machinery in `src/system.zig` was written but had
+never been compiled, let alone run, and the first test file to reach it produced
+three latent compile errors: `globalBlock` bound its literal `const` and passed
+it where a mutable pointer was required; `CopyDisposeBlockDescriptor.static`
+named the generic function rather than `@This()` in its own return type and
+annotation; and `stackBlockLiteral` passed its optional copy/dispose helpers
+straight into parameters typed as plain functions. The last two sit on the path a
+block taking ownership of a captured object must use, so any completion handler
+capturing an Objective-C object would have failed to compile. None of this was
+visible from reading the file — the trivial descriptor beside the broken generic
+one uses the same pattern correctly, because it is not generic.
 
 ### 9. Ownership by method family — P1, S
 
