@@ -3,7 +3,7 @@ const std = @import("std");
 
 comptime {
     if (builtin.target.cpu.arch != .aarch64 or builtin.target.os.tag != .macos) {
-        @compileError("mach-objc requires the aarch64-macos target");
+        @compileError("metal-zig requires the aarch64-macos target");
     }
 }
 

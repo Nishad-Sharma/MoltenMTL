@@ -30,7 +30,7 @@ protocols, methods, and enums are generated from the SDK AST.
 ## Use
 
 ```zig
-const apple = @import("mach-objc");
+const apple = @import("metal-zig");
 
 const device = apple.metal.createSystemDefaultDevice() orelse return error.NoDevice;
 defer device.release();
@@ -51,4 +51,4 @@ covers `nextDrawable` and `present` without one.
 primitive acceleration structure, ray-queries it from a compute kernel, and asserts the hit through
 a shared event. It needs a Metal device but no window server.
 
-This package is derived from [mach-objc](https://code.hexops.org/hexops/mach-objc).
+This package is derived from [metal-zig](https://code.hexops.org/hexops/metal-zig).

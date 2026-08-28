@@ -5,4 +5,4 @@ zig build generate
 zig build test
 
 repo_root=$(git rev-parse --show-toplevel)
-git -C "$repo_root" diff --exit-code -- mach-objc
+git -C "$repo_root" diff --exit-code -- metal-zig

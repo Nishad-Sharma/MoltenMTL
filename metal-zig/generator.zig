@@ -3834,7 +3834,7 @@ fn generateSingleFramework(allocator: std.mem.Allocator, io: std.Io, framework: 
 
 fn usage() void {
     std.log.warn(
-        \\mach-objc-generator [options]
+        \\metal-zig-generator [options]
         \\
         \\Options:
         \\  --framework Metal,MetalFX,QuartzCore  generate a single framework to stdout

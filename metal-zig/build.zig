@@ -4,7 +4,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    // mach-objc does not parse availability or weak-link post-floor symbols, so
+    // metal-zig does not parse availability or weak-link post-floor symbols, so
     // the deployment floor is the contract: every symbol in the selected surface
     // must exist at this version.
     //
@@ -15,14 +15,14 @@ pub fn build(b: *std.Build) void {
     // paths: none". A real pin would have to pass the SDK's framework, include
     // and library paths to every module by hand.
     if (target.result.os.tag != .macos or target.result.cpu.arch != .aarch64) {
-        @panic("mach-objc requires an aarch64-macos target");
+        @panic("metal-zig requires an aarch64-macos target");
     }
     if (target.result.os.version_range.semver.min.order(.{
         .major = 26,
         .minor = 0,
         .patch = 0,
     }) == .lt) {
-        @panic("mach-objc requires a macOS 26.0 or newer deployment target");
+        @panic("metal-zig requires a macOS 26.0 or newer deployment target");
     }
     const sdk_root = b.option(
         []const u8,
@@ -31,7 +31,7 @@ pub fn build(b: *std.Build) void {
     ) orelse "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
     const frameworks_dir = b.pathResolve(&.{ sdk_root, "System/Library/Frameworks" });
 
-    const module = b.addModule("mach-objc", .{
+    const module = b.addModule("metal-zig", .{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -67,7 +67,7 @@ pub fn build(b: *std.Build) void {
             .link_libc = true,
         }),
     });
-    objc_abi_tests.root_module.addImport("mach-objc", module);
+    objc_abi_tests.root_module.addImport("metal-zig", module);
     objc_abi_tests.root_module.addCSourceFile(.{
         .file = b.path("tests/objc_abi_fixture.m"),
         .flags = &.{"-fno-objc-arc"},
@@ -95,7 +95,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    block_tests.root_module.addImport("mach-objc", module);
+    block_tests.root_module.addImport("metal-zig", module);
     const run_block_tests = b.addRunArtifact(block_tests);
     test_step.dependOn(&run_block_tests.step);
 
@@ -106,7 +106,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    drawable_tests.root_module.addImport("mach-objc", module);
+    drawable_tests.root_module.addImport("metal-zig", module);
     const run_drawable_tests = b.addRunArtifact(drawable_tests);
     test_step.dependOn(&run_drawable_tests.step);
 
@@ -117,7 +117,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    raytrace_tests.root_module.addImport("mach-objc", module);
+    raytrace_tests.root_module.addImport("metal-zig", module);
     const run_raytrace_tests = b.addRunArtifact(raytrace_tests);
     test_step.dependOn(&run_raytrace_tests.step);
 

@@ -1,5 +1,5 @@
 const std = @import("std");
-const mach = @import("mach-objc");
+const mach = @import("metal-zig");
 
 const mtl = mach.metal;
 const ns = mach.foundation;

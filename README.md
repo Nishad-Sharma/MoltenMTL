@@ -4,15 +4,15 @@ A Zig graphics API intended to abstract over Vulkan and Metal 4.
 
 ## Current state
 
-The repository currently contains only `mach-objc`: a generator that produces
+The repository currently contains only `metal-zig`: a generator that produces
 Zig bindings to the Objective-C APIs the RHI needs — Metal, MetalFX, and the
-narrow QuartzCore surface required to present a Metal layer. The earlier `metal-c` C++ shim over Apple's metal-cpp headers has been
+narrow QuartzCore surface required to present a Metal layer.
 removed; the RHI will be rebuilt directly on the generated Objective-C
 bindings.
 
 See `PLANS.md` for the robustness plan and its phase order.
 
-## mach-objc
+## metal-zig
 
 Xcode's Objective-C headers are the sole authority for signatures, ABI, enum
 values, record layouts, nullability, ownership, availability, and block
@@ -29,7 +29,7 @@ rather than guessing.
 Build and test:
 
 ```sh
-cd mach-objc
+cd metal-zig
 zig build test          # ABI fixture, runtime, generator and Metal 4 tests
 ./verify.sh             # regenerate, test, and fail on any checked-in diff
 ```

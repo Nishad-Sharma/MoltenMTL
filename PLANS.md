@@ -336,7 +336,7 @@ What remains of the old constructors-and-properties phase.
   autorelease-pool requirement and the regeneration workflow in `README.md`.
   Internal does not mean undocumented; this is for future-you.
 - Declaration counts are reported during generation as of `ffb533d`.
-- The macOS floor is checked in `mach-objc/build.zig` against the resolved
+- The macOS floor is checked in `metal-zig/build.zig` against the resolved
   target. It is deliberately *not* pinned into the default target query:
   setting `os_version_min` makes `Query.isNativeOs()` false, Zig then stops
   discovering the host SDK, and every module that links `objc` or a framework

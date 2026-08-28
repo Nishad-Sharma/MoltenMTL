@@ -10,7 +10,7 @@
 //! be handed a null argument on the failure path.
 
 const std = @import("std");
-const mach = @import("mach-objc");
+const mach = @import("metal-zig");
 const system = mach.system;
 
 test "a global block invokes through the C ABI" {

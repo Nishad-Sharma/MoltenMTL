@@ -1,5 +1,5 @@
 const std = @import("std");
-const mach = @import("mach-objc");
+const mach = @import("metal-zig");
 
 const ca = mach.quartz_core;
 const cg = mach.core_graphics;

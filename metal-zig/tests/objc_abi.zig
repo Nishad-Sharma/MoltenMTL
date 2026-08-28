@@ -1,6 +1,6 @@
 const builtin = @import("builtin");
 const std = @import("std");
-const mach = @import("mach-objc");
+const mach = @import("metal-zig");
 const objc = mach.objc;
 
 const Struct8 = extern struct {
