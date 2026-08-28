@@ -90,20 +90,20 @@ fn registerSelector(comptime name: []const u8) *Selector {
 
 /// Returns a typed Zig function pointer that calls the superclass's IMP for `selector`.
 ///
-/// `SuperClass` is the Zig wrapper for the immediate parent class (e.g. `app_kit.View`)
+/// `SuperClass` is the Zig wrapper for the immediate parent class (e.g. `quartz_core.Layer`)
 ///
 /// `Fn` is the same signature as your override (`fn(*Self, args...) Ret`)
 ///
 /// Example:
 /// ```zig
 /// // objc:
-/// // new_self = [super initWithFrame:frame];
+/// // new_self = [super initWithLayer:layer];
 ///
 /// // zig:
 /// const new_self = objc.superFn(
-///     app_kit.View, "initWithFrame:",
-///     fn (*Self, app_kit.Rect) ?*Self,
-/// )(self, frame) orelse return null;
+///     quartz_core.Layer, "initWithLayer:",
+///     fn (*Self, *quartz_core.Layer) ?*Self,
+/// )(self, layer) orelse return null;
 /// ```
 pub fn superFn(
     comptime SuperClass: type,
@@ -1023,27 +1023,27 @@ fn hasMethod(comptime methods: []const Method, comptime sel: []const u8) bool {
 /// instantiation of the class from Zig.
 ///
 /// ```zig
-/// pub const MyWindowDelegate = objc.DefineClass(struct {
-///     pub const class_name = "MyWindowDelegate";
+/// pub const MyLayerDelegate = objc.DefineClass(struct {
+///     pub const class_name = "MyLayerDelegate";
 ///     pub const superclass = foundation.ObjectInterface;
 ///
 ///     // Optional. Enables comptime-checked `as(Base)` upcasts to a protocol.
-///     pub const protocols = &.{app_kit.WindowDelegate};
+///     pub const protocols = &.{foundation.ObjectProtocol};
 ///
 ///     pub const Self = objc.Self(class_name);
 ///
 ///     // @implementation
 ///     pub const implementation = objc.implementation(class_name, struct {
-///         _windowDidResize_block: objc.Block(fn () void),        // -> Accessor.Block
+///         _displayLayer_block: objc.Block(fn () void),           // -> Accessor.Block
 ///         _displayLink: objc.StrongObject("CAMetalDisplayLink"), // -> Accessor.StrongObject
 ///         _observer: *anyopaque,                                 // -> Accessor.Raw
 ///     });
 ///
 ///     // Each fn here becomes an Obj-C class method.
 ///     pub const methods = struct {
-///         pub fn @"windowDidResize:"(self: *Self, _: ?*app_kit.Notification) void {
+///         pub fn @"displayLayer:"(self: *Self, _: ?*quartz_core.Layer) void {
 ///             // Access our @implementation variables.
-///             _ = implementation._windowDidResize_block.invoke(self, .{});
+///             _ = implementation._displayLayer_block.invoke(self, .{});
 ///         }
 ///     };
 ///
@@ -1059,7 +1059,7 @@ fn hasMethod(comptime methods: []const Method, comptime sel: []const u8) bool {
 /// // and call methods/direct_methods:
 /// const d = MyWindowDelegate.allocInit();
 /// d.set(.observer, ctx);
-/// d.call(.@"windowDidResize:", .{null});
+/// d.call(.@"displayLayer:", .{null});
 /// ```
 pub fn DefineClass(comptime Spec: type) type {
     @setEvalBranchQuota(100_000);

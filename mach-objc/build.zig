@@ -37,7 +37,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     module.linkSystemLibrary("objc", .{});
-    module.linkFramework("AppKit", .{});
     module.linkFramework("Foundation", .{});
     module.linkFramework("Metal", .{});
     module.linkFramework("MetalFX", .{});
@@ -51,7 +50,6 @@ pub fn build(b: *std.Build) void {
         }),
     });
     unit_tests.root_module.linkSystemLibrary("objc", .{});
-    unit_tests.root_module.linkFramework("AppKit", .{});
     unit_tests.root_module.linkFramework("Foundation", .{});
     unit_tests.root_module.linkFramework("Metal", .{});
     unit_tests.root_module.linkFramework("MetalFX", .{});
@@ -101,6 +99,17 @@ pub fn build(b: *std.Build) void {
     const run_block_tests = b.addRunArtifact(block_tests);
     test_step.dependOn(&run_block_tests.step);
 
+    const drawable_tests = b.addTest(.{
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/metal_drawable.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    drawable_tests.root_module.addImport("mach-objc", module);
+    const run_drawable_tests = b.addRunArtifact(drawable_tests);
+    test_step.dependOn(&run_drawable_tests.step);
+
     const raytrace_tests = b.addTest(.{
         .root_module = b.createModule(.{
             .root_source_file = b.path("tests/metal4_raytrace.zig"),
@@ -111,40 +120,6 @@ pub fn build(b: *std.Build) void {
     raytrace_tests.root_module.addImport("mach-objc", module);
     const run_raytrace_tests = b.addRunArtifact(raytrace_tests);
     test_step.dependOn(&run_raytrace_tests.step);
-
-    const raytraced_triangle = b.addExecutable(.{
-        .name = "raytraced-triangle",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("examples/raytraced_triangle.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
-    });
-    raytraced_triangle.root_module.addImport("mach-objc", module);
-    b.installArtifact(raytraced_triangle);
-
-    // Compile the example as part of `zig build test`. It is the only consumer
-    // of the bindings written the way a caller would write them, and nothing
-    // else here compiles it: a signature change broke it while the test step
-    // stayed green, which makes it documentation that can rot unnoticed.
-    // Running it needs a window server, so this depends on the build only.
-    test_step.dependOn(&raytraced_triangle.step);
-
-    const run_raytraced_triangle = b.addRunArtifact(raytraced_triangle);
-    if (b.args) |args| run_raytraced_triangle.addArgs(args);
-    const run_raytraced_triangle_step = b.step(
-        "run-raytraced-triangle",
-        "Run the native AppKit Metal 4 ray-traced triangle",
-    );
-    run_raytraced_triangle_step.dependOn(&run_raytraced_triangle.step);
-
-    const smoke_raytraced_triangle = b.addRunArtifact(raytraced_triangle);
-    smoke_raytraced_triangle.addArgs(&.{ "--frames", "3" });
-    const smoke_raytraced_triangle_step = b.step(
-        "smoke-raytraced-triangle",
-        "Render and present three frames in a native AppKit window",
-    );
-    smoke_raytraced_triangle_step.dependOn(&smoke_raytraced_triangle.step);
 
     const generator_exe = b.addExecutable(.{
         .name = "generator",

@@ -940,7 +940,6 @@ pub const Converter = struct {
             .metal_fx => std.mem.startsWith(u8, name, "MTLFX") or
                 std.mem.startsWith(u8, name, "MTL4FX"),
             .quartz_core => std.mem.startsWith(u8, name, "CA"),
-            .app_kit => false,
         };
     }
 
@@ -949,7 +948,6 @@ pub const Converter = struct {
             .metal => "/Metal.framework/",
             .metal_fx => "/MetalFX.framework/",
             .quartz_core => "/QuartzCore.framework/",
-            .app_kit => "/AppKit.framework/",
         };
         return std.mem.indexOf(u8, header, framework_component) != null;
     }
@@ -1964,9 +1962,9 @@ fn Generator(comptime WriterType: type) type {
             for (container.protocols.items) |protocol| {
                 // TODO: optimize this O(n) lookup. We don't want to create references to protocols
                 // we don't generate, but this isn't a great way to do it. I plan on reworking the
-                // container generation code to take other frameworks into account so things like
-                // app_kit.zig doesn't duplicate NSObject (for example). Once that is done it will
-                // be easier to do an O(1) global symbol lookup across all frameworks.
+                // container generation code to take other frameworks into account, so that a
+                // framework's output doesn't duplicate NSObject (for example). Once that is done
+                // it will be easier to do an O(1) global symbol lookup across all frameworks.
                 for (self.containers.items) |c| {
                     if (std.mem.eql(u8, c.name, protocol.name)) {
                         if (!first) try self.writer.writeAll(", ");
@@ -3066,392 +3064,6 @@ fn generateQuartzCore(generator: anytype) !void {
     try generator.addProtocol("CAMetalDrawable");
 }
 
-fn generateAppKit(generator: anytype) !void {
-    generator.namespace = "NS";
-    generator.allow_methods = &.{
-        // TODO: move to generateFoundation
-        [2][]const u8{ "NSObject", "copy" },
-        [2][]const u8{ "NSObject", "retainCount" },
-
-        [2][]const u8{ "NSApplication", "sharedApplication" },
-        [2][]const u8{ "NSApplication", "delegate" },
-        [2][]const u8{ "NSApplication", "setDelegate" },
-        [2][]const u8{ "NSApplication", "finishLaunching" },
-        [2][]const u8{ "NSApplication", "run" },
-        [2][]const u8{ "NSApplication", "setActivationPolicy" },
-        [2][]const u8{ "NSApplication", "activateIgnoringOtherApps" },
-        [2][]const u8{ "NSApplication", "nextEventMatchingMask:untilDate:inMode:dequeue" },
-        [2][]const u8{ "NSApplication", "sendEvent" },
-        [2][]const u8{ "NSApplication", "currentEvent" },
-        [2][]const u8{ "NSApplication", "setMainMenu" },
-
-        [2][]const u8{ "NSWindow", "initWithContentRect:styleMask:backing:defer:screen" },
-        [2][]const u8{ "NSWindow", "isReleasedWhenClosed" },
-        [2][]const u8{ "NSWindow", "setReleasedWhenClosed" },
-        [2][]const u8{ "NSWindow", "contentView" },
-        [2][]const u8{ "NSWindow", "isKeyWindow" },
-        [2][]const u8{ "NSWindow", "isVisible" },
-        [2][]const u8{ "NSWindow", "setIsVisible" },
-        [2][]const u8{ "NSWindow", "makeKeyAndOrderFront" },
-        [2][]const u8{ "NSWindow", "setDelegate" },
-        [2][]const u8{ "NSWindow", "title" },
-        [2][]const u8{ "NSWindow", "setTitle" },
-        [2][]const u8{ "NSWindow", "contentRectForFrameRect" },
-        [2][]const u8{ "NSWindow", "frameRectForContentRect" },
-        [2][]const u8{ "NSWindow", "frame" },
-        [2][]const u8{ "NSWindow", "setFrame:display:animate" },
-        [2][]const u8{ "NSWindow", "setContentView" },
-        [2][]const u8{ "NSWindow", "update" },
-        [2][]const u8{ "NSWindow", "setMinSize" },
-        [2][]const u8{ "NSWindow", "center" },
-        [2][]const u8{ "NSWindow", "titlebarAppearsTransparent" },
-        [2][]const u8{ "NSWindow", "setTitlebarAppearsTransparent" },
-        [2][]const u8{ "NSWindow", "backgroundColor" },
-        [2][]const u8{ "NSWindow", "setBackgroundColor" },
-        [2][]const u8{ "NSWindow", "backingScaleFactor" },
-        [2][]const u8{ "NSWindow", "setAppearance" },
-        [2][]const u8{ "NSWindow", "sendEvent" },
-        [2][]const u8{ "NSWindow", "screen" },
-
-        [2][]const u8{ "NSCursor", "hide" },
-        [2][]const u8{ "NSCursor", "unhide" },
-        [2][]const u8{ "NSCursor", "pop" },
-
-        [2][]const u8{ "NSCursor", "push" },
-        [2][]const u8{ "NSCursor", "arrowCursor" },
-        [2][]const u8{ "NSCursor", "IBeamCursor" },
-        [2][]const u8{ "NSCursor", "pointingHandCursor" },
-        [2][]const u8{ "NSCursor", "closedHandCursor" },
-        [2][]const u8{ "NSCursor", "openHandCursor" },
-        [2][]const u8{ "NSCursor", "resizeLeftCursor" },
-        [2][]const u8{ "NSCursor", "resizeRightCursor" },
-        [2][]const u8{ "NSCursor", "resizeLeftRightCursor" },
-        [2][]const u8{ "NSCursor", "resizeUpCursor" },
-        [2][]const u8{ "NSCursor", "resizeDownCursor" },
-        [2][]const u8{ "NSCursor", "resizeUpDownCursor" },
-        [2][]const u8{ "NSCursor", "crosshairCursor" },
-        [2][]const u8{ "NSCursor", "operationNotAllowedCursor" },
-
-        [2][]const u8{ "NSAppearance", "appearanceNamed" },
-
-        [2][]const u8{ "NSMenu", "addItem" },
-        [2][]const u8{ "NSMenu", "addItemWithTitle:action:keyEquivalent" },
-
-        [2][]const u8{ "NSMenuItem", "setSubmenu" },
-        [2][]const u8{ "NSMenuItem", "separatorItem" },
-
-        [2][]const u8{ "NSWindowDelegate", "windowWillResize:toSize" },
-
-        [2][]const u8{ "NSView", "layer" },
-        [2][]const u8{ "NSView", "setLayer" },
-        [2][]const u8{ "NSView", "setWantsLayer" },
-        [2][]const u8{ "NSView", "initWithFrame" },
-        [2][]const u8{ "NSView", "sendEvent" },
-        [2][]const u8{ "NSView", "addSubview" },
-        [2][]const u8{ "NSView", "setFrameOrigin" },
-        [2][]const u8{ "NSView", "setFrameSize" },
-        [2][]const u8{ "NSView", "setBoundsOrigin" },
-        [2][]const u8{ "NSView", "setBoundsSize" },
-        [2][]const u8{ "NSView", "window" },
-        [2][]const u8{ "NSView", "bounds" },
-        [2][]const u8{ "NSView", "visibleRect" },
-        [2][]const u8{ "NSView", "addTrackingArea" },
-
-        [2][]const u8{ "NSResponder", "interpretKeyEvents" },
-
-        [2][]const u8{ "NSTrackingArea", "initWithRect:options:owner:userInfo" },
-        [2][]const u8{ "NSTrackingArea", "rect" },
-        [2][]const u8{ "NSTrackingArea", "options" },
-        [2][]const u8{ "NSTrackingArea", "owner" },
-        [2][]const u8{ "NSTrackingArea", "userInfo" },
-
-        [2][]const u8{ "NSDate", "distantPast" },
-
-        [2][]const u8{ "NSColor", "colorWithRed:green:blue:alpha" },
-
-        [2][]const u8{ "NSResponder", "" },
-
-        [2][]const u8{ "NSEvent", "keyCode" },
-        [2][]const u8{ "NSEvent", "modifierFlags" },
-        [2][]const u8{ "NSEvent", "isARepeat" },
-        [2][]const u8{ "NSEvent", "locationInWindow" },
-        [2][]const u8{ "NSEvent", "mouseLocation" },
-        [2][]const u8{ "NSEvent", "pressedMouseButtons" },
-        [2][]const u8{ "NSEvent", "buttonNumber" },
-        [2][]const u8{ "NSEvent", "deltaX" },
-        [2][]const u8{ "NSEvent", "deltaY" },
-        [2][]const u8{ "NSEvent", "scrollingDeltaX" },
-        [2][]const u8{ "NSEvent", "scrollingDeltaY" },
-        [2][]const u8{ "NSEvent", "hasPreciseScrollingDeltas" },
-        [2][]const u8{ "NSEvent", "magnification" },
-        [2][]const u8{ "NSEvent", "phase" },
-        [2][]const u8{ "NSEvent", "type" },
-        [2][]const u8{ "NSEvent", "addLocalMonitorForEventsMatchingMask:handler" },
-        [2][]const u8{ "NSEvent", "removeMonitor" },
-
-        [2][]const u8{ "NSDate", "dateWithTimeIntervalSinceNow" },
-
-        [2][]const u8{ "NSDictionary", "" },
-
-        [2][]const u8{ "NSScreen", "screens" },
-        [2][]const u8{ "NSScreen", "mainScreen" },
-        [2][]const u8{ "NSScreen", "frame" },
-        [2][]const u8{ "NSScreen", "maximumFramesPerSecond" },
-
-        [2][]const u8{ "NSApplicationDelegate", "applicationDidFinishLaunching" },
-
-        [2][]const u8{ "NSNotification", "object" },
-        [2][]const u8{ "NSNotification", "name" },
-    };
-
-    // TODO: many things below can be removed and/or moved to generateFoundation
-    // try generator.addInterface("INIntent");
-    // try generator.addInterface("CKShareMetadata");
-
-    try generator.addInterface("NSApplication");
-    try generator.addInterface("NSResponder");
-    // try generator.addInterface("NSRunningApplication");
-    // try generator.addInterface("NSString");
-    try generator.addInterface("NSWindow");
-    try generator.addInterface("NSNotification");
-    // try generator.addInterface("NSUserActivity");
-    // try generator.addInterface("NSCoder");
-    try generator.addInterface("NSDictionary");
-    try generator.addInterface("NSMenu");
-    try generator.addInterface("NSMenuItem");
-    // try generator.addInterface("NSArray");
-    // try generator.addInterface("NSURL");
-    // try generator.addInterface("NSError");
-
-    try generator.addInterface("NSObject");
-    // try generator.addInterface("NSException");
-    // try generator.addInterface("NSImage");
-    // try generator.addInterface("NSDockTile");
-    try generator.addInterface("NSAppearance");
-    try generator.addInterface("NSEvent");
-    try generator.addInterface("NSDate");
-    // try generator.addInterface("NSGraphicsContext");
-    // try generator.addInterface("NSDocument");
-    // try generator.addInterface("NSData");
-    // try generator.addInterface("NSFileWrapper");
-    // try generator.addInterface("NSSavePanel");
-    // try generator.addInterface("NSPageLayout");
-    // try generator.addInterface("NSPrintInfo");
-    // try generator.addInterface("NSMethodSignature");
-    // try generator.addInterface("NSInvocation");
-    // try generator.addInterface("NSPrinter");
-    // try generator.addInterface("NSPDFInfo");
-    // try generator.addInterface("NSMutableDictionary");
-    // try generator.addInterface("NSTouchBar");
-    // try generator.addInterface("NSOperationQueue");
-    // try generator.addInterface("NSOperation");
-    // try generator.addInterface("NSTouchBarItem");
-    // try generator.addInterface("NSViewController");
-    try generator.addInterface("NSView");
-    // try generator.addInterface("NSArchiver");
-    // try generator.addInterface("NSAttributedString");
-    // try generator.addInterface("NSBitmapImageRep");
-    // try generator.addInterface("NSBundle");
-    // try generator.addInterface("NSButtonCell");
-    // try generator.addInterface("NSCandidateListTouchBarItem");
-    // try generator.addInterface("NSCharacterSet");
-    // try generator.addInterface("NSClassDescription");
-    // try generator.addInterface("NSClipView");
-    // try generator.addInterface("NSCloseCommand");
-    try generator.addInterface("NSColor");
-    // try generator.addInterface("NSColorSpace");
-    try generator.addInterface("NSCursor");
-    // try generator.addInterface("NSDraggingItem");
-    // try generator.addInterface("NSDrawer");
-    // try generator.addInterface("NSEnumerator");
-    // try generator.addInterface("NSFileManager");
-    // try generator.addInterface("NSFileVersion");
-    // try generator.addInterface("NSFont");
-    // try generator.addInterface("NSFontPanel");
-    // try generator.addInterface("NSGestureRecognizer");
-    // try generator.addInterface("NSImageRep");
-    // try generator.addInterface("NSImageSymbolConfiguration");
-    // try generator.addInterface("NSIndexSet");
-    // try generator.addInterface("NSInputStream");
-    // try generator.addInterface("NSKeyedArchiver");
-    // try generator.addInterface("NSLayoutConstraint");
-    // try generator.addInterface("NSLayoutDimension");
-    // try generator.addInterface("NSLayoutGuide");
-    // try generator.addInterface("NSLayoutXAxisAnchor");
-    // try generator.addInterface("NSLayoutYAxisAnchor");
-    // try generator.addInterface("NSLocale");
-    // try generator.addInterface("NSMutableArray");
-    // try generator.addInterface("NSMutableOrderedSet");
-    // try generator.addInterface("NSMutableSet");
-    // try generator.addInterface("NSNumber");
-    // try generator.addInterface("NSOrderedCollectionDifference");
-    // try generator.addInterface("NSPanel");
-    // try generator.addInterface("NSPasteboard");
-    // try generator.addInterface("NSPortCoder");
-    // try generator.addInterface("NSPredicate");
-    // try generator.addInterface("NSPressureConfiguration");
-    // try generator.addInterface("NSPrintOperation");
-    // try generator.addInterface("NSProgress");
-    // try generator.addInterface("NSRulerView");
-    try generator.addInterface("NSScreen");
-    // try generator.addInterface("NSScriptCommand");
-    // try generator.addInterface("NSScriptObjectSpecifier");
-    // try generator.addInterface("NSScrollView");
-    // try generator.addInterface("NSSet");
-    // try generator.addInterface("NSShadow");
-    // try generator.addInterface("NSSharingService");
-    // try generator.addInterface("NSSharingServicePicker");
-    // try generator.addInterface("NSSortDescriptor");
-    // try generator.addInterface("NSStoryboard");
-    // try generator.addInterface("NSTableView");
-    // try generator.addInterface("NSText");
-    // try generator.addInterface("NSTextInputContext");
-    // try generator.addInterface("NSThread");
-    // try generator.addInterface("NSTimeZone");
-    // try generator.addInterface("NSTitlebarAccessoryViewController");
-    // try generator.addInterface("NSToolbar");
-    // try generator.addInterface("NSToolbarItem");
-    // try generator.addInterface("NSTouch");
-    try generator.addInterface("NSTrackingArea");
-    try generator.addEnum("NSTrackingAreaOptions");
-    // try generator.addInterface("NSURLHandle");
-    // try generator.addInterface("NSUndoManager");
-    // try generator.addInterface("NSWindowController");
-    // try generator.addInterface("NSWindowTab");
-    // try generator.addInterface("NSWindowTabGroup");
-
-    // try generator.addEnum("NSRequestUserAttentionType");
-    // try generator.addEnum("NSWindowListOptions");
-    // try generator.addEnum("NSApplicationDelegateReply");
-    // try generator.addEnum("NSApplicationPresentationOptions");
-    // try generator.addEnum("NSApplicationOcclusionState");
-    try generator.addEnum("NSEventMask");
-    // try generator.addEnum("NSRemoteNotificationType");
-    // try generator.addEnum("NSUserInterfaceLayoutDirection");
-    // try generator.addEnum("NSSaveOperationType");
-    // try generator.addEnum("NSApplicationPrintReply");
-    // try generator.addEnum("NSApplicationTerminateReply");
-    // try generator.addEnum("NSPrintingPaginationMode");
-    // try generator.addEnum("NSPaperOrientation");
-    // try generator.addEnum("NSApplicationActivationOptions");
-    // try generator.addEnum("NSStringCompareOptions");
-    // try generator.addEnum("NSComparisonResult");
-    // try generator.addEnum("NSQualityOfService");
-    // try generator.addEnum("NSOperationQueuePriority");
-    // try generator.addEnum("NSPrinterTableStatus");
-    // try generator.addEnum("NSPageLayoutResult");
-    // try generator.addEnum("NSAlignmentOptions");
-    // try generator.addEnum("NSAutoresizingMaskOptions");
-    try generator.addEnum("NSBackingStoreType");
-    // try generator.addEnum("NSColorRenderingIntent");
-    // try generator.addEnum("NSCompositingOperation");
-    // try generator.addEnum("NSDataBase64DecodingOptions");
-    // try generator.addEnum("NSDataBase64EncodingOptions");
-    // try generator.addEnum("NSDataCompressionAlgorithm");
-    // try generator.addEnum("NSDataReadingOptions");
-    // try generator.addEnum("NSDataSearchOptions");
-    // try generator.addEnum("NSDataWritingOptions");
-    // try generator.addEnum("NSDecodingFailurePolicy");
-    // try generator.addEnum("NSDisplayGamut");
-    // try generator.addEnum("NSDocumentChangeType");
-    // try generator.addEnum("NSDragOperation");
-    // try generator.addEnum("NSEnumerationOptions");
-    // try generator.addEnum("NSEventButtonMask");
-    // try generator.addEnum("NSEventGestureAxis");
-    try generator.addEnum("NSEventModifierFlags");
-    try generator.addEnum("NSEventPhase");
-    // try generator.addEnum("NSEventSubtype");
-    // try generator.addEnum("NSEventSwipeTrackingOptions");
-    try generator.addEnum("NSEventType");
-    // try generator.addEnum("NSFileWrapperReadingOptions");
-    // try generator.addEnum("NSFileWrapperWritingOptions");
-    // try generator.addEnum("NSFocusRingType");
-    // try generator.addEnum("NSImageCacheMode");
-    // try generator.addEnum("NSImageInterpolation");
-    // try generator.addEnum("NSImageResizingMode");
-    // try generator.addEnum("NSKeyValueChange");
-    // try generator.addEnum("NSKeyValueObservingOptions");
-    // try generator.addEnum("NSKeyValueSetMutationKind");
-    // try generator.addEnum("NSLayoutAttribute");
-    // try generator.addEnum("NSLayoutConstraintOrientation");
-    // try generator.addEnum("NSMenuPresentationStyle");
-    // try generator.addEnum("NSMenuProperties");
-    // try generator.addEnum("NSMenuSelectionMode");
-    // try generator.addEnum("NSPointingDeviceType");
-    // try generator.addEnum("NSPressureBehavior");
-    // try generator.addEnum("NSRectEdge");
-    // try generator.addEnum("NSSelectionDirection");
-    // try generator.addEnum("NSSortOptions");
-    // try generator.addEnum("NSStringDrawingOptions");
-    // try generator.addEnum("NSStringEnumerationOptions");
-    // try generator.addEnum("NSTIFFCompression");
-    // try generator.addEnum("NSTouchPhase");
-    // try generator.addEnum("NSTouchTypeMask");
-    // try generator.addEnum("NSURLBookmarkCreationOptions");
-    // try generator.addEnum("NSURLBookmarkResolutionOptions");
-    // try generator.addEnum("NSViewControllerTransitionOptions");
-    // try generator.addEnum("NSViewLayerContentsPlacement");
-    // try generator.addEnum("NSViewLayerContentsRedrawPolicy");
-    // try generator.addEnum("NSWindowAnimationBehavior");
-    // try generator.addEnum("NSWindowBackingLocation");
-    // try generator.addEnum("NSWindowButton");
-    // try generator.addEnum("NSWindowCollectionBehavior");
-    // try generator.addEnum("NSWindowDepth");
-    // try generator.addEnum("NSWindowNumberListOptions");
-    // try generator.addEnum("NSWindowOcclusionState");
-    // try generator.addEnum("NSWindowOrderingMode");
-    // try generator.addEnum("NSWindowSharingType");
-    try generator.addEnum("NSWindowStyleMask");
-    // try generator.addEnum("NSWindowTabbingMode");
-    // try generator.addEnum("NSWindowTitleVisibility");
-    // try generator.addEnum("NSWindowToolbarStyle");
-    // try generator.addEnum("NSWindowUserTabbingPreference");
-
-    // // alias
-    // // try generator.addEnum("NSRangePointer");
-    // // try generator.addEnum("NSTrackingRectTag");
-
-    // // structs
-    // // try generator.addEnum("NSFastEnumerationState");
-    // // try generator.addEnum("NSAccessibility");
-    // // try generator.addEnum("NSEdgeInsets");
-
-    // // float
-    // // try generator.addEnum("NSLayoutPriority");
-
-    // // *String
-    // // try generator.addEnum("NSAppearanceName");
-    // // try generator.addEnum("NSBindingName");
-    // // try generator.addEnum("NSAttributedStringKey");
-    // // try generator.addEnum("NSGraphicsContextAttributeKey");
-    // // try generator.addEnum("NSImageHintKey");
-    // // try generator.addEnum("NSKeyValueChangeKey");
-    // // try generator.addEnum("NSLinguisticTagScheme");
-
-    try generator.addProtocol("NSApplicationDelegate");
-    try generator.addProtocol("NSWindowDelegate");
-    // try generator.addProtocol("NSUserActivityRestoring");
-    // try generator.addProtocol("NSSecureCoding");
-    // try generator.addProtocol("NSCopying");
-    // try generator.addProtocol("NSUserInterfaceItemSearching");
-    try generator.addProtocol("NSObject");
-    // NSMenuItem is declared as both an @interface and an @protocol in AppKit, so it is
-    // "ambiguous": type references resolve to MenuItemProtocol while methods live on
-    // MenuItemInterface. Emit the protocol too so the MenuItemProtocol type exists.
-    try generator.addProtocol("NSMenuItem");
-    // try generator.addProtocol("NSCoding");
-    // try generator.addProtocol("NSMutableCopying");
-    // try generator.addProtocol("NSProgressReporting");
-    // try generator.addProtocol("NSTouchBarDelegate");
-    // try generator.addProtocol("NSAnimatablePropertyContainer");
-    // try generator.addProtocol("NSMenuDelegate");
-    // try generator.addProtocol("NSAppearanceCustomization");
-    // try generator.addProtocol("NSDraggingDestination");
-    // try generator.addProtocol("NSEditor");
-    // try generator.addProtocol("NSImageDelegate");
-    // try generator.addProtocol("NSPreviewRepresentableActivityItem");
-}
-
 fn generateUIKit(generator: anytype) !void {
     generator.namespace = "UI";
     generator.allow_methods = &.{
@@ -3954,16 +3566,6 @@ const framework_specs = [_]FrameworkSpec{
         .header_content = .{ .inline_text = "\n#include <QuartzCore/QuartzCore.h>\n" },
         .extra_clang_args = &.{"-Wno-availability"},
     },
-    .{
-        .name = "AppKit",
-        .tag = .app_kit,
-        .manual_path = "src/app_kit.zig",
-        .output_path = "src/generated/app_kit.zig",
-        .manifest_path = null,
-        .parity_surface = false,
-        .header_content = .{ .inline_text = "\n#include <AppKit/AppKit.h>\n" },
-        .extra_clang_args = &.{"-Wno-availability"},
-    },
 };
 
 fn runCommand(allocator: std.mem.Allocator, io: std.Io, argv: []const []const u8) ![]u8 {
@@ -4104,7 +3706,6 @@ fn generateForFramework(allocator: std.mem.Allocator, io: std.Io, spec: Framewor
         .metal => try generateMetal(&generator),
         .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
-        .app_kit => try generateAppKit(&generator),
     }
     // Ask Clang for the layout of every record this framework binds by hand.
     // Runs after the selection list is set, so that `generator.namespace` is
@@ -4226,7 +3827,6 @@ fn generateSingleFramework(allocator: std.mem.Allocator, io: std.Io, framework: 
         .metal => try generateMetal(&generator),
         .metal_fx => try generateMetalFX(&generator),
         .quartz_core => try generateQuartzCore(&generator),
-        .app_kit => try generateAppKit(&generator),
     }
     try generator.generate();
     try stdout_writer.flush();
@@ -4237,7 +3837,7 @@ fn usage() void {
         \\mach-objc-generator [options]
         \\
         \\Options:
-        \\  --framework Metal,MetalFX,QuartzCore,AppKit  generate a single framework to stdout
+        \\  --framework Metal,MetalFX,QuartzCore  generate a single framework to stdout
         \\  --generate-all                         generate all frameworks
         \\  --sdk-root <path>                      path to the macOS SDK
         \\  --frameworks-dir <path>                path to the SDK Frameworks directory
@@ -4250,7 +3850,6 @@ const Framework = enum {
     metal,
     metal_fx,
     quartz_core,
-    app_kit,
 };
 
 pub fn main(init: std.process.Init) anyerror!void {
@@ -4276,7 +3875,6 @@ pub fn main(init: std.process.Init) anyerror!void {
                 if (std.mem.eql(u8, fw_arg, "Metal")) break :blk .metal;
                 if (std.mem.eql(u8, fw_arg, "MetalFX")) break :blk .metal_fx;
                 if (std.mem.eql(u8, fw_arg, "QuartzCore")) break :blk .quartz_core;
-                if (std.mem.eql(u8, fw_arg, "AppKit")) break :blk .app_kit;
                 usage();
                 std.process.exit(1);
             };

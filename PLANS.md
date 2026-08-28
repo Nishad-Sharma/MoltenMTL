@@ -9,8 +9,9 @@ load-bearing: several features that a published bindings library would need are
 deliberately out of scope, and are listed at the end of this document.
 
 The goal is a raw Objective-C binding layer for Metal, MetalFX, and the narrow
-QuartzCore and AppKit surface needed to host and present a Metal layer, correct
-enough to build an RHI on:
+QuartzCore surface needed to present a Metal layer, correct enough to build an
+RHI on. Windowing is not part of it: whatever owns the window hands over a
+`CAMetalLayer`.
 
 - `aarch64-macos` only. Deployment floor equals the SDK generated from.
 - Raw Zig object pointers following Cocoa ownership conventions.
@@ -30,9 +31,8 @@ The selected surface is defined by the generator itself, not by an external
 inventory:
 
 - An **explicit selection list** — the `addEnum`, `addInterface`, `addProtocol`
-  and `add*WithPrefix` calls in `generateMetal`, `generateMetalFX`,
-  `generateQuartzCore` and `generateAppKit`. APIs are added here as the RHI
-  needs them.
+  and `add*WithPrefix` calls in `generateMetal`, `generateMetalFX` and
+  `generateQuartzCore`. APIs are added here as the RHI needs them.
 - The **transitive Objective-C closure** of that list: every type reachable from
   a selected declaration's public signature.
 - Everything else in the SDK is **excluded**, with a deterministic reason.
@@ -301,7 +301,26 @@ boundary.
 - Do not parse consumed arguments or consumed `self`. Do not add `Owned`,
   `Borrowed` or transfer-pointer types.
 
-### 10. Unavailable initializers — P1, S — **implemented, pending verification**
+**Verified at `01cdcbd`.** 139 `+1` annotations across the parity surface: 131
+in Metal, 8 in MetalFX, none in QuartzCore. Every one sits on a method returning
+`*T` or `?*T`, and no object-returning family method is missing one. The first
+pass annotated by selector alone and put "the caller owns the result" on 41
+methods that return nothing to own — the blit family, the acceleration-structure
+copies, the `new...WithCompletionHandler:` variants that pass the object to a
+block, and `copyResourceViewsFromPool:`, which returns an `MTLResourceID`
+handle. ARC's families only govern methods returning a retainable object
+pointer; that precondition was missing and is now `returnsRetainableObject`.
+
+The explicit-attribute question is settled: the log reported exactly 2 in every
+framework generated at the time, AppKit included. Every translation unit
+includes Foundation, so both attributed declarations live in the shared headers
+rather than in any framework of ours. The parser matches — this is not a wrong
+attribute name — and the selected surfaces genuinely carry none, so the
+contradiction warning has nothing to fire on. The explicit and unavailable
+counters are translation-unit-wide while the +1 count is emission-wide, which
+the log line now says.
+
+### 10. Unavailable initializers — P1, S — **done**
 
 What remains of the old constructors-and-properties phase.
 
@@ -325,11 +344,66 @@ What remains of the old constructors-and-properties phase.
   and library paths to every module by hand. Worth doing only if binaries ever
   need to run on an older macOS than the build host.
 
+### 12. AppKit output is generated once and never regenerated — P1, S
+
+Found while verifying Phase 9. `src/generated/app_kit.zig` is checked in and
+compiled by the example and the windowed test, but `--generate-all` skips it:
+the AppKit spec carries `parity_surface = false`, and that flag's only use in
+the generator is to skip generation. The file was last produced at `5431dd1`,
+before Phase 3, so nothing since — fail-closed conversion, nullability, record
+layouts, ownership, unavailable initialisers — has touched it, and `verify.sh`'s
+`git diff --exit-code` cannot catch drift in a file no run reproduces. The gate
+says "generated sources fresh"; this one is not.
+
+The symptom that exposed it: four AppKit methods return an object from a method
+family and carry no `+1` annotation — `initWithFrame:`,
+`initWithContentRect:...`, `initWithRect:...` and `copy`. That is stale output,
+not an ownership override.
+
+**Resolved at `f9eb607`.** The flag is gone; `manifest_path: null` already says
+AppKit is outside the manifest work, and that is the only exemption it gets.
+AppKit generated without complaint, so the exclusion was never load-bearing. The
+diff is 29 lines and every line of it is a fix eight phases overdue:
+
+- `NSView.layer` and `setLayer:` become `?*ca.Layer`, the cursors and
+  `NSObject.copy` become optional, and generic element types pick up their
+  nullability — `ns.Array(*Event)` was claiming a non-null element the header
+  never promised.
+- The four family initialisers gain their `+1` annotation.
+- `addLocalMonitorForEventsMatchingMask:handler:` is no longer emitted at all.
+  Its block returns `?*Event`, which Phase 8 rejects; the old file bound it with
+  a block shape the runtime support does not implement.
+
+That last one is the argument for the whole change: a generated file nobody
+regenerates keeps publishing declarations the generator has since learned it
+cannot support.
+
+**And then removed entirely.** Bringing AppKit back into the loop raised the
+next question — reporting its declaration counts means running the manual audit
+over `src/app_kit.zig`, which is the parity work it was exempt from — and that
+question had a better answer than either branch. The RHI's real dependency is
+Metal plus `CAMetalLayer`; SDL3 supplies the window and hands the layer over, so
+AppKit was 385 lines of selection code, a manual file and 740 generated lines
+serving one example. It is gone, along with `examples/raytraced_triangle.zig`.
+
+What the example uniquely covered was `nextDrawable`/`present` — the whole of
+the presentation surface, exercised nowhere else. `tests/metal_drawable.zig`
+replaces it: a `CAMetalLayer` vends drawables whether or not it is attached to
+anything on screen, so the swapchain path is now tested headlessly, in about
+fifty lines and with no windowing dependency at all. The end-to-end check was
+always `tests/metal4_raytrace.zig`, which is headless and stays.
+
 ## Deliberately out of scope
 
 Cut because this generator has one internal consumer, on one architecture, with
 the deployment floor pinned to the build SDK. Each entry names what would bring
 it back.
+
+- **Windowing.** No AppKit, no NSApplication/NSWindow/NSView. The bindings stop
+  at `CAMetalLayer`, and whatever owns the window — SDL3, GLFW — hands one over.
+  Removed at Phase 12 rather than maintained for one example.
+  *Revisit if:* the RHI ever needs to own its own window on macOS, which would
+  be a decision about the RHI rather than about these bindings.
 
 - **Availability parsing and weak linking.** If the deployment floor equals the
   SDK generated from, every symbol is present at runtime and there is no

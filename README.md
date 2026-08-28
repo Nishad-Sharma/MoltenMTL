@@ -6,8 +6,7 @@ A Zig graphics API intended to abstract over Vulkan and Metal 4.
 
 The repository currently contains only `mach-objc`: a generator that produces
 Zig bindings to the Objective-C APIs the RHI needs — Metal, MetalFX, and the
-narrow QuartzCore and AppKit surface required to host and present a Metal
-layer. The earlier `metal-c` C++ shim over Apple's metal-cpp headers has been
+narrow QuartzCore surface required to present a Metal layer. The earlier `metal-c` C++ shim over Apple's metal-cpp headers has been
 removed; the RHI will be rebuilt directly on the generated Objective-C
 bindings.
 
@@ -33,8 +32,10 @@ Build and test:
 cd mach-objc
 zig build test          # ABI fixture, runtime, generator and Metal 4 tests
 ./verify.sh             # regenerate, test, and fail on any checked-in diff
-zig build run-raytraced-triangle
 ```
+
+Windowing is out of scope: the bindings stop at `CAMetalLayer`, and whatever
+owns the window — SDL3, GLFW — hands one over.
 
 Objects returned by the bindings follow Cocoa retain/release ownership. Release
 them explicitly, and use `objc.AutoreleasePool.init()`/`deinit()` on threads
